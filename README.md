@@ -1,9 +1,20 @@
 # EzPaging
-Easy and optimized way to apply paging - filtering and sorting in Dotnet Core projects.
+Easy and optimize way to apply paging - filtering and sorting using string based conditions and filed names.
 
 The best use case of this library is Aspnet APIs when you need to get some filter or sort name or order name from the user and use that information to retrieve requested data from a repository or database or send pageable data to the user.
 
-# Usage example
+# Available Extentions
+|      Extention | Description          
+|----------------|-------------------------------|
+|ApplyFiltering  | Apply Filtering using `string Filter` property of `QueryObject` class and returns an `IQueryable<T>`
+|ApplyOrdering   | Apply Ordering using `string SortBy` and `bool IsSortAsc` properties of `QueryObject` class and returns an `IQueryable<T>`
+|ApplyPaging     | Apply paging using `short Page` and `int PageSize` properties of `QueryObject` class and returns an `IQueryable<T>`
+|ApplyOrderingAndPaging|Apply Both Ordering and paging and returns an `IQueryable<T>`
+|ApplyEverything | Apply Filtering,Ordering and paging and returns an `IQueryable<T>`
+|ApplyEverythingWithCount| Like ApplyEverything but it returns a tuple `(int Count,IQueryable<T> DataQuery)`. we can use `Count`, to create our pages.
+|FetchPaging| Receives a `QueryObject` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
+
+# Basic Usage example
 
 ```c#
 // usually, we don't need to create this object manually
