@@ -232,7 +232,7 @@ namespace TuxTeam.Gridify {
          return (count, query);
       }
 
-      public static Paging<T> FetchPaging<T> (this IQueryable<T> query, IQueryObject queryObj, QueryColumnMapper<T> columnMapper = null) {
+      public static Paging<T> Gridify<T> (this IQueryable<T> query, IQueryObject queryObj, QueryColumnMapper<T> columnMapper = null) {
          columnMapper = columnMapper.FixColumnMapper();
          var res = query.ApplyEverythingWithCount (queryObj, columnMapper);
          return new Paging<T> () { Items = res.DataQuery.ToList (), TotalItems = res.Count };

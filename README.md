@@ -13,7 +13,7 @@ at the end send back pageable sorted and filtered data to the user.
 |ApplyOrderingAndPaging|Apply Both Ordering and paging and returns an `IQueryable<T>`
 |ApplyEverything | Apply Filtering,Ordering and paging and returns an `IQueryable<T>`
 |ApplyEverythingWithCount| Like ApplyEverything but it returns a tuple `(int Count,IQueryable<T> DataQuery)`. we can use `Count`, to create our pages.
-|FetchPaging| Receives a `QueryObject` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
+|Gridify | Receives a `QueryObject` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
 
 # Basic Usage example
 
@@ -31,7 +31,7 @@ var filter = new QueryObject()
 
 Paging<Person> pData =
          myDbContext.Persons  // we can use Any list or repository or EntityFramework context
-          .FetchPaging(filter); // Filter,Sort & Apply Paging 
+          .Gridify(filter); // Filter,Sort & Apply Paging 
           
 
 // pData.TotalItems => Count persons with 'John', First name

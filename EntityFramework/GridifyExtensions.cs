@@ -14,7 +14,7 @@ namespace TuxTeam.Gridify.EntityFramework
          query = query.ApplyPaging (queryObj);
          return (count, query);
       }
-      public async static Task<Paging<T>> FetchPagingAsync<T> (this IQueryable<T> query, IQueryObject queryObj, QueryColumnMapper<T> columnMapper = null) {
+      public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IQueryObject queryObj, QueryColumnMapper<T> columnMapper = null) {
          columnMapper = columnMapper.FixColumnMapper ();
          var res = await query.ApplyEverythingWithCountAsync (queryObj, columnMapper);
          return new Paging<T> () { Items = await res.DataQuery.ToListAsync (), TotalItems = res.Count };
