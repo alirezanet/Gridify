@@ -13,10 +13,6 @@ namespace TuxTeam.EzPaging {
 #endregion
 #region "Private"
 
-      private static QueryColumnMapper<T> GetDefaultColumnMapper<T> () => new QueryColumnMapper<T> ().GenerateMappings ();
-      public static QueryColumnMapper<T> FixColumnMapper<T>(this QueryColumnMapper<T> columnMapper) 
-         => columnMapper != null ? columnMapper : GetDefaultColumnMapper<T>();
-
       private static IQueryObject FixPagingData (this IQueryObject queryObj) {
          // set default for page number
          if (queryObj.Page <= 0)
@@ -137,6 +133,9 @@ namespace TuxTeam.EzPaging {
 #endregion
 
 #region "Public"
+      public static QueryColumnMapper<T> GetDefaultColumnMapper<T> () => new QueryColumnMapper<T> ().GenerateMappings ();
+      public static QueryColumnMapper<T> FixColumnMapper<T>(this QueryColumnMapper<T> columnMapper) 
+         => columnMapper != null ? columnMapper : GetDefaultColumnMapper<T>();
 
       public static IQueryable<T> ApplyEverything<T> (this IQueryable<T> query, IQueryObject queryObj, QueryColumnMapper<T> columnMapper = null) {
          if (queryObj == null) return query;
