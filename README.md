@@ -1,7 +1,8 @@
 # EzPaging
 Easy and optimize way to apply paging - filtering and sorting using string based conditions and filed names.
 
-The best use case of this library is Aspnet APIs when you need to get some string base filtering conditions or sort data by filed name or order data by propery name from the user and use that information to retrieve requested data from a repository or database or send pageable data to the user.
+The best use case of this library is Aspnet APIs when you need to get some string base filtering conditions or sort data by filed name or order data by propery name from the user and use that information to retrieve requested data from a repository or database.
+at the end send pageable sorted and filtered data to the user.
 
 # Available Extentions
 |      Extention | Description          
