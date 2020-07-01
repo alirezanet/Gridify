@@ -16,19 +16,19 @@ at the end send back pageable sorted and filtered data to the user.
 |Gridify | Receives a `QueryObject` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
 
 # Supported Filtering Operators 
-| Name | Operator | Usage
+| Name | Operator | Usage example
 |------|-----------|-----|
-| Equal | `==` | `"FiledName == Value"` |
-| NotEqual | `!=` | `"FiledName != Value"` |
-| GreaterThan | `<<` | `"FiledName << Value"` |
-| LessThan | `>>` | `"FiledName >> Value"` |
-| GreaterThanOrEqual | `>=` | `"FiledName >= Value"` |
-| LessThanOrEqual | `<=` | `"FiledName <= Value"` |
-| Contains - Like | `=*` | `"FiledName =* Value"` |
-| NotContains - NotLike | `!*` | `"FiledName =* Value"` |
-| AND - && | `,` | `"FiledName==Value,LastName==Value2"` |
-| OR - \|\| | `|` | `"FiledName==Value|LastName==Value2"` | 
-| Parenthesis | `( )` | `"(FirstName=*Jo,Age<<30) | (FirstName!=Hn,Age>>30)"` |
+| Equal | `==` | `"FieldName == Value"` |
+| NotEqual | `!=` | `"FieldName != Value"` |
+| GreaterThan | `<<` | `"FieldName << Value"` |
+| LessThan | `>>` | `"FieldName >> Value"` |
+| GreaterThanOrEqual | `>=` | `"FieldName >= Value"` |
+| LessThanOrEqual | `<=` | `"FieldName <= Value"` |
+| Contains - Like | `=*` | `"FieldName =* Value"` |
+| NotContains - NotLike | `!*` | `"FieldName =* Value"` |
+| AND - &&        | `,` | `"FirstName==Value , LastName==Value2"` |
+| OR - \|\|       | `\|` | `"FirstName==Value \| LastName==Value2"` | 
+| Parenthesis     | `()`| `"( FirstName=* Jo , Age<<30) \| ( FirstName != Hn , Age>>30 )"` |
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
