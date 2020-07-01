@@ -26,9 +26,9 @@ at the end send back pageable sorted and filtered data to the user.
 | LessThanOrEqual | `<=` | `"FiledName <= Value"` |
 | Contains - Like | `=*` | `"FiledName =* Value"` |
 | NotContains - NotLike | `!*` | `"FiledName =* Value"` |
-| AND - && | `,` | `"FiledName==Value,LastName==Value2"` |
-| OR - \|\| | `|` | `"FiledName==Value|LastName==Value2"` | 
-| Parenthesis | `( )` | `"(FirstName=*Jo,Age<<30) | (FirstName!=Hn,Age>>30)"` |
+| AND - &&        | `,` | `"FiledName==Value , LastName==Value2"` |
+| OR - \|\|       | `\|` | `"FiledName==Value \| LastName==Value2"` | 
+| Parenthesis     | `()`| `"( FirstName=* Jo , Age<<30) \| ( FirstName != Hn , Age>>30 )"` |
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
