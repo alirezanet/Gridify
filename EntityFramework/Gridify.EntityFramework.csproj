@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Core\ezPaging.csproj" />
+    <ProjectReference Include="..\Core\Gridify.csproj" />
   </ItemGroup>
 
   <ItemGroup>

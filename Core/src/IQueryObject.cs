@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TuxTeam.EzPaging
+namespace TuxTeam.Gridify
 {
     public interface IQueryObject
     {

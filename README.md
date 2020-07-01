@@ -1,4 +1,4 @@
-# EzPaging
+# Gridify 
 Easy and optimize way to apply paging - filtering and sorting using string based conditions and filed names.
 
 The best use case of this library is Aspnet APIs when you need to get some filter or sort name or order name from the user and use that information to retrieve requested data from a repository or database or send pageable data to the user.

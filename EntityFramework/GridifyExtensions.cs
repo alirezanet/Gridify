@@ -2,9 +2,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace TuxTeam.EzPaging.EntityFramework
+namespace TuxTeam.Gridify.EntityFramework
 {
-    public static partial class EzPagingExtensions {
+    public static partial class GridifyExtensions {
 
       #region "EntityFramework Integration"
       public async static Task < (int Count, IQueryable<T> DataQuery) > ApplyEverythingWithCountAsync<T> (this IQueryable<T> query, IQueryObject queryObj, QueryColumnMapper<T> columnMapper) {

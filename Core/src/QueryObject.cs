@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TuxTeam.EzPaging
+namespace TuxTeam.Gridify
 {
     public class QueryObject : IQueryObject
     {

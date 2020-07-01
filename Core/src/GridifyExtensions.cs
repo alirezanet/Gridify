@@ -4,8 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace TuxTeam.EzPaging {
-   public static partial class EzPagingExtensions {
+namespace TuxTeam.Gridify {
+   public static partial class GridifyExtensions {
 
 #region "Static Shared"
    public static short DefaultPage = 1;

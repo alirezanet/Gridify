@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-namespace TuxTeam.EzPaging {
+namespace TuxTeam.Gridify {
    public static class PredicateBuilder {
       public static Expression<Func<T, bool>> True<T> () { return f => true; }
       public static Expression<Func<T, bool>> False<T> () { return f => false; }

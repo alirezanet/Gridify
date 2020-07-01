@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>EzPaging</PackageId>
+    <PackageId>Gridify</PackageId>
     <Version>1.0.0</Version>
     <Authors>Alireza Sabouri</Authors>
     <Company>TuxTeam</Company>
