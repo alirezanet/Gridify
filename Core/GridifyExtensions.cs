@@ -241,27 +241,27 @@ namespace TuxTeam.Gridify {
   #endregion    
 #region "EntityFramework"
       // EntityFramework Integration (need EntityFramework  as a Dependency)
-      // public async static Task < (int Count, IQueryable<T> DataQuery) > ApplyQueryWithCountAsync<T> (this IQueryable<T> query, IQueryObject queryObj, QueryColumnMapper<T> columnMapper) {
+      // public async static Task < (int Count, IQueryable<T> DataQuery) > ApplyEverythingWithCountAsync<T> (this IQueryable<T> query, IQueryObject queryObj, QueryColumnMapper<T> columnMapper) {
       //    query = query.ApplyFiltering (queryObj, columnMapper);
       //    var count = await query.CountAsync ();
       //    query = query.ApplyOrdering (queryObj, columnMapper);
       //    query = query.ApplyPaging (queryObj);
       //    return (count, query);
       // }
-      // public async static Task<Paging<T>> FetchAsync<T> (this IQueryable<T> query, IQueryObject queryObj, QueryColumnMapper<T> columnMapper) {
+      // public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IQueryObject queryObj, QueryColumnMapper<T> columnMapper) {
       //    var res = await query.ApplyQueryWithCountAsync (queryObj, columnMapper);
       //    return new Paging<T> () { Items = await res.DataQuery.ToListAsync (), TotalItems = res.Count };
       // }
-      // public async static Task<Paging<T>> FetchAsync<T> (this IQueryable<T> query, IQueryObject queryObj) 
+      // public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IQueryObject queryObj) 
       //    => await query.FetchAsync<T> (queryObj, GetDefaultColumnMapper<T> ());
   #endregion
 #region "AutoMapper"
       // AutoMapper Integration (need AutoMapper as a Dependency)
-      // public async static Task<Paging<TDestination>> FetchToAsync<TSource, TDestination> (this IQueryable<TSource> query, IQueryObject queryObj, QueryColumnMapper<TSource> columnMapper) {
+      // public async static Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination> (this IQueryable<TSource> query, IQueryObject queryObj, QueryColumnMapper<TSource> columnMapper) {
       //    var res = await query.ApplyQueryWithCountAsync (queryObj, columnMapper);
       //    return new Paging<TDestination> () { Items = await res.DataQuery.ProjectTo<TDestination> ().ToListAsync (), TotalItems = res.Count };
       // }
-      // public async static Task<Paging<D>> FetchToAsync<T, D> (this IQueryable<T> query, IQueryObject queryObj) 
+      // public async static Task<Paging<D>> GridifyToAsync<T, D> (this IQueryable<T> query, IQueryObject queryObj) 
       //    => await FetchToAsync<T, D> (query, queryObj, GetDefaultColumnMapper<T> ());
    }
 #endregion
