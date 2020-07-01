@@ -30,7 +30,7 @@ var filter = new QueryObject()
 
 Paging<Person> pData =
          myDbContext.Persons  // we can use Any list or repository or EntityFramework context
-          .ApplyEverythingWithCount(filter) // Filter,Sort & Apply Paging 
+          .FetchPaging(filter) // Filter,Sort & Apply Paging 
           .ToList();
 
 // pData.TotalItems => Count persons with 'John', First name
