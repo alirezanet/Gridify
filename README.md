@@ -19,8 +19,8 @@ dotnet add package Gridify
 |ApplyPaging     | Apply paging using `short Page` and `int PageSize` properties of `GridifyQuery` class and returns an `IQueryable<T>`
 |ApplyOrderingAndPaging|Apply Both Ordering and paging and returns an `IQueryable<T>`
 |ApplyEverything | Apply Filtering,Ordering and paging and returns an `IQueryable<T>`
-|ApplyEverythingWithCount| Like ApplyEverything but it returns a tuple `(int Count,IQueryable<T> gridifyQuery)`. we can use `Count`, to create our pages.
-|Gridify | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
+|GridifyQueryable| Like ApplyEverything but it returns a `QueryablePaging<T>` that have an extra `int totalItems` property to use for pagination
+|Gridify | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`
 
 **TIP**: 
 
@@ -159,7 +159,7 @@ var gridifiedData = myRepository.Gridify(filter, customMappings);
 # EntityFramework integration
 if you need to use gridify **async** feature for entityFramework Core, use **`Gridify.EntityFramework`** package instead.
 
-this package have two additional `GridifyAsync()` and `ApplyEverythingWithCountAsync()` functions.
+this package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` functions.
 
 ```
 dotnet add package Gridify.EntityFramework

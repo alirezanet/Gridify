@@ -223,7 +223,7 @@ namespace TuxTeam.Gridify {
          return query;
       }
 
-      public static QueryablePaging<T> ApplyEverythingWithCount<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
+      public static QueryablePaging<T> GridifyQueryable<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
          mapper=mapper.FixMapper();
          query = query.ApplyFiltering (gridifyQuery, mapper);
          var count = query.Count ();
@@ -234,7 +234,7 @@ namespace TuxTeam.Gridify {
 
       public static Paging<T> Gridify<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
          mapper = mapper.FixMapper();
-         var res = query.ApplyEverythingWithCount (gridifyQuery, mapper);
+         var res = query.GridifyQueryable (gridifyQuery, mapper);
          return new Paging<T> () { Items = res.Query.ToList (), TotalItems = res.TotalItems };
       }
 
