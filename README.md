@@ -7,13 +7,13 @@ The best use case of this library is Aspnet APIs. when you need to get some stri
 # Available Extentions
 |      Extention | Description          
 |----------------|-------------------------------|
-|ApplyFiltering  | Apply Filtering using `string Filter` property of `QueryObject` class and returns an `IQueryable<T>`
-|ApplyOrdering   | Apply Ordering using `string SortBy` and `bool IsSortAsc` properties of `QueryObject` class and returns an `IQueryable<T>`
-|ApplyPaging     | Apply paging using `short Page` and `int PageSize` properties of `QueryObject` class and returns an `IQueryable<T>`
+|ApplyFiltering  | Apply Filtering using `string Filter` property of `GridifyQuery` class and returns an `IQueryable<T>`
+|ApplyOrdering   | Apply Ordering using `string SortBy` and `bool IsSortAsc` properties of `GridifyQuery` class and returns an `IQueryable<T>`
+|ApplyPaging     | Apply paging using `short Page` and `int PageSize` properties of `GridifyQuery` class and returns an `IQueryable<T>`
 |ApplyOrderingAndPaging|Apply Both Ordering and paging and returns an `IQueryable<T>`
 |ApplyEverything | Apply Filtering,Ordering and paging and returns an `IQueryable<T>`
 |ApplyEverythingWithCount| Like ApplyEverything but it returns a tuple `(int Count,IQueryable<T> DataQuery)`. we can use `Count`, to create our pages.
-|Gridify | Receives a `QueryObject` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
+|Gridify | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
 
 # Supported Filtering Operators 
 | Name | Operator | Usage example
@@ -37,7 +37,7 @@ we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (
 ```c#
 // usually, we don't need to create this object manually
 // for example, we get this object as a parameter from our API Controller
-var filter = new QueryObject() 
+var filter = new GridifyQuery() 
 {
     Filter = "FirstName == John",
     IsSortAsc = false,
@@ -53,6 +53,59 @@ Paging<Person> pData =
 
 // pData.TotalItems => Count persons with 'John', First name
 // pData.Items      => First 20 Persons with 'John', First Name
+```
+
+# Column Mapping Support
+By default Gridify is using a `GridifyMapper` object that automaticly maps your string based field names to actual properties in your Entities but if you have a custom **DTO** (Data Transfer Object) you can create a custom instance of `GridifyMapper` and use it to create your mappings.
+
+```c#
+//// GridifyMapper Usage example -------------
+
+var customMappings = new GridifyMapper<Person>()   // by default GridifyMapper is not case sensitive but you can change this behavior
+                             .GenerateMappings();  // because FirstName and LastName is exists in both DTO and Entity classes we can Generate them
+
+// add your custom mappings
+customMappings.AddMap("address", q => q.Contact.Address );
+customMappings.AddMap("PhoneNumber", q => q.Contact.PhoneNumber );
+
+// as i mentioned before. usually we don't need create this object manually because we can get this required data from an API or any Controller.
+var filter = new GridifyQuery() 
+{
+    Filter = "FirstName == John , Address =* st",
+    IsSortAsc = true,
+    SortBy = "PhoneNumber"
+};
+
+// myRepository: could be entity frmaework context or any other collections 
+// filter      : is a GridifyQuery object
+var gridifiedData = myRepository.Gridify(filter, customMappings);
+// DONE.
+
+// ---------------------------
+// example Entities
+Public class Person
+{
+    Public string FirstName {get;set;}
+    Public string LastName {get;set;}
+    Public Contact Contact {get;set;}
+    
+}
+Public class Contact
+{
+    Public string Address {get;set;}
+    Public int PhoneNumber {get;set;}
+}
+
+// example DTO
+public class PersonDTO
+{
+   Public string FirstName {get;set;}
+   Public string LastName {get;set;}
+
+   Public string Address {get;set;}
+   Public int PhoneNumber {get;set;}
+}
+
 ```
 
 
