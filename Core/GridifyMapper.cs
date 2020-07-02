@@ -5,10 +5,10 @@ using System.Linq.Expressions;
 
 namespace TuxTeam.Gridify
 {
-    public class QueryColumnMapper<T>
+    public class GridifyMapper<T>
     {
 
-        public QueryColumnMapper(bool caseSensitive = false)
+        public GridifyMapper(bool caseSensitive = false)
         {
             CaseSensitive = caseSensitive;
             Mappings = caseSensitive ? new Dictionary<string, Expression<Func<T, object>>>() :
@@ -16,7 +16,7 @@ namespace TuxTeam.Gridify
         }
         public Dictionary<string, Expression<Func<T, object>>> Mappings { get; set; }
         public bool CaseSensitive { get; }
-        public QueryColumnMapper<T> GenerateMappings()
+        public GridifyMapper<T> GenerateMappings()
         {
             foreach (var item in typeof(T).GetProperties())
             {
@@ -27,7 +27,7 @@ namespace TuxTeam.Gridify
             }
             return this;
         }
-        public QueryColumnMapper<T> AddMap(string propertyName, Expression<Func<T, object>> column, bool replaceOldMapping = true)
+        public GridifyMapper<T> AddMap(string propertyName, Expression<Func<T, object>> column, bool replaceOldMapping = true)
         {
             if (Mappings.ContainsKey(propertyName))
             {
@@ -44,7 +44,7 @@ namespace TuxTeam.Gridify
             return this;
         }
 
-        public QueryColumnMapper<T> RemoveMap(string propertyName)
+        public GridifyMapper<T> RemoveMap(string propertyName)
         {
             Mappings.Remove(propertyName);
             return this;

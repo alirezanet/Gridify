@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace TuxTeam.Gridify
 {
-    public class QueryObject : IQueryObject
+    public class GridifyQuery : IGridifyQuery
     {
         public string SortBy { get; set; }
         public bool IsSortAsc { get; set; }

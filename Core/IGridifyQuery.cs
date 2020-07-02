@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace TuxTeam.Gridify
 {
-    public interface IQueryObject
+    public interface IGridifyQuery
     {
         string SortBy { get; set; }
         bool IsSortAsc { get; set; }
