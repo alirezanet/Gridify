@@ -10,7 +10,7 @@ dotnet add package Gridify
 
 ---------------
 
-# Available Extensions
+## Available Extensions
 
 |      Extension | Description          
 |----------------|-------------------------------|
@@ -32,7 +32,7 @@ but for example, if you need to just filter your data without paging or sorting 
 ----------------
 
 
-# Supported Filtering Operators 
+## Supported Filtering Operators 
 
 | Name | Operator | Usage example
 |------|-----------|-----|
@@ -54,7 +54,7 @@ we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (
 ---------------
 
 
-# Basic Usage example
+## Basic Usage example
 
 ```c#
 // usually, we don't need to create this object manually
@@ -79,7 +79,7 @@ Paging<Person> pData =
 
 ------------------
 
-# WebApi Usage example
+## WebApi Usage example
 ```c#
 // ApiController
 
@@ -102,7 +102,7 @@ http://exampleDomain.com/api/GetPersons
 ------------------
 
 
-# Custom Mapping Support
+## Custom Mapping Support
 By default Gridify is using a `GridifyMapper` object that automatically maps your string based field names to actual properties in your Entities but if you have a custom **DTO** (Data Transfer Object) you can create a custom instance of `GridifyMapper` and use it to create your mappings.
 
 ```c#
@@ -156,7 +156,7 @@ var gridifiedData = myRepository.Gridify(filter, customMappings);
 
 -----------------
 
-# EntityFramework integration
+## EntityFramework integration
 if you need to use gridify **async** feature for entityFramework Core, use **`Gridify.EntityFramework`** package instead.
 
 this package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` functions.
@@ -167,14 +167,14 @@ dotnet add package Gridify.EntityFramework
 
 
 
-# AutoMapper integration
+## AutoMapper integration
 (GridifyTo() => ProjectTo() + Paging Filtering Sorting)
 soon ...
 
 -----------------
 
-# Collaboration
-Any collaboration to improve documentation and library is appreciated feel free to send pull-Request. <3
+## Contribution
+Any Contribution to improve documentation and library is appreciated feel free to send pull-Request. <3
 
 
 
