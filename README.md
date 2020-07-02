@@ -86,8 +86,8 @@ var customMappings = new GridifyMapper<Person>()   // by default GridifyMapper i
                              .GenerateMappings();  // because FirstName and LastName is exists in both DTO and Entity classes we can Generate them
 
 // add your custom mappings
-customMappings.AddMap("address", q => q.Contact.Address );
-customMappings.AddMap("PhoneNumber", q => q.Contact.PhoneNumber );
+customMappings.AddMap("address", q => q.Contact.Address )
+              .AddMap("PhoneNumber", q => q.Contact.PhoneNumber );
 
 // as i mentioned before. usually we don't need create this object manually because we can get this required data from an API or any Controller.
 var filter = new GridifyQuery() 
