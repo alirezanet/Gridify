@@ -136,7 +136,7 @@ if you need to use gridify async feature for entityFramework Core, use **`Gridif
 this package have two additional `GridifyAsync()` and `ApplyEverythingWithCountAsync()`.
 
 ```
-dotnet add package EntityFramework
+dotnet add package Gridify.EntityFramework
 ```
 
 
