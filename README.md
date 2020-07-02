@@ -133,7 +133,7 @@ public class PersonDTO
 
 # EntityFramework integration
 if you need to use gridify async feature for entityFramework Core, use **`Gridify.EntityFramework`** package instead.
-this package have two additional `GridifyAsync()` and `ApplyEverythingWithCountAsync()`.
+this package have two additional `GridifyAsync()` and `ApplyEverythingWithCountAsync()` functions.
 
 ```
 dotnet add package Gridify.EntityFramework
