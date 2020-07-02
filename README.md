@@ -15,6 +15,8 @@ The best use case of this library is Aspnet APIs. when you need to get some stri
 |ApplyEverythingWithCount| Like ApplyEverything but it returns a tuple `(int Count,IQueryable<T> DataQuery)`. we can use `Count`, to create our pages.
 |Gridify | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
 
+`Gridify` function is a *ALL-IN-ONE package* that applies **filtering** and **ordering** and **paging** to your data, but for example, if you need to just filter your data without paging or sorting options you can use `ApplyFiltering` function instead.
+
 # Supported Filtering Operators 
 | Name | Operator | Usage example
 |------|-----------|-----|
