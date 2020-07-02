@@ -1,13 +1,18 @@
 # Gridify 
 Easy and optimize way to apply **paging**, **filtering** and **sorting** using string based conditions and filed names.
 
-The best use case of this library is Aspnet APIs. when you need to get some string base filtering conditions to filter data or sort them by a filed name or apply pagination concepts to you lists and return a **pageable**, data grid ready information, from any repository or databases.
+The best use case of this library is Asp-net APIs. when you need to get some string base filtering conditions to filter data or sort them by a filed name or apply pagination concepts to you lists and return a **pageable**, data grid ready information, from any repository or databases.
+
+installation using dotnet core CLI:
+```
+dotnet add package Gridify
+```
 
 ---------------
 
 
-# Available Extentions
-|      Extention | Description          
+# Available Extensions
+|      Extension | Description          
 |----------------|-------------------------------|
 |ApplyFiltering  | Apply Filtering using `string Filter` property of `GridifyQuery` class and returns an `IQueryable<T>`
 |ApplyOrdering   | Apply Ordering using `string SortBy` and `bool IsSortAsc` properties of `GridifyQuery` class and returns an `IQueryable<T>`
@@ -72,7 +77,7 @@ Paging<Person> pData =
 
 
 # Column Mapping Support
-By default Gridify is using a `GridifyMapper` object that automaticly maps your string based field names to actual properties in your Entities but if you have a custom **DTO** (Data Transfer Object) you can create a custom instance of `GridifyMapper` and use it to create your mappings.
+By default Gridify is using a `GridifyMapper` object that automatically maps your string based field names to actual properties in your Entities but if you have a custom **DTO** (Data Transfer Object) you can create a custom instance of `GridifyMapper` and use it to create your mappings.
 
 ```c#
 //// GridifyMapper Usage example -------------
@@ -92,7 +97,7 @@ var filter = new GridifyQuery()
     SortBy = "PhoneNumber"
 };
 
-// myRepository: could be entity frmaework context or any other collections 
+// myRepository: could be entity framework context or any other collections 
 var gridifiedData = myRepository.Gridify(filter, customMappings);
 
 // DONE.
@@ -126,9 +131,23 @@ public class PersonDTO
 
 -----------------
 
+# EntityFramework integration
+if you need to use gridify async feature for entityFramework Core, use **`Gridify.EntityFramework`** package instead.
+this package have two additional `GridifyAsync()` and `ApplyEverythingWithCountAsync()`.
+
+```
+dotnet add package EntityFramework
+```
+
+
+
+# AutoMapper integration
+soon ...
+
+-----------------
 
 # Collaboration
-Any collaboration to improve documentation and library is appreciated feel free to send pullrequest. <3
+Any collaboration to improve documentation and library is appreciated feel free to send pull-Request. <3
 
 
 
