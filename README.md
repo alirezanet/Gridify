@@ -77,8 +77,8 @@ var filter = new GridifyQuery()
 };
 
 // myRepository: could be entity frmaework context or any other collections 
-// filter      : is a GridifyQuery object
 var gridifiedData = myRepository.Gridify(filter, customMappings);
+
 // DONE.
 
 // ---------------------------
