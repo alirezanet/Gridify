@@ -3,6 +3,8 @@ Easy and optimize way to apply **paging**, **filtering** and **sorting** using s
 
 The best use case of this library is Aspnet APIs. when you need to get some string base filtering conditions to filter data or sort them by a filed name or apply pagination concepts to you lists and return a **pageable**, data grid ready information, from any repository or databases.
 
+---------------
+
 
 # Available Extentions
 |      Extention | Description          
@@ -15,7 +17,12 @@ The best use case of this library is Aspnet APIs. when you need to get some stri
 |ApplyEverythingWithCount| Like ApplyEverything but it returns a tuple `(int Count,IQueryable<T> DataQuery)`. we can use `Count`, to create our pages.
 |Gridify | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
 
-`Gridify` function is an *ALL-IN-ONE package*, that applies **filtering** and **ordering** and **paging** to your data, but for example, if you need to just filter your data without paging or sorting options you can use `ApplyFiltering` function instead.
+`Gridify` function is an *ALL-IN-ONE package*, that applies **filtering** and **ordering** and **paging** to your data and returns a `Paging<T>`,
+but for example, if you need to just filter your data without paging or sorting options you can use `ApplyFiltering` function instead.
+
+
+----------------
+
 
 # Supported Filtering Operators 
 | Name | Operator | Usage example
@@ -33,6 +40,10 @@ The best use case of this library is Aspnet APIs. when you need to get some stri
 | Parenthesis     | `()`| `"( FirstName=* Jo , Age<<30) \| ( FirstName != Hn , Age>>30 )"` |
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
+
+
+---------------
+
 
 # Basic Usage example
 
@@ -56,6 +67,9 @@ Paging<Person> pData =
 // pData.TotalItems => Count persons with 'John', First name
 // pData.Items      => First 20 Persons with 'John', First Name
 ```
+
+------------------
+
 
 # Column Mapping Support
 By default Gridify is using a `GridifyMapper` object that automaticly maps your string based field names to actual properties in your Entities but if you have a custom **DTO** (Data Transfer Object) you can create a custom instance of `GridifyMapper` and use it to create your mappings.
@@ -109,6 +123,8 @@ public class PersonDTO
 }
 
 ```
+
+-----------------
 
 
 # Collaboration
