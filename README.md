@@ -22,7 +22,10 @@ dotnet add package Gridify
 |ApplyEverythingWithCount| Like ApplyEverything but it returns a tuple `(int Count,IQueryable<T> gridifyQuery)`. we can use `Count`, to create our pages.
 |Gridify | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
 
+**TIP**: 
+
 `Gridify` function is an *ALL-IN-ONE package*, that applies **filtering** and **ordering** and **paging** to your data and returns a `Paging<T>`,
+
 but for example, if you need to just filter your data without paging or sorting options you can use `ApplyFiltering` function instead.
 
 
