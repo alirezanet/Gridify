@@ -132,7 +132,7 @@ public class PersonDTO
 -----------------
 
 # EntityFramework integration
-if you need to use gridify async feature for entityFramework Core, use **`Gridify.EntityFramework`** package instead.
+if you need to use gridify **async** feature for entityFramework Core, use **`Gridify.EntityFramework`** package instead.
 this package have two additional `GridifyAsync()` and `ApplyEverythingWithCountAsync()` functions.
 
 ```
@@ -141,7 +141,8 @@ dotnet add package Gridify.EntityFramework
 
 
 
-# AutoMapper integration (GridifyTo() => ProjectTo() + Paging Filtering Sorting)
+# AutoMapper integration
+(GridifyTo() => ProjectTo() + Paging Filtering Sorting)
 soon ...
 
 -----------------
