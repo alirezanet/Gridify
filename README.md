@@ -75,6 +75,17 @@ Paging<Person> pData =
 
 ------------------
 
+# WebApi Usage example
+```c#
+[Produces(typeof(Paging<Person>))]
+public IActionResult GetPersons(GridifyQuery filter)
+{
+    return myDbContext.Persons.Gridify(filter);
+}
+```
+
+------------------
+
 
 # Column Mapping Support
 By default Gridify is using a `GridifyMapper` object that automatically maps your string based field names to actual properties in your Entities but if you have a custom **DTO** (Data Transfer Object) you can create a custom instance of `GridifyMapper` and use it to create your mappings.
