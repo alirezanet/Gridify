@@ -42,7 +42,7 @@ but for example, if you need to just filter your data without paging or sorting 
 | GreaterThanOrEqual | `>=` | `"FieldName >= Value"` |
 | LessThanOrEqual | `<=` | `"FieldName <= Value"` |
 | Contains - Like | `=*` | `"FieldName =* Value"` |
-| NotContains - NotLike | `!*` | `"FieldName =* Value"` |
+| NotContains - NotLike | `!*` | `"FieldName !* Value"` |
 | AND - &&        | `,` | `"FirstName==Value , LastName==Value2"` |
 | OR - \|\|       | `\|` | `"FirstName==Value \| LastName==Value2"` | 
 | Parenthesis     | `()`| `"( FirstName=* Jo , Age<<30) \| ( FirstName != Hn , Age>>30 )"` |
