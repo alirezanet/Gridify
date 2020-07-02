@@ -13,27 +13,27 @@ namespace TuxTeam.Gridify {
 #endregion
 #region "Private"
 
-      private static IGridifyQuery FixPagingData (this IGridifyQuery queryObj) {
+      private static IGridifyQuery FixPagingData (this IGridifyQuery gridifyQuery) {
          // set default for page number
-         if (queryObj.Page <= 0)
-            queryObj.Page = DefaultPage;
+         if (gridifyQuery.Page <= 0)
+            gridifyQuery.Page = DefaultPage;
 
          // set default for PageSize
-         if (queryObj.PageSize <= 0)
-            queryObj.PageSize = DefaultPageSize;
+         if (gridifyQuery.PageSize <= 0)
+            gridifyQuery.PageSize = DefaultPageSize;
 
-         return queryObj;
+         return gridifyQuery;
       }
 
-         private static Expression<Func<T, bool>> GetExpressionFromConditon<T> (string condition, IGridifyQuery queryObj, GridifyMapper<T> columnMapper) {
+         private static Expression<Func<T, bool>> GetExpressionFromConditon<T> (string condition, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
          try {
             string[] op = { "==", "!=", "=*", "!*", ">>", "<<", ">=", "<=" };
-            var maps = queryObj.ParseFilter (condition, op);
+            var maps = gridifyQuery.ParseFilter (condition, op);
 
             if (!maps.HasValue)
                return null;
 
-            Expression<Func<T, object>> exp = columnMapper.Mappings[maps.Value.Left];
+            Expression<Func<T, object>> exp = mapper.Mappings[maps.Value.Left];
             var body = exp.Body;
 
             // Remove the boxing for value types
@@ -112,11 +112,11 @@ namespace TuxTeam.Gridify {
          return complexFilters;
       }
 
-      private static Expression<Func<T, bool>> GetExpressionFromInternalConditions<T> (IGridifyQuery queryObj, GridifyMapper<T> columnMapper, List < (string condition, bool IsAnd) > conditions) {
+      private static Expression<Func<T, bool>> GetExpressionFromInternalConditions<T> (IGridifyQuery gridifyQuery, GridifyMapper<T> mapper, List < (string condition, bool IsAnd) > conditions) {
          Expression<Func<T, bool>> finalExp = null;
          bool nextOpIsAnd = true;
          conditions.ForEach (c => {
-            var exp = GetExpressionFromConditon (c.condition, queryObj, columnMapper);
+            var exp = GetExpressionFromConditon (c.condition, gridifyQuery, mapper);
             if (exp == null) return;
             if (finalExp == null)
                finalExp = exp;
@@ -133,61 +133,61 @@ namespace TuxTeam.Gridify {
 #endregion
 
 #region "Public"
-      public static GridifyMapper<T> GetDefaultColumnMapper<T> () => new GridifyMapper<T> ().GenerateMappings ();
-      public static GridifyMapper<T> FixColumnMapper<T>(this GridifyMapper<T> columnMapper) 
-         => columnMapper != null ? columnMapper : GetDefaultColumnMapper<T>();
+      public static GridifyMapper<T> GetDefaultMapper<T> () => new GridifyMapper<T> ().GenerateMappings ();
+      public static GridifyMapper<T> FixMapper<T>(this GridifyMapper<T> mapper) 
+         => mapper != null ? mapper : GetDefaultMapper<T>();
 
-      public static IQueryable<T> ApplyEverything<T> (this IQueryable<T> query, IGridifyQuery queryObj, GridifyMapper<T> columnMapper = null) {
-         if (queryObj == null) return query;
-         columnMapper = columnMapper.FixColumnMapper();
+      public static IQueryable<T> ApplyEverything<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
+         if (gridifyQuery == null) return query;
+         mapper = mapper.FixMapper();
 
-         query = query.ApplyFiltering (queryObj, columnMapper);
-         query = query.ApplyOrdering (queryObj, columnMapper);
-         query = query.ApplyPaging (queryObj);
+         query = query.ApplyFiltering (gridifyQuery, mapper);
+         query = query.ApplyOrdering (gridifyQuery, mapper);
+         query = query.ApplyPaging (gridifyQuery);
          return query;
       }
 
-      public static IQueryable<T> ApplyOrdering<T> (this IQueryable<T> query, IGridifyQuery queryObj, GridifyMapper<T> columnMapper = null) {
-         if (queryObj == null) return query;
-         columnMapper = columnMapper.FixColumnMapper();
-         if (String.IsNullOrWhiteSpace (queryObj.SortBy) || !columnMapper.Mappings.ContainsKey (queryObj.SortBy))
+      public static IQueryable<T> ApplyOrdering<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
+         if (gridifyQuery == null) return query;
+         mapper = mapper.FixMapper();
+         if (String.IsNullOrWhiteSpace (gridifyQuery.SortBy) || !mapper.Mappings.ContainsKey (gridifyQuery.SortBy))
             return query;
-         if (queryObj.IsSortAsc)
-            return query.OrderBy (columnMapper.Mappings[queryObj.SortBy]);
+         if (gridifyQuery.IsSortAsc)
+            return query.OrderBy (mapper.Mappings[gridifyQuery.SortBy]);
          else
-            return query.OrderByDescending (columnMapper.Mappings[queryObj.SortBy]);
+            return query.OrderByDescending (mapper.Mappings[gridifyQuery.SortBy]);
       }
-      public static IQueryable<T> ApplyOrdering<T, Tkey> (this IQueryable<T> query, IGridifyQuery queryObj, Expression<Func<T, Tkey>> groupOrder, GridifyMapper<T> columnMapper = null) {
-         if (queryObj == null) return query;
-         columnMapper = columnMapper.FixColumnMapper();
-         if (String.IsNullOrWhiteSpace (queryObj.SortBy) || !columnMapper.Mappings.ContainsKey (queryObj.SortBy))
+      public static IQueryable<T> ApplyOrdering<T, Tkey> (this IQueryable<T> query, IGridifyQuery gridifyQuery, Expression<Func<T, Tkey>> groupOrder, GridifyMapper<T> mapper = null) {
+         if (gridifyQuery == null) return query;
+         mapper = mapper.FixMapper();
+         if (String.IsNullOrWhiteSpace (gridifyQuery.SortBy) || !mapper.Mappings.ContainsKey (gridifyQuery.SortBy))
             return query;
-         if (queryObj.IsSortAsc)
-            return query.OrderBy (groupOrder).ThenBy (columnMapper.Mappings[queryObj.SortBy]);
+         if (gridifyQuery.IsSortAsc)
+            return query.OrderBy (groupOrder).ThenBy (mapper.Mappings[gridifyQuery.SortBy]);
          else
-            return query.OrderByDescending (groupOrder).ThenBy (columnMapper.Mappings[queryObj.SortBy]);
+            return query.OrderByDescending (groupOrder).ThenBy (mapper.Mappings[gridifyQuery.SortBy]);
       }
 
-      public static IQueryable<T> ApplyPaging<T> (this IQueryable<T> query, IGridifyQuery queryObj) {
-         if (queryObj == null) return query;
-         queryObj = queryObj.FixPagingData ();
-         return query.Skip ((queryObj.Page - 1) * queryObj.PageSize).Take (queryObj.PageSize);
+      public static IQueryable<T> ApplyPaging<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery) {
+         if (gridifyQuery == null) return query;
+         gridifyQuery = gridifyQuery.FixPagingData ();
+         return query.Skip ((gridifyQuery.Page - 1) * gridifyQuery.PageSize).Take (gridifyQuery.PageSize);
       }
 
-      public static IQueryable<IGrouping<T2, T>> ApplyPaging<T, T2> (this IQueryable<IGrouping<T2, T>> query, IGridifyQuery queryObj) {
-         if (queryObj == null) return query;
-         queryObj = queryObj.FixPagingData ();
-         return query.Skip ((queryObj.Page - 1) * queryObj.PageSize).Take (queryObj.PageSize);
+      public static IQueryable<IGrouping<T2, T>> ApplyPaging<T, T2> (this IQueryable<IGrouping<T2, T>> query, IGridifyQuery gridifyQuery) {
+         if (gridifyQuery == null) return query;
+         gridifyQuery = gridifyQuery.FixPagingData ();
+         return query.Skip ((gridifyQuery.Page - 1) * gridifyQuery.PageSize).Take (gridifyQuery.PageSize);
       }
    
-      public static IQueryable<T> ApplyFiltering<T> (this IQueryable<T> query, IGridifyQuery queryObj, GridifyMapper<T> columnMapper = null) {
-         if (queryObj == null) return query;
-         if (String.IsNullOrWhiteSpace (queryObj.Filter))
+      public static IQueryable<T> ApplyFiltering<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
+         if (gridifyQuery == null) return query;
+         if (String.IsNullOrWhiteSpace (gridifyQuery.Filter))
             return query;
          
-         columnMapper = columnMapper.FixColumnMapper();
+         mapper = mapper.FixMapper();
          
-         var textFilter = queryObj.Filter.Trim ();
+         var textFilter = gridifyQuery.Filter.Trim ();
          Expression<Func<T, bool>> queryExpression = null;
          if (textFilter.Trim ().StartsWith ("(")) // its complex query
          {
@@ -196,7 +196,7 @@ namespace TuxTeam.Gridify {
             bool nextOpIsAnd = true;
             foreach (var complexFilter in complexFilters) {
                var conditions = CreateConditions (complexFilter.condition);
-               var internalExpression = GetExpressionFromInternalConditions (queryObj, columnMapper, conditions);
+               var internalExpression = GetExpressionFromInternalConditions (gridifyQuery, mapper, conditions);
                if (finalExp == null)
                   finalExp = internalExpression;
                else {
@@ -210,59 +210,59 @@ namespace TuxTeam.Gridify {
             queryExpression = finalExp;
          } else { // its normal query
             var conditions = CreateConditions (textFilter);
-            queryExpression = GetExpressionFromInternalConditions (queryObj, columnMapper, conditions);
+            queryExpression = GetExpressionFromInternalConditions (gridifyQuery, mapper, conditions);
          }
          if (queryExpression != null) query = query.Where (queryExpression);
          return query;
       }
 
-      public static IQueryable<T> ApplyOrderingAndPaging<T> (this IQueryable<T> query, IGridifyQuery queryObj, GridifyMapper<T> columnMapper = null) {
-         columnMapper = columnMapper.FixColumnMapper();
-         query = query.ApplyOrdering (queryObj, columnMapper);
-         query = query.ApplyPaging (queryObj);
+      public static IQueryable<T> ApplyOrderingAndPaging<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
+         mapper = mapper.FixMapper();
+         query = query.ApplyOrdering (gridifyQuery, mapper);
+         query = query.ApplyPaging (gridifyQuery);
          return query;
       }
 
-      public static (int Count, IQueryable<T> DataQuery) ApplyEverythingWithCount<T> (this IQueryable<T> query, IGridifyQuery queryObj, GridifyMapper<T> columnMapper = null) {
-         columnMapper=columnMapper.FixColumnMapper();
-         query = query.ApplyFiltering (queryObj, columnMapper);
+      public static (int Count, IQueryable<T> gridifyQuery) ApplyEverythingWithCount<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
+         mapper=mapper.FixMapper();
+         query = query.ApplyFiltering (gridifyQuery, mapper);
          var count = query.Count ();
-         query = query.ApplyOrdering (queryObj, columnMapper);
-         query = query.ApplyPaging (queryObj);
+         query = query.ApplyOrdering (gridifyQuery, mapper);
+         query = query.ApplyPaging (gridifyQuery);
          return (count, query);
       }
 
-      public static Paging<T> Gridify<T> (this IQueryable<T> query, IGridifyQuery queryObj, GridifyMapper<T> columnMapper = null) {
-         columnMapper = columnMapper.FixColumnMapper();
-         var res = query.ApplyEverythingWithCount (queryObj, columnMapper);
-         return new Paging<T> () { Items = res.DataQuery.ToList (), TotalItems = res.Count };
+      public static Paging<T> Gridify<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
+         mapper = mapper.FixMapper();
+         var res = query.ApplyEverythingWithCount (gridifyQuery, mapper);
+         return new Paging<T> () { Items = res.gridifyQuery.ToList (), TotalItems = res.Count };
       }
 
   #endregion    
 #region "EntityFramework"
       // EntityFramework Integration (need EntityFramework  as a Dependency)
-      // public async static Task < (int Count, IQueryable<T> DataQuery) > ApplyEverythingWithCountAsync<T> (this IQueryable<T> query, IGridifyQuery queryObj, GridifyMapper<T> columnMapper) {
-      //    query = query.ApplyFiltering (queryObj, columnMapper);
+      // public async static Task < (int Count, IQueryable<T> gridifyQuery) > ApplyEverythingWithCountAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
+      //    query = query.ApplyFiltering (gridifyQuery, mapper);
       //    var count = await query.CountAsync ();
-      //    query = query.ApplyOrdering (queryObj, columnMapper);
-      //    query = query.ApplyPaging (queryObj);
+      //    query = query.ApplyOrdering (gridifyQuery, mapper);
+      //    query = query.ApplyPaging (gridifyQuery);
       //    return (count, query);
       // }
-      // public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery queryObj, GridifyMapper<T> columnMapper) {
-      //    var res = await query.ApplyQueryWithCountAsync (queryObj, columnMapper);
-      //    return new Paging<T> () { Items = await res.DataQuery.ToListAsync (), TotalItems = res.Count };
+      // public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
+      //    var res = await query.ApplyQueryWithCountAsync (gridifyQuery, mapper);
+      //    return new Paging<T> () { Items = await res.gridifyQuery.ToListAsync (), TotalItems = res.Count };
       // }
-      // public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery queryObj) 
-      //    => await query.FetchAsync<T> (queryObj, GetDefaultColumnMapper<T> ());
+      // public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery) 
+      //    => await query.FetchAsync<T> (gridifyQuery, GetDefaultMapper<T> ());
   #endregion
 #region "AutoMapper"
       // AutoMapper Integration (need AutoMapper as a Dependency)
-      // public async static Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination> (this IQueryable<TSource> query, IGridifyQuery queryObj, GridifyMapper<TSource> columnMapper) {
-      //    var res = await query.ApplyQueryWithCountAsync (queryObj, columnMapper);
-      //    return new Paging<TDestination> () { Items = await res.DataQuery.ProjectTo<TDestination> ().ToListAsync (), TotalItems = res.Count };
+      // public async static Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination> (this IQueryable<TSource> query, IGridifyQuery gridifyQuery, GridifyMapper<TSource> mapper) {
+      //    var res = await query.ApplyQueryWithCountAsync (gridifyQuery, mapper);
+      //    return new Paging<TDestination> () { Items = await res.gridifyQuery.ProjectTo<TDestination> ().ToListAsync (), TotalItems = res.Count };
       // }
-      // public async static Task<Paging<D>> GridifyToAsync<T, D> (this IQueryable<T> query, IGridifyQuery queryObj) 
-      //    => await FetchToAsync<T, D> (query, queryObj, GetDefaultColumnMapper<T> ());
+      // public async static Task<Paging<D>> GridifyToAsync<T, D> (this IQueryable<T> query, IGridifyQuery gridifyQuery) 
+      //    => await FetchToAsync<T, D> (query, gridifyQuery, GetDefaultMapper<T> ());
    }
 #endregion
 }

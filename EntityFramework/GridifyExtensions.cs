@@ -7,17 +7,17 @@ namespace TuxTeam.Gridify.EntityFramework
     public static partial class GridifyExtensions {
 
       #region "EntityFramework Integration"
-      public async static Task < (int Count, IQueryable<T> DataQuery) > ApplyEverythingWithCountAsync<T> (this IQueryable<T> query, IGridifyQuery queryObj, GridifyMapper<T> columnMapper) {
-         query = query.ApplyFiltering (queryObj, columnMapper);
+      public async static Task < (int Count, IQueryable<T> gridifyQuery) > ApplyEverythingWithCountAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
+         query = query.ApplyFiltering (gridifyQuery, mapper);
          var count = await query.CountAsync ();
-         query = query.ApplyOrdering (queryObj, columnMapper);
-         query = query.ApplyPaging (queryObj);
+         query = query.ApplyOrdering (gridifyQuery, mapper);
+         query = query.ApplyPaging (gridifyQuery);
          return (count, query);
       }
-      public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery queryObj, GridifyMapper<T> columnMapper = null) {
-         columnMapper = columnMapper.FixColumnMapper ();
-         var res = await query.ApplyEverythingWithCountAsync (queryObj, columnMapper);
-         return new Paging<T> () { Items = await res.DataQuery.ToListAsync (), TotalItems = res.Count };
+      public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
+         mapper = mapper.FixMapper ();
+         var res = await query.ApplyEverythingWithCountAsync (gridifyQuery, mapper);
+         return new Paging<T> () { Items = await res.gridifyQuery.ToListAsync (), TotalItems = res.Count };
       }
       #endregion
    }

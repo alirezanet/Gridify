@@ -19,7 +19,7 @@ dotnet add package Gridify
 |ApplyPaging     | Apply paging using `short Page` and `int PageSize` properties of `GridifyQuery` class and returns an `IQueryable<T>`
 |ApplyOrderingAndPaging|Apply Both Ordering and paging and returns an `IQueryable<T>`
 |ApplyEverything | Apply Filtering,Ordering and paging and returns an `IQueryable<T>`
-|ApplyEverythingWithCount| Like ApplyEverything but it returns a tuple `(int Count,IQueryable<T> DataQuery)`. we can use `Count`, to create our pages.
+|ApplyEverythingWithCount| Like ApplyEverything but it returns a tuple `(int Count,IQueryable<T> gridifyQuery)`. we can use `Count`, to create our pages.
 |Gridify | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`. (Paging Class Has `int TotalItems` and `List<T> Items`)
 
 `Gridify` function is an *ALL-IN-ONE package*, that applies **filtering** and **ordering** and **paging** to your data and returns a `Paging<T>`,
