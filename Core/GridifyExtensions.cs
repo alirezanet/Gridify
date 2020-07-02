@@ -25,7 +25,7 @@ namespace TuxTeam.Gridify {
          return gridifyQuery;
       }
 
-         private static Expression<Func<T, bool>> GetExpressionFromConditon<T> (string condition, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
+         private static Expression<Func<T, bool>> GetExpressionFromCondition<T> (string condition, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
          try {
             string[] op = { "==", "!=", "=*", "!*", ">>", "<<", ">=", "<=" };
             var maps = gridifyQuery.ParseFilter (condition, op);
@@ -116,7 +116,7 @@ namespace TuxTeam.Gridify {
          Expression<Func<T, bool>> finalExp = null;
          bool nextOpIsAnd = true;
          conditions.ForEach (c => {
-            var exp = GetExpressionFromConditon (c.condition, gridifyQuery, mapper);
+            var exp = GetExpressionFromCondition (c.condition, gridifyQuery, mapper);
             if (exp == null) return;
             if (finalExp == null)
                finalExp = exp;
@@ -223,38 +223,23 @@ namespace TuxTeam.Gridify {
          return query;
       }
 
-      public static (int Count, IQueryable<T> gridifyQuery) ApplyEverythingWithCount<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
+      public static QueryablePaging<T> ApplyEverythingWithCount<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
          mapper=mapper.FixMapper();
          query = query.ApplyFiltering (gridifyQuery, mapper);
          var count = query.Count ();
          query = query.ApplyOrdering (gridifyQuery, mapper);
          query = query.ApplyPaging (gridifyQuery);
-         return (count, query);
+         return new QueryablePaging<T>(){TotalItems=count,Query=query};
       }
 
       public static Paging<T> Gridify<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
          mapper = mapper.FixMapper();
          var res = query.ApplyEverythingWithCount (gridifyQuery, mapper);
-         return new Paging<T> () { Items = res.gridifyQuery.ToList (), TotalItems = res.Count };
+         return new Paging<T> () { Items = res.Query.ToList (), TotalItems = res.TotalItems };
       }
 
   #endregion    
-#region "EntityFramework"
-      // EntityFramework Integration (need EntityFramework  as a Dependency)
-      // public async static Task < (int Count, IQueryable<T> gridifyQuery) > ApplyEverythingWithCountAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
-      //    query = query.ApplyFiltering (gridifyQuery, mapper);
-      //    var count = await query.CountAsync ();
-      //    query = query.ApplyOrdering (gridifyQuery, mapper);
-      //    query = query.ApplyPaging (gridifyQuery);
-      //    return (count, query);
-      // }
-      // public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
-      //    var res = await query.ApplyQueryWithCountAsync (gridifyQuery, mapper);
-      //    return new Paging<T> () { Items = await res.gridifyQuery.ToListAsync (), TotalItems = res.Count };
-      // }
-      // public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery) 
-      //    => await query.FetchAsync<T> (gridifyQuery, GetDefaultMapper<T> ());
-  #endregion
+
 #region "AutoMapper"
       // AutoMapper Integration (need AutoMapper as a Dependency)
       // public async static Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination> (this IQueryable<TSource> query, IGridifyQuery gridifyQuery, GridifyMapper<TSource> mapper) {
