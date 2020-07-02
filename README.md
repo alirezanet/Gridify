@@ -11,6 +11,7 @@ dotnet add package Gridify
 ---------------
 
 # Available Extensions
+
 |      Extension | Description          
 |----------------|-------------------------------|
 |ApplyFiltering  | Apply Filtering using `string Filter` property of `GridifyQuery` class and returns an `IQueryable<T>`
@@ -32,6 +33,7 @@ but for example, if you need to just filter your data without paging or sorting 
 
 
 # Supported Filtering Operators 
+
 | Name | Operator | Usage example
 |------|-----------|-----|
 | Equal | `==` | `"FieldName == Value"` |
