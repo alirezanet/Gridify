@@ -77,11 +77,18 @@ Paging<Person> pData =
 
 # WebApi Usage example
 ```c#
+// ApiController
+
 [Produces(typeof(Paging<Person>))]
 public IActionResult GetPersons(GridifyQuery filter)
 {
     return myDbContext.Persons.Gridify(filter);
 }
+
+```
+request example :
+```
+http://exampleDomain.com/api/GetPersons?pageSize=100&page=1&sortBy=FirstName&isSortAsc=false&filter=Age%3D%3D10
 ```
 
 ------------------
