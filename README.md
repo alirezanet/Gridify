@@ -86,9 +86,13 @@ public IActionResult GetPersons(GridifyQuery filter)
 }
 
 ```
-request example :
+complete request sample:
 ```
 http://exampleDomain.com/api/GetPersons?pageSize=100&page=1&sortBy=FirstName&isSortAsc=false&filter=Age%3D%3D10
+```
+also we can totally ignore GridifyQuery
+```
+http://exampleDomain.com/api/GetPersons
 ```
 
 ------------------
