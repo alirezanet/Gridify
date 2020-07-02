@@ -10,7 +10,6 @@ dotnet add package Gridify
 
 ---------------
 
-
 # Available Extensions
 |      Extension | Description          
 |----------------|-------------------------------|
