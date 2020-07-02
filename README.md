@@ -141,7 +141,7 @@ dotnet add package Gridify.EntityFramework
 
 
 
-# AutoMapper integration
+# AutoMapper integration (GridifyTo() => ProjectTo() + Paging Filtering Sorting)
 soon ...
 
 -----------------
