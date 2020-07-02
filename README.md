@@ -102,29 +102,6 @@ http://exampleDomain.com/api/GetPersons
 By default Gridify is using a `GridifyMapper` object that automatically maps your string based field names to actual properties in your Entities but if you have a custom **DTO** (Data Transfer Object) you can create a custom instance of `GridifyMapper` and use it to create your mappings.
 
 ```c#
-//// GridifyMapper Usage example -------------
-
-var customMappings = new GridifyMapper<Person>()   // by default GridifyMapper is not case sensitive but you can change this behavior
-                             .GenerateMappings();  // because FirstName and LastName is exists in both DTO and Entity classes we can Generate them
-
-// add your custom mappings
-customMappings.AddMap("address", q => q.Contact.Address )
-              .AddMap("PhoneNumber", q => q.Contact.PhoneNumber );
-
-// as i mentioned before. usually we don't need create this object manually because we can get this required data from an API or any Controller.
-var filter = new GridifyQuery() 
-{
-    Filter = "FirstName == John , Address =* st",
-    IsSortAsc = true,
-    SortBy = "PhoneNumber"
-};
-
-// myRepository: could be entity framework context or any other collections 
-var gridifiedData = myRepository.Gridify(filter, customMappings);
-
-// DONE.
-
-// ---------------------------
 // example Entities
 Public class Person
 {
@@ -148,6 +125,28 @@ public class PersonDTO
    Public string Address {get;set;}
    Public int PhoneNumber {get;set;}
 }
+
+//// GridifyMapper Usage example -------------
+
+var customMappings = new GridifyMapper<Person>()   
+        // because FirstName and LastName is exists in both DTO and Entity classes we can Generate them
+        .GenerateMappings() 
+        // add custom mappings
+        .AddMap("address", q => q.Contact.Address ) 
+        .AddMap("PhoneNumber", q => q.Contact.PhoneNumber );
+
+
+// as i mentioned before. usually we don't need create this object manually.
+var filter = new GridifyQuery() 
+{
+    Filter = "FirstName == John , Address =* st",
+    IsSortAsc = true,
+    SortBy = "PhoneNumber"
+};
+
+// myRepository: could be entity framework context or any other collections 
+var gridifiedData = myRepository.Gridify(filter, customMappings);
+
 
 ```
 
