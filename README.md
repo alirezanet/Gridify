@@ -1,5 +1,5 @@
 # Gridify 
-Easy and optimize way to apply **paging**, **filtering** and **sorting** using string based conditions and filed names.
+Easy and optimize way to apply **paging**, **filtering** and **sorting** using text-based data.
 
 The best use case of this library is Asp-net APIs. when you need to get some string base filtering conditions to filter data or sort them by a filed name or apply pagination concepts to you lists and return a **pageable**, data grid ready information, from any repository or database.
 
