@@ -7,7 +7,7 @@ namespace TuxTeam.Gridify.EntityFramework
     public static partial class GridifyExtensions {
 
       #region "EntityFramework Integration"
-      public async static Task < QueryablePaging<T> > GridifyQueryable<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
+      public async static Task < QueryablePaging<T> > GridifyQueryableAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
          query = query.ApplyFiltering (gridifyQuery, mapper);
          var count = await query.CountAsync ();
          query = query.ApplyOrdering (gridifyQuery, mapper);
