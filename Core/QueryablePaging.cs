@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TuxTeam.Gridify
+namespace Gridify
 {
     public class QueryablePaging<T>
     {

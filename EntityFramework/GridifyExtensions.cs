@@ -2,7 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace TuxTeam.Gridify.EntityFramework
+namespace Gridify.EntityFramework
 {
     public static partial class GridifyExtensions {
 

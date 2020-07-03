@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace TuxTeam.Gridify
+namespace Gridify
 {
     public class GridifyMapper<T>
     {

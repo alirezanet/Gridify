@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TuxTeam.Gridify
+namespace Gridify
 {
     public interface IGridifyQuery
     {

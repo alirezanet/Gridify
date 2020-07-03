@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace TuxTeam.Gridify {
+namespace Gridify {
    public static partial class GridifyExtensions {
 
       #region "Static Shared"
