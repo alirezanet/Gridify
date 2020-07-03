@@ -294,15 +294,6 @@ namespace TuxTeam.Gridify {
       }
 
       #endregion    
-
-      #region "AutoMapper"
-      // AutoMapper Integration (need AutoMapper as a Dependency)
-      // public async static Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination> (this IQueryable<TSource> query, IGridifyQuery gridifyQuery, GridifyMapper<TSource> mapper) {
-      //    var res = await query.ApplyQueryWithCountAsync (gridifyQuery, mapper);
-      //    return new Paging<TDestination> () { Items = await res.gridifyQuery.ProjectTo<TDestination> ().ToListAsync (), TotalItems = res.Count };
-      // }
-      // public async static Task<Paging<D>> GridifyToAsync<T, D> (this IQueryable<T> query, IGridifyQuery gridifyQuery) 
-      //    => await FetchToAsync<T, D> (query, gridifyQuery, GetDefaultMapper<T> ());
    }
-   #endregion
+     
 }

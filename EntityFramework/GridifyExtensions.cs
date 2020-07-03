@@ -20,5 +20,11 @@ namespace TuxTeam.Gridify.EntityFramework
          return new Paging<T> () { Items = await res.Query.ToListAsync (), TotalItems = res.TotalItems };
       }
       #endregion
+
+      //  //AutoMapper Integration (need AutoMapper as a Dependency)
+      // public async static Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination> (this IQueryable<TSource> query, IGridifyQuery gridifyQuery, GridifyMapper<TSource> mapper) {
+      //    var res = await query.GridifyQueryableAsync (gridifyQuery, mapper);
+      //    return new Paging<TDestination> () { Items = await res.Query.ProjectTo<TDestination> ().ToListAsync (), TotalItems = res.TotalItems };
+      // }
    }
 }
