@@ -1,4 +1,4 @@
 **/bin
 **/obj
 .vscode
-nuget.config*
+nuget.config* 
