@@ -7,11 +7,11 @@ using System.Linq.Expressions;
 namespace TuxTeam.Gridify {
    public static partial class GridifyExtensions {
 
-#region "Static Shared"
-   public static short DefaultPage = 1;
-   public static int DefaultPageSize = 10;
-#endregion
-#region "Private"
+      #region "Static Shared"
+      public static short DefaultPage = 1;
+      public static int DefaultPageSize = 10;
+      #endregion
+      #region "Private"
 
       /// <summary>
       /// Set default <c>Page<c/> number and <c>PageSize<c/> if its not already set in gridifyQuery
@@ -30,7 +30,7 @@ namespace TuxTeam.Gridify {
          return gridifyQuery;
       }
 
-         private static Expression<Func<T, bool>> GetExpressionFromCondition<T> (string condition, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
+      private static Expression<Func<T, bool>> GetExpressionFromCondition<T> (string condition, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
          try {
             string[] op = { "==", "!=", "=*", "!*", ">>", "<<", ">=", "<=" };
             var maps = gridifyQuery.ParseFilter (condition, op);
@@ -83,7 +83,7 @@ namespace TuxTeam.Gridify {
             }
             return Expression.Lambda<Func<T, bool>> (be, exp.Parameters);
          } catch (Exception) {
-            return null; 
+            return null;
          }
       }
 
@@ -135,16 +135,36 @@ namespace TuxTeam.Gridify {
          });
          return finalExp;
       }
-#endregion
+      #endregion
 
-#region "Public"
+      #region "Public"
+
+      /// <summary>
+      /// create and return a default <c>GridifyMapper</c>
+      /// </summary>
+      /// <typeparam name="T">type to set mappings</typeparam>
+      /// <returns>returns an auto generated <c>GridifyMapper</c></returns>
       public static GridifyMapper<T> GetDefaultMapper<T> () => new GridifyMapper<T> ().GenerateMappings ();
-      public static GridifyMapper<T> FixMapper<T>(this GridifyMapper<T> mapper) 
-         => mapper != null ? mapper : GetDefaultMapper<T>();
 
+      /// <summary>
+      /// if given mapper was null this function creates default generated mapper
+      /// </summary>
+      /// <param name="mapper">a <c>GridifyMapper<c/> that can be null</param>
+      /// <typeparam name="T">type to set mappings</typeparam>
+      /// <returns>return back mapper or new generated mapper if it was null</returns>
+      public static GridifyMapper<T> FixMapper<T> (this GridifyMapper<T> mapper) => mapper != null ? mapper : GetDefaultMapper<T> ();
+
+      /// <summary>
+      /// adds Filtering,Ordering And Paging to the query
+      /// </summary>
+      /// <param name="query">the original(target) queryable object</param>
+      /// <param name="gridifyQuery">the configuration to apply paging, filtering and ordering</param>
+      /// <param name="mapper">this is an optional parameter to apply filtering and ordering using a custom mapping configuration</param>
+      /// <typeparam name="T">type of target entity</typeparam>
+      /// <returns>returns user query after applying filtering, ordering and paging </returns>
       public static IQueryable<T> ApplyEverything<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
          if (gridifyQuery == null) return query;
-         mapper = mapper.FixMapper();
+         mapper = mapper.FixMapper ();
 
          query = query.ApplyFiltering (gridifyQuery, mapper);
          query = query.ApplyOrdering (gridifyQuery, mapper);
@@ -152,9 +172,17 @@ namespace TuxTeam.Gridify {
          return query;
       }
 
+      /// <summary>
+      /// adds Ordering to the query
+      /// </summary>
+      /// <param name="query">the original(target) queryable object</param>
+      /// <param name="gridifyQuery">the configuration to apply ordering</param>
+      /// <param name="mapper">this is an optional parameter to apply ordering using a custom mapping configuration</param>
+      /// <typeparam name="T">type of target entity</typeparam>
+      /// <returns>returns user query after applying Ordering </returns>
       public static IQueryable<T> ApplyOrdering<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
          if (gridifyQuery == null) return query;
-         mapper = mapper.FixMapper();
+         mapper = mapper.FixMapper ();
          if (String.IsNullOrWhiteSpace (gridifyQuery.SortBy) || !mapper.Mappings.ContainsKey (gridifyQuery.SortBy))
             return query;
          if (gridifyQuery.IsSortAsc)
@@ -162,9 +190,19 @@ namespace TuxTeam.Gridify {
          else
             return query.OrderByDescending (mapper.Mappings[gridifyQuery.SortBy]);
       }
-      public static IQueryable<T> ApplyOrdering<T, Tkey> (this IQueryable<T> query, IGridifyQuery gridifyQuery, Expression<Func<T, Tkey>> groupOrder, GridifyMapper<T> mapper = null) {
+
+      /// <summary>
+      /// adds Ordering to the query
+      /// </summary>
+      /// <param name="query">the original(target) queryable object</param>
+      /// <param name="gridifyQuery">the configuration to apply ordering</param>
+      /// <param name="groupOrder">select group member for ordering</param>  // need to be more specific
+      /// <param name="mapper">this is an optional parameter to apply ordering using a custom mapping configuration</param>
+      /// <typeparam name="T">type of target entity</typeparam>
+      /// <returns>returns user query after applying Ordering </returns>
+      public static IQueryable<T> ApplyOrdering<T, TKey> (this IQueryable<T> query, IGridifyQuery gridifyQuery, Expression<Func<T, TKey>> groupOrder, GridifyMapper<T> mapper = null) {
          if (gridifyQuery == null) return query;
-         mapper = mapper.FixMapper();
+         mapper = mapper.FixMapper ();
          if (String.IsNullOrWhiteSpace (gridifyQuery.SortBy) || !mapper.Mappings.ContainsKey (gridifyQuery.SortBy))
             return query;
          if (gridifyQuery.IsSortAsc)
@@ -184,14 +222,14 @@ namespace TuxTeam.Gridify {
          gridifyQuery = gridifyQuery.FixPagingData ();
          return query.Skip ((gridifyQuery.Page - 1) * gridifyQuery.PageSize).Take (gridifyQuery.PageSize);
       }
-   
+
       public static IQueryable<T> ApplyFiltering<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
          if (gridifyQuery == null) return query;
          if (String.IsNullOrWhiteSpace (gridifyQuery.Filter))
             return query;
-         
-         mapper = mapper.FixMapper();
-         
+
+         mapper = mapper.FixMapper ();
+
          var textFilter = gridifyQuery.Filter.Trim ();
          Expression<Func<T, bool>> queryExpression = null;
          if (textFilter.Trim ().StartsWith ("(")) // its complex query
@@ -222,30 +260,42 @@ namespace TuxTeam.Gridify {
       }
 
       public static IQueryable<T> ApplyOrderingAndPaging<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
-         mapper = mapper.FixMapper();
+         mapper = mapper.FixMapper ();
          query = query.ApplyOrdering (gridifyQuery, mapper);
          query = query.ApplyPaging (gridifyQuery);
          return query;
       }
 
       public static QueryablePaging<T> GridifyQueryable<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
-         mapper=mapper.FixMapper();
+         mapper = mapper.FixMapper ();
          query = query.ApplyFiltering (gridifyQuery, mapper);
          var count = query.Count ();
          query = query.ApplyOrdering (gridifyQuery, mapper);
          query = query.ApplyPaging (gridifyQuery);
-         return new QueryablePaging<T>(){TotalItems=count,Query=query};
+         return new QueryablePaging<T> () { TotalItems = count, Query = query };
       }
 
+      /// <summary>
+      /// gets a query or collection,
+      /// adds filtering, ordering and paging 
+      /// loads filtered and sorted data
+      /// return pagination ready result 
+      /// </summary>
+      /// <param name="query">the original(target) queryable object</param>
+      /// <param name="gridifyQuery">the configuration to apply paging, filtering and ordering</param>
+      /// <param name="mapper">this is an optional parameter to apply filtering and ordering using a custom mapping configuration</param>
+      /// <typeparam name="T">type of target entity</typeparam>
+      /// <returns>returns a loaded <c>Paging<T><c/> after applying filtering, ordering and paging </returns>
+      /// <returns></returns>
       public static Paging<T> Gridify<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
-         mapper = mapper.FixMapper();
+         mapper = mapper.FixMapper ();
          var res = query.GridifyQueryable (gridifyQuery, mapper);
          return new Paging<T> () { Items = res.Query.ToList (), TotalItems = res.TotalItems };
       }
 
-  #endregion    
+      #endregion    
 
-#region "AutoMapper"
+      #region "AutoMapper"
       // AutoMapper Integration (need AutoMapper as a Dependency)
       // public async static Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination> (this IQueryable<TSource> query, IGridifyQuery gridifyQuery, GridifyMapper<TSource> mapper) {
       //    var res = await query.ApplyQueryWithCountAsync (gridifyQuery, mapper);
@@ -254,5 +304,5 @@ namespace TuxTeam.Gridify {
       // public async static Task<Paging<D>> GridifyToAsync<T, D> (this IQueryable<T> query, IGridifyQuery gridifyQuery) 
       //    => await FetchToAsync<T, D> (query, gridifyQuery, GetDefaultMapper<T> ());
    }
-#endregion
+   #endregion
 }
