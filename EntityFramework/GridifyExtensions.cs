@@ -16,7 +16,7 @@ namespace TuxTeam.Gridify.EntityFramework
       }
       public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null) {
          mapper = mapper.FixMapper ();
-         var res = await query.GridifyQueryable (gridifyQuery, mapper);
+         var res = await query.GridifyQueryableAsync (gridifyQuery, mapper);
          return new Paging<T> () { Items = await res.Query.ToListAsync (), TotalItems = res.TotalItems };
       }
       #endregion
