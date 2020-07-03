@@ -13,6 +13,11 @@ namespace TuxTeam.Gridify {
 #endregion
 #region "Private"
 
+      /// <summary>
+      /// Set default <c>Page<c/> number and <c>PageSize<c/> if its not already set in gridifyQuery
+      /// </summary>
+      /// <param name="gridifyQuery">query and paging configuration</param>
+      /// <returns>returns a gridifyQuery with valid PageSize and Page</returns>
       private static IGridifyQuery FixPagingData (this IGridifyQuery gridifyQuery) {
          // set default for page number
          if (gridifyQuery.Page <= 0)
