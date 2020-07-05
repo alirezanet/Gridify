@@ -89,8 +89,8 @@ namespace Gridify {
 
       private static List < (string condition, bool IsAnd) > CreateConditions (string filter) {
          var filters = new List < (string condition, bool IsAnd) > ();
-         var conds = filter.Split (',', '|').ToList ();
-         conds.ForEach (c => {
+         var conditions = filter.Split (',', '|').ToList ();
+         conditions.ForEach (c => {
             var OpIndex = filter.IndexOf (c) + c.Length;
             string nextOp = OpIndex + 1 <= filter.Length ? filter.Substring (OpIndex, 1) : ",";
             filters.Add ((c.Trim (), nextOp != "|"));
