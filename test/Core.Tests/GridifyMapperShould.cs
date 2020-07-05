@@ -6,12 +6,6 @@ using Xunit;
 namespace Gridify.Tests {
     public class GridifyMapperShould {
 
-        class TestClass {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public TestClass ClassProp { get; set; }
-        }
-
         private GridifyMapper<TestClass> _sut;
         public GridifyMapperShould()
         {
