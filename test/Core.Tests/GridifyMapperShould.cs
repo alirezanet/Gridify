@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Xunit;
+using Xunit; 
 
 namespace Gridify.Tests {
     public class GridifyMapperShould {
@@ -44,15 +44,5 @@ namespace Gridify.Tests {
             Assert.Single (_sut.Mappings);
         }
 
-        [Fact]
-        public void GetExpression () {
-           
-            var actual = _sut.GetExpression ("Name");
-            Expression<Func<TestClass, object>> expected = Param_0 => (object)Param_0.Name;
-
-            Assert.IsType (expected.GetType() , actual);
-            Assert.Equal( expected.Body.ToString() ,actual.Body.ToString());
-
-        }
     }
 }

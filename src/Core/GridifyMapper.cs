@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace Gridify
 {
-    public class GridifyMapper<T>
+    public class GridifyMapper<T> : IGridifyMapper<T>
     {
 
         public GridifyMapper(bool caseSensitive = false)
@@ -50,7 +50,7 @@ namespace Gridify
             return this;
         }
 
-        public Expression<Func<T, object>> GetExpression(string propertyName)
+        private Expression<Func<T, object>> GetExpression(string propertyName)
         {
             // x =>
             var parameter = Expression.Parameter(typeof(T));
