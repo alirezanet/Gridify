@@ -12,12 +12,18 @@ namespace Gridify.Tests {
             public TestClass ClassProp { get; set; }
         }
 
+        private GridifyMapper<TestClass> _sut;
+        public GridifyMapperShould()
+        {
+            _sut = new GridifyMapper<TestClass>();
+        }
+
         [Fact]
         public void GenerateMappings () {
-            var sut = new GridifyMapper<TestClass> ();
-            sut.GenerateMappings ();
-            Assert.Equal (typeof (TestClass).GetProperties ().Count (), sut.Mappings.Count);
-            Assert.True (sut.Mappings.ContainsKey ("Id"));
+            _sut.GenerateMappings ();
+
+            Assert.Equal (typeof (TestClass).GetProperties ().Count (), _sut.Mappings.Count);
+            Assert.True (_sut.Mappings.ContainsKey ("Id"));
         }
 
         [Fact]
@@ -32,26 +38,23 @@ namespace Gridify.Tests {
 
         [Fact]
         public void AddMap () {
-            var sut = new GridifyMapper<TestClass> ();
-            sut.AddMap (nameof (TestClass.Name), p => p.Name);
-            Assert.Single (sut.Mappings);
+            _sut.AddMap (nameof (TestClass.Name), p => p.Name);
+            Assert.Single (_sut.Mappings);
         }
 
         [Fact]
         public void RemoveMap () {
-            var sut = new GridifyMapper<TestClass> ();
-            sut.Mappings.Add ("name", q => q.Name);
-            sut.Mappings.Add ("Id", q => q.Id);
-            sut.RemoveMap (nameof (TestClass.Name));
-            Assert.Single (sut.Mappings);
+            _sut.Mappings.Add ("name", q => q.Name);
+            _sut.Mappings.Add ("Id", q => q.Id);
+            _sut.RemoveMap (nameof (TestClass.Name));
+            Assert.Single (_sut.Mappings);
         }
 
         [Fact]
         public void GetExpression () {
-            var sut = new GridifyMapper<TestClass> ();
-            
+           
+            var actual = _sut.GetExpression ("Name");
             Expression<Func<TestClass, object>> expected = Param_0 => (object)Param_0.Name;
-            var actual = sut.GetExpression ("Name");
 
             Assert.IsType (expected.GetType() , actual);
             Assert.Equal( expected.Body.ToString() ,actual.Body.ToString());
