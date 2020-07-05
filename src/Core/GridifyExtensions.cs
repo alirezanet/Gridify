@@ -33,7 +33,7 @@ namespace Gridify {
       private static Expression<Func<T, bool>> GetExpressionFromCondition<T> (string condition, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper) {
          try {
             string[] op = { "==", "!=", "=*", "!*", ">>", "<<", ">=", "<=" };
-            var maps = gridifyQuery.ParseFilter (condition, op);
+            var maps = ParseFilter(condition, op);
 
             if (!maps.HasValue)
                return null;
@@ -135,9 +135,20 @@ namespace Gridify {
          });
          return finalExp;
       }
+
+      private static (string Left, string Operation, string Right) ? ParseFilter (string filter, string[] operationList) {
+            try {
+                string[] map = filter.Split (operationList, StringSplitOptions.None);
+                string currentOp = filter.Substring (map[0].Length, 2);
+                return (map[0], currentOp, map[1]);
+            } catch {
+                return null;
+            }
+      }
       #endregion
 
       #region "Public"
+      
 
       /// <summary>
       /// create and return a default <c>GridifyMapper</c>

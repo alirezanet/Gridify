@@ -9,6 +9,5 @@ namespace Gridify
         short Page { get; set; }
         int PageSize { get; set; }
         string Filter { get; set; }    
-        (string Left, string Operation, string Right)? ParseFilter(string filter, string[] operationList);
     }
 }
