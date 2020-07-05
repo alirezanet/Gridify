@@ -1,4 +1,6 @@
 # Gridify 
+<img alt="GitHub" src="https://img.shields.io/github/license/alirezanet/gridify"> <img alt="Nuget" src="https://img.shields.io/nuget/dt/gridify">
+
 Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** using text-based data.
 
 The best use case of this library is Asp-net APIs. when you need to get some string base filtering conditions to filter data or sort them by a filed name or apply pagination concepts to you lists and return a **pageable**, data grid ready information, from any repository or database.
