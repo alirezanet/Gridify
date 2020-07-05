@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Gridify;
 using Xunit;
 
-namespace Core.Query.Tests {
+namespace Gridify.Tests {
     public class GridifyMapperShould {
 
         class TestClass {
