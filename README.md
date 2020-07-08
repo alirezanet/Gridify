@@ -38,17 +38,17 @@ but for example, if you need to just filter your data without paging or sorting 
 
 | Name | Operator | Usage example
 |------|-----------|-----|
-| Equal | `==` | `"FieldName == Value"` |
-| NotEqual | `!=` | `"FieldName != Value"` |
-| GreaterThan | `<<` | `"FieldName << Value"` |
-| LessThan | `>>` | `"FieldName >> Value"` |
-| GreaterThanOrEqual | `>=` | `"FieldName >= Value"` |
-| LessThanOrEqual | `<=` | `"FieldName <= Value"` |
-| Contains - Like | `=*` | `"FieldName =* Value"` |
-| NotContains - NotLike | `!*` | `"FieldName !* Value"` |
+| Equal | `==` | `"FieldName==Value"` |
+| NotEqual | `!=` | `"FieldName!=Value"` |
+| GreaterThan | `<<` | `"FieldName<<Value"` |
+| LessThan | `>>` | `"FieldName>>Value"` |
+| GreaterThanOrEqual | `>=` | `"FieldName>=Value"` |
+| LessThanOrEqual | `<=` | `"FieldName<=Value"` |
+| Contains - Like | `=*` | `"FieldName=*Value"` |
+| NotContains - NotLike | `!*` | `"FieldName!*Value"` |
 | AND - &&        | `,` | `"FirstName==Value , LastName==Value2"` |
 | OR - \|\|       | `\|` | `"FirstName==Value \| LastName==Value2"` | 
-| Parenthesis     | `()`| `"( FirstName=* Jo , Age<<30) \| ( FirstName != Hn , Age>>30 )"` |
+| Parenthesis     | `()`| `"( FirstName=*Jo,Age<<30) \| ( FirstName!=Hn,Age>>30 )"` |
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
@@ -63,7 +63,7 @@ we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (
 // for example, we get this object as a parameter from our API Controller
 var filter = new GridifyQuery() 
 {
-    Filter = "FirstName == John",
+    Filter = "FirstName==John",
     IsSortAsc = false,
     Page = 1,
     PageSize = 20,
@@ -145,7 +145,7 @@ var customMappings = new GridifyMapper<Person>()
 // as i mentioned before. usually we don't need create this object manually.
 var filter = new GridifyQuery() 
 {
-    Filter = "FirstName == John , Address =* st",
+    Filter = "FirstName==John,Address=*st",
     IsSortAsc = true,
     SortBy = "PhoneNumber"
 };
@@ -159,6 +159,7 @@ var gridifiedData = myRepository.Gridify(filter, customMappings);
 -----------------
 
 ## EntityFramework integration
+
 if you need to use gridify **async** feature for entityFramework Core, use **`Gridify.EntityFramework`** package instead.
 
 this package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` functions.
@@ -170,15 +171,12 @@ dotnet add package Gridify.EntityFramework
 
 
 ## AutoMapper integration
+
 (GridifyTo() => ProjectTo() + Paging Filtering Sorting)
 soon ...
 
 -----------------
 
 ## Contribution
+
 Any Contribution to improve documentation and library is appreciated feel free to send pull-Request. <3
-
-
-
-
-
