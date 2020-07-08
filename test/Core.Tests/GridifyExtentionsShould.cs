@@ -1,10 +1,10 @@
-using System;
+#nullable enable
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using Xunit; 
+using Xunit;
 
-namespace Gridify.Tests {
+namespace Gridify.Tests
+{
     public class GridifyExtentionsShould {
         
         private List<TestClass> _fakeRepository;
@@ -22,6 +22,27 @@ namespace Gridify.Tests {
                                         .ApplyFiltering(gq)
                                         .ToList();
             var expected = _fakeRepository.Where(q=> q.Name == "John").ToList();
+            Assert.Equal(expected.Count, actual.Count);
+            Assert.Equal( expected,actual);
+            Assert.True(actual.Any());
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void ApplyFiltering_NullOrEmptyFilter_ShouldSkip(string? filter)
+        {
+            var gq = new GridifyQuery();
+            if(filter == null) 
+                gq = null;
+            else
+                gq.Filter = filter;    
+
+            var actual = _fakeRepository.AsQueryable()
+                                        .ApplyFiltering(gq)
+                                        .ToList();
+
+            var expected = _fakeRepository.ToList();
             Assert.Equal(expected.Count, actual.Count);
             Assert.Equal( expected,actual);
             Assert.True(actual.Any());
@@ -70,6 +91,8 @@ namespace Gridify.Tests {
             Assert.Equal( expected,actual);
             Assert.True(actual.Any());
         }
+
+ 
 #endregion
 
 #region "ApplyOrdering"
