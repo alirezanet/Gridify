@@ -159,6 +159,47 @@ namespace Gridify.Tests
         }
 #endregion
 
+#region "ApplyPaging"
+        [Fact]
+        public void ApplyPaging_UsingDefaultValues()
+        {
+            var gq = new GridifyQuery();
+            var actual = _fakeRepository.AsQueryable()
+                                        .ApplyPaging(gq)
+                                        .ToList();
+               
+            // just returning first page with default size 
+            var expected = _fakeRepository.Take(GridifyExtensions.DefaultPageSize).ToList();
+
+            Assert.Equal(expected.Count, actual.Count);
+            Assert.Equal( expected,actual);
+            Assert.True(actual.Any());
+        }
+
+        [Theory]
+        [InlineData(1,5)]
+        [InlineData(2,5)]
+        [InlineData(1,10)]
+        [InlineData(4,3)]
+        [InlineData(5,3)]
+        [InlineData(1,15)]
+        [InlineData(20,10)]
+        public void ApplyPaging_UsingCustomValues(short page,int pageSize)
+        {
+            var gq = new GridifyQuery() {Page = page , PageSize = pageSize};
+            var actual = _fakeRepository.AsQueryable()
+                                        .ApplyPaging(gq)
+                                        .ToList();
+
+            var skip = (page - 1) * pageSize;
+            var expected = _fakeRepository.Skip(skip)
+                                          .Take(pageSize).ToList();
+
+            Assert.Equal(expected.Count, actual.Count);
+            Assert.Equal(expected,actual);
+        }
+#endregion
+
 #region "Data"
         private List<TestClass> GetSampleData(){
             var lst = new List<TestClass>();
@@ -171,6 +212,18 @@ namespace Gridify.Tests
             lst.Add(new TestClass(7,"Hasan",(TestClass) lst[1].Clone()));
             lst.Add(new TestClass(8,"Farhad",(TestClass) lst[2].Clone()));
             lst.Add(new TestClass(9,"Sara", null));
+            lst.Add(new TestClass(10,"Jorge",null));
+            lst.Add(new TestClass(11,"joe",null));
+            lst.Add(new TestClass(12,"jimmy",(TestClass) lst[0].Clone()));
+            lst.Add(new TestClass(13,"Nazanin",null));
+            lst.Add(new TestClass(14,"Reza",null));
+            lst.Add(new TestClass(15,"Korosh", (TestClass) lst[0].Clone()));
+            lst.Add(new TestClass(16,"Kamran",(TestClass) lst[1].Clone()));
+            lst.Add(new TestClass(17,"Saeid",(TestClass) lst[2].Clone()));
+            lst.Add(new TestClass(18,"jessica", null));
+            lst.Add(new TestClass(19,"Pedram", null));
+            lst.Add(new TestClass(20,"Peyman", null));
+            lst.Add(new TestClass(21,"Fereshte", null));
             return lst;
         }
 
