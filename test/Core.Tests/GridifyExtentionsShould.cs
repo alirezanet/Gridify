@@ -13,11 +13,70 @@ namespace Gridify.Tests {
             _fakeRepository = new List<TestClass>(GetSampleData());
         }
 
+#region "ApplyFiltering"
+        [Fact]
+        public void ApplyFiltering_SingleField()
+        {
+            var gq = new GridifyQuery() { Filter = "name==John" };
+            var actual = _fakeRepository.AsQueryable()
+                                        .ApplyFiltering(gq)
+                                        .ToList();
+            var expected = _fakeRepository.Where(q=> q.Name == "John").ToList();
+            Assert.Equal(expected.Count, actual.Count);
+            Assert.Equal( expected,actual);
+            Assert.True(actual.Any());
+        }
+        
+        [Fact]
+        public void ApplyFiltering_MultipleCondition()
+        {
+            var gq = new GridifyQuery() { Filter = "name==Jack|name==Rose|id>>7" };
+            var actual = _fakeRepository.AsQueryable()
+                                        .ApplyFiltering(gq)
+                                        .ToList();
+            var expected = _fakeRepository.Where(q=> q.Name == "Jack" || q.Name == "Rose" || q.Id > 7).ToList();
+            Assert.Equal(expected.Count, actual.Count);
+            Assert.Equal(expected, actual);
+            Assert.True(actual.Any());
+        }
+
+        [Fact]
+        public void ApplyFiltering_ComplexWithParenthesis()
+        {
+            var gq = new GridifyQuery() { Filter = "(name=*J|name=*S),(Id<<5)" };
+            var actual = _fakeRepository.AsQueryable()
+                                        .ApplyFiltering(gq)
+                                        .ToList();
+            var expected = _fakeRepository.Where(q=> (q.Name.Contains("J") || q.Name.Contains("S")) && q.Id < 5).ToList();
+            Assert.Equal(expected.Count, actual.Count);
+            Assert.Equal( expected,actual);
+            Assert.True(actual.Any());
+        }
+        [Fact]
+        public void ApplyFiltering_UsingChildClassProperty()
+        {
+            var gq = new GridifyQuery() { Filter = "Child-Name==Bob" };
+            var gm = new GridifyMapper<TestClass>()
+                             .GenerateMappings()
+                             .AddMap("Child-name", q => q.ChildClass.Name);
+
+            var actual = _fakeRepository.AsQueryable()
+                                        .Where(q=> q.ChildClass != null)
+                                        .ApplyFiltering(gq,gm)
+                                        .ToList();
+
+            var expected = _fakeRepository.Where(q=> q.ChildClass != null && q.ChildClass.Name == "Bob").ToList();
+            Assert.Equal(expected.Count, actual.Count);
+            Assert.Equal( expected,actual);
+            Assert.True(actual.Any());
+        }
+#endregion
+
 #region "ApplyOrdering"
         [Fact]
         public void ApplyOrdering_SortBy_Ascending()
         {
-            var gq = new GridifyQuery() {SortBy = "Name" , IsSortAsc = true };
+            var gq = new GridifyQuery() {SortBy = "name" , IsSortAsc = true };
             var actual = _fakeRepository.AsQueryable()
                                         .ApplyOrdering(gq)
                                         .ToList();
