@@ -8,7 +8,6 @@ namespace Gridify {
    public static partial class GridifyExtensions {
 
       #region "Static Shared"
-      public static short DefaultPage = 1;
       public static int DefaultPageSize = 10;
       #endregion
       #region "Private"
@@ -21,7 +20,7 @@ namespace Gridify {
       private static IGridifyQuery FixPagingData (this IGridifyQuery gridifyQuery) {
          // set default for page number
          if (gridifyQuery.Page <= 0)
-            gridifyQuery.Page = DefaultPage;
+            gridifyQuery.Page = 1;
 
          // set default for PageSize
          if (gridifyQuery.PageSize <= 0)
