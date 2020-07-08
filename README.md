@@ -155,6 +155,12 @@ var gridifiedData = myRepository.Gridify(filter, customMappings);
 
 
 ```
+by default `GridifyMapper` is `Case-insensitive` but you can change this behavior if you need `Case-Sensitive` mappings.
+
+```c#
+var customMappings = new GridifyMapper<Person>(true); // mapper is case-sensitive now. 
+```
+
 
 -----------------
 
