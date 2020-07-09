@@ -1,15 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>Gridify</PackageId>
-    <Version>1.0.5</Version>
-    <Authors>Alireza Sabouri</Authors>
-    <Company>TuxTeam</Company>
-    <PackageDescription>Gridify, Easy and optimize way for Filtering,Sorting and Paging Data</PackageDescription>
-    <RepositoryUrl>https://github.com/alirezanet/Gridify</RepositoryUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <!-- <GeneratePackageOnBuild>true</GeneratePackageOnBuild> -->
-  </PropertyGroup>
+   <PropertyGroup>
+      <TargetFramework>netstandard2.0</TargetFramework>
+      <PackageId>Gridify</PackageId>
+      <Version>1.0.5</Version>
+      <Authors>Alireza Sabouri</Authors>
+      <Company>TuxTeam</Company>
+      <PackageDescription>Gridify, Easy and optimize way for Filtering,Sorting and Paging Data</PackageDescription>
+      <RepositoryUrl>https://github.com/alirezanet/Gridify</RepositoryUrl>
+      <PackageLicenseExpression>MIT</PackageLicenseExpression>
+      <!-- <GeneratePackageOnBuild>true</GeneratePackageOnBuild> -->
+   </PropertyGroup>
 
 </Project>
