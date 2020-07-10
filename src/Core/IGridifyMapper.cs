@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace Gridify {
-   public interface IGridifyMapper<T> {
+namespace Gridify
+{
+   public interface IGridifyMapper<T>
+   {
       Dictionary<string, Expression<Func<T, object>>> Mappings { get; set; }
       bool CaseSensitive { get; }
 

@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Gridify.Tests {
-   public class GridifyExtentionsShould {
+namespace Gridify.Tests
+{
+   public class GridifyExtentionsShould
+   {
 
       private List<TestClass> _fakeRepository;
-      public GridifyExtentionsShould () {
-         _fakeRepository = new List<TestClass> (GetSampleData ());
-      }
+      public GridifyExtentionsShould () => _fakeRepository = new List<TestClass> (GetSampleData ());
 
-      #region "ApplyFiltering"
+#region "ApplyFiltering"
       [Fact]
-      public void ApplyFiltering_SingleField () {
+      public void ApplyFiltering_SingleField ()
+      {
          var gq = new GridifyQuery () { Filter = "name==John" };
          var actual = _fakeRepository.AsQueryable ()
             .ApplyFiltering (gq)
@@ -27,7 +28,8 @@ namespace Gridify.Tests {
       [Theory]
       [InlineData (null)]
       [InlineData ("")]
-      public void ApplyFiltering_NullOrEmptyFilter_ShouldSkip (string? filter) {
+      public void ApplyFiltering_NullOrEmptyFilter_ShouldSkip (string? filter)
+      {
          var gq = new GridifyQuery ();
          if (filter == null)
             gq = null;
@@ -45,7 +47,8 @@ namespace Gridify.Tests {
       }
 
       [Fact]
-      public void ApplyFiltering_MultipleCondition () {
+      public void ApplyFiltering_MultipleCondition ()
+      {
          var gq = new GridifyQuery () { Filter = "name==Jack|name==Rose|id>>7" };
          var actual = _fakeRepository.AsQueryable ()
             .ApplyFiltering (gq)
@@ -57,7 +60,8 @@ namespace Gridify.Tests {
       }
 
       [Fact]
-      public void ApplyFiltering_ComplexWithParenthesis () {
+      public void ApplyFiltering_ComplexWithParenthesis ()
+      {
          var gq = new GridifyQuery () { Filter = "(name=*J|name=*S),(Id<<5)" };
          var actual = _fakeRepository.AsQueryable ()
             .ApplyFiltering (gq)
@@ -69,7 +73,8 @@ namespace Gridify.Tests {
       }
 
       [Fact]
-      public void ApplyFiltering_UsingChildClassProperty () {
+      public void ApplyFiltering_UsingChildClassProperty ()
+      {
          var gq = new GridifyQuery () { Filter = "Child-Name==Bob" };
          var gm = new GridifyMapper<TestClass> ()
             .GenerateMappings ()
@@ -86,11 +91,12 @@ namespace Gridify.Tests {
          Assert.True (actual.Any ());
       }
 
-      #endregion
+#endregion
 
-      #region "ApplyOrdering"
+#region "ApplyOrdering"
       [Fact]
-      public void ApplyOrdering_SortBy_Ascending () {
+      public void ApplyOrdering_SortBy_Ascending ()
+      {
          var gq = new GridifyQuery () { SortBy = "name", IsSortAsc = true };
          var actual = _fakeRepository.AsQueryable ()
             .ApplyOrdering (gq)
@@ -101,7 +107,8 @@ namespace Gridify.Tests {
       }
 
       [Fact]
-      public void ApplyOrdering_SortBy_Descending () {
+      public void ApplyOrdering_SortBy_Descending ()
+      {
          var gq = new GridifyQuery () { SortBy = "Name", IsSortAsc = false };
          var actual = _fakeRepository.AsQueryable ()
             .ApplyOrdering (gq)
@@ -111,7 +118,8 @@ namespace Gridify.Tests {
       }
 
       [Fact]
-      public void ApplyOrdering_SortUsingChildClassProperty () {
+      public void ApplyOrdering_SortUsingChildClassProperty ()
+      {
          var gq = new GridifyQuery () { SortBy = "Child-Name", IsSortAsc = false };
          var gm = new GridifyMapper<TestClass> ()
             .GenerateMappings ()
@@ -128,7 +136,8 @@ namespace Gridify.Tests {
       }
 
       [Fact]
-      public void ApplyOrdering_EmptySortBy_ShouldSkip () {
+      public void ApplyOrdering_EmptySortBy_ShouldSkip ()
+      {
          var gq = new GridifyQuery () { };
          var actual = _fakeRepository.AsQueryable ()
             .ApplyOrdering (gq)
@@ -138,18 +147,20 @@ namespace Gridify.Tests {
       }
 
       [Fact]
-      public void ApplyOrdering_NullGridifyQuery_ShouldSkip () {
+      public void ApplyOrdering_NullGridifyQuery_ShouldSkip ()
+      {
          var actual = _fakeRepository.AsQueryable ()
             .ApplyOrdering (null)
             .ToList ();
          var expected = _fakeRepository.ToList ();
          Assert.Equal (expected, actual);
       }
-      #endregion
+#endregion
 
-      #region "ApplyPaging"
+#region "ApplyPaging"
       [Fact]
-      public void ApplyPaging_UsingDefaultValues () {
+      public void ApplyPaging_UsingDefaultValues ()
+      {
          var gq = new GridifyQuery ();
          var actual = _fakeRepository.AsQueryable ()
             .ApplyPaging (gq)
@@ -171,7 +182,8 @@ namespace Gridify.Tests {
       [InlineData (5, 3)]
       [InlineData (1, 15)]
       [InlineData (20, 10)]
-      public void ApplyPaging_UsingCustomValues (short page, int pageSize) {
+      public void ApplyPaging_UsingCustomValues (short page, int pageSize)
+      {
          var gq = new GridifyQuery () { Page = page, PageSize = pageSize };
          var actual = _fakeRepository.AsQueryable ()
             .ApplyPaging (gq)
@@ -184,10 +196,11 @@ namespace Gridify.Tests {
          Assert.Equal (expected.Count, actual.Count);
          Assert.Equal (expected, actual);
       }
-      #endregion
+#endregion
 
-      #region "Data"
-      private List<TestClass> GetSampleData () {
+#region "Data"
+      private List<TestClass> GetSampleData ()
+      {
          var lst = new List<TestClass> ();
          lst.Add (new TestClass (1, "John", null));
          lst.Add (new TestClass (2, "Bob", null));
@@ -214,5 +227,5 @@ namespace Gridify.Tests {
       }
 
    }
-   #endregion
+#endregion
 }

@@ -3,16 +3,18 @@ using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
 
-namespace Gridify.Tests {
-   public class GridifyMapperShould {
+namespace Gridify.Tests
+{
+   public class GridifyMapperShould
+   {
 
       private GridifyMapper<TestClass> _sut;
-      public GridifyMapperShould () {
-         _sut = new GridifyMapper<TestClass> ();
-      }
+      public GridifyMapperShould () => _sut = new GridifyMapper<TestClass> ();
+      
 
       [Fact]
-      public void GenerateMappings () {
+      public void GenerateMappings ()
+      {
          _sut.GenerateMappings ();
 
          Assert.Equal (typeof (TestClass).GetProperties ().Count (), _sut.Mappings.Count);
@@ -20,7 +22,8 @@ namespace Gridify.Tests {
       }
 
       [Fact]
-      public void CaseSensitivity () {
+      public void CaseSensitivity ()
+      {
          var sut = new GridifyMapper<TestClass> (true);
          sut.Mappings.Add ("id", q => q.Id);
 
@@ -30,13 +33,15 @@ namespace Gridify.Tests {
       }
 
       [Fact]
-      public void AddMap () {
+      public void AddMap ()
+      {
          _sut.AddMap (nameof (TestClass.Name), p => p.Name);
          Assert.Single (_sut.Mappings);
       }
 
       [Fact]
-      public void RemoveMap () {
+      public void RemoveMap ()
+      {
          _sut.Mappings.Add ("name", q => q.Name);
          _sut.Mappings.Add ("Id", q => q.Id);
          _sut.RemoveMap (nameof (TestClass.Name));
