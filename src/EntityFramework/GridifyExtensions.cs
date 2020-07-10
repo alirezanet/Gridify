@@ -18,16 +18,11 @@ namespace Gridify.EntityFramework
       }
       public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null)
       {
+         var result = new Paging<Person> () { Items = qp.Query.ProjectTo<Person> ().ToList (), TotalItems = qp.TotalItems };
          mapper = mapper.FixMapper ();
          var res = await query.GridifyQueryableAsync (gridifyQuery, mapper);
          return new Paging<T> () { Items = await res.Query.ToListAsync (), TotalItems = res.TotalItems };
       }
 #endregion
-
-      //  //AutoMapper Integration (need AutoMapper as a Dependency)
-      // public async static Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination> (this IQueryable<TSource> query, IGridifyQuery gridifyQuery, GridifyMapper<TSource> mapper) {
-      //    var res = await query.GridifyQueryableAsync (gridifyQuery, mapper);
-      //    return new Paging<TDestination> () { Items = await res.Query.ProjectTo<TDestination> ().ToListAsync (), TotalItems = res.TotalItems };
-      // }
    }
 }

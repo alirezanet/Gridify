@@ -1,4 +1,5 @@
-# Gridify 
+# Gridify
+
 <img alt="GitHub" src="https://img.shields.io/github/license/alirezanet/gridify"> <img alt="Nuget" src="https://img.shields.io/nuget/dt/gridify">
 
 Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** using text-based data.
@@ -6,62 +7,59 @@ Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** us
 The best use case of this library is Asp-net APIs. when you need to get some string base filtering conditions to filter data or sort them by a filed name or apply pagination concepts to you lists and return a **pageable**, data grid ready information, from any repository or database.
 
 installation using dotnet core CLI:
-```
+
+```terminal
 dotnet add package Gridify
 ```
 
----------------
+---
 
 ## Available Extensions
 
-|      Extension | Description          
-|----------------|-------------------------------|
-|ApplyFiltering  | Apply Filtering using `string Filter` property of `GridifyQuery` class and returns an `IQueryable<T>`
-|ApplyOrdering   | Apply Ordering using `string SortBy` and `bool IsSortAsc` properties of `GridifyQuery` class and returns an `IQueryable<T>`
-|ApplyPaging     | Apply paging using `short Page` and `int PageSize` properties of `GridifyQuery` class and returns an `IQueryable<T>`
-|ApplyOrderingAndPaging|Apply Both Ordering and paging and returns an `IQueryable<T>`
-|ApplyEverything | Apply Filtering,Ordering and paging and returns an `IQueryable<T>`
-|GridifyQueryable| Like ApplyEverything but it returns a `QueryablePaging<T>` that have an extra `int totalItems` property to use for pagination
-|Gridify | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`
+| Extension              | Description                                                                                                                   |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| ApplyFiltering         | Apply Filtering using `string Filter` property of `GridifyQuery` class and returns an `IQueryable<T>`                         |
+| ApplyOrdering          | Apply Ordering using `string SortBy` and `bool IsSortAsc` properties of `GridifyQuery` class and returns an `IQueryable<T>`   |
+| ApplyPaging            | Apply paging using `short Page` and `int PageSize` properties of `GridifyQuery` class and returns an `IQueryable<T>`          |
+| ApplyOrderingAndPaging | Apply Both Ordering and paging and returns an `IQueryable<T>`                                                                 |
+| ApplyEverything        | Apply Filtering,Ordering and paging and returns an `IQueryable<T>`                                                            |
+| GridifyQueryable       | Like ApplyEverything but it returns a `QueryablePaging<T>` that have an extra `int totalItems` property to use for pagination |
+| Gridify                | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`                                                    |
 
-**TIP**: 
+**TIP**:
 
-`Gridify` function is an *ALL-IN-ONE package*, that applies **filtering** and **ordering** and **paging** to your data and returns a `Paging<T>`,
+`Gridify` function is an _ALL-IN-ONE package_, that applies **filtering** and **ordering** and **paging** to your data and returns a `Paging<T>`,
 
 but for example, if you need to just filter your data without paging or sorting options you can use `ApplyFiltering` function instead.
 
+---
 
-----------------
+## Supported Filtering Operators
 
-
-## Supported Filtering Operators 
-
-| Name | Operator | Usage example
-|------|-----------|-----|
-| Equal | `==` | `"FieldName==Value"` |
-| NotEqual | `!=` | `"FieldName!=Value"` |
-| GreaterThan | `<<` | `"FieldName<<Value"` |
-| LessThan | `>>` | `"FieldName>>Value"` |
-| GreaterThanOrEqual | `>=` | `"FieldName>=Value"` |
-| LessThanOrEqual | `<=` | `"FieldName<=Value"` |
-| Contains - Like | `=*` | `"FieldName=*Value"` |
-| NotContains - NotLike | `!*` | `"FieldName!*Value"` |
-| AND - &&        | `,` | `"FirstName==Value , LastName==Value2"` |
-| OR - \|\|       | `\|` | `"FirstName==Value \| LastName==Value2"` | 
-| Parenthesis     | `()`| `"( FirstName=*Jo,Age<<30) \| ( FirstName!=Hn,Age>>30 )"` |
+| Name                  | Operator | Usage example                                             |
+| --------------------- | -------- | --------------------------------------------------------- |
+| Equal                 | `==`     | `"FieldName==Value"`                                      |
+| NotEqual              | `!=`     | `"FieldName!=Value"`                                      |
+| GreaterThan           | `<<`     | `"FieldName<<Value"`                                      |
+| LessThan              | `>>`     | `"FieldName>>Value"`                                      |
+| GreaterThanOrEqual    | `>=`     | `"FieldName>=Value"`                                      |
+| LessThanOrEqual       | `<=`     | `"FieldName<=Value"`                                      |
+| Contains - Like       | `=*`     | `"FieldName=*Value"`                                      |
+| NotContains - NotLike | `!*`     | `"FieldName!*Value"`                                      |
+| AND - &&              | `,`      | `"FirstName==Value , LastName==Value2"`                   |
+| OR - \|\|             | `\|`     | `"FirstName==Value \| LastName==Value2"`                  |
+| Parenthesis           | `()`     | `"( FirstName=*Jo,Age<<30) \| ( FirstName!=Hn,Age>>30 )"` |
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
-
----------------
-
+---
 
 ## Basic Usage example
 
 ```c#
 // usually, we don't need to create this object manually
 // for example, we get this object as a parameter from our API Controller
-var filter = new GridifyQuery() 
+var filter = new GridifyQuery()
 {
     Filter = "FirstName==John",
     IsSortAsc = false,
@@ -72,16 +70,17 @@ var filter = new GridifyQuery()
 
 Paging<Person> pData =
          myDbContext.Persons  // we can use Any list or repository or EntityFramework context
-          .Gridify(filter); // Filter,Sort & Apply Paging 
-          
+          .Gridify(filter); // Filter,Sort & Apply Paging
+
 
 // pData.TotalItems => Count persons with 'John', First name
 // pData.Items      => First 20 Persons with 'John', First Name
 ```
 
-------------------
+---
 
 ## WebApi Usage example
+
 ```c#
 // ApiController
 
@@ -92,19 +91,23 @@ public IActionResult GetPersons(GridifyQuery filter)
 }
 
 ```
+
 complete request sample:
-```
+
+```url
 http://exampleDomain.com/api/GetPersons?pageSize=100&page=1&sortBy=FirstName&isSortAsc=false&filter=Age%3D%3D10
 ```
+
 also we can totally ignore GridifyQuery
-```
+
+```url
 http://exampleDomain.com/api/GetPersons
 ```
 
-------------------
-
+---
 
 ## Custom Mapping Support
+
 By default Gridify is using a `GridifyMapper` object that automatically maps your string based field names to actual properties in your Entities but if you have a custom **DTO** (Data Transfer Object) you can create a custom instance of `GridifyMapper` and use it to create your mappings.
 
 ```c#
@@ -114,7 +117,7 @@ Public class Person
     Public string FirstName {get;set;}
     Public string LastName {get;set;}
     Public Contact Contact {get;set;}
-    
+
 }
 Public class Contact
 {
@@ -134,35 +137,47 @@ public class PersonDTO
 
 //// GridifyMapper Usage example -------------
 
-var customMappings = new GridifyMapper<Person>()   
+var customMappings = new GridifyMapper<Person>()
         // because FirstName and LastName is exists in both DTO and Entity classes we can Generate them
-        .GenerateMappings() 
+        .GenerateMappings()
         // add custom mappings
-        .AddMap("address", q => q.Contact.Address ) 
+        .AddMap("address", q => q.Contact.Address )
         .AddMap("PhoneNumber", q => q.Contact.PhoneNumber );
 
 
 // as i mentioned before. usually we don't need create this object manually.
-var filter = new GridifyQuery() 
+var filter = new GridifyQuery()
 {
     Filter = "FirstName==John,Address=*st",
     IsSortAsc = true,
     SortBy = "PhoneNumber"
 };
 
-// myRepository: could be entity framework context or any other collections 
-var gridifiedData = myRepository.Gridify(filter, customMappings);
+// myRepository: could be entity framework context or any other collections
+var gridifiedData = myRepository.Persons.Gridify(filter, customMappings);
 
 
 ```
+
 by default `GridifyMapper` is `Case-insensitive` but you can change this behavior if you need `Case-Sensitive` mappings.
 
 ```c#
-var customMappings = new GridifyMapper<Person>(true); // mapper is case-sensitive now. 
+var customMappings = new GridifyMapper<Person>(true); // mapper is case-sensitive now.
 ```
 
+---
 
------------------
+## Combine Gridify with AutoMapper
+
+```c#
+//AutoMapper ProjectTo + Filtering Only, example
+var query = myDbContext.Persons.ApplyFiltering(gridifyQuery);
+var result = query.ProjectTo<PersonDTO>().ToList();
+
+// AutoMapper ProjectTo + Filtering + Ordering + Paging, example
+QueryablePaging<Person> qp = myDbContext.Persons.GridifyQueryable(gridifyQuery);
+var result = new Paging<Person> () { Items = qp.Query.ProjectTo<PersonDTO>().ToList (), TotalItems = qp.TotalItems };
+```
 
 ## EntityFramework integration
 
@@ -170,18 +185,11 @@ if you need to use gridify **async** feature for entityFramework Core, use **`Gr
 
 this package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` functions.
 
-```
+```terminal
 dotnet add package Gridify.EntityFramework
 ```
 
-
-
-## AutoMapper integration
-
-(GridifyTo() => ProjectTo() + Paging Filtering Sorting)
-soon ...
-
------------------
+---
 
 ## Contribution
 
