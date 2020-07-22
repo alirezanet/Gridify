@@ -210,17 +210,19 @@ namespace Gridify.Tests
       public void ApplyOrderingAndPaging_UsingCustomValues(short page, int pageSize, bool isSortAsc)
       {
          var gq = new GridifyQuery() { Page = page, PageSize = pageSize, SortBy = "Name", IsSortAsc = isSortAsc };
+         // actual
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrderingAndPaging(gq)
             .ToList();
 
+         // expected
          var skip = (page - 1) * pageSize;
-         var expectedQuery = _fakeRepository.Skip(skip).Take(pageSize);
+         var expectedQuery = _fakeRepository.AsQueryable();
          if (isSortAsc)
-            expectedQuery = expectedQuery;
+            expectedQuery = expectedQuery.OrderBy(q=>q.Name);
          else
             expectedQuery = expectedQuery.OrderByDescending(q => q.Name);
-         var expected = expectedQuery.ToList();
+         var expected = expectedQuery.Skip(skip).Take(pageSize).ToList();
 
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
