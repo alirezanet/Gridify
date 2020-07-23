@@ -114,25 +114,25 @@ By default Gridify is using a `GridifyMapper` object that automatically maps you
 // example Entities
 public class Person
 {
-    Public string FirstName {get;set;}
-    Public string LastName {get;set;}
-    Public Contact Contact {get;set;}
+    public string FirstName {get;set;}
+    public string LastName {get;set;}
+    public Contact Contact {get;set;}
 
 }
 public class Contact
 {
-    Public string Address {get;set;}
-    Public int PhoneNumber {get;set;}
+    public string Address {get;set;}
+    public int PhoneNumber {get;set;}
 }
 
 // example DTO
 public class PersonDTO
 {
-   Public string FirstName {get;set;}
-   Public string LastName {get;set;}
+   public string FirstName {get;set;}
+   public string LastName {get;set;}
 
-   Public string Address {get;set;}
-   Public int PhoneNumber {get;set;}
+   public string Address {get;set;}
+   public int PhoneNumber {get;set;}
 }
 
 //// GridifyMapper Usage example -------------
