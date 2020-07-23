@@ -112,14 +112,14 @@ By default Gridify is using a `GridifyMapper` object that automatically maps you
 
 ```c#
 // example Entities
-Public class Person
+public class Person
 {
     Public string FirstName {get;set;}
     Public string LastName {get;set;}
     Public Contact Contact {get;set;}
 
 }
-Public class Contact
+public class Contact
 {
     Public string Address {get;set;}
     Public int PhoneNumber {get;set;}
