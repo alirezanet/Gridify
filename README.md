@@ -47,8 +47,8 @@ but for example, if you need to just filter your data without paging or sorting 
 | Contains - Like       | `=*`     | `"FieldName=*Value"`                                      |
 | NotContains - NotLike | `!*`     | `"FieldName!*Value"`                                      |
 | AND - &&              | `,`      | `"FirstName==Value , LastName==Value2"`                   |
-| OR - \|\|             | `\|`     | `"FirstName==Value \| LastName==Value2"`                  |
-| Parenthesis           | `()`     | `"( FirstName=*Jo,Age<<30) \| ( FirstName!=Hn,Age>>30 )"` |
+| OR - &#124;&#124;     | <code>&#124;</code>  | <code>"FirstName==Value &#124; LastName==Value2"</code>   |
+| Parenthesis           | `()`     | <code>"( FirstName=*Jo,Age<<30) &#124;  ( FirstName!=Hn,Age>>30 )"</code> |
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
