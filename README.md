@@ -1,4 +1,4 @@
-# Gridify
+# Gridify (C#)
 
 <img alt="GitHub" src="https://img.shields.io/github/license/alirezanet/gridify"> <img alt="Nuget" src="https://img.shields.io/nuget/dt/gridify">
 
