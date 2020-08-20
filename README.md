@@ -23,7 +23,7 @@ dotnet add package Gridify
 ---
 
 ## Extentions
-library adds below extension methods to `IQueryable`:
+The library adds below extension methods to `IQueryable`:
 
 
 | Extension              | Description                                                                                                                   |
