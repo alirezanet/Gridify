@@ -7,59 +7,79 @@ namespace Gridify
 {
    public class GridifyMapper<T> : IGridifyMapper<T>
    {
-
-      public GridifyMapper (bool caseSensitive = false)
+      private HashSet<GMap<T>> _mappings;
+      public bool CaseSensitive { get; }
+      public GridifyMapper(bool caseSensitive = false)
       {
          CaseSensitive = caseSensitive;
-         Mappings = caseSensitive ? new Dictionary<string, Expression<Func<T, object>>> () :
-            new Dictionary<string, Expression<Func<T, object>>> (StringComparer.OrdinalIgnoreCase);
+         _mappings = new HashSet<GMap<T>>();
       }
-      public Dictionary<string, Expression<Func<T, object>>> Mappings { get; set; }
-      public bool CaseSensitive { get; }
-      public GridifyMapper<T> GenerateMappings ()
+      public IGridifyMapper<T> GenerateMappings()
       {
-         foreach (var item in typeof (T).GetProperties ())
+         foreach (var item in typeof(T).GetProperties())
          {
-            var name = Char.ToLowerInvariant (item.Name[0]) + item.Name.Substring (1); //camel-case name
+            var name = Char.ToLowerInvariant(item.Name[0]) + item.Name.Substring(1); // camel-case name
 
             // add to mapper object
-            Mappings.Add (name, GetExpression (item.Name));
+            _mappings.Add(new GMap<T>(name, CreateExpression(item.Name)));
          }
          return this;
       }
-      public GridifyMapper<T> AddMap (string propertyName, Expression<Func<T, object>> column, bool replaceOldMapping = true)
+      public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object>> to, Func<string, object> convertor = null, bool overrideIfExists = true)
       {
-         if (Mappings.ContainsKey (propertyName))
-         {
-            if (replaceOldMapping)
-            {
-               RemoveMap (propertyName);
-               Mappings.Add (propertyName, column);
-            }
-         }
-         else
-         {
-            Mappings.Add (propertyName, column);
-         }
+         if (!overrideIfExists && HasMap(from))
+            throw new Exception($"Duplicate Key. the '{from}' key already exists");
+
+         RemoveMap(from);
+         _mappings.Add(new GMap<T>(from, to, convertor));
          return this;
       }
 
-      public GridifyMapper<T> RemoveMap (string propertyName)
+      public IGridifyMapper<T> AddMap(GMap<T> gMap, bool overrideIfExists = true)
       {
-         Mappings.Remove (propertyName);
+         if (!overrideIfExists && HasMap(gMap.From))
+            throw new Exception($"Duplicate Key. the '{gMap.From}' key already exists");
+
+         RemoveMap(gMap.From);
+         _mappings.Add(gMap);
          return this;
       }
 
-      private Expression<Func<T, object>> GetExpression (string propertyName)
+      public IGridifyMapper<T> RemoveMap(string from)
+      {
+         _ = CaseSensitive ?
+            _mappings.RemoveWhere(q => from.Equals(q.From)) :
+            _mappings.RemoveWhere(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
+         return this;
+      }
+
+      public IGridifyMapper<T> RemoveMap(GMap<T> gMap)
+      {
+         _mappings.Remove(gMap);
+         return this;
+      }
+
+      public bool HasMap(string from) =>
+      CaseSensitive ?
+      _mappings.Any(q => q.From == from) : _mappings.Any(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
+
+      public GMap<T> GetGMap(string from) =>
+      CaseSensitive ?
+      _mappings.FirstOrDefault(q => from.Equals(q.From)) : _mappings.FirstOrDefault(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
+      public Expression<Func<T, object>> GetExpression(string key) =>
+      CaseSensitive ?
+      _mappings.FirstOrDefault(q => key.Equals(q.From)).To : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase)).To;
+      private Expression<Func<T, object>> CreateExpression(string from)
       {
          // x =>
-         var parameter = Expression.Parameter (typeof (T));
+         var parameter = Expression.Parameter(typeof(T));
          // x.Name
-         var mapProperty = Expression.Property (parameter, propertyName);
+         var mapProperty = Expression.Property(parameter, from);
          // (object)x.Name
-         var convertedExpression = Expression.Convert (mapProperty, typeof (object));
+         var convertedExpression = Expression.Convert(mapProperty, typeof(object));
          // x => (object)x.Name
-         return Expression.Lambda<Func<T, object>> (convertedExpression, parameter);
+         return Expression.Lambda<Func<T, object>>(convertedExpression, parameter);
       }
+      public IEnumerable<GMap<T>> GetCurrentMaps() => _mappings.AsEnumerable();
    }
 }

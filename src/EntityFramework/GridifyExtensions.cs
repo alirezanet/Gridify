@@ -8,7 +8,7 @@ namespace Gridify.EntityFramework
    {
 
 #region "EntityFramework Integration"
-      public async static Task<QueryablePaging<T>> GridifyQueryableAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper)
+      public async static Task<QueryablePaging<T>> GridifyQueryableAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper)
       {
          query = query.ApplyFiltering (gridifyQuery, mapper);
          var count = await query.CountAsync ();
@@ -16,7 +16,7 @@ namespace Gridify.EntityFramework
          query = query.ApplyPaging (gridifyQuery);
          return new QueryablePaging<T> () { TotalItems = count, Query = query };
       }
-      public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, GridifyMapper<T> mapper = null)
+      public async static Task<Paging<T>> GridifyAsync<T> (this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
       {
          mapper = mapper.FixMapper ();
          var res = await query.GridifyQueryableAsync (gridifyQuery, mapper);

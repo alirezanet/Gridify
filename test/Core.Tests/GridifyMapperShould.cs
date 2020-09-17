@@ -7,45 +7,42 @@ namespace Gridify.Tests
 {
    public class GridifyMapperShould
    {
-
-      private GridifyMapper<TestClass> _sut;
-      public GridifyMapperShould () => _sut = new GridifyMapper<TestClass> ();
-      
+      private IGridifyMapper<TestClass> _sut;
+      public GridifyMapperShould () => _sut = new GridifyMapper<TestClass> ();     
 
       [Fact]
       public void GenerateMappings ()
       {
          _sut.GenerateMappings ();
 
-         Assert.Equal (typeof (TestClass).GetProperties ().Count (), _sut.Mappings.Count);
-         Assert.True (_sut.Mappings.ContainsKey ("Id"));
+         Assert.Equal (typeof (TestClass).GetProperties ().Count (), _sut.GetCurrentMaps().Count());
+         Assert.True (_sut.HasMap ("Id"));
       }
 
       [Fact]
       public void CaseSensitivity ()
       {
          var sut = new GridifyMapper<TestClass> (true);
-         sut.Mappings.Add ("id", q => q.Id);
+         sut.AddMap ("id", q => q.Id );
 
-         Assert.True (sut.CaseSensitive);
-         Assert.True (sut.Mappings.ContainsKey ("id"));
-         Assert.False (sut.Mappings.ContainsKey ("ID"));
+         Assert.True (sut.HasMap ("id"));
+         Assert.False (sut.HasMap ("ID"));
       }
 
       [Fact]
       public void AddMap ()
       {
          _sut.AddMap (nameof (TestClass.Name), p => p.Name);
-         Assert.Single (_sut.Mappings);
+         Assert.Single (_sut.GetCurrentMaps());
       }
 
       [Fact]
       public void RemoveMap ()
       {
-         _sut.Mappings.Add ("name", q => q.Name);
-         _sut.Mappings.Add ("Id", q => q.Id);
+         _sut.AddMap ("name", q => q.Name);
+         _sut.AddMap ("Id", q => q.Id);
          _sut.RemoveMap (nameof (TestClass.Name));
-         Assert.Single (_sut.Mappings);
+         Assert.Single (_sut.GetCurrentMaps());
       }
 
    }

@@ -91,6 +91,24 @@ namespace Gridify.Tests
          Assert.True(actual.Any());
       }
 
+      [Fact]
+      public void ApplyFiltering_CustomConvertor()
+      {
+         var gq = new GridifyQuery() { Filter = "name==liam" };
+         var gm = new GridifyMapper<TestClass>()
+            .GenerateMappings()
+            .AddMap("name", q => q.Name, q => q.ToUpper()); // useing client side Custom convertor
+
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(gq, gm)
+            .ToList();
+
+         var expected = _fakeRepository.Where(q => q.Name == "LIAM").ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
 #endregion
 
 #region "ApplyOrdering"
@@ -219,7 +237,7 @@ namespace Gridify.Tests
          var skip = (page - 1) * pageSize;
          var expectedQuery = _fakeRepository.AsQueryable();
          if (isSortAsc)
-            expectedQuery = expectedQuery.OrderBy(q=>q.Name);
+            expectedQuery = expectedQuery.OrderBy(q => q.Name);
          else
             expectedQuery = expectedQuery.OrderByDescending(q => q.Name);
          var expected = expectedQuery.Skip(skip).Take(pageSize).ToList();
@@ -254,6 +272,7 @@ namespace Gridify.Tests
          lst.Add(new TestClass(19, "Pedram", null));
          lst.Add(new TestClass(20, "Peyman", null));
          lst.Add(new TestClass(21, "Fereshte", null));
+         lst.Add(new TestClass(22, "LIAM", null));
          return lst;
       }
 #endregion
