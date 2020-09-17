@@ -7,12 +7,12 @@ namespace Gridify
 {
    public class GridifyMapper<T> : IGridifyMapper<T>
    {
-      private HashSet<GMap<T>> _mappings;
+      private HashSet<IGMap<T>> _mappings;
       public bool CaseSensitive { get; }
       public GridifyMapper(bool caseSensitive = false)
       {
          CaseSensitive = caseSensitive;
-         _mappings = new HashSet<GMap<T>>();
+         _mappings = new HashSet<IGMap<T>>();
       }
       public IGridifyMapper<T> GenerateMappings()
       {
@@ -35,7 +35,7 @@ namespace Gridify
          return this;
       }
 
-      public IGridifyMapper<T> AddMap(GMap<T> gMap, bool overrideIfExists = true)
+      public IGridifyMapper<T> AddMap(IGMap<T> gMap, bool overrideIfExists = true)
       {
          if (!overrideIfExists && HasMap(gMap.From))
             throw new Exception($"Duplicate Key. the '{gMap.From}' key already exists");
@@ -53,7 +53,7 @@ namespace Gridify
          return this;
       }
 
-      public IGridifyMapper<T> RemoveMap(GMap<T> gMap)
+      public IGridifyMapper<T> RemoveMap(IGMap<T> gMap)
       {
          _mappings.Remove(gMap);
          return this;
@@ -63,7 +63,7 @@ namespace Gridify
       CaseSensitive ?
       _mappings.Any(q => q.From == from) : _mappings.Any(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
 
-      public GMap<T> GetGMap(string from) =>
+      public IGMap<T> GetGMap(string from) =>
       CaseSensitive ?
       _mappings.FirstOrDefault(q => from.Equals(q.From)) : _mappings.FirstOrDefault(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
       public Expression<Func<T, object>> GetExpression(string key) =>
@@ -80,6 +80,6 @@ namespace Gridify
          // x => (object)x.Name
          return Expression.Lambda<Func<T, object>>(convertedExpression, parameter);
       }
-      public IEnumerable<GMap<T>> GetCurrentMaps() => _mappings.AsEnumerable();
+      public IEnumerable<IGMap<T>> GetCurrentMaps() => _mappings.AsEnumerable();
    }
 }

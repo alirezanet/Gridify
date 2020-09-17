@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace Gridify
 {
-   public class GMap<T>
+   public class GMap<T> : IGMap<T>
    {
       public string From { get; set; }
       public Expression<Func<T, object>> To { get; set; }
