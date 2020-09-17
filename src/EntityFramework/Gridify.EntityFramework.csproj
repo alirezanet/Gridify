@@ -12,7 +12,7 @@
       <Version>1.1.0</Version>
       <Authors>Alireza Sabouri</Authors>
       <Company>TuxTeam</Company>
-      <PackageDescription>Gridify (EntityFramework), Easy and optimize way for Filtering,Sorting and Paging Data</PackageDescription>
+      <PackageDescription>Gridify (EntityFramework), Easy and optimized way to apply Filtering, Sorting, and Pagination using text-based data.</PackageDescription>
       <RepositoryUrl>https://github.com/alirezanet/Gridify</RepositoryUrl>
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
    </PropertyGroup>
