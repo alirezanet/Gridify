@@ -6,6 +6,35 @@ Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** us
 
 The best use case of this library is Asp-net APIs. when you need to get some string base filtering conditions to filter data or sort them by a field name or apply pagination concepts to you lists and return a **pageable**, data grid ready information, from any repository or database.
 
+---
+
+## WebApi Usage example
+
+```c#
+// ApiController
+
+[Produces(typeof(Paging<Person>))]
+public IActionResult GetPersons(GridifyQuery filter)
+{
+    // Gridify => Returns Filtered and Sorted Pagination Data
+    return myDbContext.Persons.Gridify(filter);
+}
+
+```
+
+complete request sample:
+
+```url
+http://exampleDomain.com/api/GetPersons?pageSize=100&page=1&sortBy=FirstName&isSortAsc=false&filter=Age%3D%3D10
+```
+
+also we can totally ignore GridifyQuery
+
+```url
+http://exampleDomain.com/api/GetPersons
+```
+
+---
 
 ## Installation
 
@@ -85,33 +114,6 @@ Paging<Person> pData =
 
 // pData.TotalItems => Count persons with 'John', First name
 // pData.Items      => First 20 Persons with 'John', First Name
-```
-
----
-
-## WebApi Usage example
-
-```c#
-// ApiController
-
-[Produces(typeof(Paging<Person>))]
-public IActionResult GetPersons(GridifyQuery filter)
-{
-    return myDbContext.Persons.Gridify(filter);
-}
-
-```
-
-complete request sample:
-
-```url
-http://exampleDomain.com/api/GetPersons?pageSize=100&page=1&sortBy=FirstName&isSortAsc=false&filter=Age%3D%3D10
-```
-
-also we can totally ignore GridifyQuery
-
-```url
-http://exampleDomain.com/api/GetPersons
 ```
 
 ---
