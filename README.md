@@ -16,7 +16,7 @@ The best use case of this library is Asp-net APIs. when you need to get some str
 [Produces(typeof(Paging<Person>))]
 public IActionResult GetPersons(GridifyQuery filter)
 {
-    // Gridify => Returns Filtered and Sorted Pagination Data
+    // Gridify => Filter,Sort & Apply Paging
     return myDbContext.Persons.Gridify(filter);
 }
 
@@ -36,7 +36,7 @@ http://exampleDomain.com/api/GetPersons
 
 ---
 
-## Basic Usage example
+## What is GridifyQuery (basic usage example)
 
 ```c#
 // usually, we don't need to create this object manually
