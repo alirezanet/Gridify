@@ -8,7 +8,7 @@ The best use case of this library is Asp-net APIs. when you need to get some str
 
 ---
 
-## WebApi Usage example
+## WebApi Simple Usage example
 
 ```c#
 // ApiController
