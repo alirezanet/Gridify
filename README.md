@@ -17,7 +17,7 @@ The best use case of this library is Asp-net APIs. when you need to get some str
 public IActionResult GetPersons(GridifyQuery filter)
 {
     // Gridify => Filter,Sort & Apply Paging 
-    // in short, Gridify returns data specifically for data Grids. 
+    // in short, Gridify returns data especially for data Grids. 
     return myDbContext.Persons.Gridify(filter);
 }
 
