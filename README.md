@@ -36,6 +36,31 @@ http://exampleDomain.com/api/GetPersons
 
 ---
 
+## Basic Usage example
+
+```c#
+// usually, we don't need to create this object manually
+// for example, we get this object as a parameter from our API Controller
+var filter = new GridifyQuery()
+{
+    Filter = "FirstName==John",
+    IsSortAsc = false,
+    Page = 1,
+    PageSize = 20,
+    SortBy = "LastName"
+};
+
+Paging<Person> pData =
+         myDbContext.Persons  // we can use Any list or repository or EntityFramework context
+          .Gridify(filter); // Filter,Sort & Apply Paging
+
+
+// pData.TotalItems => Count persons with 'John', First name
+// pData.Items      => First 20 Persons with 'John', First Name
+```
+
+---
+
 ## Installation
 
 Install the [Gridify NuGet Package.](https://www.nuget.org/packages/Gridify/)
@@ -90,31 +115,6 @@ but for example, if you need to just filter your data without paging or sorting 
 | Parenthesis           | `()`     | <code>"(FirstName=*Jo,Age<<30)&#124;(FirstName!=Hn,Age>>30)"</code> |
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
-
----
-
-## Basic Usage example
-
-```c#
-// usually, we don't need to create this object manually
-// for example, we get this object as a parameter from our API Controller
-var filter = new GridifyQuery()
-{
-    Filter = "FirstName==John",
-    IsSortAsc = false,
-    Page = 1,
-    PageSize = 20,
-    SortBy = "LastName"
-};
-
-Paging<Person> pData =
-         myDbContext.Persons  // we can use Any list or repository or EntityFramework context
-          .Gridify(filter); // Filter,Sort & Apply Paging
-
-
-// pData.TotalItems => Count persons with 'John', First name
-// pData.Items      => First 20 Persons with 'John', First Name
-```
 
 ---
 
