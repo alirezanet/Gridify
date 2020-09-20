@@ -38,6 +38,8 @@ http://exampleDomain.com/api/GetPersons
 
 ## What is GridifyQuery (basic usage example)
 
+GridifyQuery is a simple class for configuring Filtering,Paging,Sorting. 
+
 ```c#
 // usually, we don't need to create this object manually
 // for example, we get this object as a parameter from our API Controller
