@@ -14,11 +14,11 @@ The best use case of this library is Asp-net APIs. when you need to get some str
 // ApiController
 
 [Produces(typeof(Paging<Person>))]
-public IActionResult GetPersons(GridifyQuery filter)
+public IActionResult GetPersons([FromQuery] GridifyQuery filteringParams)
 {
     // Gridify => Filter,Sort & Apply Paging 
     // in short, Gridify returns data especially for data Grids. 
-    return myDbContext.Persons.Gridify(filter);
+    return myDbContext.Persons.Gridify(filteringParams);
 }
 
 ```
