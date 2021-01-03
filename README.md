@@ -14,11 +14,11 @@ The best use case of this library is Asp-net APIs. when you need to get some str
 // ApiController
 
 [Produces(typeof(Paging<Person>))]
-public IActionResult GetPersons([FromQuery] GridifyQuery filteringParams)
+public IActionResult GetPersons([FromQuery] GridifyQuery gQuery)
 {
     // Gridify => Filter,Sort & Apply Paging 
     // in short, Gridify returns data especially for data Grids. 
-    return myDbContext.Persons.Gridify(filteringParams);
+    return myDbContext.Persons.Gridify(gQuery);
 }
 
 ```
@@ -44,7 +44,7 @@ GridifyQuery is a simple class for configuring Filtering,Paging,Sorting.
 ```c#
 // usually, we don't need to create this object manually
 // for example, we get this object as a parameter from our API Controller
-var filter = new GridifyQuery()
+var gQuery = new GridifyQuery()
 {
     Filter = "FirstName==John",
     IsSortAsc = false,
@@ -55,7 +55,7 @@ var filter = new GridifyQuery()
 
 Paging<Person> pData =
          myDbContext.Persons  // we can use Any list or repository or EntityFramework context
-          .Gridify(filter); // Filter,Sort & Apply Paging
+          .Gridify(gQuery); // Filter,Sort & Apply Paging
 
 
 // pData.TotalItems => Count persons with 'John', First name
@@ -161,7 +161,7 @@ var customMappings = new GridifyMapper<Person>()
 
 
 // as i mentioned before. usually we don't need create this object manually.
-var filter = new GridifyQuery()
+var gQuery = new GridifyQuery()
 {
     Filter = "FirstName==John,Address=*st",
     IsSortAsc = true,
@@ -169,7 +169,7 @@ var filter = new GridifyQuery()
 };
 
 // myRepository: could be entity framework context or any other collections
-var gridifiedData = myRepository.Persons.Gridify(filter, customMappings);
+var gridifiedData = myRepository.Persons.Gridify(gQuery, customMappings);
 
 
 ```
