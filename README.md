@@ -202,6 +202,8 @@ this package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` 
 
 ```terminal
 dotnet add package Gridify.EntityFramework
+or
+dotnet add package Gridify.EntityFramework5
 ```
 
 ---
