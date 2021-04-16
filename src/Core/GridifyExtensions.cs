@@ -62,9 +62,16 @@ namespace Gridify
 
             if (value != null && body.Type != value.GetType ())
             {
-               var converter = TypeDescriptor.GetConverter (body.Type);
-               value = converter.ConvertFromString (value.ToString ());
-               // value = Convert.ChangeType(value, body.Type);
+               try
+               {
+                  var converter = TypeDescriptor.GetConverter (body.Type);
+                  value = converter.ConvertFromString (value.ToString ()); 
+               }
+               catch (System.FormatException)
+               {
+                  // return no records in case of any exception in formating, github issue #2
+                  return q => false;
+               }             
             }
             Expression be = null;
             var ContainsMethod = typeof (string).GetMethod ("Contains", new [] { typeof (string) });
@@ -99,7 +106,7 @@ namespace Gridify
             }
             return Expression.Lambda<Func<T, bool>> (be, exp.Parameters);
          }
-         catch (Exception)
+           catch (Exception)
          {
             return null;
          }

@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -23,6 +24,35 @@ namespace Gridify.Tests
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
+      }
+
+      [Fact]
+      public void ApplyFiltering_SingleGuidField()
+      {
+         var guidString = "e2cec5dd-208d-4bb5-a852-50008f8ba366";
+         var guid = Guid.Parse(guidString);
+         var gq = new GridifyQuery() { Filter = "guid==" + guidString };
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(gq)
+            .ToList();
+         var expected = _fakeRepository.Where(q => q.guid == guid).ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
+      [Fact]
+      public void ApplyFiltering_SingleBrokenGuidField()
+      {
+         var brokenGuidString = "e2cec5dd-208d-4bb5-a852-";
+         var gq = new GridifyQuery() { Filter = "guid==" + brokenGuidString };
+
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(gq)
+            .ToList();
+
+         Assert.False(actual.Any());
+         
       }
 
       [Theory]
@@ -251,12 +281,12 @@ namespace Gridify.Tests
       private List<TestClass> GetSampleData()
       {
          var lst = new List<TestClass>();
-         lst.Add(new TestClass(1, "John", null));
-         lst.Add(new TestClass(2, "Bob", null));
+         lst.Add(new TestClass(1, "John", null, Guid.NewGuid()));
+         lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid()));
          lst.Add(new TestClass(3, "Jack", (TestClass) lst[0].Clone()));
-         lst.Add(new TestClass(4, "Rose", null));
+         lst.Add(new TestClass(4, "Rose", null, Guid.Parse("e2cec5dd-208d-4bb5-a852-50008f8ba366")));
          lst.Add(new TestClass(5, "Ali", null));
-         lst.Add(new TestClass(6, "Hamid", (TestClass) lst[0].Clone()));
+         lst.Add(new TestClass(6, "Hamid", (TestClass) lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
          lst.Add(new TestClass(7, "Hasan", (TestClass) lst[1].Clone()));
          lst.Add(new TestClass(8, "Farhad", (TestClass) lst[2].Clone()));
          lst.Add(new TestClass(9, "Sara", null));
