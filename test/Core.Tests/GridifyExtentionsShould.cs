@@ -52,7 +52,20 @@ namespace Gridify.Tests
             .ToList();
 
          Assert.False(actual.Any());
-         
+      }
+
+      
+      [Fact]
+      public void ApplyFiltering_SingleBrokenGuidField_NotEqual()
+      {
+         var brokenGuidString = "e2cec5dd-208d-4bb5-a852-";
+         var gq = new GridifyQuery() { Filter = "guid!=" + brokenGuidString };
+
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(gq)
+            .ToList();
+
+         Assert.True(actual.Any());
       }
 
       [Theory]

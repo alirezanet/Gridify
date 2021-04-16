@@ -64,12 +64,18 @@ namespace Gridify
             {
                try
                {
+                  // handle broken guids,  github issue #2
+                  if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _))
+                  {
+                     value = Guid.NewGuid();
+                  }
+
                   var converter = TypeDescriptor.GetConverter (body.Type);
                   value = converter.ConvertFromString (value.ToString ()); 
                }
                catch (System.FormatException)
                {
-                  // return no records in case of any exception in formating, github issue #2
+                  // return no records in case of any exception in formating
                   return q => false;
                }             
             }
