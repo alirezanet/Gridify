@@ -26,6 +26,13 @@
       >
          <i class=" fa fa-search"></i> Simple Filter</router-link
       >
+      <router-link
+         class="side-link"
+         active-class="side-active"
+         to="/AdvanceFilter"
+      >
+         <i class=" fa fa-search-plus"></i> Advance Filter</router-link
+      >
    </div>
 </template>
 

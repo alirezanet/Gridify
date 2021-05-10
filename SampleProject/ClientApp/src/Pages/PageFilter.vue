@@ -18,7 +18,7 @@
                      <input
                         type="number"
                         class="form-control"
-                        placeholder="enter page"
+                        placeholder="Enter page"
                         v-model="page"
                      />
                   </div>

@@ -4,6 +4,7 @@ import Home from "./Pages/Home";
 import PageFilter from "./Pages/PageFilter";
 import SimpleFilter from "./Pages/SimpleFilter";
 import Ordering from "./Pages/Ordering";
+import AdvanceFilter from "./Pages/AdvanceFilter";
 Vue.use(VueRouter);
 
 export const Routes = [
@@ -23,5 +24,9 @@ export const Routes = [
    {
       path: "/Ordering",
       component: Ordering
+   },
+   {
+      path: "/AdvanceFilter",
+      component: AdvanceFilter
    }
 ];

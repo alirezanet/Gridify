@@ -5,21 +5,21 @@
             <form class="mt-3">
                <div class="row">
                   <div class="form-group col-md-6">
-                     <label>First Name</label>
+                     <label>Age Greater Than </label>
                      <input
-                        type="text"
+                        type="number"
                         class="form-control"
-                        placeholder="First Name Contains (FieldName=*Value)"
-                        v-model="firstName"
+                        placeholder="Enter Age"
+                        v-model="ageMoreThan"
                      />
                   </div>
                   <div class="form-group col-md-6">
-                     <label>LastName</label>
+                     <label>Age Less Than</label>
                      <input
-                        type="text"
+                        type="number"
                         class="form-control"
-                        placeholder="Last Name Equal (FieldName==Value)"
-                        v-model="lastName"
+                        placeholder="Enter page"
+                        v-model="ageLessThan"
                      />
                   </div>
                </div>
@@ -56,9 +56,9 @@
                      </tr>
                   </thead>
                   <tbody>
-                     <tr v-for="(item, index) in items" :key="item.id">
+                     <tr v-for="item in items" :key="item.id">
                         <th scope="row">
-                           {{ index + 1 }}
+                           {{ item.id }}
                         </th>
                         <td>{{ item.firstName }}</td>
                         <td>{{ item.lastName }}</td>
@@ -82,40 +82,31 @@ export default {
       return {
          items: [],
          count: null,
-         query: `/api/Gridify/SimpleFilter`,
-         firstName: "",
-         lastName: ""
+         query: `/api/Gridify`,
+         ageMoreThan: "",
+         ageLessThan: ""
       };
    },
    methods: {
       getData() {
-         let fNameQuery;
-         let lNameQuery;
-         if (this.firstName) {
-            fNameQuery = `firstName=*${this.firstName}`;
+         this.query = `/api/Gridify`;
+         if (this.ageMoreThan && !this.ageLessThan) {
+            this.query = `/api/Gridify?Filter=age>>${this.ageMoreThan}`;
          }
-         if (this.lastName) {
-            lNameQuery = `lastName==${this.lastName}`;
+         if (!this.ageMoreThan && this.ageLessThan) {
+            this.query = `/api/Gridify?Filter=age<<${this.ageLessThan}`;
          }
-         this.query = `/api/Gridify/SimpleFilter`;
-
-         if (fNameQuery && !lNameQuery) {
-            this.query = `/api/Gridify/SimpleFilter/?Filter=${fNameQuery}`;
+         if (this.ageMoreThan && this.ageLessThan) {
+            this.query = `/api/Gridify?Filter= age>>${this.ageMoreThan}&age<<${this.ageLessThan}`;
          }
-         if (!fNameQuery && lNameQuery) {
-            this.query = `/api/Gridify/SimpleFilter/?Filter=${lNameQuery}`;
-         }
-         if (fNameQuery && lNameQuery) {
-            this.query = `/api/Gridify/SimpleFilter/?Filter=${fNameQuery}&${lNameQuery}`;
-         }
-
          axios.get(this.query).then(res => {
-            this.items = res.data;
+            this.items = res.data.items;
+            this.count = res.data.totalItems;
          });
       },
       clear() {
-         this.lastName = "";
-         this.firstName = "";
+         this.ageMoreThan = "";
+         this.ageLessThan = "";
          this.getData();
       }
    },
