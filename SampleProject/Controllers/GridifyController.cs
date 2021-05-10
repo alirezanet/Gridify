@@ -48,13 +48,16 @@ namespace SampleProject.Controllers
       [Produces(typeof(List<PersonDto>))]
       public async Task<IActionResult> GetSimpleFilteredList([FromQuery] GridifyQuery filter)
       {
-         // Simple filter
-         // Usually we don't need create this object manually, We get it from Query
-         filter = new GridifyQuery()
+         if (filter == null)
          {
-            // FirstName equals to Alireza
-            Filter = "FirstName==Alireza"
-         };
+            // Simple filter
+            // Usually we don't need create this object manually, We get it from Query
+            filter = new GridifyQuery()
+            {
+               // FirstName equals to Alireza
+               Filter = "FirstName==Alireza"
+            };
+         }
          var result = _context.People.ApplyFiltering(filter);
          return Ok(await result.ProjectTo<PersonDto>(_mapper.ConfigurationProvider).ToListAsync());
       }
@@ -68,14 +71,17 @@ namespace SampleProject.Controllers
       [Produces(typeof(List<PersonDto>))]
       public async Task<IActionResult> GetComplexFilteredList([FromQuery] GridifyQuery filter)
       {
-         // Complex filter
-         filter = new GridifyQuery()
+         if (filter == null)
          {
-            // FirstName contains Ali AND FirstName doesn't contain reza
-            // OR
-            // FirstName contains Ali AND Age is greater than 30
-            Filter = "(FirstName=*Ali,FirstName!*reza)|(FirstName=*Ali,Age>>30)"
-         };
+            // Complex filter
+            filter = new GridifyQuery()
+            {
+               // FirstName contains Ali AND FirstName doesn't contain reza
+               // OR
+               // FirstName contains Ali AND Age is greater than 30
+               Filter = "(FirstName=*Ali,FirstName!*reza)|(FirstName=*Ali,Age>>30)"
+            };
+         }
          var result = _context.People.ApplyFiltering(filter);
          return Ok(await result.ProjectTo<PersonDto>(_mapper.ConfigurationProvider).ToListAsync());
       }
@@ -89,12 +95,15 @@ namespace SampleProject.Controllers
       [Produces(typeof(List<PersonDto>))]
       public async Task<IActionResult> GetOrderedList([FromQuery] GridifyQuery filter)
       {
-         filter = new GridifyQuery()
+         if (filter == null)
          {
-            // Decending order
-            IsSortAsc = false,
-            SortBy = "Age"
-         };
+            filter = new GridifyQuery()
+            {
+               // Decending order
+               IsSortAsc = false,
+               SortBy = "Age"
+            };
+         }
          var result = _context.People.ApplyOrdering(filter);
          return Ok(await result.ProjectTo<PersonDto>(_mapper.ConfigurationProvider).ToListAsync());
       }
@@ -108,12 +117,15 @@ namespace SampleProject.Controllers
       [Produces(typeof(Paging<PersonDto>))]
       public async Task<IActionResult> GetPaginatedList([FromQuery] GridifyQuery filter)
       {
-         filter = new GridifyQuery()
+         if (filter == null)
          {
-            // Page is defined by client, or send in URL query.
-            Page = 1,
-            PageSize = 20
-         };
+            filter = new GridifyQuery()
+            {
+               // Page is defined by client, or send in URL query.
+               Page = 1,
+               PageSize = 20
+            };
+         }
          var result = _context.People.ApplyPaging(filter);
          return Ok(await result.ProjectTo<PersonDto>(_mapper.ConfigurationProvider).ToListAsync());
       }
@@ -127,14 +139,17 @@ namespace SampleProject.Controllers
       [Produces(typeof(Paging<PersonDto>))]
       public async Task<IActionResult> GetOrderedAndPaginatedList([FromQuery] GridifyQuery filter)
       {
-         filter = new GridifyQuery()
+         if (filter == null)
          {
-            // Ascending order
-            IsSortAsc = true,
-            SortBy = "Age",
-            PageSize = 2
-            // Page is defined by client, or send in URL query.
-         };
+            filter = new GridifyQuery()
+            {
+               // Ascending order
+               IsSortAsc = true,
+               SortBy = "Age",
+               PageSize = 2
+               // Page is defined by client, or send in URL query.
+            };
+         }
          var result = _context.People.ApplyOrderingAndPaging(filter);
          return Ok(await result.ProjectTo<PersonDto>(_mapper.ConfigurationProvider).ToListAsync());
       }
@@ -148,17 +163,20 @@ namespace SampleProject.Controllers
       [Produces(typeof(Paging<PersonDto>))]
       public async Task<IActionResult> GetEverythingList([FromQuery] GridifyQuery filter)
       {
-         filter = new GridifyQuery()
+         if (filter == null)
          {
-            // Exclude a specific LastName from result
-            Filter = "LastName!*D",
-            // Ascending order
-            IsSortAsc = true,
-            SortBy = "Address",
-            PageSize = 10,
-            // Page is defined by client, or send in URL query.
-            Page = 1
-         };
+            filter = new GridifyQuery()
+            {
+               // Exclude a specific LastName from result
+               Filter = "LastName!*D",
+               // Ascending order
+               IsSortAsc = true,
+               SortBy = "Address",
+               PageSize = 10,
+               // Page is defined by client, or send in URL query.
+               Page = 1
+            };
+         }
          var result = _context.People.ApplyEverything(filter);
          return Ok(await result.ProjectTo<PersonDto>(_mapper.ConfigurationProvider).ToListAsync());
       }
@@ -180,14 +198,17 @@ namespace SampleProject.Controllers
            .AddMap("livingAddress", q => q.Contact.Address)
            .AddMap("phone", q => q.Contact.PhoneNumber);
 
-         filter = new GridifyQuery()
+         if (filter == null)
          {
-            // Notice we dont use Address as we used on filters before,
-            // instead, we use new map that we defined in GridifyMapper.
-            Filter = "FirstName==Alireza,livingAddress=*Calvin",
-            IsSortAsc = true,
-            SortBy = "phone"
-         };
+            filter = new GridifyQuery()
+            {
+               // Notice we dont use Address as we used on filters before,
+               // instead, we use new map that we defined in GridifyMapper.
+               Filter = "FirstName==Alireza,livingAddress=*Calvin",
+               IsSortAsc = true,
+               SortBy = "phone"
+            };
+         }
 
          // GridifyQueryable return a QueryablePaging<T>
          var result = await _context.People.GridifyQueryableAsync(filter, customMappings);
