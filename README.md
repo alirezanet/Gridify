@@ -16,8 +16,8 @@ The best use case of this library is Asp-net APIs. when you need to get some str
 [Produces(typeof(Paging<Person>))]
 public IActionResult GetPersons([FromQuery] GridifyQuery gQuery)
 {
-    // Gridify => Filter,Sort & Apply Paging 
-    // in short, Gridify returns data especially for data Grids. 
+    // Gridify => Filter,Sort & Apply Paging
+    // in short, Gridify returns data especially for data Grids.
     return myDbContext.Persons.Gridify(gQuery);
 }
 
@@ -39,7 +39,7 @@ http://exampleDomain.com/api/GetPersons
 
 ## What is GridifyQuery (basic usage example)
 
-GridifyQuery is a simple class for configuring Filtering,Paging,Sorting. 
+GridifyQuery is a simple class for configuring Filtering,Paging,Sorting.
 
 ```c#
 // usually, we don't need to create this object manually
@@ -69,19 +69,22 @@ Paging<Person> pData =
 Install the [Gridify NuGet Package.](https://www.nuget.org/packages/Gridify/)
 
 **Package Manager Console**
+
 ```
 Install-Package Gridify
 ```
+
 **.NET Core CLI**
 
 ```
 dotnet add package Gridify
 ```
+
 ---
 
 ## Extentions
-The library adds below extension methods to `IQueryable`:
 
+The library adds below extension methods to `IQueryable`:
 
 | Extension              | Description                                                                                                                   |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -103,19 +106,19 @@ but for example, if you need to just filter your data without paging or sorting 
 
 ## Supported Filtering Operators
 
-| Name                  | Operator | Usage example                                             |
-| --------------------- | -------- | --------------------------------------------------------- |
-| Equal                 | `==`     | `"FieldName==Value"`                                      |
-| NotEqual              | `!=`     | `"FieldName!=Value"`                                      |
-| GreaterThan           | `<<`     | `"FieldName<<Value"`                                      |
-| LessThan              | `>>`     | `"FieldName>>Value"`                                      |
-| GreaterThanOrEqual    | `>=`     | `"FieldName>=Value"`                                      |
-| LessThanOrEqual       | `<=`     | `"FieldName<=Value"`                                      |
-| Contains - Like       | `=*`     | `"FieldName=*Value"`                                      |
-| NotContains - NotLike | `!*`     | `"FieldName!*Value"`                                      |
-| AND - &&              | `,`      | `"FirstName==Value,LastName==Value2"`                   |
-| OR - &#124;&#124;     | <code>&#124;</code>  | <code>"FirstName==Value&#124;LastName==Value2"</code>
-| Parenthesis           | `()`     | <code>"(FirstName=*Jo,Age<<30)&#124;(FirstName!=Hn,Age>>30)"</code> |
+| Name                  | Operator            | Usage example                                                        |
+| --------------------- | ------------------- | -------------------------------------------------------------------- |
+| Equal                 | `==`                | `"FieldName==Value"`                                                 |
+| NotEqual              | `!=`                | `"FieldName!=Value"`                                                 |
+| GreaterThan           | `>>`                | `"FieldName>>Value"`                                                 |
+| LessThan              | `<<`                | `"FieldName<<Value"`                                                 |
+| GreaterThanOrEqual    | `>=`                | `"FieldName>=Value"`                                                 |
+| LessThanOrEqual       | `<=`                | `"FieldName<=Value"`                                                 |
+| Contains - Like       | `=*`                | `"FieldName=*Value"`                                                 |
+| NotContains - NotLike | `!*`                | `"FieldName!*Value"`                                                 |
+| AND - &&              | `,`                 | `"FirstName==Value,LastName==Value2"`                                |
+| OR - &#124;&#124;     | <code>&#124;</code> | <code>"FirstName==Value&#124;LastName==Value2"</code>                |
+| Parenthesis           | `()`                | <code>"(FirstName=\*Jo,Age<<30)&#124;(FirstName!=Hn,Age>>30)"</code> |
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
