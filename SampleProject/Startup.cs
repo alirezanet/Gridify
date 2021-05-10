@@ -18,6 +18,7 @@ namespace SampleProject
       }
 
       public IConfiguration Configuration { get; }
+      private readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
       // This method gets called by the runtime. Use this method to add services to the container.
       public void ConfigureServices(IServiceCollection services)
@@ -30,6 +31,16 @@ namespace SampleProject
             // Set the comments path for the Swagger JSON and UI.
             var xmlPath = Path.Combine(AppContext.BaseDirectory, "SampleProject.xml");
             c.IncludeXmlComments(xmlPath);
+         });
+
+         services.AddCors(c =>
+         {
+            c.AddPolicy(name: MyAllowSpecificOrigins, opt =>
+                                    opt.WithOrigins("http://localhost:5000",
+                                                    "http://localhost:8080")
+                                        .AllowAnyHeader()
+                                        .AllowAnyMethod()
+                                        .AllowCredentials());
          });
       }
 
@@ -44,7 +55,7 @@ namespace SampleProject
          {
             app.UseExceptionHandler("/Home/Error");
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            app.UseHsts();
+            //app.UseHsts();
          }
 
          app.UseSwagger();
@@ -53,10 +64,12 @@ namespace SampleProject
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gridify SampleProject API");
          });
 
-         app.UseHttpsRedirection();
+         //app.UseHttpsRedirection();
          app.UseStaticFiles();
 
          app.UseRouting();
+
+         app.UseCors(MyAllowSpecificOrigins);
 
          app.UseAuthorization();
 
