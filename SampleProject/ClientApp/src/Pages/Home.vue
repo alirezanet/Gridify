@@ -49,7 +49,7 @@ export default {};
 
 <style scoped>
 .container-fluid {
-   background-color: beige;
+   background-color: #f2f2f2;
    padding: 1rem;
    height: 100vh;
 }

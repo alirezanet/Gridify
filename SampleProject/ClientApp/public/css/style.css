@@ -32,7 +32,7 @@
 }
 
 .main {
-   margin-left: 220px; /* Same as the width of the sidenav */
+   margin-left: 194px; /* Same as the width of the sidenav */
    font-size: 28px; /* Increased text to enable scrolling */
    padding: 0px 10px;
 }
@@ -52,4 +52,10 @@
 }
 .query-text {
    font-size: 20px;
+}
+
+.container-fluid {
+   background-color: #f2f2f2;
+   padding: 1rem;
+   height: 100vh;
 }
