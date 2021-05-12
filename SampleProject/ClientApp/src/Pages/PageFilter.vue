@@ -68,6 +68,14 @@
                      </tr>
                   </tbody>
                </table>
+               <div class="pagination">
+                  <span
+                     v-for="page in pagination"
+                     :key="page"
+                     @click.prevent="pageChanger(page)"
+                     >{{ page }}</span
+                  >
+               </div>
             </div>
             <h2 v-else class="text-muted mx-auto">No Data</h2>
          </div>
@@ -84,11 +92,12 @@ export default {
          count: null,
          query: `/api/Gridify`,
          pageSize: "",
-         page: ""
+         page: "",
+         pagination: []
       };
    },
    methods: {
-      getData() {
+      async getData() {
          let pQuery = "";
 
          if (this.pageSize && this.page == "") {
@@ -103,14 +112,30 @@ export default {
 
          this.query = `/api/Gridify${pQuery}`;
 
-         axios.get(this.query).then(res => {
+         await axios.get(this.query).then(res => {
             this.items = res.data.items;
             this.count = res.data.totalItems;
          });
+         this.pageMaker();
       },
       clear() {
          this.pageSize = "";
          this.page = "";
+         this.getData();
+      },
+      pageMaker() {
+         if (this.pageSize > 0) {
+            this.pagination = [];
+            this.pageNum = Math.ceil(this.count / this.pageSize);
+
+            for (let i = 1; i <= this.pageNum; i++) {
+               this.pagination.push(i);
+            }
+         }
+         console.log(this.pagination);
+      },
+      pageChanger(page) {
+         this.page = page;
          this.getData();
       }
    },
@@ -120,4 +145,19 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.pagination {
+   display: block;
+   align-items: center;
+   text-align: center;
+}
+.pagination span {
+   margin: 0.5rem;
+   color: blue;
+   font-size: 17px;
+   cursor: pointer;
+}
+.pagination span:hover {
+   border-bottom: 1px solid blue;
+}
+</style>

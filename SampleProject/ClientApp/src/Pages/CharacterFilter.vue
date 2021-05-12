@@ -82,7 +82,7 @@ export default {
       return {
          items: [],
          count: null,
-         query: `/api/Gridify/SimpleFilter`,
+         query: `/api/Gridify`,
          firstName: "",
          lastName: ""
       };
@@ -97,20 +97,20 @@ export default {
          if (this.lastName) {
             lNameQuery = `lastName==${this.lastName}`;
          }
-         this.query = `/api/Gridify/SimpleFilter`;
+         this.query = `/api/Gridify`;
 
          if (fNameQuery && !lNameQuery) {
-            this.query = `/api/Gridify/SimpleFilter/?Filter=${fNameQuery}`;
+            this.query = `/api/Gridify/?Filter=${fNameQuery}`;
          }
          if (!fNameQuery && lNameQuery) {
-            this.query = `/api/Gridify/SimpleFilter/?Filter=${lNameQuery}`;
+            this.query = `/api/Gridify/?Filter=${lNameQuery}`;
          }
          if (fNameQuery && lNameQuery) {
-            this.query = `/api/Gridify/SimpleFilter/?Filter=${fNameQuery}&${lNameQuery}`;
+            this.query = `/api/Gridify/?Filter=${fNameQuery},${lNameQuery}`;
          }
 
          axios.get(this.query).then(res => {
-            this.items = res.data;
+            this.items = res.data.items;
          });
       },
       clear() {

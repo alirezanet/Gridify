@@ -22,16 +22,17 @@
       <router-link
          class="side-link"
          active-class="side-active"
-         to="/SimpleFilter"
+         to="/CharacterFilter"
       >
-         <i class=" fa fa-search"></i> Simple Filter</router-link
+         <i class=" fa fa-search"></i> Character Filter</router-link
       >
       <router-link
          class="side-link"
          active-class="side-active"
-         to="/AdvanceFilter"
+         to="/NumericFilter"
       >
-         <i class=" fa fa-search-plus"></i> Advance Filter</router-link
+         <i class="fa fa-sort-numeric-desc" aria-hidden="true"></i>
+         Numeric Filter</router-link
       >
    </div>
 </template>

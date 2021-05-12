@@ -2,9 +2,9 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "./Pages/Home";
 import PageFilter from "./Pages/PageFilter";
-import SimpleFilter from "./Pages/SimpleFilter";
+import CharacterFilter from "./Pages/CharacterFilter";
 import Ordering from "./Pages/Ordering";
-import AdvanceFilter from "./Pages/AdvanceFilter";
+import NumericFilter from "./Pages/NumericFilter";
 Vue.use(VueRouter);
 
 export const Routes = [
@@ -18,15 +18,15 @@ export const Routes = [
       component: PageFilter
    },
    {
-      path: "/SimpleFilter",
-      component: SimpleFilter
+      path: "/CharacterFilter",
+      component: CharacterFilter
    },
    {
       path: "/Ordering",
       component: Ordering
    },
    {
-      path: "/AdvanceFilter",
-      component: AdvanceFilter
+      path: "/NumericFilter",
+      component: NumericFilter
    }
 ];
