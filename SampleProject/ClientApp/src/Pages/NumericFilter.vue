@@ -1,4 +1,5 @@
 <template>
+   <!--  In this page we  search by age but we make the span for example   age should be  less than 50 and more or equeal to 20 -->
    <div>
       <div class="main">
          <div class="container-fluid">
@@ -89,6 +90,7 @@ export default {
    },
    methods: {
       getData() {
+         // Get Data from backend by query
          this.query = `/api/Gridify`;
          if (this.ageMoreThan && !this.ageLessThan) {
             this.query = `/api/Gridify?Filter=age>>${this.ageMoreThan}`;
@@ -99,11 +101,13 @@ export default {
          if (this.ageMoreThan && this.ageLessThan) {
             this.query = `/api/Gridify?Filter= age>>${this.ageMoreThan},age<=${this.ageLessThan}`;
          }
+         // Call data from Get method by axios (third party library)
          axios.get(this.query).then(res => {
             this.items = res.data.items;
             this.count = res.data.totalItems;
          });
       },
+      // Clear Data
       clear() {
          this.ageMoreThan = "";
          this.ageLessThan = "";

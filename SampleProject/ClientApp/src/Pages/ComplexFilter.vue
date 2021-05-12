@@ -1,4 +1,5 @@
 <template>
+   <!--  In complex filter the search method checks all parameters and if one theme would true it will show the results -->
    <div>
       <div class="main">
          <div class="container-fluid">
@@ -88,6 +89,7 @@ export default {
       };
    },
    methods: {
+      // Get Data From Backend
       getData() {
          this.query = `/api/Gridify`;
          if (this.firstName && !this.ageLessThan) {
@@ -99,6 +101,7 @@ export default {
          if (this.firstName && this.ageLessThan) {
             this.query = `/api/Gridify?Filter= firstName=*${this.firstName}&age<=${this.ageLessThan}`;
          }
+         // Call data from Get method by axios (third party library)
          axios.get(this.query).then(res => {
             this.items = res.data.items;
             this.count = res.data.totalItems;

@@ -1,4 +1,5 @@
 <template>
+   <!--  In Ordering method you can sort data by age  -->
    <div>
       <div class="main">
          <div class="container-fluid">
@@ -100,6 +101,7 @@ export default {
    },
    methods: {
       getData() {
+         // Get Data from backend by query
          this.query = `/api/Gridify/Ordering`;
          if (this.sort === "ac") {
             this.query = `/api/Gridify/Ordering?SortBy=age`;
@@ -110,11 +112,13 @@ export default {
          if (this.sort === "none") {
             this.query = `/api/Gridify/Ordering`;
          }
+         // Call data from Get method by axios (third party library)
          axios.get(this.query).then(res => {
             this.items = res.data;
          });
       }
    },
+   // Clear Data
    mounted() {
       this.getData();
    }

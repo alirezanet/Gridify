@@ -1,7 +1,8 @@
 <template>
+   <!--  Home Page | Welcome To Gridify! -->
    <div class="container-fluid">
       <div class="paragraph">
-         <h2>Welcome To Gridify</h2>
+         <h2>Welcome To Gridify!</h2>
          <p>
             Easy and optimized way to apply Filtering, Sorting and pagination
             using text-based data. The best use case of this library is Asp-net

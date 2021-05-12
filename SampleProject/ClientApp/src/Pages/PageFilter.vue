@@ -1,4 +1,5 @@
 <template>
+   <!--  By page filter you can set your data count by page size and  -->
    <div>
       <div class="main">
          <div class="container-fluid">
@@ -90,13 +91,14 @@ export default {
       return {
          items: [],
          count: null,
-         query: `/api/Gridify`,
+         query: null,
          pageSize: "",
          page: "",
          pagination: []
       };
    },
    methods: {
+      // Get Data from backend by query
       async getData() {
          let pQuery = "";
 
@@ -111,18 +113,21 @@ export default {
          }
 
          this.query = `/api/Gridify${pQuery}`;
-
+         // Call data from Get method by axios (third party library)
          await axios.get(this.query).then(res => {
             this.items = res.data.items;
             this.count = res.data.totalItems;
          });
+         // pagination method
          this.pageMaker();
       },
+      // Clear Data
       clear() {
          this.pageSize = "";
          this.page = "";
          this.getData();
       },
+      //pagination method
       pageMaker() {
          if (this.pageSize > 0) {
             this.pagination = [];
@@ -132,8 +137,8 @@ export default {
                this.pagination.push(i);
             }
          }
-         console.log(this.pagination);
       },
+      // change the page by click from dome
       pageChanger(page) {
          this.page = page;
          this.getData();

@@ -1,4 +1,5 @@
 <template>
+   <!-- You can filter your data by its character (equal or contains) -->
    <div>
       <div class="main">
          <div class="container-fluid">
@@ -82,37 +83,31 @@ export default {
       return {
          items: [],
          count: null,
-         query: `/api/Gridify`,
+         query: null,
          firstName: "",
          lastName: ""
       };
    },
    methods: {
+      // Get Data from backend by query
       getData() {
-         let fNameQuery;
-         let lNameQuery;
-         if (this.firstName) {
-            fNameQuery = `firstName=*${this.firstName}`;
-         }
-         if (this.lastName) {
-            lNameQuery = `lastName==${this.lastName}`;
-         }
          this.query = `/api/Gridify`;
 
-         if (fNameQuery && !lNameQuery) {
-            this.query = `/api/Gridify/?Filter=${fNameQuery}`;
+         if (this.firstName && !this.lastName) {
+            this.query = `/api/Gridify/?Filter=firstName=*${this.firstName}`;
          }
-         if (!fNameQuery && lNameQuery) {
-            this.query = `/api/Gridify/?Filter=${lNameQuery}`;
+         if (!this.firstName && this.lastName) {
+            this.query = `/api/Gridify/?Filter=${this.lastName}`;
          }
-         if (fNameQuery && lNameQuery) {
-            this.query = `/api/Gridify/?Filter=${fNameQuery},${lNameQuery}`;
+         if (this.firstName && this.lastName) {
+            this.query = `/api/Gridify/?Filter=firstName=*${this.firstName},lastName==${this.lastName}`;
          }
-
+         // Call data from Get method by axios (third party library)
          axios.get(this.query).then(res => {
             this.items = res.data.items;
          });
       },
+      // Clear Data
       clear() {
          this.lastName = "";
          this.firstName = "";
