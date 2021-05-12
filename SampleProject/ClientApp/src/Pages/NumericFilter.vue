@@ -83,7 +83,7 @@ export default {
       return {
          items: [],
          count: null,
-         query: `/api/Gridify`,
+         query: null,
          ageMoreThan: "",
          ageLessThan: ""
       };

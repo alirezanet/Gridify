@@ -95,26 +95,26 @@ export default {
       return {
          items: [],
          count: null,
-         query: `/api/Gridify/Ordering`,
+         query: null,
          sort: "none"
       };
    },
    methods: {
       getData() {
          // Get Data from backend by query
-         this.query = `/api/Gridify/Ordering`;
+         this.query = `/api/Gridify`;
          if (this.sort === "ac") {
-            this.query = `/api/Gridify/Ordering?SortBy=age`;
+            this.query = `/api/Gridify?SortBy=age`;
          }
          if (this.sort === "dc") {
-            this.query = `/api/Gridify/Ordering?SortBy=age&isAsc=false`;
+            this.query = `/api/Gridify?SortBy=age&&IsSortAsc=true`;
          }
          if (this.sort === "none") {
-            this.query = `/api/Gridify/Ordering`;
+            this.query = `/api/Gridify`;
          }
          // Call data from Get method by axios (third party library)
          axios.get(this.query).then(res => {
-            this.items = res.data;
+            this.items = res.data.items;
          });
       }
    },
