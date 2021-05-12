@@ -34,6 +34,14 @@
          <i class="fa fa-sort-numeric-desc" aria-hidden="true"></i>
          Numeric Filter</router-link
       >
+      <router-link
+         class="side-link"
+         active-class="side-active"
+         to="/ComplexFilter"
+      >
+         <i class="fa fa-search-plus" aria-hidden="true"></i>
+         Complex Filter</router-link
+      >
    </div>
 </template>
 
