@@ -117,7 +117,7 @@ namespace SampleProject.Controllers
       [Produces(typeof(Paging<PersonDto>))]
       public async Task<IActionResult> GetPaginatedList([FromQuery] GridifyQuery gridifyQuery)
       {
-         if (gridifyQuery.PageSize <= 0 || gridifyQuery.Page <= 0)
+         if (gridifyQuery.PageSize <= 0 && gridifyQuery.Page <= 0)
          {
             gridifyQuery = new GridifyQuery()
             {
@@ -139,7 +139,7 @@ namespace SampleProject.Controllers
       [Produces(typeof(Paging<PersonDto>))]
       public async Task<IActionResult> GetOrderedAndPaginatedList([FromQuery] GridifyQuery gridifyQuery)
       {
-         if (gridifyQuery.PageSize <= 0 || gridifyQuery.Page <= 0 || string.IsNullOrEmpty(gridifyQuery.SortBy))
+         if ((gridifyQuery.PageSize <= 0 && gridifyQuery.Page <= 0) || string.IsNullOrEmpty(gridifyQuery.SortBy))
          {
             gridifyQuery = new GridifyQuery()
             {
@@ -163,8 +163,7 @@ namespace SampleProject.Controllers
       [Produces(typeof(Paging<PersonDto>))]
       public async Task<IActionResult> GetEverythingList([FromQuery] GridifyQuery gridifyQuery)
       {
-         if (string.IsNullOrEmpty(gridifyQuery.SortBy) ||
-            string.IsNullOrEmpty(gridifyQuery.Filter) ||
+         if (string.IsNullOrEmpty(gridifyQuery.Filter) ||
             gridifyQuery.PageSize <= 0 || gridifyQuery.Page <= 0)
          {
             gridifyQuery = new GridifyQuery()
@@ -198,10 +197,9 @@ namespace SampleProject.Controllers
            .GenerateMappings()
            // Add custom mappings
            .AddMap("livingAddress", q => q.Contact.Address)
-           .AddMap("phone", q => q.Contact.PhoneNumber);
+           .AddMap("phone", q => q.Contact.PhoneNumber.ToString());
 
-         if (string.IsNullOrEmpty(gridifyQuery.SortBy) ||
-            string.IsNullOrEmpty(gridifyQuery.Filter))
+         if (string.IsNullOrEmpty(gridifyQuery.Filter))
          {
             gridifyQuery = new GridifyQuery()
             {

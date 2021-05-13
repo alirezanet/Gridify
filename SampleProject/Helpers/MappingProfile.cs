@@ -9,7 +9,7 @@ namespace SampleProject.Helpers
       {
          CreateMap<Person, PersonDto>()
             .ForMember(x => x.Address, opt => opt.MapFrom(x => x.Contact.Address))
-            .ForMember(x => x.PhoneNumber, opt => opt.MapFrom(x => x.Contact.PhoneNumber));
+            .ForMember(x => x.PhoneNumber, opt => opt.MapFrom(x => x.Contact.PhoneNumber.ToString()));
       }
    }
 }
