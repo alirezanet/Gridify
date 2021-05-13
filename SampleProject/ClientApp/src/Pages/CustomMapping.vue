@@ -97,7 +97,7 @@ export default {
             this.query = `/api/Gridify/CustomMapping/?Filter=livingAddress=*${this.livingAddress}`;
          }
          if (!this.livingAddress && this.phone) {
-            this.query = `/api/Gridify/CustomMapping/?Filter=*${this.phone}`;
+            this.query = `/api/Gridify/CustomMapping/?Filter=phone=*${this.phone}`;
          }
          if (this.livingAddress && this.phone) {
             this.query = `/api/Gridify/CustomMapping/?Filter=livingAddress=*${this.livingAddress},phone=*${this.phone}`;
