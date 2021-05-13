@@ -6,6 +6,7 @@ import CharacterFilter from "./Pages/CharacterFilter";
 import Ordering from "./Pages/Ordering";
 import NumericFilter from "./Pages/NumericFilter";
 import ComplexFilter from "./Pages/ComplexFilter"
+import CustomMapping from "./Pages/CustomMapping"
 Vue.use(VueRouter);
 
 export const Routes = [
@@ -33,5 +34,9 @@ export const Routes = [
    {
       path: "/ComplexFilter",
       component: ComplexFilter
+   },
+   {
+      path: "/CustomMapping",
+      component: CustomMapping
    }
 ];

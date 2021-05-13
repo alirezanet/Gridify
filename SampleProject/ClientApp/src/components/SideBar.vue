@@ -42,6 +42,14 @@
          <i class="fa fa-search-plus" aria-hidden="true"></i>
          Complex Filter</router-link
       >
+      <router-link
+         class="side-link"
+         active-class="side-active"
+         to="/CustomMapping"
+      >
+         <i class="fa fa-cog" aria-hidden="true"></i>
+         Custom Mapping</router-link
+      >
    </div>
 </template>
 
