@@ -1,5 +1,6 @@
 <template>
-   <!-- You can filter your data by its character (equal or contains) -->
+   <!-- In custom mapping you can set your  search value
+    by another value in this section we mapped addres as LivingAddress and phone as PhoneNumber  -->
    <div>
       <div class="main">
          <div class="container-fluid">
