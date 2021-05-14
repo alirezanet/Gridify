@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using SampleProject.Models;
+using SampleProject.Entites;
 using System;
 
 namespace SampleProject.Helpers

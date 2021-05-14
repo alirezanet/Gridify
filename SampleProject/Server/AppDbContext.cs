@@ -1,9 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using SampleProject.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using SampleProject.Entites;
 
 namespace SampleProject
 {

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SampleProject.Models
+namespace SampleProject.Entites
 {
    public class Contact
    {

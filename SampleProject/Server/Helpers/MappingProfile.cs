@@ -1,5 +1,6 @@
 using AutoMapper;
-using SampleProject.Models;
+using SampleProject.DataTransferObjects;
+using SampleProject.Entites;
 
 namespace SampleProject.Helpers
 {
