@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SampleProject</name>
+    </assembly>
+    <members>
+        <member name="M:SampleProject.Controllers.GridifyController.Get(Gridify.GridifyQuery)">
+            <summary>
+            Returns Gridify Paging List of PersonDto
+            </summary>
+            <param name="gridifyQuery"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SampleProject.Controllers.GridifyController.GetSimpleFilteredList(Gridify.GridifyQuery)">
+            <summary>
+            Returns a List of PersonDto with only Filtering applied (Simple filter)
+            </summary>
+            <param name="gridifyQuery"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SampleProject.Controllers.GridifyController.GetComplexFilteredList(Gridify.GridifyQuery)">
+            <summary>
+            Returns a List of PersonDto with only Filtering applied (Complex filter)
+            </summary>
+            <param name="gridifyQuery"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SampleProject.Controllers.GridifyController.GetOrderedList(Gridify.GridifyQuery)">
+            <summary>
+            Returns a List of PersonDto with only Ordering applied
+            </summary>
+            <param name="gridifyQuery"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SampleProject.Controllers.GridifyController.GetPaginatedList(Gridify.GridifyQuery)">
+            <summary>
+            Returns Gridify Paging List of PersonDto with only Paging applied
+            </summary>
+            <param name="gridifyQuery"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SampleProject.Controllers.GridifyController.GetOrderedAndPaginatedList(Gridify.GridifyQuery)">
+            <summary>
+            Returns Gridify Paging List of PersonDto with Ordering and Paging applied 
+            </summary>
+            <param name="gridifyQuery"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SampleProject.Controllers.GridifyController.GetEverythingList(Gridify.GridifyQuery)">
+            <summary>
+            Returns Gridify Paging List of PersonDto with Everything applied
+            </summary>
+            <param name="gridifyQuery"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SampleProject.Controllers.GridifyController.GetCustomMappedList(Gridify.GridifyQuery)">
+            <summary>
+            Returns Gridify Paging List of PersonDto with CustomMapping
+            </summary>
+            <param name="gridifyQuery"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
