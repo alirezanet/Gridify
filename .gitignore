@@ -3,3 +3,5 @@
 .vs
 .vscode
 nuget.config* 
+node_modules/
+/node_modules
