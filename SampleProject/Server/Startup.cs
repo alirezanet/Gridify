@@ -40,12 +40,10 @@ namespace SampleProject
          services.AddCors(c =>
          {
             c.AddPolicy(name: MyAllowSpecificOrigins, opt =>
-                                    opt.WithOrigins("http://localhost:5000",
-                                                    "http://localhost:8080",
-                                                    "http://localhost:5500")
-                                        .AllowAnyHeader()
-                                        .AllowAnyMethod()
-                                        .AllowCredentials());
+               opt.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials());
          });
 
          services.AddSpaStaticFiles(configuration => configuration.RootPath = "wwwroot");
