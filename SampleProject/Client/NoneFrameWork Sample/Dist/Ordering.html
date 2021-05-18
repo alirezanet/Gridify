@@ -1,0 +1,91 @@
+<!--  In Ordering method you can sort data by age  -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../CSS/Style.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Order By</title>
+</head>
+
+<body>
+    <!-- Side Bar -->
+
+    <div class="sidenav ">
+        <a class="side-link mt-2 " href="index.html">
+            <i class="fa fa-home"></i> Home
+        </a>
+        <a class="side-link " href="FilterByPage.html">
+            <i class=" fa fa-sort-amount-asc"></i> Filter By Page
+        </a>
+        <a class="side-link side-active" href="Ordering.html">
+            <i class=" fa fa-sort"></i> Order By
+        </a>
+        <a class="side-link " href="CharacterFilter.html">
+            <i class=" fa fa-search"></i> Character Filter
+        </a>
+        <a class="side-link" href="NumericFilter.html">
+            <i class="fa fa-sort-numeric-desc" aria-hidden="true"></i> Numeric Filter
+        </a>
+        <a class="side-link" href="ComplexFilter.html">
+            <i class="fa fa-search-plus" aria-hidden="true"></i> Complex Filter
+        </a>
+        <a class="side-link" href="CustomMapping.html">
+            <i class="fa fa-cog" aria-hidden="true"></i> Custom Mapping
+        </a>
+    </div>
+    <!-- main -->
+    <div>
+        <div class="main">
+            <div class="container-fluid">
+                <div class="mt-3">
+                    <div class="row ml-2 mb-3">
+                        <div class="col-md-4">
+                            <button class="btn btn-info" id="ascending"> Ascending</button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-danger" id="descending">Descending</button>
+
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-dark" id="noneSort">
+                                None Sort
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="query mt-5">
+                        <p class="ml-3 query-text" id="queryParam"></p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered mt-5">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">First Name</th>
+                                    <th scope="col">Last Name</th>
+                                    <th scope="col">Age</th>
+                                    <th scope="col">Phone Number</th>
+
+                                    <th scope="col">Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id=tableBody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <script src="../JS/OrderBy.js"></script>
+
+</body>
+
+</html>

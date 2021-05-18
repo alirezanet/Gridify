@@ -1,5 +1,5 @@
 <template>
-   <!-- You can filter your data by its character (equal or contains) -->
+   <!--  In complex filter the search method checks all parameters and if one theme would true it will show the results -->
    <div>
       <div class="main">
          <div class="container-fluid">
@@ -15,12 +15,12 @@
                      />
                   </div>
                   <div class="form-group col-md-6">
-                     <label>LastName</label>
+                     <label>Age Less Than</label>
                      <input
-                        type="text"
+                        type="number"
                         class="form-control"
-                        placeholder="Last Name Equal (FieldName==Value)"
-                        v-model="lastName"
+                        placeholder="Enter page (GreaterThanOrEqual	FieldName<=Value) "
+                        v-model="ageLessThan"
                      />
                   </div>
                </div>
@@ -57,9 +57,9 @@
                      </tr>
                   </thead>
                   <tbody>
-                     <tr v-for="(item, index) in items" :key="item.id">
+                     <tr v-for="item in items" :key="item.id">
                         <th scope="row">
-                           {{ index + 1 }}
+                           {{ item.id }}
                         </th>
                         <td>{{ item.firstName }}</td>
                         <td>{{ item.lastName }}</td>
@@ -85,32 +85,31 @@ export default {
          count: null,
          query: null,
          firstName: "",
-         lastName: ""
+         ageLessThan: ""
       };
    },
    methods: {
-      // Get Data from backend by query
+      // Get Data From Backend
       getData() {
          this.query = `/api/Gridify`;
-
-         if (this.firstName && !this.lastName) {
-            this.query = `/api/Gridify/?Filter=firstName=*${this.firstName}`;
+         if (this.firstName && !this.ageLessThan) {
+            this.query = `/api/Gridify?Filter=firstName=*${this.firstName}`;
          }
-         if (!this.firstName && this.lastName) {
-            this.query = `/api/Gridify/?Filter=${this.lastName}`;
+         if (!this.firstName && this.ageLessThan) {
+            this.query = `/api/Gridify?Filter=age<=${this.ageLessThan}`;
          }
-         if (this.firstName && this.lastName) {
-            this.query = `/api/Gridify/?Filter=firstName=*${this.firstName},lastName==${this.lastName}`;
+         if (this.firstName && this.ageLessThan) {
+            this.query = `/api/Gridify?Filter= firstName=*${this.firstName}|age<=${this.ageLessThan}`;
          }
          // Call data from Get method by axios (third party library)
          axios.get(this.query).then(res => {
             this.items = res.data.items;
+            this.count = res.data.totalItems;
          });
       },
-      // Clear Data
       clear() {
-         this.lastName = "";
          this.firstName = "";
+         this.ageLessThan = "";
          this.getData();
       }
    },
