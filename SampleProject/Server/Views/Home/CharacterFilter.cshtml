@@ -1,0 +1,65 @@
+@{
+   ViewData["Title"] = "Character Filter";
+}
+
+<!-- You can filter your data by its character (equal or contains) -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+   <!-- main -->
+   <div>
+      <div class="main">
+         <div class="container-fluid">
+            <div class="mt-3">
+               <div class="row">
+                  <div class="form-group col-md-6">
+                     <label>First Name</label>
+                     <input id="firstName" type="text" class="form-control"
+                            placeholder="First Name Contains (FieldName=*Value)" />
+                  </div>
+                  <div class="form-group col-md-6">
+                     <label>LastName</label>
+                     <input id="lastName" type="text" class="form-control"
+                            placeholder="Last Name Equal (FieldName==Value)" />
+                  </div>
+               </div>
+               <button id="searchBtn" type="submit" class="btn btn-primary">
+                  Search
+               </button>
+               <button id="clearBtn" type="submit" class="btn btn-danger ml-1">
+                  Clear
+               </button>
+            </div>
+
+            <div class="query mt-5">
+               <p class="ml-3 query-text" id="queryParam"></p>
+            </div>
+            <div class="table-responsive">
+               <table class="table table-bordered mt-5">
+                  <thead>
+                     <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
+                        <th scope="col">Age</th>
+                        <th scope="col">Phone Number</th>
+
+                        <th scope="col">Address</th>
+                     </tr>
+                  </thead>
+                  <tbody id=tableBody></tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+   </div>
+   <script src="~/js/CharacterFilter.js"></script>
+</body>
+</html>

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SpaServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,11 +41,10 @@ namespace SampleProject
             c.AddPolicy(name: MyAllowSpecificOrigins, opt =>
                opt.AllowAnyOrigin()
                   .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials());
+                  .AllowAnyMethod());
          });
 
-         services.AddSpaStaticFiles(configuration => configuration.RootPath = "wwwroot");
+         //services.AddSpaStaticFiles(configuration => configuration.RootPath = "wwwroot");
       }
 
       // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,7 +68,7 @@ namespace SampleProject
          });
 
          //app.UseHttpsRedirection();
-         app.UseSpaStaticFiles();
+         //app.UseSpaStaticFiles();
 
          app.UseStaticFiles();
 
@@ -82,17 +80,24 @@ namespace SampleProject
 
          app.UseEndpoints(endpoints =>
          {
-            endpoints.MapControllers();
+            endpoints.MapControllerRoute(
+                   name: "default",
+                   pattern: "{controller=Home}/{action=Index}/{id?}");
          });
 
-         app.UseSpa(spa =>
-         {
-            spa.Options.SourcePath = "wwwroot";
-            if (Env.IsDevelopment())
-            {
-               spa.UseProxyToSpaDevelopmentServer("http://localhost:8080/");
-            }
-         });
+         //app.UseEndpoints(endpoints =>
+         //{
+         //   endpoints.MapControllers();
+         //});
+
+         //app.UseSpa(spa =>
+         //{
+         //   spa.Options.SourcePath = "wwwroot";
+         //   if (Env.IsDevelopment())
+         //   {
+         //      spa.UseProxyToSpaDevelopmentServer("http://localhost:8080/");
+         //   }
+         //});
       }
    }
 }

@@ -200,18 +200,6 @@ namespace SampleProject.Controllers
            .AddMap("livingAddress", q => q.Contact.Address)
            .AddMap("phone", q => q.Contact.PhoneNumber.ToString());
 
-         if (string.IsNullOrEmpty(gridifyQuery.Filter))
-         {
-            gridifyQuery = new GridifyQuery()
-            {
-               // Notice we dont use Address as we used on filters before,
-               // instead, we use new map that we defined in GridifyMapper.
-               Filter = "FirstName==Alireza,livingAddress=*Calvin",
-               IsSortAsc = true,
-               SortBy = "phone"
-            };
-         }
-
          // GridifyQueryable return a QueryablePaging<T>
          var result = await _context.People.GridifyQueryableAsync(gridifyQuery, customMappings);
 

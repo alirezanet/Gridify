@@ -14,25 +14,25 @@
    padding-top: 20px;
 }
 
-.sidenav a {
-   padding: 8px 8px 8px 16px;
-   text-decoration: none;
-   font-size: 25px;
-   color: #818181;
-   display: block;
-}
+   .sidenav a {
+      padding: 8px 8px 8px 16px;
+      text-decoration: none;
+      font-size: 25px;
+      color: #818181;
+      display: block;
+   }
 
-.sidenav a:hover {
-   color: #f1f1f1;
-   border-bottom: 1px solid #f1f1f1 !important;
-}
+      .sidenav a:hover {
+         color: #f1f1f1;
+         border-bottom: 1px solid #f1f1f1 !important;
+      }
 
 .side-active {
    color: #fff !important;
 }
 
 .main {
-   margin-left: 194px; /* Same as the width of the sidenav */
+   /* margin-left: 194px; Same as the width of the sidenav */
    font-size: 28px; /* Increased text to enable scrolling */
    padding: 0px 10px;
 }
@@ -41,23 +41,20 @@
    .sidenav {
       padding-top: 15px;
    }
-   .sidenav a {
-      font-size: 18px;
-   }
+
+      .sidenav a {
+         font-size: 18px;
+      }
 }
+
 .query {
    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
    padding-top: 0.5rem;
    padding-bottom: 0.001rem;
 }
+
 .query-text {
    font-size: 20px;
-}
-
-.container-fluid {
-   background-color: #f2f2f2;
-   padding: 1rem;
-   height: 100vh;
 }
 
 .side-active {
@@ -69,35 +66,41 @@
    border-bottom: 1px solid #818181;
    font-size: 18px;
 }
+
 .container-fluid {
-   background-color: #f2f2f2;
+   /*   background-color: #f2f2f2;*/
    padding: 1rem;
    height: 100vh;
 }
+
 .paragraph {
-   margin-left: 220px;
+   margin: 1rem;
 }
+
 .code-border {
-   box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
-      rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
    padding: 0.5rem;
    width: 250px;
    color: brown;
 }
+
 .sidenav a {
    font-size: 16px;
 }
+
 .pagination {
    display: block !important;
    align-items: center;
    text-align: center;
 }
-.pagination span {
-   margin: 0.5rem;
-   color: blue;
-   font-size: 17px;
-   cursor: pointer;
-}
-.pagination span:hover {
-   border-bottom: 1px solid blue;
-}
+
+   .pagination span {
+      margin: 0.5rem;
+      color: blue;
+      font-size: 17px;
+      cursor: pointer;
+   }
+
+      .pagination span:hover {
+         border-bottom: 1px solid blue;
+      }
