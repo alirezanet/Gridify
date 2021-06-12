@@ -16,6 +16,11 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.5" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.5" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
+      <PackageReference Include="westwind.aspnetcore.markdown" Version="3.6.0" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <Folder Include="wwwroot\temp\" />
    </ItemGroup>
 
 </Project>

@@ -5,8 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Westwind.AspNetCore.Markdown;
 
 namespace SampleProject
 {
@@ -44,7 +46,8 @@ namespace SampleProject
                   .AllowAnyMethod());
          });
 
-         //services.AddSpaStaticFiles(configuration => configuration.RootPath = "wwwroot");
+         services.AddMarkdown();
+         services.AddMvc().AddApplicationPart(typeof(MarkdownPageProcessorMiddleware).Assembly);
       }
 
       // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,7 +71,8 @@ namespace SampleProject
          });
 
          //app.UseHttpsRedirection();
-         //app.UseSpaStaticFiles();
+
+         app.UseMarkdown();
 
          app.UseStaticFiles();
 
@@ -76,7 +80,7 @@ namespace SampleProject
 
          app.UseCors(MyAllowSpecificOrigins);
 
-         app.UseAuthorization();
+         //app.UseAuthorization();
 
          app.UseEndpoints(endpoints =>
          {
@@ -84,20 +88,6 @@ namespace SampleProject
                    name: "default",
                    pattern: "{controller=Home}/{action=Index}/{id?}");
          });
-
-         //app.UseEndpoints(endpoints =>
-         //{
-         //   endpoints.MapControllers();
-         //});
-
-         //app.UseSpa(spa =>
-         //{
-         //   spa.Options.SourcePath = "wwwroot";
-         //   if (Env.IsDevelopment())
-         //   {
-         //      spa.UseProxyToSpaDevelopmentServer("http://localhost:8080/");
-         //   }
-         //});
       }
    }
 }

@@ -9,6 +9,7 @@
    <link rel="stylesheet" href="~/css/style.css">
    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+   @await RenderSectionAsync("Headers", required: false)
 </head>
 <body>
    <header>
@@ -21,9 +22,6 @@
             </button>
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                <ul class="navbar-nav flex-grow-1">
-                  <li class="nav-item">
-                     <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                  </li>
                   <li class="nav-item">
                      <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="CharacterFilter">Character Filter</a>
                   </li>
