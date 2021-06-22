@@ -2,3 +2,5 @@
 **/obj
 .vscode
 nuget.config* 
+.idea
+.vs
