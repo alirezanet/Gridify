@@ -103,7 +103,7 @@ namespace Gridify.Syntax
          if (Current.Kind == kind)
             return NextToken();
                                                                                          
-         _diagnostics.Add($"ERROR: Unexpected token <{Current.Kind}>, expected <{kind}>");
+         _diagnostics.Add($"Unexpected token <{Current.Kind}>, expected <{kind}>");
          return new SyntaxToken(kind, Current.Position, null);
       }
 

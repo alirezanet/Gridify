@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
-using Gridify.Syntax;
 
 namespace Gridify.Syntax
 {
@@ -19,14 +18,11 @@ namespace Gridify.Syntax
 
             var gMap = mapper.GetGMap(left);
 
-            Expression<Func<T, object>> exp = gMap.To;
+            var exp = gMap.To;
             var body = exp.Body;
 
             // Remove the boxing for value types
-            if (body.NodeType == ExpressionType.Convert)
-            {
-               body = ((UnaryExpression) body).Operand;
-            }
+            if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression) body).Operand;
 
             object value = right;
 
@@ -36,24 +32,19 @@ namespace Gridify.Syntax
 
 
             if (value != null && body.Type != value.GetType())
-            {
                try
                {
                   // handle broken guids,  github issue #2
-                  if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _))
-                  {
-                     value = Guid.NewGuid();
-                  }
+                  if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid();
 
                   var converter = TypeDescriptor.GetConverter(body.Type);
                   value = converter.ConvertFromString(value.ToString());
                }
-               catch (System.FormatException)
+               catch (FormatException)
                {
                   // return no records in case of any exception in formating
                   return q => false;
                }
-            }
 
             Expression be = null;
             var containsMethod = typeof(string).GetMethod("Contains", new[] {typeof(string)});
@@ -111,31 +102,31 @@ namespace Gridify.Syntax
 
 
                if (bExp.Left is ParenthesizedExpressionSyntax lpExp)
-                  leftQuery = GenerateQuery<T>(lpExp.Expression, gridifyQuery, mapper);
+                  leftQuery = GenerateQuery(lpExp.Expression, gridifyQuery, mapper);
                else
-                  leftQuery = GenerateQuery<T>(bExp.Left, gridifyQuery, mapper);
+                  leftQuery = GenerateQuery(bExp.Left, gridifyQuery, mapper);
 
 
                if (bExp.Right is ParenthesizedExpressionSyntax rpExp)
-                  rightQuery = GenerateQuery<T>(rpExp.Expression, gridifyQuery, mapper);
+                  rightQuery = GenerateQuery(rpExp.Expression, gridifyQuery, mapper);
                else
-                  rightQuery = GenerateQuery<T>(bExp.Right, gridifyQuery, mapper);
+                  rightQuery = GenerateQuery(bExp.Right, gridifyQuery, mapper);
 
 
                return bExp.OperatorToken.Kind switch
                {
                   SyntaxKind.And => leftQuery.And(rightQuery),
                   SyntaxKind.Or => leftQuery.Or(rightQuery),
-                  _ => null // TODO : Error handing ?
+                  _ => throw new GridifyFilteringException($"Invalid expression Operator '{bExp.OperatorToken.Kind}'")
                };
             }
             case SyntaxKind.ParenthesizedExpression:
             {
                var pExp = expression as ParenthesizedExpressionSyntax;
-               return GenerateQuery<T>(pExp!.Expression, gridifyQuery, mapper);
+               return GenerateQuery(pExp!.Expression, gridifyQuery, mapper);
             }
             default:
-               return null;
+               throw new GridifyFilteringException($"Invalid expression format '{expression.Kind}'.");
          }
       }
    }
