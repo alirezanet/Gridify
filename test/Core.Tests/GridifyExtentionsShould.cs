@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Gridify.Syntax;
 using Xunit;
 
 namespace Gridify.Tests
@@ -26,6 +27,19 @@ namespace Gridify.Tests
          Assert.True(actual.Any());
       }
 
+      [Fact]
+      public void ApplyFiltering_EscapeCharacters()
+      {
+         var gq = new GridifyQuery() { Filter = "name==(LI,AM)" };
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(gq)
+            .ToList();
+         var expected = _fakeRepository.Where(q => q.Name == "(LI,AM)").ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+      
       [Fact]
       public void ApplyFiltering_SingleGuidField()
       {
@@ -110,6 +124,20 @@ namespace Gridify.Tests
             .ApplyFiltering(gq)
             .ToList();
          var expected = _fakeRepository.Where(q => (q.Name.Contains("J") || q.Name.Contains("S")) && q.Id < 5).ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
+      [Fact]
+      public void ApplyFiltering_NestedParenthesisWithSpace()
+      {
+         // we shouldn't add spaces for values 
+         var gq = new GridifyQuery() { Filter = " ( name =*J| ( name =*S , Id <<5 ) )" };
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(gq)
+            .ToList();
+         var expected = _fakeRepository.Where(q => (q.Name.Contains("J") || (q.Name.Contains("S") && q.Id < 5)) ).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -316,6 +344,9 @@ namespace Gridify.Tests
          lst.Add(new TestClass(20, "Peyman", null));
          lst.Add(new TestClass(21, "Fereshte", null));
          lst.Add(new TestClass(22, "LIAM", null));
+         lst.Add(new TestClass(23, "LI,AM", null));
+         lst.Add(new TestClass(24, "(LI,AM)", null));
+
          return lst;
       }
 #endregion
