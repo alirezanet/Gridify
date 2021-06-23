@@ -70,13 +70,13 @@ namespace Gridify.Tests
          lst.Add(new TestClass(15, "Korosh", (TestClass) lst[0].Clone()));
          lst.Add(new TestClass(16, "Kamran", (TestClass) lst[1].Clone()));
          lst.Add(new TestClass(17, "Saeid", (TestClass) lst[2].Clone()));
-         lst.Add(new TestClass(18, "jessica", null));
-         lst.Add(new TestClass(19, "Pedram", null));
-         lst.Add(new TestClass(20, "Peyman", null));
+         lst.Add(new TestClass(18, "jessi==ca", null));
+         lst.Add(new TestClass(19, "Ped=ram", null));
+         lst.Add(new TestClass(20, "Peyman!", null));
          lst.Add(new TestClass(21, "Fereshte", null));
          lst.Add(new TestClass(22, "LIAM", null));
          lst.Add(new TestClass(22, @"\Liam", null));
-         lst.Add(new TestClass(23, "LI,AM", null));
+         lst.Add(new TestClass(23, "LI | AM", null));
          lst.Add(new TestClass(24, "(LI,AM)", null));
 
          return lst;
@@ -99,27 +99,19 @@ namespace Gridify.Tests
          Assert.True(actual.Any());
       }
 
-      [Fact]
-      public void ApplyFiltering_EscapeSpecialCharacters()
-      {
-         var gq = new GridifyQuery {Filter = @"(name==\(LI\,AM\),id==24)"};
-         var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering(gq)
-            .ToList();
-         var expected = _fakeRepository.Where(q => q.Name == "(LI,AM)" && q.Id == 24).ToList();
-         Assert.Equal(expected.Count, actual.Count);
-         Assert.Equal(expected, actual);
-         Assert.True(actual.Any());
-      }
 
-      [Fact]
-      public void ApplyFiltering_EscapeEscapeCharacter()
+      [Theory]
+      [InlineData(@" name ==\(LI\,AM\)" , "(LI,AM)")]
+      [InlineData(@" name ==jessi==ca" , "jessi==ca")]
+      [InlineData(@" name ==\\Liam" , @"\Liam")]
+      [InlineData(@" name ==LI \| AM" , @"LI | AM")]
+      public void ApplyFiltering_EscapeSpecialCharacters(string textFilter, string rawText)
       {
-         var gq = new GridifyQuery {Filter = @"name==\\Liam"};
+         var gq = new GridifyQuery {Filter = textFilter};
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
-         var expected = _fakeRepository.Where(q => q.Name == @"\Liam").ToList();
+         var expected = _fakeRepository.Where(q => q.Name == rawText).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
