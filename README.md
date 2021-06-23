@@ -119,6 +119,11 @@ but for example, if you need to just filter your data without paging or sorting 
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
+**Escape character hint**:
+
+Filtering has four special character `, | ( )` to handle complex queries. if you want to use these characters in your query values (after `==`), you should add a backslash <code>\ </code> before them.
+
+
 ---
 
 ## Custom Mapping Support
