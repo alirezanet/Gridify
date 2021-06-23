@@ -10,6 +10,7 @@
       <RepositoryUrl>https://github.com/alirezanet/Gridify</RepositoryUrl>
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
       <LangVersion>latest</LangVersion>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
       
       <!-- <GeneratePackageOnBuild>true</GeneratePackageOnBuild> -->
    </PropertyGroup>
