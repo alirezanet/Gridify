@@ -91,9 +91,9 @@ namespace Gridify
          mapper = mapper.FixMapper();
          if (string.IsNullOrWhiteSpace(gridifyQuery.SortBy) || !mapper.HasMap(gridifyQuery.SortBy))
             return query;
-         if (gridifyQuery.IsSortAsc)
-            return query.OrderBy(mapper.GetExpression(gridifyQuery.SortBy));
-         return query.OrderByDescending(mapper.GetExpression(gridifyQuery.SortBy));
+
+         var expression = mapper.GetExpression(gridifyQuery.SortBy);
+         return gridifyQuery.IsSortAsc ? query.OrderBy(expression) : query.OrderByDescending(expression);
       }
 
       /// <summary>
@@ -105,16 +105,19 @@ namespace Gridify
       /// // need to be more specific
       /// <param name="mapper">this is an optional parameter to apply ordering using a custom mapping configuration</param>
       /// <typeparam name="T">type of target entity</typeparam>
+      /// <typeparam name="TKey">type of target property</typeparam>
       /// <returns>returns user query after applying Ordering </returns>
-      public static IQueryable<T> ApplyOrdering<T, TKey>(this IQueryable<T> query, IGridifyQuery gridifyQuery, Expression<Func<T, TKey>> groupOrder, IGridifyMapper<T> mapper = null)
+      public static IQueryable<T> ApplyOrdering<T, TKey>(this IQueryable<T> query, IGridifyQuery gridifyQuery, Expression<Func<T, TKey>> groupOrder,
+         IGridifyMapper<T> mapper = null)
       {
          if (gridifyQuery == null) return query;
          mapper = mapper.FixMapper();
          if (string.IsNullOrWhiteSpace(gridifyQuery.SortBy) || !mapper.HasMap(gridifyQuery.SortBy))
             return query;
-         if (gridifyQuery.IsSortAsc)
-            return query.OrderBy(groupOrder).ThenBy(mapper.GetExpression(gridifyQuery.SortBy));
-         return query.OrderByDescending(groupOrder).ThenBy(mapper.GetExpression(gridifyQuery.SortBy));
+
+         return gridifyQuery.IsSortAsc
+            ? query.OrderBy(groupOrder).ThenBy(mapper.GetExpression(gridifyQuery.SortBy))
+            : query.OrderByDescending(groupOrder).ThenBy(mapper.GetExpression(gridifyQuery.SortBy));
       }
 
       public static IQueryable<T> ApplyPaging<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery)
@@ -148,7 +151,9 @@ namespace Gridify
          var queryExpression = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, gridifyQuery, mapper);
 
 
-         if (queryExpression != null) query = query.Where(queryExpression);
+         if (queryExpression != null)
+            query = query.Where(queryExpression);
+
          return query;
       }
 
@@ -168,7 +173,7 @@ namespace Gridify
          var count = query.Count();
          query = query.ApplyOrdering(gridifyQuery, mapper);
          query = query.ApplyPaging(gridifyQuery);
-         return new QueryablePaging<T> {TotalItems = count, Query = query};
+         return new QueryablePaging<T>(count, query);
       }
 
       /// <summary>
@@ -187,7 +192,7 @@ namespace Gridify
       {
          mapper = mapper.FixMapper();
          var res = query.GridifyQueryable(gridifyQuery, mapper);
-         return new Paging<T> {Items = res.Query.ToList(), TotalItems = res.TotalItems};
+         return new Paging<T>(res.TotalItems, res.Query.ToList());
       }
 
       #endregion
