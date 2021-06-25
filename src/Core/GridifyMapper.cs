@@ -5,27 +5,33 @@ using System.Linq.Expressions;
 
 namespace Gridify
 {
-   public class GridifyMapper<T> : IGridifyMapper<T>
+   public partial class GridifyMapper<T> : IGridifyMapper<T>
    {
-      private HashSet<IGMap<T>> _mappings;
-      public bool CaseSensitive { get; }
+      private readonly HashSet<IGMap<T>> _mappings;
+
       public GridifyMapper(bool caseSensitive = false)
       {
          CaseSensitive = caseSensitive;
          _mappings = new HashSet<IGMap<T>>();
       }
+
+      public bool CaseSensitive { get; }
+
       public IGridifyMapper<T> GenerateMappings()
       {
          foreach (var item in typeof(T).GetProperties())
          {
-            var name = Char.ToLowerInvariant(item.Name[0]) + item.Name.Substring(1); // camel-case name
+            var name = char.ToLowerInvariant(item.Name[0]) + item.Name.Substring(1); // camel-case name
 
             // add to mapper object
             _mappings.Add(new GMap<T>(name, CreateExpression(item.Name)));
          }
+
          return this;
       }
-      public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object>> to, Func<string, object> convertor = null, bool overrideIfExists = true)
+
+      public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object>> to, Func<string, object> convertor = null,
+         bool overrideIfExists = true)
       {
          if (!overrideIfExists && HasMap(from))
             throw new Exception($"Duplicate Key. the '{from}' key already exists");
@@ -47,9 +53,9 @@ namespace Gridify
 
       public IGridifyMapper<T> RemoveMap(string from)
       {
-         _ = CaseSensitive ?
-            _mappings.RemoveWhere(q => from.Equals(q.From)) :
-            _mappings.RemoveWhere(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
+         _ = CaseSensitive
+            ? _mappings.RemoveWhere(q => from.Equals(q.From))
+            : _mappings.RemoveWhere(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
          return this;
       }
 
@@ -59,16 +65,35 @@ namespace Gridify
          return this;
       }
 
-      public bool HasMap(string from) =>
-      CaseSensitive ?
-      _mappings.Any(q => q.From == from) : _mappings.Any(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
+      public bool HasMap(string from)
+      {
+         return CaseSensitive
+            ? _mappings.Any(q => q.From == from)
+            : _mappings.Any(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
+      }
 
-      public IGMap<T> GetGMap(string from) =>
-      CaseSensitive ?
-      _mappings.FirstOrDefault(q => from.Equals(q.From)) : _mappings.FirstOrDefault(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
-      public Expression<Func<T, object>> GetExpression(string key) =>
-      CaseSensitive ?
-      _mappings.FirstOrDefault(q => key.Equals(q.From)).To : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase)).To;
+      public IGMap<T>? GetGMap(string from)
+      {
+         return CaseSensitive
+            ? _mappings.FirstOrDefault(q => from.Equals(q.From))
+            : _mappings.FirstOrDefault(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
+      }
+
+      public Expression<Func<T, object>> GetExpression(string key)
+      {
+         var expression = CaseSensitive
+            ? _mappings.FirstOrDefault(q => key.Equals(q.From))?.To
+            : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
+         if (expression == null)
+            throw new GridifyMapperException($"Mapping Key `{key}` not found.");
+         return expression;
+      }
+
+      public IEnumerable<IGMap<T>> GetCurrentMaps()
+      {
+         return _mappings.AsEnumerable();
+      }
+
       private Expression<Func<T, object>> CreateExpression(string from)
       {
          // x =>
@@ -80,6 +105,5 @@ namespace Gridify
          // x => (object)x.Name
          return Expression.Lambda<Func<T, object>>(convertedExpression, parameter);
       }
-      public IEnumerable<IGMap<T>> GetCurrentMaps() => _mappings.AsEnumerable();
    }
 }
