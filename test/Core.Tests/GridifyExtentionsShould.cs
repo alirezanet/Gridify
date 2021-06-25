@@ -53,14 +53,14 @@ namespace Gridify.Tests
       private List<TestClass> GetSampleData()
       {
          var lst = new List<TestClass>();
-         lst.Add(new TestClass(1, "John", null, Guid.NewGuid()));
-         lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid()));
-         lst.Add(new TestClass(3, "Jack", (TestClass) lst[0].Clone()));
+         lst.Add(new TestClass(1, "John", null, Guid.NewGuid(), DateTime.Now));
+         lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid(), DateTime.UtcNow));
+         lst.Add(new TestClass(3, "Jack", (TestClass) lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2)));
          lst.Add(new TestClass(4, "Rose", null, Guid.Parse("e2cec5dd-208d-4bb5-a852-50008f8ba366")));
          lst.Add(new TestClass(5, "Ali", null));
          lst.Add(new TestClass(6, "Hamid", (TestClass) lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
          lst.Add(new TestClass(7, "Hasan", (TestClass) lst[1].Clone()));
-         lst.Add(new TestClass(8, "Farhad", (TestClass) lst[2].Clone()));
+         lst.Add(new TestClass(8, "Farhad", (TestClass) lst[2].Clone(), Guid.Empty));
          lst.Add(new TestClass(9, "Sara", null));
          lst.Add(new TestClass(10, "Jorge", null));
          lst.Add(new TestClass(11, "joe", null));
@@ -101,10 +101,10 @@ namespace Gridify.Tests
 
 
       [Theory]
-      [InlineData(@" name ==\(LI\,AM\)" , "(LI,AM)")]
-      [InlineData(@" name ==jessi==ca" , "jessi==ca")]
-      [InlineData(@" name ==\\Liam" , @"\Liam")]
-      [InlineData(@" name ==LI \| AM" , @"LI | AM")]
+      [InlineData(@" name ==\(LI\,AM\)", "(LI,AM)")]
+      [InlineData(@" name ==jessi==ca", "jessi==ca")]
+      [InlineData(@" name ==\\Liam", @"\Liam")]
+      [InlineData(@" name ==LI \| AM", @"LI | AM")]
       public void ApplyFiltering_EscapeSpecialCharacters(string textFilter, string rawText)
       {
          var gq = new GridifyQuery {Filter = textFilter};
@@ -133,11 +133,11 @@ namespace Gridify.Tests
       {
          var guidString = "e2cec5dd-208d-4bb5-a852-50008f8ba366";
          var guid = Guid.Parse(guidString);
-         var gq = new GridifyQuery {Filter = "guid==" + guidString};
+         var gq = new GridifyQuery {Filter = "myGuid==" + guidString};
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
-         var expected = _fakeRepository.Where(q => q.guid == guid).ToList();
+         var expected = _fakeRepository.Where(q => q.MyGuid == guid).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -147,7 +147,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_SingleBrokenGuidField()
       {
          var brokenGuidString = "e2cec5dd-208d-4bb5-a852-";
-         var gq = new GridifyQuery {Filter = "guid==" + brokenGuidString};
+         var gq = new GridifyQuery {Filter = "myGuid==" + brokenGuidString};
 
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
@@ -161,7 +161,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_SingleBrokenGuidField_NotEqual()
       {
          var brokenGuidString = "e2cec5dd-208d-4bb5-a852-";
-         var gq = new GridifyQuery {Filter = "guid!=" + brokenGuidString};
+         var gq = new GridifyQuery {Filter = "myGuid!=" + brokenGuidString};
 
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
@@ -174,7 +174,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_InvalidFilterExpressionShouldThrowException()
       {
-         var gq = new GridifyQuery {Filter = "=guif,d="};
+         var gq = new GridifyQuery {Filter = "=guid,d="};
          Assert.Throws<GridifyFilteringException>(() =>
             _fakeRepository.AsQueryable().ApplyFiltering(gq).ToList());
       }
@@ -301,6 +301,19 @@ namespace Gridify.Tests
       }
 
       [Fact]
+      public void ApplyOrdering_SortBy_DateTime()
+      {
+         var gq = new GridifyQuery {SortBy = "MyDateTime", IsSortAsc = true};
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyOrdering(gq)
+            .ToList();
+         var expected = _fakeRepository.OrderBy(q => q.MyDateTime).ToList();
+
+         Assert.Equal(expected, actual);
+         Assert.Equal(expected.First().Id, actual.First().Id);
+      }
+
+      [Fact]
       public void ApplyOrdering_SortBy_Descending()
       {
          var gq = new GridifyQuery {SortBy = "Name", IsSortAsc = false};
@@ -308,7 +321,9 @@ namespace Gridify.Tests
             .ApplyOrdering(gq)
             .ToList();
          var expected = _fakeRepository.OrderByDescending(q => q.Name).ToList();
+
          Assert.Equal(expected, actual);
+         Assert.Equal(expected.First().Id, actual.First().Id);
       }
 
       [Fact]

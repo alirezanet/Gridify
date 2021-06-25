@@ -2,32 +2,36 @@ using System;
 
 namespace Gridify.Tests
 {
-
    public class TestClass : ICloneable
    {
-      public TestClass () { }
-      public TestClass (int id, string name, TestClass classProp,Guid guid = default)
+      public TestClass()
       {
-         this.Id = id;
-         this.Name = name;
-         this.ChildClass = classProp;
-         this.guid = guid;
+      }
+
+      public TestClass(int id, string name, TestClass classProp, Guid myGuid = default, DateTime? date = default)
+      {
+         Id = id;
+         Name = name;
+         ChildClass = classProp;
+         MyGuid = myGuid;
+         MyDateTime = date;
       }
 
       public int Id { get; set; }
       public string Name { get; set; }
       public TestClass ChildClass { get; set; }
-      public Guid guid { get; set;}
-      
+      public DateTime? MyDateTime { get; set; }
+      public Guid MyGuid { get; set; }
 
-      public object Clone ()
+
+      public object Clone()
       {
-         return new TestClass ()
+         return new TestClass
          {
-            Id = this.Id,
-            Name = this.Name,
-            ChildClass = this.ChildClass != null ? (TestClass) this.ChildClass.Clone () : null,
-            guid =this.guid
+            Id = Id,
+            Name = Name,
+            ChildClass = ChildClass != null ? (TestClass) ChildClass.Clone() : null,
+            MyGuid = MyGuid
          };
       }
    }
