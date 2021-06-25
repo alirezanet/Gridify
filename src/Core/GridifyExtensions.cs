@@ -165,7 +165,19 @@ namespace Gridify
          query = query.ApplyPaging(gridifyQuery);
          return query;
       }
-
+      
+      /// <summary>
+      /// gets a query or collection,
+      /// adds filtering,
+      /// Get totalItems Count
+      /// adds ordering and paging
+      /// return QueryablePaging with TotalItems and an IQueryable Query
+      /// </summary>
+      /// <param name="query">the original(target) queryable object</param>
+      /// <param name="gridifyQuery">the configuration to apply paging, filtering and ordering</param>
+      /// <param name="mapper">this is an optional parameter to apply filtering and ordering using a custom mapping configuration</param>
+      /// <typeparam name="T">type of target entity</typeparam>
+      /// <returns>returns a <c>QueryablePaging<T><c /> after applying filtering, ordering and paging</returns>
       public static QueryablePaging<T> GridifyQueryable<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
       {
          mapper = mapper.FixMapper();
