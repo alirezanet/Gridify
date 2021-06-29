@@ -98,6 +98,40 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
+      
+      [Fact]
+      public void ApplyFiltering_NullHandlingUsingCustomConvertor()
+      {
+         // create custom mapper
+         var gm = new GridifyMapper<TestClass>().GenerateMappings();
+
+         // map any string to related property , also use Client convertor to handle custom scenarios
+         gm.AddMap("date", g => g.MyDateTime, q => q == "null" ? null : q);
+
+         var gq = new GridifyQuery {Filter = "date==null"};
+
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(gq, gm)
+            .ToList();
+
+         var expected = _fakeRepository.Where(q => q.MyDateTime == null).ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
+      [Fact]
+      public void ApplyFiltering_DuplicateFiledName()
+      {
+         var gq = new GridifyQuery {Filter = "name==John|name==Sara"};
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(gq)
+            .ToList();
+         var expected = _fakeRepository.Where(q => q.Name == "John" | q.Name == "Sara").ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
 
 
       [Theory]
