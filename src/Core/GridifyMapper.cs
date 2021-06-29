@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -30,7 +31,7 @@ namespace Gridify
          return this;
       }
 
-      public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object>> to, Func<string, object> convertor = null,
+      public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object>> to, Func<string, object> convertor = null!,
          bool overrideIfExists = true)
       {
          if (!overrideIfExists && HasMap(from))
@@ -94,7 +95,7 @@ namespace Gridify
          return _mappings.AsEnumerable();
       }
 
-      private Expression<Func<T, object>> CreateExpression(string from)
+      private static Expression<Func<T, object>> CreateExpression(string from)
       {
          // x =>
          var parameter = Expression.Parameter(typeof(T));
