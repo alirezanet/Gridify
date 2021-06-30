@@ -1,12 +1,15 @@
-﻿using System;
+using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Gridify.Syntax
 {
    public static class ExpressionToQueryConvertor
    {
-      private static Expression<Func<T, bool>> ConvertBinaryExpressionSyntaxToQuery<T>(BinaryExpressionSyntax binarySyntax, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper)
+      private static Expression<Func<T, bool>> ConvertBinaryExpressionSyntaxToQuery<T>(BinaryExpressionSyntax binarySyntax,
+         IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper)
       {
          try
          {
@@ -47,7 +50,7 @@ namespace Gridify.Syntax
                }
 
             Expression be = null;
-            var containsMethod = typeof(string).GetMethod("Contains", new[] {typeof(string)});
+
             switch (op.Kind)
             {
                case SyntaxKind.Equal:
@@ -69,10 +72,11 @@ namespace Gridify.Syntax
                   be = Expression.LessThanOrEqual(body, Expression.Constant(value, body.Type));
                   break;
                case SyntaxKind.Like:
-                  be = Expression.Call(body, containsMethod, Expression.Constant(value, body.Type));
+                  var containsMethod =
+                     be = Expression.Call(body, GetContainsMethod(), Expression.Constant(value, body.Type));
                   break;
                case SyntaxKind.NotLike:
-                  be = Expression.Not(Expression.Call(body, containsMethod, Expression.Constant(value, body.Type)));
+                  be = Expression.Not(Expression.Call(body, GetContainsMethod(), Expression.Constant(value, body.Type)));
                   break;
                default:
                   return null;
@@ -85,6 +89,9 @@ namespace Gridify.Syntax
             return null;
          }
       }
+
+      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] {typeof(string)});
+
 
       internal static Expression<Func<T, bool>> GenerateQuery<T>(ExpressionSyntax expression, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper)
       {
