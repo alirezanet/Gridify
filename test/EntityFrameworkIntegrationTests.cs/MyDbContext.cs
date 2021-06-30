@@ -10,6 +10,7 @@ namespace EntityFrameworkIntegrationTests.cs
       protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
       {
          optionsBuilder.UseInMemoryDatabase("myTestDb");
+         optionsBuilder.EnableServiceProviderCaching(true);
          base.OnConfiguring(optionsBuilder);
       }
    }
@@ -18,7 +19,7 @@ namespace EntityFrameworkIntegrationTests.cs
    {
       public int Id { get; set; }
       public string Name { get; set; }
-      public DateTime CreateDate { get; set; }
+      public DateTime? CreateDate { get; set; }
       public Guid FkGuid { get; set; }
    }
 }
