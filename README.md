@@ -91,6 +91,7 @@ The library adds below extension methods to `IQueryable`:
 | ApplyOrdering          | Apply Ordering using `string SortBy` and `bool IsSortAsc` properties of `GridifyQuery` class and returns an `IQueryable<T>`   |
 | ApplyPaging            | Apply paging using `short Page` and `int PageSize` properties of `GridifyQuery` class and returns an `IQueryable<T>`          |
 | ApplyOrderingAndPaging | Apply Both Ordering and paging and returns an `IQueryable<T>`                                                                 |
+| ApplyFilterAndOrdering | Apply Both Filtering and Ordering and returns an `IQueryable<T>`                                                                 |
 | ApplyEverything        | Apply Filtering,Ordering and paging and returns an `IQueryable<T>`                                                            |
 | GridifyQueryable       | Like ApplyEverything but it returns a `QueryablePaging<T>` that have an extra `int totalItems` property to use for pagination |
 | Gridify                | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`                                                    |
