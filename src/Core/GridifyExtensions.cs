@@ -156,6 +156,13 @@ namespace Gridify
 
          return query;
       }
+      public static IQueryable<T> ApplyFilterAndOrdering<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
+      {
+         mapper = mapper.FixMapper();
+         query = query.ApplyFiltering(gridifyQuery, mapper);
+         query = query.ApplyOrdering(gridifyQuery);
+         return query;
+      }
 
 
       public static IQueryable<T> ApplyOrderingAndPaging<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
