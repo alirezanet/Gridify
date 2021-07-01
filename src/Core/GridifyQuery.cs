@@ -2,7 +2,11 @@ namespace Gridify
 {
    public class GridifyQuery : IGridifyQuery
    {
-      public GridifyQuery(string sortBy = null, bool isSortAsc = default, short page = default, int pageSize = default, string filter = null)
+      public GridifyQuery()
+      {
+      }
+
+      public GridifyQuery(string sortBy = default, bool isSortAsc = default, short page = default, int pageSize = default, string filter = default)
       {
          SortBy = sortBy;
          IsSortAsc = isSortAsc;
