@@ -6,7 +6,7 @@ namespace Gridify
       {
       }
 
-      public GridifyQuery(string sortBy = default, bool isSortAsc = default, short page = default, int pageSize = default, string filter = default)
+      public GridifyQuery(string sortBy, bool isSortAsc, short page, int pageSize, string filter)
       {
          SortBy = sortBy;
          IsSortAsc = isSortAsc;
