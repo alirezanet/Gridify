@@ -110,8 +110,8 @@ but for example, if you need to just filter your data without paging or sorting 
 | --------------------- | -------- | --------------------------------------------------------- |
 | Equal                 | `==`     | `"FieldName ==Value"`                                      |
 | NotEqual              | `!=`     | `"FieldName !=Value"`                                      |
-| GreaterThan           | `<<`     | `"FieldName <<Value"`                                      |
-| LessThan              | `>>`     | `"FieldName >>Value"`                                      |
+| LessThan              | `<<`     | `"FieldName <<Value"`                                      |
+| GreaterThan           | `>>`     | `"FieldName >>Value"`                                      |
 | GreaterThanOrEqual    | `>=`     | `"FieldName >=Value"`                                      |
 | LessThanOrEqual       | `<=`     | `"FieldName <=Value"`                                      |
 | Contains - Like       | `=*`     | `"FieldName =*Value"`                                      |
