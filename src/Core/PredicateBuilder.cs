@@ -20,7 +20,7 @@ namespace Gridify
 
       public static Expression<Func<T, bool>> And<T> (this Expression<Func<T, bool>> expr1, Expression<Func<T, bool>> expr2)
       {
-         var parameter = Expression.Parameter(typeof (T) , "q");
+         var parameter = Expression.Parameter(typeof (T));
 
          var leftVisitor = new ReplaceExpressionVisitor(expr1.Parameters[0], parameter);
          var left = leftVisitor.Visit(expr1.Body);
