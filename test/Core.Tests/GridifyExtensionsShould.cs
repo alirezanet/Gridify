@@ -6,11 +6,11 @@ using Xunit;
 
 namespace Gridify.Tests
 {
-   public class GridifyExtentionsShould
+   public class GridifyExtensionsShould
    {
       private readonly List<TestClass> _fakeRepository;
 
-      public GridifyExtentionsShould()
+      public GridifyExtensionsShould()
       {
          _fakeRepository = new List<TestClass>(GetSampleData());
       }
