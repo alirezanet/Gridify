@@ -215,5 +215,31 @@ namespace Gridify
       }
 
       #endregion
+     
+      // TODO: should have some tests
+      public static Expression<Func<T, bool>> GetFilteringExpression<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
+      {
+         if (string.IsNullOrWhiteSpace(gridifyQuery.Filter))
+            throw new GridifyQueryException("Filter is not defined");
+
+         mapper = mapper.FixMapper();
+
+         var syntaxTree = SyntaxTree.Parse(gridifyQuery.Filter);
+
+         if (syntaxTree.Diagnostics.Any())
+            throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
+
+         var queryExpression = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, gridifyQuery, mapper);
+         if (queryExpression == null) throw new GridifyQueryException("Can not create expression with current data");
+         return queryExpression;
+      }
+      public static  Expression<Func<T, object>> GetOrderingExpression<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
+      {
+         mapper = mapper.FixMapper();
+         if (string.IsNullOrWhiteSpace(gridifyQuery.SortBy) || !mapper.HasMap(gridifyQuery.SortBy))
+            throw new GridifyQueryException("SortBy is not defined or not Found");
+         var expression = mapper.GetExpression(gridifyQuery.SortBy);
+         return expression;
+      }
    }
 }

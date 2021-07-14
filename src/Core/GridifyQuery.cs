@@ -26,30 +26,7 @@ namespace Gridify
       public int PageSize { get; set; }
       public string Filter { get; set; }
 
-      public Expression<Func<T, bool>> GetFilteringExpression<T>(IGridifyMapper<T> mapper = null)
-      {
-         if (string.IsNullOrWhiteSpace(Filter))
-            throw new GridifyQueryException("Filter is not defined");
-
-         mapper = mapper.FixMapper();
-
-         var syntaxTree = SyntaxTree.Parse(Filter);
-
-         if (syntaxTree.Diagnostics.Any())
-            throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
-
-         var queryExpression = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, this, mapper);
-         if (queryExpression == null) throw new GridifyQueryException("Can not create expression with current data");
-         return queryExpression;
-      }
-      public Expression<Func<T, object>> GetOrderingExpression<T>(IGridifyMapper<T> mapper = null)
-      {
-         mapper = mapper.FixMapper();
-         if (string.IsNullOrWhiteSpace(SortBy) || !mapper.HasMap(SortBy))
-            throw new GridifyQueryException("SortBy is not defined or not Found");
-         var expression = mapper.GetExpression(SortBy);
-         return expression;
-      }
+ 
       
    }
 }
