@@ -67,6 +67,7 @@ Paging<Person> pData =
 ---
 
 ##Performance comparison
+
 Filtering is the most expensive feature in gridify. the below benchmark is comparing filtering in the most known dynamic linq libraries. as you can see, gridify has the closest result to the native dotnet linq.
 
 |      Method |     Mean |   Error |  StdDev | MValue | Ratio |   Gen 0 |  Gen 1 | Gen 2 | Allocated |
