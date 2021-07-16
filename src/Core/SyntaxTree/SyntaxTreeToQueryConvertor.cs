@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -8,8 +7,7 @@ namespace Gridify.Syntax
 {
    public static class ExpressionToQueryConvertor
    {
-      private static Expression<Func<T, bool>> ConvertBinaryExpressionSyntaxToQuery<T>(BinaryExpressionSyntax binarySyntax,
-         IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper)
+      private static Expression<Func<T, bool>> ConvertBinaryExpressionSyntaxToQuery<T>(BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)
       {
          try
          {
@@ -38,18 +36,18 @@ namespace Gridify.Syntax
                try
                {
                   // handle broken guids,  github issue #2
-                  if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid();
+                  if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
 
                   var converter = TypeDescriptor.GetConverter(body.Type);
                   value = converter.ConvertFromString(value.ToString());
                }
                catch (FormatException)
                {
-                  // return no records in case of any exception in formating
+                  // return no records in case of any exception in formatting
                   return q => false;
                }
 
-            Expression be = null;
+            Expression be;
 
             switch (op.Kind)
             {
@@ -72,8 +70,7 @@ namespace Gridify.Syntax
                   be = Expression.LessThanOrEqual(body, Expression.Constant(value, body.Type));
                   break;
                case SyntaxKind.Like:
-                  var containsMethod =
-                     be = Expression.Call(body, GetContainsMethod(), Expression.Constant(value, body.Type));
+                  be = Expression.Call(body, GetContainsMethod(), Expression.Constant(value, body.Type));
                   break;
                case SyntaxKind.NotLike:
                   be = Expression.Not(Expression.Call(body, GetContainsMethod(), Expression.Constant(value, body.Type)));
@@ -90,51 +87,55 @@ namespace Gridify.Syntax
          }
       }
 
-      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] {typeof(string)});
-
-
-      internal static Expression<Func<T, bool>> GenerateQuery<T>(ExpressionSyntax expression, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper)
+      private static MethodInfo GetContainsMethod()
       {
-         switch (expression.Kind)
-         {
-            case SyntaxKind.BinaryExpression:
+         return typeof(string).GetMethod("Contains", new[] {typeof(string)});
+      }
+
+      internal static Expression<Func<T, bool>> GenerateQuery<T>(ExpressionSyntax expression, IGridifyMapper<T> mapper)
+      {
+         while (true)
+            switch (expression.Kind)
             {
-               var bExp = expression as BinaryExpressionSyntax;
-
-               if (bExp!.Left is FieldExpressionSyntax && bExp.Right is ValueExpressionSyntax)
-                  return ConvertBinaryExpressionSyntaxToQuery(bExp, gridifyQuery, mapper);
-
-               Expression<Func<T, bool>> leftQuery;
-               Expression<Func<T, bool>> rightQuery;
-
-
-               if (bExp.Left is ParenthesizedExpressionSyntax lpExp)
-                  leftQuery = GenerateQuery(lpExp.Expression, gridifyQuery, mapper);
-               else
-                  leftQuery = GenerateQuery(bExp.Left, gridifyQuery, mapper);
-
-
-               if (bExp.Right is ParenthesizedExpressionSyntax rpExp)
-                  rightQuery = GenerateQuery(rpExp.Expression, gridifyQuery, mapper);
-               else
-                  rightQuery = GenerateQuery(bExp.Right, gridifyQuery, mapper);
-
-
-               return bExp.OperatorToken.Kind switch
+               case SyntaxKind.BinaryExpression:
                {
-                  SyntaxKind.And => leftQuery.And(rightQuery),
-                  SyntaxKind.Or => leftQuery.Or(rightQuery),
-                  _ => throw new GridifyFilteringException($"Invalid expression Operator '{bExp.OperatorToken.Kind}'")
-               };
+                  var bExp = expression as BinaryExpressionSyntax;
+
+                  if (bExp!.Left is FieldExpressionSyntax && bExp.Right is ValueExpressionSyntax)
+                     return ConvertBinaryExpressionSyntaxToQuery(bExp, mapper);
+
+                  Expression<Func<T, bool>> leftQuery;
+                  Expression<Func<T, bool>> rightQuery;
+
+
+                  if (bExp.Left is ParenthesizedExpressionSyntax lpExp)
+                     leftQuery = GenerateQuery(lpExp.Expression, mapper);
+                  else
+                     leftQuery = GenerateQuery(bExp.Left, mapper);
+
+
+                  if (bExp.Right is ParenthesizedExpressionSyntax rpExp)
+                     rightQuery = GenerateQuery(rpExp.Expression, mapper);
+                  else
+                     rightQuery = GenerateQuery(bExp.Right, mapper);
+
+
+                  return bExp.OperatorToken.Kind switch
+                  {
+                     SyntaxKind.And => leftQuery.And(rightQuery),
+                     SyntaxKind.Or => leftQuery.Or(rightQuery),
+                     _ => throw new GridifyFilteringException($"Invalid expression Operator '{bExp.OperatorToken.Kind}'")
+                  };
+               }
+               case SyntaxKind.ParenthesizedExpression:
+               {
+                  var pExp = expression as ParenthesizedExpressionSyntax;
+                  expression = pExp!.Expression;
+                  continue;
+               }
+               default:
+                  throw new GridifyFilteringException($"Invalid expression format '{expression.Kind}'.");
             }
-            case SyntaxKind.ParenthesizedExpression:
-            {
-               var pExp = expression as ParenthesizedExpressionSyntax;
-               return GenerateQuery(pExp!.Expression, gridifyQuery, mapper);
-            }
-            default:
-               throw new GridifyFilteringException($"Invalid expression format '{expression.Kind}'.");
-         }
       }
    }
 }

@@ -148,8 +148,7 @@ namespace Gridify
          if (syntaxTree.Diagnostics.Any())
             throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
 
-         var queryExpression = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, gridifyQuery, mapper);
-
+         var queryExpression = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
 
          if (queryExpression != null)
             query = query.Where(queryExpression);
@@ -229,7 +228,7 @@ namespace Gridify
          if (syntaxTree.Diagnostics.Any())
             throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
 
-         var queryExpression = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, gridifyQuery, mapper);
+         var queryExpression = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
          if (queryExpression == null) throw new GridifyQueryException("Can not create expression with current data");
          return queryExpression;
       }
