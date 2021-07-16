@@ -9,7 +9,7 @@
    <PropertyGroup>
       <TargetFramework>netstandard2.1</TargetFramework>
       <PackageId>Gridify.EntityFramework5</PackageId>
-      <Version>1.3.3</Version>
+      <Version>1.3.4</Version>
       <Authors>Alireza Sabouri</Authors>
       <Company>TuxTeam</Company>
       <PackageDescription>Gridify (EntityFramework), Easy and optimized way to apply Filtering, Sorting, and Pagination using text-based data.</PackageDescription>
