@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace Gridify
 {
-   public partial class GridifyMapper<T> : IGridifyMapper<T>
+   public class GridifyMapper<T> : IGridifyMapper<T>
    {
       private readonly HashSet<IGMap<T>> _mappings;
 
