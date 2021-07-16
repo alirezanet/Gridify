@@ -119,7 +119,7 @@ namespace Gridify.Syntax
             return new SyntaxToken(SyntaxKind.ValueToken, start, text.ToString());
          }
 
-         _diagnostics.Add($"bad character input: '{Current}' at {_position}");
+         _diagnostics.Add($"bad character input: '{Current.ToString()}' at {_position.ToString()}");
          return new SyntaxToken(SyntaxKind.BadToken, _position++, string.Empty);
       }
    }
