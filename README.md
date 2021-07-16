@@ -62,7 +62,7 @@ Paging<Person> pData =
 // pData.Items      => First 20 Persons with 'John', First Name
 ```
 
-### see more examples in the [tests](https://github.com/Alirezanet/Gridify/blob/74937addc01041abeea50fc28e231847074006b0/test/Core.Tests/GridifyExtensionsShould.cs#L21) 
+### see more examples in the [tests](https://github.com/Alirezanet/Gridify/blob/ffba5e55a51f2dfa478a2963cde8e13cb88ec5c1/test/Core.Tests/GridifyExtensionsShould.cs#L90) 
 
 ---
 
