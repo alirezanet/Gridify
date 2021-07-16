@@ -62,6 +62,15 @@ Paging<Person> pData =
 // pData.Items      => First 20 Persons with 'John', First Name
 ```
 
+## ApplyFiltering
+Also, if you don't need paging and sorting features simply use `ApplyFiltering` extention instead of `Gridify`.
+
+```c#
+var query = myDbContext.Persons.ApplyFiltering("name == John");
+// this is equal to : 
+// myDbContext.Persons.Where(p => p.Name == "John");
+```
+
 ### see more examples in the [tests](https://github.com/Alirezanet/Gridify/blob/ffba5e55a51f2dfa478a2963cde8e13cb88ec5c1/test/Core.Tests/GridifyExtensionsShould.cs#L90) 
 
 ---
