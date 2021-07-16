@@ -9,13 +9,11 @@ namespace Gridify.Syntax
    {
       public IReadOnlyList<string> Diagnostics { get; }
       public ExpressionSyntax Root { get; }
-      private SyntaxToken EndToken { get; }
 
       public SyntaxTree(IEnumerable<string> diagnostics, ExpressionSyntax root,SyntaxToken endToken)
       {
          Diagnostics = diagnostics.ToArray();
          Root = root;
-         EndToken = endToken;
       }
 
       public static SyntaxTree Parse(string text)
