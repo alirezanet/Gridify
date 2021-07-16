@@ -63,7 +63,7 @@ Paging<Person> pData =
 ```
 
 ## ApplyFiltering
-Also, if you don't need paging and sorting features simply use `ApplyFiltering` extention instead of `Gridify`.
+Also, if you don't need paging and sorting features simply use `ApplyFiltering` extension instead of `Gridify`.
 
 ```c#
 var query = myDbContext.Persons.ApplyFiltering("name == John");
@@ -103,7 +103,7 @@ dotnet add package Gridify
 ```
 ---
 
-## Extentions
+## Extensions
 The library adds below extension methods to `IQueryable`:
 
 
