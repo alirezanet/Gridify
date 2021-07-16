@@ -5,18 +5,9 @@ namespace Gridify.Syntax
 {
    internal class Parser
    {
+      private readonly List<string> _diagnostics = new();
       private readonly SyntaxToken[] _tokens;
-      private int _position = default;
-      private readonly List<string> _diagnostics = new List<string>();
-      public IEnumerable<string> Diagnostics => _diagnostics;
-
-      private SyntaxToken Peek(int offset)
-      {
-         var index = _position + offset;
-         return index >= _tokens.Length ? _tokens[_tokens.Length - 1] : _tokens[index];
-      }
-
-      private SyntaxToken Current => Peek(0);
+      private int _position;
 
       public Parser(string text)
       {
@@ -26,21 +17,26 @@ namespace Gridify.Syntax
          do
          {
             token = lexer.NextToken();
-            if (token.Kind != SyntaxKind.BadToken && token.Kind != SyntaxKind.WhiteSpace)
-            {
-               tokens.Add(token);
-            }
+            if (token.Kind != SyntaxKind.BadToken && token.Kind != SyntaxKind.WhiteSpace) tokens.Add(token);
          } while (token.Kind != SyntaxKind.End);
 
          _tokens = tokens.ToArray();
          _diagnostics.AddRange(lexer.Diagnostics);
       }
 
+      private SyntaxToken Current => Peek(0);
+
+      private SyntaxToken Peek(int offset)
+      {
+         var index = _position + offset;
+         return index >= _tokens.Length ? _tokens[_tokens.Length - 1] : _tokens[index];
+      }
+
       public SyntaxTree Parse()
       {
          var expression = ParseTerm();
          var end = Match(SyntaxKind.End);
-         return new SyntaxTree(_diagnostics,expression,end);
+         return new SyntaxTree(_diagnostics, expression, end);
       }
 
       private ExpressionSyntax ParseTerm()
@@ -49,7 +45,7 @@ namespace Gridify.Syntax
          var binaryKinds = new[]
          {
             SyntaxKind.And,
-            SyntaxKind.Or,
+            SyntaxKind.Or
          };
 
          while (binaryKinds.Contains(Current.Kind))
@@ -61,6 +57,7 @@ namespace Gridify.Syntax
 
          return left;
       }
+
       private ExpressionSyntax ParseFactor()
       {
          var left = ParsePrimaryExpression();
@@ -73,7 +70,7 @@ namespace Gridify.Syntax
             SyntaxKind.GreaterThan,
             SyntaxKind.LessThan,
             SyntaxKind.GreaterOrEqualThan,
-            SyntaxKind.LessOrEqualThan,
+            SyntaxKind.LessOrEqualThan
          };
 
          while (binaryKinds.Contains(Current.Kind))
@@ -85,10 +82,11 @@ namespace Gridify.Syntax
 
          return left;
       }
+
       private ExpressionSyntax ParseValueExpression()
       {
          var valueToken = Match(SyntaxKind.ValueToken);
-         return new ValueExpressionSyntax(valueToken); 
+         return new ValueExpressionSyntax(valueToken);
       }
 
       private SyntaxToken NextToken()
@@ -102,7 +100,7 @@ namespace Gridify.Syntax
       {
          if (Current.Kind == kind)
             return NextToken();
-                                                                                         
+
          _diagnostics.Add($"Unexpected token <{Current.Kind}>, expected <{kind}>");
          return new SyntaxToken(kind, Current.Position, null);
       }
@@ -116,6 +114,7 @@ namespace Gridify.Syntax
             var right = Match(SyntaxKind.CloseParenthesis);
             return new ParenthesizedExpressionSyntax(left, expression, right);
          }
+
          var fieldToken = Match(SyntaxKind.FieldToken);
          return new FieldExpressionSyntax(fieldToken);
       }
