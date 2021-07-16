@@ -100,7 +100,8 @@ The library adds below extension methods to `IQueryable`:
 
 | Extension              | Description                                                                                                                   |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| ApplyFiltering         | Apply Filtering using `string Filter` property of `GridifyQuery` class and returns an `IQueryable<T>`                         |
+| ApplyFiltering (string)| Apply Filtering using a raw `string` and returns an `IQueryable<T>`                         |
+| ApplyFiltering (GridifyQuery)| Apply Filtering using `string Filter` property of `GridifyQuery` class and returns an `IQueryable<T>`                         |
 | ApplyOrdering          | Apply Ordering using `string SortBy` and `bool IsSortAsc` properties of `GridifyQuery` class and returns an `IQueryable<T>`   |
 | ApplyPaging            | Apply paging using `short Page` and `int PageSize` properties of `GridifyQuery` class and returns an `IQueryable<T>`          |
 | ApplyOrderingAndPaging | Apply Both Ordering and paging and returns an `IQueryable<T>`                                                                 |

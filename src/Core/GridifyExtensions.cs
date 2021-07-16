@@ -35,6 +35,33 @@ namespace Gridify
 
       #endregion
 
+      // TODO: should have some tests
+      public static Expression<Func<T, bool>> GetFilteringExpression<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
+      {
+         if (string.IsNullOrWhiteSpace(gridifyQuery.Filter))
+            throw new GridifyQueryException("Filter is not defined");
+
+         mapper = mapper.FixMapper();
+
+         var syntaxTree = SyntaxTree.Parse(gridifyQuery.Filter);
+
+         if (syntaxTree.Diagnostics.Any())
+            throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
+
+         var queryExpression = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
+         if (queryExpression == null) throw new GridifyQueryException("Can not create expression with current data");
+         return queryExpression;
+      }
+
+      public static Expression<Func<T, object>> GetOrderingExpression<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
+      {
+         mapper = mapper.FixMapper();
+         if (string.IsNullOrWhiteSpace(gridifyQuery.SortBy) || !mapper.HasMap(gridifyQuery.SortBy))
+            throw new GridifyQueryException("SortBy is not defined or not Found");
+         var expression = mapper.GetExpression(gridifyQuery.SortBy);
+         return expression;
+      }
+
       #region "Public"
 
       /// <summary>
@@ -137,13 +164,17 @@ namespace Gridify
       public static IQueryable<T> ApplyFiltering<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
       {
          if (gridifyQuery == null) return query;
-         if (string.IsNullOrWhiteSpace(gridifyQuery.Filter))
+         return string.IsNullOrWhiteSpace(gridifyQuery.Filter) ? query : ApplyFiltering(query, gridifyQuery.Filter, mapper);
+      }
+
+      public static IQueryable<T> ApplyFiltering<T>(this IQueryable<T> query, string filter, IGridifyMapper<T> mapper = null)
+      {
+         if (string.IsNullOrWhiteSpace(filter))
             return query;
 
          mapper = mapper.FixMapper();
 
-         var textFilter = gridifyQuery.Filter;
-         var syntaxTree = SyntaxTree.Parse(textFilter);
+         var syntaxTree = SyntaxTree.Parse(filter);
 
          if (syntaxTree.Diagnostics.Any())
             throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
@@ -155,6 +186,7 @@ namespace Gridify
 
          return query;
       }
+
       public static IQueryable<T> ApplyFilterAndOrdering<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
       {
          mapper = mapper.FixMapper();
@@ -171,7 +203,7 @@ namespace Gridify
          query = query.ApplyPaging(gridifyQuery);
          return query;
       }
-      
+
       /// <summary>
       /// gets a query or collection,
       /// adds filtering,
@@ -214,31 +246,5 @@ namespace Gridify
       }
 
       #endregion
-     
-      // TODO: should have some tests
-      public static Expression<Func<T, bool>> GetFilteringExpression<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
-      {
-         if (string.IsNullOrWhiteSpace(gridifyQuery.Filter))
-            throw new GridifyQueryException("Filter is not defined");
-
-         mapper = mapper.FixMapper();
-
-         var syntaxTree = SyntaxTree.Parse(gridifyQuery.Filter);
-
-         if (syntaxTree.Diagnostics.Any())
-            throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
-
-         var queryExpression = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
-         if (queryExpression == null) throw new GridifyQueryException("Can not create expression with current data");
-         return queryExpression;
-      }
-      public static  Expression<Func<T, object>> GetOrderingExpression<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
-      {
-         mapper = mapper.FixMapper();
-         if (string.IsNullOrWhiteSpace(gridifyQuery.SortBy) || !mapper.HasMap(gridifyQuery.SortBy))
-            throw new GridifyQueryException("SortBy is not defined or not Found");
-         var expression = mapper.GetExpression(gridifyQuery.SortBy);
-         return expression;
-      }
    }
 }

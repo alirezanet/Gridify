@@ -28,7 +28,6 @@ namespace Benchmarks
          private const string Val = "a";
          private IEnumerable<TestClass> _dataSource;
          private string[] _dynamicLinq;
-         private GridifyQuery _gq;
          private SieveProcessor _processor;
          private SieveModel _sieveModel;
 
@@ -36,7 +35,6 @@ namespace Benchmarks
          public void Setup()
          {
             _dataSource = GetSampleData().ToList();
-            _gq = new GridifyQuery {Filter = "name=*" + Val};
             _dynamicLinq = new[] {"Name.Contains(@0)", Val};
             _processor = new SieveProcessor(new OptionsWrapper<SieveOptions>(new SieveOptions()));
             _sieveModel = new SieveModel {Filters = "name@=" + Val};
@@ -48,12 +46,12 @@ namespace Benchmarks
             var x = _dataSource.AsQueryable()
                .Where(q => q.Name.Contains(Val)).ToList();
          }
-         
+
          [Benchmark]
          public void Gridify()
          {
             var x = _dataSource.AsQueryable()
-               .ApplyFiltering(_gq).ToList();
+               .ApplyFiltering(Val).ToList();
          }
 
          [Benchmark]
@@ -69,7 +67,6 @@ namespace Benchmarks
             var x = _dataSource.AsQueryable();
             var _ = _processor.Apply(_sieveModel, x, applySorting: false, applyPagination: false).ToList();
          }
-
 
 
          private static IEnumerable<TestClass> GetSampleData()
