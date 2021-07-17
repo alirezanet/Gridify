@@ -30,6 +30,7 @@ namespace Benchmarks
          private string[] _dynamicLinq;
          private SieveProcessor _processor;
          private SieveModel _sieveModel;
+         private string _gridifyFilter;
 
          [GlobalSetup]
          public void Setup()
@@ -38,26 +39,27 @@ namespace Benchmarks
             _dynamicLinq = new[] {"Name.Contains(@0)", Val};
             _processor = new SieveProcessor(new OptionsWrapper<SieveOptions>(new SieveOptions()));
             _sieveModel = new SieveModel {Filters = "name@=" + Val};
+            _gridifyFilter = "name ==" + Val;
          }
 
          [Benchmark(Baseline = true)]
          public void NativeLinQ()
          {
-            var x = _dataSource.AsQueryable()
+            var _ = _dataSource.AsQueryable()
                .Where(q => q.Name.Contains(Val)).ToList();
          }
 
          [Benchmark]
          public void Gridify()
          {
-            var x = _dataSource.AsQueryable()
-               .ApplyFiltering(Val).ToList();
+            var _ = _dataSource.AsQueryable()
+               .ApplyFiltering(_gridifyFilter).ToList();
          }
 
          [Benchmark]
          public void DynamicLinQ()
          {
-            var x = _dataSource.AsQueryable()
+            var _ = _dataSource.AsQueryable()
                .Where(_dynamicLinq[0], _dynamicLinq[1]).ToList();
          }
 
