@@ -22,9 +22,11 @@ namespace Gridify
       {
          foreach (var item in typeof(T).GetProperties())
          {
+            // skip classes
+            if(item.PropertyType.IsClass && item.PropertyType != typeof(string))
+               continue;
+            
             var name = char.ToLowerInvariant(item.Name[0]) + item.Name.Substring(1); // camel-case name
-
-            // add to mapper object
             _mappings.Add(new GMap<T>(name, CreateExpression(item.Name)));
          }
 
