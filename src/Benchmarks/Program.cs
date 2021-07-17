@@ -14,7 +14,7 @@ namespace Benchmarks
 {
    public class Program
    {
-      private static void Main(string[] args)
+      private static void Main()
       {
          BenchmarkRunner.Run<MyClass>();
          Console.Read();
@@ -39,21 +39,21 @@ namespace Benchmarks
             _dynamicLinq = new[] {"Name.Contains(@0)", Val};
             _processor = new SieveProcessor(new OptionsWrapper<SieveOptions>(new SieveOptions()));
             _sieveModel = new SieveModel {Filters = "name@=" + Val};
-            _gridifyFilter = "name ==" + Val;
+            _gridifyFilter = "name==" + Val;
          }
 
-         [Benchmark(Baseline = true)]
-         public void NativeLinQ()
-         {
-            var _ = _dataSource.AsQueryable()
-               .Where(q => q.Name.Contains(Val)).ToList();
-         }
-
-         [Benchmark]
+         [Benchmark()]
          public void Gridify()
          {
             var _ = _dataSource.AsQueryable()
                .ApplyFiltering(_gridifyFilter).ToList();
+         }
+         
+         [Benchmark]
+         public void NativeLinQ()
+         {
+            var _ = _dataSource.AsQueryable()
+               .Where(q => q.Name.Contains(Val)).ToList();
          }
 
          [Benchmark]
