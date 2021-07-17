@@ -15,6 +15,7 @@
    
    <ItemGroup>
      <ProjectReference Include="..\..\src\Core\Gridify.csproj" />
+     <ProjectReference Include="..\..\src\EntityFramework\Gridify.EntityFramework.csproj" />
    </ItemGroup>
 
 </Project>
