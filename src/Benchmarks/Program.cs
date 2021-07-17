@@ -39,7 +39,7 @@ namespace Benchmarks
             _dynamicLinq = new[] {"Name.Contains(@0)", Val};
             _processor = new SieveProcessor(new OptionsWrapper<SieveOptions>(new SieveOptions()));
             _sieveModel = new SieveModel {Filters = "name@=" + Val};
-            _gridifyFilter = "name==" + Val;
+            _gridifyFilter = "name=*" + Val;
          }
 
          [Benchmark()]
