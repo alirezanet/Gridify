@@ -82,8 +82,8 @@ Filtering is the most expensive feature in gridify. the below benchmark is compa
 |      Method |       Mean |    Error |   StdDev | MValue |   Gen 0 |   Gen 1 | Allocated |
 |------------ |-----------:|---------:|---------:|-------:|--------:|--------:|----------:|
 |     Gridify |   573.3 us |  2.86 us |  2.67 us |  2.000 | 13.6719 |  4.3945 |     29 KB |
-|  NativeLinQ |   544.9 us |  1.80 us |  1.59 us |  2.000 |  7.3242 |  3.4180 |     15 KB |
-| DynamicLinQ |   775.2 us |  3.85 us |  3.41 us |  2.000 | 49.8047 |       - |    103 KB |
+|  Native Linq|   544.9 us |  1.80 us |  1.59 us |  2.000 |  7.3242 |  3.4180 |     15 KB |
+| Dynamic Linq|   775.2 us |  3.85 us |  3.41 us |  2.000 | 49.8047 |       - |    103 KB |
 |       Sieve | 1,729.9 us | 21.63 us | 18.06 us |  2.000 | 25.3906 | 11.7188 |     55 KB |
 
 ---
