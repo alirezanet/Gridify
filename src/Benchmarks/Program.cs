@@ -25,49 +25,55 @@ namespace Benchmarks
       [MValueColumn]
       public class MyClass
       {
-         private const string Val = "a";
          private IEnumerable<TestClass> _dataSource;
-         private string[] _dynamicLinq;
-         private SieveProcessor _processor;
-         private SieveModel _sieveModel;
-         private string _gridifyFilter;
 
          [GlobalSetup]
          public void Setup()
          {
             _dataSource = GetSampleData().ToList();
-            _dynamicLinq = new[] {"Name.Contains(@0)", Val};
-            _processor = new SieveProcessor(new OptionsWrapper<SieveOptions>(new SieveOptions()));
-            _sieveModel = new SieveModel {Filters = "name@=" + Val};
-            _gridifyFilter = "name=*" + Val;
          }
 
-         [Benchmark()]
+         [Benchmark]
          public void Gridify()
          {
-            var _ = _dataSource.AsQueryable()
-               .ApplyFiltering(_gridifyFilter).ToList();
+            _dataSource.AsQueryable()
+               .ApplyFiltering("Name=*a").ToList();
+            _dataSource.AsQueryable()
+               .ApplyFiltering("Id>>5");
+            _dataSource.AsQueryable()
+               .ApplyFiltering("Name==Ali");
          }
-         
+
          [Benchmark]
          public void NativeLinQ()
          {
-            var _ = _dataSource.AsQueryable()
-               .Where(q => q.Name.Contains(Val)).ToList();
+            _dataSource.AsQueryable()
+               .Where(q => q.Name.Contains("a")).ToList();
+            _dataSource.AsQueryable()
+               .Where(q => q.Id > 5);
+            _dataSource.AsQueryable()
+               .Where(q => q.Name == "Ali");
          }
 
          [Benchmark]
          public void DynamicLinQ()
          {
-            var _ = _dataSource.AsQueryable()
-               .Where(_dynamicLinq[0], _dynamicLinq[1]).ToList();
+            _dataSource.AsQueryable()
+               .Where("Name.Contains(@0)", "a").ToList();
+            _dataSource.AsQueryable()
+               .Where("Id > (@0)", "5");
+            _dataSource.AsQueryable()
+               .Where("Name==(@0)", "Ali");
          }
 
          [Benchmark]
          public void Sieve()
          {
+            var processor = new SieveProcessor(new OptionsWrapper<SieveOptions>(new SieveOptions()));
             var x = _dataSource.AsQueryable();
-            var _ = _processor.Apply(_sieveModel, x, applySorting: false, applyPagination: false).ToList();
+            processor.Apply(new SieveModel {Filters = "Name@=a"}, x, applySorting: false, applyPagination: false).ToList();
+            processor.Apply(new SieveModel {Filters = "Id>5"}, x, applySorting: false, applyPagination: false).ToList();
+            processor.Apply(new SieveModel {Filters = "Name==Ali"}, x, applySorting: false, applyPagination: false).ToList();
          }
 
 
