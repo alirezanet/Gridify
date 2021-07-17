@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Order;
 using BenchmarkDotNet.Running;
 using Gridify;
 using Gridify.Tests;
@@ -22,7 +23,7 @@ namespace Benchmarks
 
       [MemoryDiagnoser]
       [RPlotExporter]
-      [MValueColumn]
+      [Orderer(SummaryOrderPolicy.FastestToSlowest)]
       public class MyClass
       {
          private IEnumerable<TestClass> _dataSource;
@@ -44,7 +45,7 @@ namespace Benchmarks
                .ApplyFiltering("Name==Ali");
          }
 
-         [Benchmark]
+         [Benchmark(Baseline = true)]
          public void NativeLinQ()
          {
             _dataSource.AsQueryable()
