@@ -79,12 +79,12 @@ var query = myDbContext.Persons.ApplyFiltering("name == John");
 
 Filtering is the most expensive feature in gridify. the below benchmark is comparing filtering in the most known dynamic linq libraries. as you can see, gridify has the closest result to the native linq.
 
-|      Method |       Mean |    Error |   StdDev | MValue |   Gen 0 |   Gen 1 | Allocated |
-|------------ |-----------:|---------:|---------:|-------:|--------:|--------:|----------:|
-|     Gridify |   573.3 us |  2.86 us |  2.67 us |  2.000 | 13.6719 |  4.3945 |     29 KB |
-|  Native Linq|   544.9 us |  1.80 us |  1.59 us |  2.000 |  7.3242 |  3.4180 |     15 KB |
-| Dynamic Linq|   775.2 us |  3.85 us |  3.41 us |  2.000 | 49.8047 |       - |    103 KB |
-|       Sieve | 1,729.9 us | 21.63 us | 18.06 us |  2.000 | 25.3906 | 11.7188 |     55 KB |
+|      Method |       Mean |    Error |   StdDev | MValue | Ratio | RatioSD |   Gen 0 |   Gen 1 | Gen 2 | Allocated |
+|------------ |-----------:|---------:|---------:|-------:|------:|--------:|--------:|--------:|------:|----------:|
+|  NativeLinQ |   545.8 us |  1.98 us |  1.85 us |  2.000 |  1.00 |    0.00 |  7.3242 |  3.4180 |     - |     15 KB |
+|     Gridify |   573.7 us |  3.88 us |  3.24 us |  2.000 |  1.05 |    0.01 | 13.6719 |  4.3945 |     - |     29 KB |
+| DynamicLinQ |   781.1 us |  6.14 us |  5.74 us |  2.000 |  1.43 |    0.01 | 49.8047 |       - |     - |    102 KB |
+|       Sieve | 1,726.0 us | 24.42 us | 21.65 us |  2.000 |  3.16 |    0.04 | 25.3906 | 11.7188 |     - |     55 KB |
 
 ---
 
