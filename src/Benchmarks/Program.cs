@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Order;
 using BenchmarkDotNet.Running;
 using Gridify;
@@ -26,55 +27,48 @@ namespace Benchmarks
       [Orderer(SummaryOrderPolicy.FastestToSlowest)]
       public class MyClass
       {
-         private IEnumerable<TestClass> _dataSource;
+         private static readonly Consumer Consumer = new();
+         private TestClass[] _data;
+         private IQueryable<TestClass> Ds => _data.AsQueryable();
 
          [GlobalSetup]
          public void Setup()
          {
-            _dataSource = GetSampleData().ToList();
-         }
-
-         [Benchmark]
-         public void Gridify()
-         {
-            _dataSource.AsQueryable()
-               .ApplyFiltering("Name=*a").ToList();
-            _dataSource.AsQueryable()
-               .ApplyFiltering("Id>>5");
-            _dataSource.AsQueryable()
-               .ApplyFiltering("Name==Ali");
+            _data = GetSampleData().ToArray();
          }
 
          [Benchmark(Baseline = true)]
          public void NativeLinQ()
          {
-            _dataSource.AsQueryable()
-               .Where(q => q.Name.Contains("a")).ToList();
-            _dataSource.AsQueryable()
-               .Where(q => q.Id > 5);
-            _dataSource.AsQueryable()
-               .Where(q => q.Name == "Ali");
+            Ds.Where(q => q.Name.Contains("a")).Consume(Consumer);
+            Ds.Where(q => q.Id > 5).Consume(Consumer);
+            Ds.Where(q => q.Name == "Ali").Consume(Consumer);
          }
+
+         [Benchmark]
+         public void Gridify()
+         {
+            Ds .ApplyFiltering("Name=*a").Consume(Consumer);
+            Ds .ApplyFiltering("Id>>5").Consume(Consumer);
+            Ds .ApplyFiltering("Name==Ali").Consume(Consumer);
+         }
+
 
          [Benchmark]
          public void DynamicLinQ()
          {
-            _dataSource.AsQueryable()
-               .Where("Name.Contains(@0)", "a").ToList();
-            _dataSource.AsQueryable()
-               .Where("Id > (@0)", "5");
-            _dataSource.AsQueryable()
-               .Where("Name==(@0)", "Ali");
+            Ds .Where("Name.Contains(@0)", "a").Consume(Consumer);
+            Ds .Where("Id > (@0)", "5").Consume(Consumer);
+            Ds .Where("Name==(@0)", "Ali").Consume(Consumer);
          }
 
          [Benchmark]
          public void Sieve()
          {
             var processor = new SieveProcessor(new OptionsWrapper<SieveOptions>(new SieveOptions()));
-            var x = _dataSource.AsQueryable();
-            processor.Apply(new SieveModel {Filters = "Name@=a"}, x, applySorting: false, applyPagination: false).ToList();
-            processor.Apply(new SieveModel {Filters = "Id>5"}, x, applySorting: false, applyPagination: false).ToList();
-            processor.Apply(new SieveModel {Filters = "Name==Ali"}, x, applySorting: false, applyPagination: false).ToList();
+            processor.Apply(new SieveModel {Filters = "Name@=a"}, Ds, applySorting: false, applyPagination: false).Consume(Consumer);
+            processor.Apply(new SieveModel {Filters = "Id>5"}, Ds, applySorting: false, applyPagination: false).Consume(Consumer);
+            processor.Apply(new SieveModel {Filters = "Name==Ali"}, Ds, applySorting: false, applyPagination: false).Consume(Consumer);
          }
 
 
