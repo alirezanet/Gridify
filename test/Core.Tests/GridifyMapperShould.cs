@@ -56,7 +56,7 @@ namespace Gridify.Tests
          //act
          Action act = () => _sut.AddMap("test", q => q.Name, overrideIfExists: false);
          //assert
-         Exception exception = Assert.Throws<Exception>(act);
+         var exception = Assert.Throws<GridifyMapperException>(act);
          //The thrown exception can be used for even more detailed assertions.
          Assert.Equal("Duplicate Key. the 'test' key already exists", exception.Message);
       }
