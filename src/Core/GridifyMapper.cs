@@ -37,7 +37,7 @@ namespace Gridify
          bool overrideIfExists = true)
       {
          if (!overrideIfExists && HasMap(from))
-            throw new Exception($"Duplicate Key. the '{from}' key already exists");
+            throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
 
          RemoveMap(from);
          _mappings.Add(new GMap<T>(from, to, convertor));
@@ -47,7 +47,7 @@ namespace Gridify
       public IGridifyMapper<T> AddMap(IGMap<T> gMap, bool overrideIfExists = true)
       {
          if (!overrideIfExists && HasMap(gMap.From))
-            throw new Exception($"Duplicate Key. the '{gMap.From}' key already exists");
+            throw new GridifyMapperException($"Duplicate Key. the '{gMap.From}' key already exists");
 
          RemoveMap(gMap.From);
          _mappings.Add(gMap);
