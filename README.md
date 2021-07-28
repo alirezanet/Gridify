@@ -78,15 +78,20 @@ var query = myDbContext.Persons.ApplyFiltering("name == John");
 ## Performance comparison
 
 Filtering is the most expensive feature in gridify. the below benchmark is comparing filtering in the most known dynamic linq libraries. as you can see, gridify has the closest result to the native linq.
+also, I Should note other features like Pagination and Sorting has almost zero overhead in Gridify.
 
-[Host]     : .NET 5.0.8 (5.0.821.31504), X64 RyuJIT
+BenchmarkDotNet=v0.13.0, OS=Windows 10.0.19043.1110 (21H1/May2021Update)
+11th Gen Intel Core i5-11400F 2.60GHz, 1 CPU, 12 logical and 6 physical cores
+.NET SDK=5.0.301
+[Host]     : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
 
-|      Method |     Mean |     Error |    StdDev |   Median | Ratio | RatioSD |   Gen 0 |   Gen 1 | Allocated |
-|------------ |---------:|----------:|----------:|---------:|------:|--------:|--------:|--------:|----------:|
-| Native Linq | 1.386 ms | 0.0271 ms | 0.0301 ms | 1.376 ms |  1.00 |    0.00 | 15.6250 |  7.8125 |     35 KB |
-|     Gridify | 1.503 ms | 0.0128 ms | 0.0114 ms | 1.505 ms |  1.09 |    0.02 | 21.4844 |  9.7656 |     47 KB |
-|       Sieve | 1.871 ms | 0.0365 ms | 0.0499 ms | 1.852 ms |  1.36 |    0.06 | 29.2969 | 13.6719 |     60 KB |
-| DynamicLinq | 1.964 ms | 0.1237 ms | 0.3490 ms | 1.773 ms |  1.58 |    0.27 | 58.5938 | 19.5313 |    122 KB |
+
+|      Method |       Mean |    Error |   StdDev | Ratio | RatioSD |   Gen 0 |  Gen 1 | Allocated |
+|------------ |-----------:|---------:|---------:|------:|--------:|--------:|-------:|----------:|
+| Native Linq |   869.3 us | 10.54 us |  9.86 us |  1.00 |    0.00 |  5.8594 | 2.9297 |     36 KB |
+|     Gridify |   928.1 us | 13.41 us | 11.89 us |  1.07 |    0.02 |  6.8359 | 2.9297 |     46 KB |
+|Dynamic Linq | 1,068.5 us | 10.66 us |  9.97 us |  1.23 |    0.02 | 19.5313 | 9.7656 |    122 KB |
+|       Sieve | 1,126.8 us | 10.73 us | 10.04 us |  1.30 |    0.02 |  8.7891 | 3.9063 |     54 KB |
 
 ---
 
