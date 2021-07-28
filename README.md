@@ -135,15 +135,15 @@ but for example, if you need to just filter your data without paging or sorting 
 | --------------------- | -------- | --------------------------------------------------------- |
 | Equal                 | `==`     | `"FieldName ==Value"`                                      |
 | NotEqual              | `!=`     | `"FieldName !=Value"`                                      |
-| LessThan              | `<<`     | `"FieldName <<Value"`                                      |
-| GreaterThan           | `>>`     | `"FieldName >>Value"`                                      |
+| LessThan              | `<`      | `"FieldName < Value"`                                      |
+| GreaterThan           | `>`      | `"FieldName > Value"`                                      |
 | GreaterThanOrEqual    | `>=`     | `"FieldName >=Value"`                                      |
 | LessThanOrEqual       | `<=`     | `"FieldName <=Value"`                                      |
 | Contains - Like       | `=*`     | `"FieldName =*Value"`                                      |
 | NotContains - NotLike | `!*`     | `"FieldName !*Value"`                                      |
 | AND - &&              | `,`      | `"FirstName ==Value, LastName ==Value2"`                   |
 | OR - &#124;&#124;     | <code>&#124;</code>  | <code>"FirstName==Value&#124;LastName==Value2"</code>
-| Parenthesis           | `()`     | <code>"(FirstName=*Jo,Age<<30)&#124;(FirstName!=Hn,Age>>30)"</code> |
+| Parenthesis           | `()`     | <code>"(FirstName=*Jo,Age<30)&#124;(FirstName!=Hn,Age>30)"</code> |
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
 

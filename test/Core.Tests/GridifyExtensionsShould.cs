@@ -274,9 +274,9 @@ namespace Gridify.Tests
       public void ApplyFiltering_MultipleCondition()
       {
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering("name==Jack|name==Rose|id>>7")
+            .ApplyFiltering("name==Jack|name==Rose|id>=7")
             .ToList();
-         var expected = _fakeRepository.Where(q => q.Name == "Jack" || q.Name == "Rose" || q.Id > 7).ToList();
+         var expected = _fakeRepository.Where(q => q.Name == "Jack" || q.Name == "Rose" || q.Id >= 7).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -286,7 +286,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_ComplexWithParenthesis()
       {
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering("(name=*J|name=*S),(Id<<5)")
+            .ApplyFiltering("(name=*J|name=*S),(Id<5)")
             .ToList();
          var expected = _fakeRepository.Where(q => (q.Name.Contains("J") || q.Name.Contains("S")) && q.Id < 5).ToList();
          Assert.Equal(expected.Count, actual.Count);
@@ -298,7 +298,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_NestedParenthesisWithSpace()
       {
          // we shouldn't add spaces for values 
-         var gq = new GridifyQuery {Filter = " ( name =*J| ( name =*S , Id <<5 ) )"};
+         var gq = new GridifyQuery {Filter = " ( name =*J| ( name =*S , Id <5 ) )"};
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();

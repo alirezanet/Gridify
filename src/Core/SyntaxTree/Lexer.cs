@@ -53,14 +53,12 @@ namespace Gridify.Syntax
                return new SyntaxToken(SyntaxKind.NotEqual, _position += 2, "!=");
             case '!' when peek == '*':
                return new SyntaxToken(SyntaxKind.NotLike, _position += 2, "!*");
-            case '<' when peek == '<':
-               return new SyntaxToken(SyntaxKind.LessThan, _position += 2, "<<");
-            case '>' when peek == '>':
-               return new SyntaxToken(SyntaxKind.GreaterThan, _position += 2, ">>");
-            case '<' when peek == '=':
-               return new SyntaxToken(SyntaxKind.LessOrEqualThan, _position += 2, "<=");
-            case '>' when peek == '=':
-               return new SyntaxToken(SyntaxKind.GreaterOrEqualThan, _position += 2, ">=");
+            case '<':
+               return peek == '=' ? new SyntaxToken(SyntaxKind.LessOrEqualThan, _position += 2, "<=") :
+                  new SyntaxToken(SyntaxKind.LessThan, _position++, "<");
+            case '>':
+               return peek == '=' ? new SyntaxToken(SyntaxKind.GreaterOrEqualThan, _position += 2, ">=") : 
+                  new SyntaxToken(SyntaxKind.GreaterThan, _position++, ">");
          }
 
          if (char.IsLetter(Current) && !_waitingForValue)
