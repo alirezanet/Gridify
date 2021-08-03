@@ -156,7 +156,15 @@ we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (
 
 Filtering has four special character `, | ( )` to handle complex queries. if you want to use these characters in your query values (after `==`), you should add a backslash <code>\ </code> before them.
 
-
+JavaScript escape example:
+```javascript
+let esc = (v) => v.replace(/([(),|])/g, '\\$1')
+```
+Csharp escape example:
+```csharp
+var value = "(test,test2)";
+var esc = Regex.Replace(value, "([(),|])", "\\$1" ); // esc = \(test\,test2\)
+```
 ---
 
 ## Custom Mapping Support
