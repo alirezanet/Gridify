@@ -75,22 +75,42 @@ namespace Gridify.Syntax
                case SyntaxKind.NotLike:
                   be = Expression.Not(Expression.Call(body, GetContainsMethod(), Expression.Constant(value, body.Type)));
                   break;
+               case SyntaxKind.StartsWith:
+                  body = Expression.Call(body, GetToStringMethod());
+                  be = Expression.Call(body, GetStartWithMethod(), Expression.Constant(value?.ToString(), body.Type));
+                 break;
+               case SyntaxKind.EndsWith:
+                  body = Expression.Call(body, GetToStringMethod());
+                  be = Expression.Call(body, GetEndsWithMethod(), Expression.Constant(value?.ToString(), body.Type));
+                  break;
+               case SyntaxKind.NotStartsWith:
+                  body = Expression.Call(body, GetToStringMethod());
+                  be = Expression.Not(Expression.Call(body, GetStartWithMethod(), Expression.Constant(value?.ToString(), body.Type)));
+                  break;
+               case SyntaxKind.NotEndsWith:
+                  body = Expression.Call(body, GetToStringMethod());
+                  be = Expression.Not(Expression.Call(body, GetEndsWithMethod(), Expression.Constant(value?.ToString(), body.Type)));
+                  break;
                default:
                   return null;
             }
-
             return Expression.Lambda<Func<T, bool>>(be, exp.Parameters);
          }
-         catch (Exception)
+         catch (Exception ex)
          {
+            // Unhandled exceptions ignores gridify completely,
+            // Not sure this is the best approach or not yet
             return null;
          }
       }
 
-      private static MethodInfo GetContainsMethod()
-      {
-         return typeof(string).GetMethod("Contains", new[] {typeof(string)});
-      }
+      private static MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] {typeof(string)});
+
+      private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] {typeof(string)});
+
+      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] {typeof(string)});
+      
+      private static MethodInfo GetToStringMethod() => typeof(object).GetMethod("ToString");
 
       internal static Expression<Func<T, bool>> GenerateQuery<T>(ExpressionSyntax expression, IGridifyMapper<T> mapper)
       {

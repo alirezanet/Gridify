@@ -20,12 +20,16 @@
       GreaterThan,
       LessOrEqualThan,
       GreaterOrEqualThan,
+      StartsWith,
+      EndsWith,
 
       // expressions
       FieldExpression,
       BinaryExpression,
       ValueExpression,
       ValueToken,
-      ParenthesizedExpression
+      ParenthesizedExpression,
+      NotStartsWith,
+      NotEndsWith
    }
 }

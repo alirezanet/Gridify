@@ -146,6 +146,10 @@ but for example, if you need to just filter your data without paging or sorting 
 | LessThanOrEqual       | `<=`     | `"FieldName <=Value"`                                      |
 | Contains - Like       | `=*`     | `"FieldName =*Value"`                                      |
 | NotContains - NotLike | `!*`     | `"FieldName !*Value"`                                      |
+| StartsWith            | `^`      | `"FieldName ^ Value"`                                      |
+| NotStartsWith         | `!^`     | `"FieldName !^ Value"`                                     |
+| EndsWith              | `$`      | `"FieldName $ Value"`                                      |
+| NotEndsWith           | `!$`     | `"FieldName !$ Value"`                                     |
 | AND - &&              | `,`      | `"FirstName ==Value, LastName ==Value2"`                   |
 | OR - &#124;&#124;     | <code>&#124;</code>  | <code>"FirstName==Value&#124;LastName==Value2"</code>
 | Parenthesis           | `()`     | <code>"(FirstName=*Jo,Age<30)&#124;(FirstName!=Hn,Age>30)"</code> |

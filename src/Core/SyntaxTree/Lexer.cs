@@ -45,6 +45,14 @@ namespace Gridify.Syntax
                return new SyntaxToken(SyntaxKind.And, _position++, ",");
             case '|':
                return new SyntaxToken(SyntaxKind.Or, _position++, "|");
+            case '^':
+               return new SyntaxToken(SyntaxKind.StartsWith, _position++, "^");
+            case '$':
+               return new SyntaxToken(SyntaxKind.EndsWith, _position++, "$");
+            case '!' when peek == '^':
+               return new SyntaxToken(SyntaxKind.NotStartsWith, _position += 2, "!^");
+            case '!' when peek == '$':
+               return new SyntaxToken(SyntaxKind.NotEndsWith, _position += 2, "!$");
             case '=' when peek == '=':
                return new SyntaxToken(SyntaxKind.Equal, _position += 2, "==");
             case '=' when peek == '*':

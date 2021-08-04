@@ -70,7 +70,11 @@ namespace Gridify.Syntax
             SyntaxKind.GreaterThan,
             SyntaxKind.LessThan,
             SyntaxKind.GreaterOrEqualThan,
-            SyntaxKind.LessOrEqualThan
+            SyntaxKind.LessOrEqualThan,
+            SyntaxKind.StartsWith,
+            SyntaxKind.EndsWith,
+            SyntaxKind.NotStartsWith,
+            SyntaxKind.NotEndsWith
          };
 
          while (binaryKinds.Contains(Current.Kind))
