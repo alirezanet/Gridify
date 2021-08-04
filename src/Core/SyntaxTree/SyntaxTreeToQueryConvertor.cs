@@ -76,24 +76,49 @@ namespace Gridify.Syntax
                   be = Expression.Not(Expression.Call(body, GetContainsMethod(), Expression.Constant(value, body.Type)));
                   break;
                case SyntaxKind.StartsWith:
-                  body = Expression.Call(body, GetToStringMethod());
-                  be = Expression.Call(body, GetStartWithMethod(), Expression.Constant(value?.ToString(), body.Type));
-                 break;
+                  if (body.Type != typeof(string))
+                  {
+                     body = Expression.Call(body, GetToStringMethod());
+                     be = Expression.Call(body, GetStartWithMethod(), Expression.Constant(value?.ToString(), body.Type));
+                  }
+                  else
+                     be = Expression.Call(body, GetStartWithMethod(), Expression.Constant(value, body.Type));
+
+                  break;
                case SyntaxKind.EndsWith:
-                  body = Expression.Call(body, GetToStringMethod());
-                  be = Expression.Call(body, GetEndsWithMethod(), Expression.Constant(value?.ToString(), body.Type));
+                  if (body.Type != typeof(string))
+                  {
+                     body = Expression.Call(body, GetToStringMethod());
+                     be = Expression.Call(body, GetEndsWithMethod(), Expression.Constant(value?.ToString(), body.Type));
+                  }
+                  else
+                     be = Expression.Call(body, GetEndsWithMethod(), Expression.Constant(value, body.Type));
+
                   break;
                case SyntaxKind.NotStartsWith:
-                  body = Expression.Call(body, GetToStringMethod());
-                  be = Expression.Not(Expression.Call(body, GetStartWithMethod(), Expression.Constant(value?.ToString(), body.Type)));
+                  if (body.Type != typeof(string))
+                  {
+                     body = Expression.Call(body, GetToStringMethod());
+                     be = Expression.Not(Expression.Call(body, GetStartWithMethod(), Expression.Constant(value?.ToString(), body.Type)));
+                  }
+                  else
+                     be = Expression.Not(Expression.Call(body, GetStartWithMethod(), Expression.Constant(value, body.Type)));
+
                   break;
                case SyntaxKind.NotEndsWith:
-                  body = Expression.Call(body, GetToStringMethod());
-                  be = Expression.Not(Expression.Call(body, GetEndsWithMethod(), Expression.Constant(value?.ToString(), body.Type)));
+                  if (body.Type != typeof(string))
+                  {
+                     body = Expression.Call(body, GetToStringMethod());
+                     be = Expression.Not(Expression.Call(body, GetEndsWithMethod(), Expression.Constant(value?.ToString(), body.Type)));
+                  }
+                  else
+                     be = Expression.Not(Expression.Call(body, GetEndsWithMethod(), Expression.Constant(value, body.Type)));
+
                   break;
                default:
                   return null;
             }
+
             return Expression.Lambda<Func<T, bool>>(be, exp.Parameters);
          }
          catch (Exception)
@@ -109,7 +134,7 @@ namespace Gridify.Syntax
       private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] {typeof(string)});
 
       private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] {typeof(string)});
-      
+
       private static MethodInfo GetToStringMethod() => typeof(object).GetMethod("ToString");
 
       internal static Expression<Func<T, bool>> GenerateQuery<T>(ExpressionSyntax expression, IGridifyMapper<T> mapper)
