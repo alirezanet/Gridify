@@ -96,7 +96,7 @@ namespace Gridify.Syntax
             }
             return Expression.Lambda<Func<T, bool>>(be, exp.Parameters);
          }
-         catch (Exception ex)
+         catch (Exception)
          {
             // Unhandled exceptions ignores gridify completely,
             // Not sure this is the best approach or not yet
