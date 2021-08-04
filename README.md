@@ -71,7 +71,7 @@ var query = myDbContext.Persons.ApplyFiltering("name == John");
 // myDbContext.Persons.Where(p => p.Name == "John");
 ```
 
-### see more examples in the [tests](https://github.com/Alirezanet/Gridify/blob/ffba5e55a51f2dfa478a2963cde8e13cb88ec5c1/test/Core.Tests/GridifyExtensionsShould.cs#L90) 
+### see more examples in the [tests](https://github.com/alirezanet/Gridify/blob/ca492ca943c3406c8a5f4c130097ee2e6d7e06ec/test/Core.Tests/GridifyExtensionsShould.cs#L22) 
 
 ---
 
