@@ -4,3 +4,4 @@
 nuget.config* 
 .idea
 .vs
+packages
