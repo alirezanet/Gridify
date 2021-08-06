@@ -166,7 +166,7 @@ namespace Gridify
          if (gridifyQuery == null) return query;
          return string.IsNullOrWhiteSpace(gridifyQuery.Filter) ? query : ApplyFiltering(query, gridifyQuery.Filter, mapper);
       }
-
+      
       public static IQueryable<T> ApplyFiltering<T>(this IQueryable<T> query, string filter, IGridifyMapper<T> mapper = null)
       {
          if (string.IsNullOrWhiteSpace(filter))
@@ -241,6 +241,27 @@ namespace Gridify
       public static Paging<T> Gridify<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
       {
          mapper = mapper.FixMapper();
+         var res = query.GridifyQueryable(gridifyQuery, mapper);
+         return new Paging<T>(res.TotalItems, res.Query.ToList());
+      }
+      
+      /// <summary>
+      /// gets a query or collection,
+      /// adds filtering, ordering and paging
+      /// loads filtered and sorted data
+      /// return pagination ready result
+      /// </summary>
+      /// <param name="query">the original(target) queryable object</param>
+      /// <param name="queryOption">the configuration to apply paging, filtering and ordering</param>
+      /// <param name="mapper">this is an optional parameter to apply filtering and ordering using a custom mapping configuration</param>
+      /// <typeparam name="T">type of target entity</typeparam>
+      /// <returns>returns a loaded <c>Paging<T><c /> after applying filtering, ordering and paging </returns>
+      /// <returns></returns>
+      public static Paging<T> Gridify<T>(this IQueryable<T> query, Action<IGridifyQuery> queryOption, IGridifyMapper<T> mapper = null)
+      {
+         mapper = mapper.FixMapper();
+         var gridifyQuery = new GridifyQuery();
+         queryOption?.Invoke(gridifyQuery);
          var res = query.GridifyQueryable(gridifyQuery, mapper);
          return new Paging<T>(res.TotalItems, res.Query.ToList());
       }

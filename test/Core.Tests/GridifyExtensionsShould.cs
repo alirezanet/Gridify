@@ -30,6 +30,7 @@ namespace Gridify.Tests
          Assert.True(actual.Any());
       }
 
+
       [Fact]
       public void ApplyFiltering_SingleField_GridifyQuery()
       {
@@ -217,7 +218,7 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
-      
+
       [Fact]
       public void ApplyEverything_EmptyGridifyQuery()
       {
@@ -481,6 +482,29 @@ namespace Gridify.Tests
       #endregion
 
       #region "Other"
+
+      [Fact]
+      public void Gridify_ActionOverload()
+      {
+         var actual = _fakeRepository.AsQueryable()
+            .Gridify(q =>
+            {
+               q.Filter = "name==John";
+               q.PageSize = 13;
+               q.SortBy = "name";
+               q.IsSortAsc = false;
+            });
+
+         var query = _fakeRepository.AsQueryable().Where(q => q.Name == "John").OrderByDescending(q => q.Name);
+         var totalItems = query.Count();
+         var items = query.Skip(-2).Take(15).ToList();
+         var expected = new Paging<TestClass>() {Items = items, TotalItems = totalItems};
+
+         Assert.Equal(expected.TotalItems, actual.TotalItems);
+         Assert.Equal(expected.Items.Count(), actual.Items.Count());
+         Assert.True(actual.Items.Any());
+         Assert.Equal(expected.Items.First().Id , actual.Items.First().Id);
+      }
 
       [Theory]
       [InlineData(0, 5, true)]
