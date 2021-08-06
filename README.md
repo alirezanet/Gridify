@@ -1,6 +1,6 @@
 # Gridify
 
-<img alt="GitHub" src="https://img.shields.io/github/license/alirezanet/gridify"> <img alt="Nuget" src="https://img.shields.io/nuget/dt/gridify">
+<img alt="GitHub" src="https://img.shields.io/github/license/alirezanet/gridify"> <img alt="Nuget" src="https://img.shields.io/nuget/dt/gridify"> ![Nuget](https://img.shields.io/nuget/v/gridify) ![GitHub branch checks state](https://img.shields.io/github/checks-status/alirezanet/gridify/master)
 
 Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** using text-based data.
 
