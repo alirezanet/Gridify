@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Gridify.Syntax;
 
 namespace Gridify
@@ -119,8 +120,7 @@ namespace Gridify
          if (string.IsNullOrWhiteSpace(gridifyQuery.SortBy) || !mapper.HasMap(gridifyQuery.SortBy))
             return query;
 
-         var expression = mapper.GetExpression(gridifyQuery.SortBy);
-         return gridifyQuery.IsSortAsc ? query.OrderBy(expression) : query.OrderByDescending(expression);
+         return query.OrderByMember(mapper.GetExpression(gridifyQuery.SortBy), gridifyQuery.IsSortAsc);
       }
 
       /// <summary>
@@ -143,8 +143,8 @@ namespace Gridify
             return query;
 
          return gridifyQuery.IsSortAsc
-            ? query.OrderBy(groupOrder).ThenBy(mapper.GetExpression(gridifyQuery.SortBy))
-            : query.OrderByDescending(groupOrder).ThenBy(mapper.GetExpression(gridifyQuery.SortBy));
+            ? query.OrderBy(groupOrder).ThenByMember(mapper.GetExpression(gridifyQuery.SortBy),gridifyQuery.IsSortAsc)
+            : query.OrderByDescending(groupOrder).ThenByMember(mapper.GetExpression(gridifyQuery.SortBy),gridifyQuery.IsSortAsc);
       }
 
       public static IQueryable<T> ApplyPaging<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery)
@@ -166,7 +166,7 @@ namespace Gridify
          if (gridifyQuery == null) return query;
          return string.IsNullOrWhiteSpace(gridifyQuery.Filter) ? query : ApplyFiltering(query, gridifyQuery.Filter, mapper);
       }
-      
+
       public static IQueryable<T> ApplyFiltering<T>(this IQueryable<T> query, string filter, IGridifyMapper<T> mapper = null)
       {
          if (string.IsNullOrWhiteSpace(filter))
@@ -244,7 +244,7 @@ namespace Gridify
          var res = query.GridifyQueryable(gridifyQuery, mapper);
          return new Paging<T>(res.TotalItems, res.Query.ToList());
       }
-      
+
       /// <summary>
       /// gets a query or collection,
       /// adds filtering, ordering and paging
@@ -267,5 +267,88 @@ namespace Gridify
       }
 
       #endregion
+
+      /// <summary>
+      ///     Supports sorting of a given member as an expression when type is not known. It solves problem with LINQ to Entities unable to
+      ///     cast different types as 'System.DateTime', 'System.DateTime?' to type 'System.Object'.
+      ///     LINQ to Entities only supports casting Entity Data Model primitive types.
+      /// </summary>
+      /// <typeparam name="T">entity type</typeparam>
+      /// <param name="query">query to apply sorting on.</param>
+      /// <param name="expression">the member expression to apply</param>
+      /// <param name="isSortAsc">the sort order to apply</param>
+      /// <returns>Query with sorting applied as IOrderedQueryable of type T</returns>
+      private static IOrderedQueryable<T> OrderByMember<T>(
+         this IQueryable<T> query,
+         Expression<Func<T, object>> expression,
+         bool isSortAsc)
+      {
+         if (expression.Body is not UnaryExpression body) return isSortAsc ? query.OrderBy(expression) : query.OrderByDescending(expression);
+
+         if (body.Operand is MemberExpression memberExpression)
+         {
+            return
+               (IOrderedQueryable<T>)
+               query.Provider.CreateQuery(
+                  Expression.Call(
+                     typeof(Queryable),
+                     isSortAsc ? "OrderBy" : "OrderByDescending",
+                     new[] {typeof(T), memberExpression.Type},
+                     query.Expression,
+                     Expression.Lambda(memberExpression, expression.Parameters)));
+         }
+
+         return isSortAsc ? query.OrderBy(expression) : query.OrderByDescending(expression);
+      }
+
+      /// <summary>
+      ///     Supports sorting of a given member as an expression when type is not known. It solves problem with LINQ to Entities unable to
+      ///     cast different types as 'System.DateTime', 'System.DateTime?' to type 'System.Object'.
+      ///     LINQ to Entities only supports casting Entity Data Model primitive types.
+      /// </summary>
+      /// <typeparam name="T">entity type</typeparam>
+      /// <param name="query">query to apply sorting on.</param>
+      /// <param name="expression">the member expression to apply</param>
+      /// <param name="isSortAsc">the sort order to apply</param>
+      /// <returns>Query with sorting applied as IOrderedQueryable of type T</returns>
+      public static IOrderedQueryable<T> ThenByMember<T>(
+         this IQueryable<T> query,
+         Expression<Func<T, object>> expression,
+         bool isSortAsc)
+      {
+         return ((IOrderedQueryable<T>) query).ThenByMember(expression, isSortAsc);
+      }
+
+      /// <summary>
+      ///     Supports sorting of a given member as an expression when type is not known. It solves problem with LINQ to Entities unable to
+      ///     cast different types as 'System.DateTime', 'System.DateTime?' to type 'System.Object'.
+      ///     LINQ to Entities only supports casting Entity Data Model primitive types.
+      /// </summary>
+      /// <typeparam name="T">entity type</typeparam>
+      /// <param name="query">query to apply sorting on.</param>
+      /// <param name="expression">the member expression to apply</param>
+      /// <param name="isSortAsc">the sort order to apply</param>
+      /// <returns>Query with sorting applied as IOrderedQueryable of type T</returns>
+      private static IOrderedQueryable<T> ThenByMember<T>(
+         this IOrderedQueryable<T> query,
+         Expression<Func<T, object>> expression,
+         bool isSortAsc)
+      {
+         if (expression.Body is not UnaryExpression body) return isSortAsc ? query.ThenBy(expression) : query.ThenByDescending(expression);
+         if (body.Operand is MemberExpression memberExpression)
+         {
+            return
+               (IOrderedQueryable<T>)
+               query.Provider.CreateQuery(
+                  Expression.Call(
+                     typeof(Queryable),
+                     isSortAsc ? "ThenBy" : "ThenByDescending",
+                     new[] {typeof(T), memberExpression.Type},
+                     query.Expression,
+                     Expression.Lambda(memberExpression, expression.Parameters)));
+         }
+
+         return isSortAsc ? query.ThenBy(expression) : query.ThenByDescending(expression);
+      }
    }
 }
