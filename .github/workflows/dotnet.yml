@@ -8,31 +8,8 @@ on:
 
 jobs:
   build:
-
-    runs-on: windows-latest
-
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1
-
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.2
-      
-    - name: Navigate to Workspace
-      run: cd $GITHUB_WORKSPACE
-
-    - name: Create Build Directory
-      run: mkdir _build
-      
-    - name: Restore Packages
-      run: nuget restore EzRep.sln
-
-    - name: Build Solution
-      run: |
-        msbuild.exe gridify.sln /nologo /nr:false /p:platform="Any CPU" /p:configuration="Release"
-        
     - uses: actions/checkout@v2
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
