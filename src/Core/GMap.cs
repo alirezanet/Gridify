@@ -10,9 +10,9 @@ namespace Gridify
    {
       public string From { get; set; }
       public Expression<Func<T, object>> To { get; set; }
-      public Func<string, object> Convertor { get; set; }
+      public Func<string, object>? Convertor { get; set; }
 
-      public GMap(string from, Expression<Func<T, object>> to, Func<string, object> convertor = null)
+      public GMap(string from, Expression<Func<T, object>> to, Func<string, object>? convertor = null)
       {
          From = from;
          To = to;

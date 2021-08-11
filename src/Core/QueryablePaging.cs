@@ -4,17 +4,13 @@ namespace Gridify
 {
    public class QueryablePaging<T>
    {
-      public QueryablePaging()
+      public QueryablePaging(int count, IQueryable<T> query)
       {
-      }
-      
-      public QueryablePaging(int totalItems, IQueryable<T> query)
-      {
-         TotalItems = totalItems;
+         Count = count;
          Query = query;
       }
 
-      public int TotalItems { get; set; }
-      public IQueryable<T> Query { get; set; }
+      public int Count { get; }
+      public IQueryable<T> Query { get; }
    }
 }

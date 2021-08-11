@@ -361,9 +361,9 @@ namespace Gridify.Tests
       #region "ApplyOrdering"
 
       [Fact]
-      public void ApplyOrdering_SortBy_Ascending()
+      public void ApplyOrdering_OrderBy_Ascending()
       {
-         var gq = new GridifyQuery {SortBy = "name", IsSortAsc = true};
+         var gq = new GridifyQuery {OrderBy = "name"};
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrdering(gq)
             .ToList();
@@ -372,9 +372,9 @@ namespace Gridify.Tests
       }
 
       [Fact]
-      public void ApplyOrdering_SortBy_DateTime()
+      public void ApplyOrdering_OrderBy_DateTime()
       {
-         var gq = new GridifyQuery {SortBy = "MyDateTime", IsSortAsc = true};
+         var gq = new GridifyQuery {OrderBy = "MyDateTime"};
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrdering(gq)
             .ToList();
@@ -385,9 +385,9 @@ namespace Gridify.Tests
       }
 
       [Fact]
-      public void ApplyOrdering_SortBy_Descending()
+      public void ApplyOrdering_OrderBy_Descending()
       {
-         var gq = new GridifyQuery {SortBy = "Name", IsSortAsc = false};
+         var gq = new GridifyQuery {OrderBy = "Name desc"};
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrdering(gq)
             .ToList();
@@ -396,11 +396,30 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.Equal(expected.First().Id, actual.First().Id);
       }
+      
+      [Fact]
+      public void ApplyOrdering_MultipleOrderBy()
+      {
+         var gq = new GridifyQuery {OrderBy = "MyDateTime desc , id , name asc"};
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyOrdering(gq)
+            .ToList();
+         var expected = _fakeRepository
+                     .OrderByDescending(q => q.MyDateTime)
+                     .ThenBy(q=>q.Id)
+                     .ThenBy(q=> q.Name)
+                     .ToList();
+
+         Assert.Equal(expected.First().Id, actual.First().Id);
+         Assert.Equal(expected.Last().Id, actual.Last().Id);
+         Assert.Equal(expected, actual);
+      }
+
 
       [Fact]
       public void ApplyOrdering_SortUsingChildClassProperty()
       {
-         var gq = new GridifyQuery {SortBy = "Child_Name", IsSortAsc = false};
+         var gq = new GridifyQuery {OrderBy = "Child_Name desc"};
          var gm = new GridifyMapper<TestClass>()
             .GenerateMappings()
             .AddMap("Child_Name", q => q.ChildClass.Name);
@@ -416,7 +435,7 @@ namespace Gridify.Tests
       }
 
       [Fact]
-      public void ApplyOrdering_EmptySortBy_ShouldSkip()
+      public void ApplyOrdering_EmptyOrderBy_ShouldSkip()
       {
          var gq = new GridifyQuery();
          var actual = _fakeRepository.AsQueryable()
@@ -491,8 +510,7 @@ namespace Gridify.Tests
             {
                q.Filter = "name=John";
                q.PageSize = 13;
-               q.SortBy = "name";
-               q.IsSortAsc = false;
+               q.OrderBy = "name desc";
             });
 
          var query = _fakeRepository.AsQueryable().Where(q => q.Name == "John").OrderByDescending(q => q.Name);
@@ -516,7 +534,8 @@ namespace Gridify.Tests
       [InlineData(19, 10, true)]
       public void ApplyOrderingAndPaging_UsingCustomValues(short page, int pageSize, bool isSortAsc)
       {
-         var gq = new GridifyQuery {Page = page, PageSize = pageSize, SortBy = "Name", IsSortAsc = isSortAsc};
+         var orderByExp = "name " + (isSortAsc ? "asc" : "desc");
+         var gq = new GridifyQuery {Page = page, PageSize = pageSize, OrderBy = orderByExp};
          // actual
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrderingAndPaging(gq)

@@ -5,28 +5,24 @@ using Gridify.Syntax;
 
 namespace Gridify
 {
-   public partial class GridifyQuery : IGridifyQuery
+   public class GridifyQuery : IGridifyQuery
    {
       public GridifyQuery()
       {
       }
-
-      public GridifyQuery(string sortBy, bool isSortAsc, short page, int pageSize, string filter)
+      public GridifyQuery(string orderBy, short page, int pageSize, string filter)
       {
-         SortBy = sortBy;
-         IsSortAsc = isSortAsc;
          Page = page;
          PageSize = pageSize;
+         OrderBy = orderBy;
          Filter = filter;
       }
 
-      public string SortBy { get; set; }
-      public bool IsSortAsc { get; set; }
       public short Page { get; set; }
       public int PageSize { get; set; }
-      public string Filter { get; set; }
-
- 
-      
+      public string? OrderBy { get; set; }
+      public string? Filter { get; set; }
    }
+
+  
 }

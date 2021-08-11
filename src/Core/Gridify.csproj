@@ -11,6 +11,7 @@
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
       <LangVersion>latest</LangVersion>
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <Nullable>enable</Nullable>
       
       <!-- <GeneratePackageOnBuild>true</GeneratePackageOnBuild> -->
    </PropertyGroup>

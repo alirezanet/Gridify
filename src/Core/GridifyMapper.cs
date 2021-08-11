@@ -33,7 +33,7 @@ namespace Gridify
          return this;
       }
 
-      public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object>> to, Func<string, object> convertor = null!,
+      public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object>> to, Func<string, object>? convertor = null!,
          bool overrideIfExists = true)
       {
          if (!overrideIfExists && HasMap(from))

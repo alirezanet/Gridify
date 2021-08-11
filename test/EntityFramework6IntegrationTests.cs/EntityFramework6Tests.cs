@@ -18,7 +18,7 @@ namespace EntityFramework6IntegrationTests.cs
 
          using (var context = new EntityContext(connection))
          {
-            var gm = new GridifyQuery() { SortBy = "name" };
+            var gm = new GridifyQuery() { OrderBy = "name desc" };
             var expected = context.Customers.ApplyOrdering(gm).ToList();
             var actual = context.Customers
                            .OrderByDescending(q => q.Name)
@@ -36,7 +36,7 @@ namespace EntityFramework6IntegrationTests.cs
 
          using (var context = new EntityContext(connection))
          {
-            var gm = new GridifyQuery() { SortBy = "name" , IsSortAsc = true};
+            var gm = new GridifyQuery() { OrderBy = "name" };
             var expected = context.Customers.ApplyOrdering(gm).ToList();
             var actual = context.Customers
                .OrderBy(q => q.Name)
@@ -54,7 +54,7 @@ namespace EntityFramework6IntegrationTests.cs
 
          using (var context = new EntityContext(connection))
          {
-            var gm = new GridifyQuery() { SortBy = "name" , Filter = "id > 3"};
+            var gm = new GridifyQuery() { OrderBy = "name desc" , Filter = "id > 3"};
             var expected = context.Customers.ApplyFilterAndOrdering(gm).ToList();
             var actual = context.Customers
                .Where(q=>q.Id > 3)   

@@ -34,7 +34,7 @@ namespace EntityFrameworkIntegrationTests.cs
       public void GridifyQueryableDateTimeShouldNotThrowException()
       {
          // arrange
-         var gq = new GridifyQuery {IsSortAsc = true, SortBy = "CreateDate"};
+         var gq = new GridifyQuery {OrderBy = "CreateDate"};
 
          // act
          var exception = Record.Exception(() => _dbContext.Users.GridifyQueryable(gq));

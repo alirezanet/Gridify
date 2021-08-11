@@ -26,7 +26,7 @@ public IActionResult GetPersons([FromQuery] GridifyQuery gQuery)
 complete request sample:
 
 ```url
-http://exampleDomain.com/api/GetPersons?pageSize=100&page=1&sortBy=FirstName&isSortAsc=false&filter=Age%3D%3D10
+http://exampleDomain.com/api/GetPersons?pageSize=100&page=1&orderBy=FirstName&filter=Age%3D%3D10
 ```
 
 also we can totally ignore GridifyQuery
@@ -46,11 +46,10 @@ GridifyQuery is a simple class for configuring Filtering,Paging,Sorting.
 // for example, we get this object as a parameter from our API Controller
 var gQuery = new GridifyQuery()
 {
-    Filter = "FirstName==John",
-    IsSortAsc = false,
+    Filter = "FirstName=John",
     Page = 1,
     PageSize = 20,
-    SortBy = "LastName"
+    OrderBy = "LastName"
 };
 
 Paging<Person> pData =
@@ -66,9 +65,9 @@ Paging<Person> pData =
 Also, if you don't need paging and sorting features simply use `ApplyFiltering` extension instead of `Gridify`.
 
 ```c#
-var query = myDbContext.Persons.ApplyFiltering("name == John");
+var query = myDbContext.Persons.ApplyFiltering("name = John");
 // this is equal to : 
-// myDbContext.Persons.Where(p => p.Name == "John");
+// myDbContext.Persons.Where(p => p.Name = "John");
 ```
 
 ### see more examples in the [tests](https://github.com/alirezanet/Gridify/blob/ca492ca943c3406c8a5f4c130097ee2e6d7e06ec/test/Core.Tests/GridifyExtensionsShould.cs#L22) 
@@ -118,7 +117,7 @@ The library adds below extension methods to `IQueryable`:
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | ApplyFiltering (string)| Apply Filtering using a raw `string` and returns an `IQueryable<T>`                         |
 | ApplyFiltering (GridifyQuery)| Apply Filtering using `string Filter` property of `GridifyQuery` class and returns an `IQueryable<T>`                         |
-| ApplyOrdering          | Apply Ordering using `string SortBy` and `bool IsSortAsc` properties of `GridifyQuery` class and returns an `IQueryable<T>`   |
+| ApplyOrdering          | Apply Ordering using `string OrderBy` and `bool IsSortAsc` properties of `GridifyQuery` class and returns an `IQueryable<T>`   |
 | ApplyPaging            | Apply paging using `short Page` and `int PageSize` properties of `GridifyQuery` class and returns an `IQueryable<T>`          |
 | ApplyOrderingAndPaging | Apply Both Ordering and paging and returns an `IQueryable<T>`                                                                 |
 | ApplyFilterAndOrdering | Apply Both Filtering and Ordering and returns an `IQueryable<T>`                                                                 |
@@ -138,7 +137,7 @@ but for example, if you need to just filter your data without paging or sorting 
 
 | Name                  | Operator | Usage example                                             |
 | --------------------- | -------- | --------------------------------------------------------- |
-| Equal                 | `==`     | `"FieldName ==Value"`                                      |
+| Equal                 | `=`      | `"FieldName = Value"`                                      |
 | NotEqual              | `!=`     | `"FieldName !=Value"`                                      |
 | LessThan              | `<`      | `"FieldName < Value"`                                      |
 | GreaterThan           | `>`      | `"FieldName > Value"`                                      |
@@ -169,6 +168,24 @@ Csharp escape example:
 var value = "(test,test2)";
 var esc = Regex.Replace(value, "([(),|])", "\\$1" ); // esc = \(test\,test2\)
 ```
+
+---
+
+## Multiple OrderBy
+OrderBy accepts a comma separated field names follow by `asc` or `desc` keyword.
+by default, if you don't add these keywords,
+gridify assumes you need Ascending ordering.
+
+e.g
+```c#
+// asc - desc
+var gq = new GridifyQuery() { OrderBy = "Id" }; // default assending its equal to "Id asc"
+var gq = new GridifyQuery() { OrderBy = "Id desc" }; // use desending ordering
+
+// multiple orderings example
+var gq = new GridifyQuery() { OrderBy = "Id desc, FirstName asc, LastName" }; 
+```
+
 ---
 
 ## Custom Mapping Support
@@ -213,9 +230,8 @@ var customMappings = new GridifyMapper<Person>()
 // as i mentioned before. usually we don't need create this object manually.
 var gQuery = new GridifyQuery()
 {
-    Filter = "FirstName==John,Address=*st",
-    IsSortAsc = true,
-    SortBy = "PhoneNumber"
+    Filter = "FirstName=John,Address=*st",
+    OrderBy = "PhoneNumber"
 };
 
 // myRepository: could be entity framework context or any other collections
@@ -229,6 +245,7 @@ by default `GridifyMapper` is `Case-insensitive` but you can change this behavio
 ```c#
 var customMappings = new GridifyMapper<Person>(true); // mapper is case-sensitive now.
 ```
+
 
 ---
 

@@ -7,7 +7,7 @@ namespace Gridify.Syntax
 {
    public static class ExpressionToQueryConvertor
    {
-      private static Expression<Func<T, bool>> ConvertBinaryExpressionSyntaxToQuery<T>(BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)
+      private static Expression<Func<T, bool>>? ConvertBinaryExpressionSyntaxToQuery<T>(BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)
       {
          try
          {
@@ -18,6 +18,7 @@ namespace Gridify.Syntax
             if (left == null || right == null) return null;
 
             var gMap = mapper.GetGMap(left);
+            if (gMap == null) return null;
 
             var exp = gMap.To;
             var body = exp.Body;
@@ -129,13 +130,13 @@ namespace Gridify.Syntax
          }
       }
 
-      private static MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] {typeof(string)});
+      private static MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] {typeof(string)})!;
 
-      private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] {typeof(string)});
+      private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] {typeof(string)})!;
 
-      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] {typeof(string)});
+      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] {typeof(string)})!;
 
-      private static MethodInfo GetToStringMethod() => typeof(object).GetMethod("ToString");
+      private static MethodInfo GetToStringMethod() => typeof(object).GetMethod("ToString")!;
 
       internal static Expression<Func<T, bool>> GenerateQuery<T>(ExpressionSyntax expression, IGridifyMapper<T> mapper)
       {
@@ -147,7 +148,7 @@ namespace Gridify.Syntax
                   var bExp = expression as BinaryExpressionSyntax;
 
                   if (bExp!.Left is FieldExpressionSyntax && bExp.Right is ValueExpressionSyntax)
-                     return ConvertBinaryExpressionSyntaxToQuery(bExp, mapper);
+                     return ConvertBinaryExpressionSyntaxToQuery(bExp, mapper) ?? throw new GridifyFilteringException("Invalid expression");
 
                   Expression<Func<T, bool>> leftQuery;
                   Expression<Func<T, bool>> rightQuery;
