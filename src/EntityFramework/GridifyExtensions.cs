@@ -20,7 +20,7 @@ namespace Gridify.EntityFramework
       {
          mapper = mapper.FixMapper ();
          var res = await query.GridifyQueryableAsync (gridifyQuery, mapper);
-         return new Paging<T> () { Items = await res.Query.ToListAsync (), TotalItems = res.TotalItems };
+         return new Paging<T> () { Data = await res.Query.ToListAsync (), Count = res.TotalItems };
       }
 #endregion
    }

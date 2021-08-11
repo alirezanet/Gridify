@@ -41,7 +41,7 @@ namespace Benchmarks
       {
          Ds .ApplyFiltering("Name=*a").Consume(Consumer);
          Ds .ApplyFiltering("Id>5").Consume(Consumer);
-         Ds .ApplyFiltering("Name==Ali").Consume(Consumer);
+         Ds .ApplyFiltering("Name=Ali").Consume(Consumer);
       }
 
 

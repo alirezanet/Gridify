@@ -22,7 +22,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_SingleField()
       {
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering("name==John")
+            .ApplyFiltering("name=John")
             .ToList();
          var expected = _fakeRepository.Where(q => q.Name == "John").ToList();
          Assert.Equal(expected.Count, actual.Count);
@@ -34,7 +34,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_SingleField_GridifyQuery()
       {
-         var gq = new GridifyQuery {Filter = "name==John"};
+         var gq = new GridifyQuery {Filter = "name=John"};
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -54,7 +54,7 @@ namespace Gridify.Tests
          gm.AddMap("date", g => g.MyDateTime, q => q == "null" ? null : q);
 
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering("date==null", gm)
+            .ApplyFiltering("date=null", gm)
             .ToList();
 
          var expected = _fakeRepository.Where(q => q.MyDateTime == null).ToList();
@@ -66,7 +66,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_DuplicateFiledName()
       {
-         const string gq = "name==John|name==Sara";
+         const string gq = "name=John|name=Sara";
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -78,10 +78,10 @@ namespace Gridify.Tests
 
 
       [Theory]
-      [InlineData(@" name ==\(LI\,AM\)", "(LI,AM)")]
-      [InlineData(@" name ==jessi==ca", "jessi==ca")]
-      [InlineData(@" name ==\\Liam", @"\Liam")]
-      [InlineData(@" name ==LI \| AM", @"LI | AM")]
+      [InlineData(@" name =\(LI\,AM\)", "(LI,AM)")]
+      [InlineData(@" name =jessi=ca", "jessi=ca")]
+      [InlineData(@" name =\\Liam", @"\Liam")]
+      [InlineData(@" name =LI \| AM", @"LI | AM")]
       public void ApplyFiltering_EscapeSpecialCharacters(string textFilter, string rawText)
       {
          var gq = new GridifyQuery {Filter = textFilter};
@@ -97,7 +97,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_ParenthesisQueryWithoutEscapeShouldThrowException()
       {
-         var gq = new GridifyQuery {Filter = @"name==(LI,AM)"};
+         var gq = new GridifyQuery {Filter = @"name=(LI,AM)"};
          Action act = () => _fakeRepository.AsQueryable()
             .ApplyFiltering(gq);
 
@@ -110,7 +110,7 @@ namespace Gridify.Tests
       {
          var guidString = "e2cec5dd-208d-4bb5-a852-50008f8ba366";
          var guid = Guid.Parse(guidString);
-         var gq = new GridifyQuery {Filter = "myGuid==" + guidString};
+         var gq = new GridifyQuery {Filter = "myGuid=" + guidString};
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -124,7 +124,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_SingleBrokenGuidField()
       {
          var brokenGuidString = "e2cec5dd-208d-4bb5-a852-";
-         var gq = new GridifyQuery {Filter = "myGuid==" + brokenGuidString};
+         var gq = new GridifyQuery {Filter = "myGuid=" + brokenGuidString};
 
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
@@ -159,7 +159,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_InvalidCharacterShouldThrowException()
       {
-         var gq = new GridifyQuery {Filter = "@name==ali"};
+         var gq = new GridifyQuery {Filter = "@name=ali"};
          Assert.Throws<GridifyFilteringException>(() =>
             _fakeRepository.AsQueryable().ApplyFiltering(gq).ToList());
       }
@@ -188,7 +188,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_CustomConvertor()
       {
-         const string gq = "name==liam";
+         const string gq = "name=liam";
          var gm = new GridifyMapper<TestClass>()
             .GenerateMappings()
             .AddMap("name", q => q.Name, q => q.ToUpper()); // using client side Custom convertor
@@ -303,7 +303,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_MultipleCondition()
       {
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering("name==Jack|name==Rose|id>=7")
+            .ApplyFiltering("name=Jack|name=Rose|id>=7")
             .ToList();
          var expected = _fakeRepository.Where(q => q.Name == "Jack" || q.Name == "Rose" || q.Id >= 7).ToList();
          Assert.Equal(expected.Count, actual.Count);
@@ -340,7 +340,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_UsingChildClassProperty()
       {
-         var gq = new GridifyQuery {Filter = "Child_Name==Bob"};
+         var gq = new GridifyQuery {Filter = "Child_Name=Bob"};
          var gm = new GridifyMapper<TestClass>()
             .GenerateMappings()
             .AddMap("Child_name", q => q.ChildClass.Name);
@@ -489,7 +489,7 @@ namespace Gridify.Tests
          var actual = _fakeRepository.AsQueryable()
             .Gridify(q =>
             {
-               q.Filter = "name==John";
+               q.Filter = "name=John";
                q.PageSize = 13;
                q.SortBy = "name";
                q.IsSortAsc = false;
@@ -498,12 +498,12 @@ namespace Gridify.Tests
          var query = _fakeRepository.AsQueryable().Where(q => q.Name == "John").OrderByDescending(q => q.Name);
          var totalItems = query.Count();
          var items = query.Skip(-2).Take(15).ToList();
-         var expected = new Paging<TestClass>() {Items = items, TotalItems = totalItems};
+         var expected = new Paging<TestClass>() {Data = items, Count = totalItems};
 
-         Assert.Equal(expected.TotalItems, actual.TotalItems);
-         Assert.Equal(expected.Items.Count(), actual.Items.Count());
-         Assert.True(actual.Items.Any());
-         Assert.Equal(expected.Items.First().Id , actual.Items.First().Id);
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected.Data.Count(), actual.Data.Count());
+         Assert.True(actual.Data.Any());
+         Assert.Equal(expected.Data.First().Id , actual.Data.First().Id);
       }
 
       [Theory]
@@ -560,7 +560,7 @@ namespace Gridify.Tests
          lst.Add(new TestClass(15, "Korosh", (TestClass) lst[0].Clone()));
          lst.Add(new TestClass(16, "Kamran", (TestClass) lst[1].Clone()));
          lst.Add(new TestClass(17, "Saeid", (TestClass) lst[2].Clone()));
-         lst.Add(new TestClass(18, "jessi==ca", null));
+         lst.Add(new TestClass(18, "jessi=ca", null));
          lst.Add(new TestClass(19, "Ped=ram", null));
          lst.Add(new TestClass(20, "Peyman!", null));
          lst.Add(new TestClass(21, "Fereshte", null));
