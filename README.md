@@ -172,7 +172,7 @@ var esc = Regex.Replace(value, "([(),|])", "\\$1" ); // esc = \(test\,test2\)
 ---
 
 ## Multiple OrderBy
-OrderBy accepts a comma separated field names follow by `asc` or `desc` keyword.
+OrderBy accepts comma-separated field names followed by `asc` or `desc` keyword.
 by default, if you don't add these keywords,
 gridify assumes you need Ascending ordering.
 
