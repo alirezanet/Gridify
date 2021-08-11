@@ -51,7 +51,7 @@ namespace Gridify.Tests
          var gm = new GridifyMapper<TestClass>().GenerateMappings();
 
          // map any string to related property , also use Client convertor to handle custom scenarios
-         gm.AddMap("date", g => g.MyDateTime, q => q == "null" ? null : q);
+         gm.AddMap("date", g => g.MyDateTime!, q => (q == "null" ? null : q)!);
 
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering("date=null", gm)
