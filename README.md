@@ -67,7 +67,7 @@ Also, if you don't need paging and sorting features simply use `ApplyFiltering` 
 ```c#
 var query = myDbContext.Persons.ApplyFiltering("name = John");
 // this is equal to : 
-// myDbContext.Persons.Where(p => p.Name = "John");
+// myDbContext.Persons.Where(p => p.Name == "John");
 ```
 
 ### see more examples in the [tests](https://github.com/alirezanet/Gridify/blob/ca492ca943c3406c8a5f4c130097ee2e6d7e06ec/test/Core.Tests/GridifyExtensionsShould.cs#L22) 
