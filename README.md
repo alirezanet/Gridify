@@ -149,15 +149,15 @@ but for example, if you need to just filter your data without paging or sorting 
 | NotStartsWith         | `!^`     | `"FieldName !^ Value"`                                     |
 | EndsWith              | `$`      | `"FieldName $ Value"`                                      |
 | NotEndsWith           | `!$`     | `"FieldName !$ Value"`                                     |
-| AND - &&              | `,`      | `"FirstName ==Value, LastName ==Value2"`                   |
-| OR - &#124;&#124;     | <code>&#124;</code>  | <code>"FirstName==Value&#124;LastName==Value2"</code>
+| AND - &&              | `,`      | `"FirstName = Value, LastName = Value2"`                   |
+| OR - &#124;&#124;     | <code>&#124;</code>  | <code>"FirstName=Value&#124;LastName=Value2"</code>
 | Parenthesis           | `()`     | <code>"(FirstName=*Jo,Age<30)&#124;(FirstName!=Hn,Age>30)"</code> |
 
 we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
 **Escape character hint**:
 
-Filtering has four special character `, | ( )` to handle complex queries. if you want to use these characters in your query values (after `==`), you should add a backslash <code>\ </code> before them.
+Filtering has four special character `, | ( )` to handle complex queries. if you want to use these characters in your query values (after `=`), you should add a backslash <code>\ </code> before them.
 
 JavaScript escape example:
 ```javascript
