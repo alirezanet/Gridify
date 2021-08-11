@@ -57,8 +57,8 @@ Paging<Person> pData =
           .Gridify(gQuery); // Filter,Sort & Apply Paging
 
 
-// pData.TotalItems => Count persons with 'John', First name
-// pData.Items      => First 20 Persons with 'John', First Name
+// pData.Count => Count persons with 'John', First name
+// pData.Data      => First 20 Persons with 'John', First Name
 ```
 
 ## ApplyFiltering
@@ -122,7 +122,7 @@ The library adds below extension methods to `IQueryable`:
 | ApplyOrderingAndPaging | Apply Both Ordering and paging and returns an `IQueryable<T>`                                                                 |
 | ApplyFilterAndOrdering | Apply Both Filtering and Ordering and returns an `IQueryable<T>`                                                                 |
 | ApplyEverything        | Apply Filtering,Ordering and paging and returns an `IQueryable<T>`                                                            |
-| GridifyQueryable       | Like ApplyEverything but it returns a `QueryablePaging<T>` that have an extra `int totalItems` property to use for pagination |
+| GridifyQueryable       | Like ApplyEverything but it returns a `QueryablePaging<T>` that have an extra `int Count` property to use for pagination |
 | Gridify                | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`                                                    |
 
 **TIP**:
@@ -258,7 +258,7 @@ var result = query.ProjectTo<PersonDTO>().ToList();
 
 // AutoMapper ProjectTo + Filtering + Ordering + Paging, example
 QueryablePaging<Person> qp = myDbContext.Persons.GridifyQueryable(gridifyQuery);
-var result = new Paging<Person> () { Items = qp.Query.ProjectTo<PersonDTO>().ToList (), TotalItems = qp.TotalItems };
+var result = new Paging<Person> (qp.Count,qp.Query.ProjectTo<PersonDTO>().ToList ());
 ```
 
 ## EntityFramework integration
