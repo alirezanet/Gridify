@@ -39,13 +39,13 @@ namespace Gridify
                continue;
 
             var name = char.ToLowerInvariant(item.Name[0]) + item.Name.Substring(1); // camel-case name
-            _mappings.Add(new GMap<T>(name, CreateExpression(item.Name)));
+            _mappings.Add(new GMap<T>(name, CreateExpression(item.Name)!));
          }
 
          return this;
       }
 
-      public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object>> to, Func<string, object>? convertor = null!,
+      public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null!,
          bool overrideIfExists = true)
       {
          if (!overrideIfExists && HasMap(from))
@@ -101,7 +101,7 @@ namespace Gridify
             : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
          if (expression == null)
             throw new GridifyMapperException($"Mapping Key `{key}` not found.");
-         return expression;
+         return expression!;
       }
 
       public IEnumerable<IGMap<T>> GetCurrentMaps()

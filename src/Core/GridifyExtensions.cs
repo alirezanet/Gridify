@@ -66,7 +66,7 @@ namespace Gridify
             // skip if there is no mappings available
             if (!mapper.HasMap(member)) continue;
             
-            yield return mapper.GetExpression(member);
+            yield return mapper.GetExpression(member)!;
          }
       }
 
