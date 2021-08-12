@@ -30,7 +30,7 @@ namespace Gridify.Tests
          {
             Id = Id,
             Name = Name,
-            ChildClass = (TestClass) ChildClass.Clone(),
+            ChildClass = (TestClass)ChildClass?.Clone()!,
             MyGuid = MyGuid
          };
       }

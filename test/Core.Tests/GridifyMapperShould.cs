@@ -44,7 +44,7 @@ namespace Gridify.Tests
       {
          _sut.Configuration.CaseSensitive = false;
          _sut.AddMap("name", q => q.Name);
-         _sut.AddMap("childDate", q => q.ChildClass.MyDateTime);
+         _sut.AddMap("childDate", q => q.ChildClass!.MyDateTime);
          _sut.RemoveMap(nameof(TestClass.Name));
          Assert.Single(_sut.GetCurrentMaps());
       }
