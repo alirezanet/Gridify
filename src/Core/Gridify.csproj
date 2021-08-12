@@ -16,8 +16,4 @@
       <!-- <GeneratePackageOnBuild>true</GeneratePackageOnBuild> -->
    </PropertyGroup>
 
-   <ItemGroup>
-     <PackageReference Include="EntityFramework" Version="6.4.4" />
-   </ItemGroup>
-
 </Project>
