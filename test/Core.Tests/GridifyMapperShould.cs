@@ -25,7 +25,7 @@ namespace Gridify.Tests
       [Fact]
       public void CaseSensitivity()
       {
-         var sut = new GridifyMapper<TestClass>(true);
+         var sut = new GridifyMapper<TestClass>(q => q.CaseSensitive = true);
          sut.AddMap("id", q => q.Id);
 
          Assert.True(sut.HasMap("id"));
@@ -42,6 +42,7 @@ namespace Gridify.Tests
       [Fact]
       public void RemoveMap()
       {
+         _sut.Configuration.CaseSensitive = false;
          _sut.AddMap("name", q => q.Name);
          _sut.AddMap("Id", q => q.Id);
          _sut.RemoveMap(nameof(TestClass.Name));
@@ -60,6 +61,9 @@ namespace Gridify.Tests
          //The thrown exception can be used for even more detailed assertions.
          Assert.Equal("Duplicate Key. the 'test' key already exists", exception.Message);
       }
+      
+      
+      
 
    }
 }

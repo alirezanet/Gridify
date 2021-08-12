@@ -14,7 +14,7 @@ namespace Gridify
       Expression<Func<T, object>> GetExpression(string from);
       IGMap<T>? GetGMap(string from);
       bool HasMap(string key);
-      bool CaseSensitive {get;} 
+      public GridifyMapperConfiguration Configuration { get; }
       IEnumerable<IGMap<T>> GetCurrentMaps();
    }
 }

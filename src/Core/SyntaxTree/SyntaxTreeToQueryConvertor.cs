@@ -24,23 +24,27 @@ namespace Gridify.Syntax
             var body = exp.Body;
 
             // Remove the boxing for value types
-            if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression) body).Operand;
+            if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression)body).Operand;
 
-            object value = right;
+            object? value = right;
 
             // execute user custom Convertor
             if (gMap.Convertor != null)
                value = gMap.Convertor.Invoke(right);
 
-
             if (value != null && body.Type != value.GetType())
                try
                {
-                  // handle broken guids,  github issue #2
-                  if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
+                  if (mapper.Configuration.AllowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual  && value.ToString() == "null")
+                     value = null;
+                  else
+                  {
+                     // handle broken guids,  github issue #2
+                     if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
 
-                  var converter = TypeDescriptor.GetConverter(body.Type);
-                  value = converter.ConvertFromString(value.ToString());
+                     var converter = TypeDescriptor.GetConverter(body.Type);
+                     value = converter.ConvertFromString(value.ToString())!;
+                  }
                }
                catch (FormatException)
                {
@@ -130,11 +134,11 @@ namespace Gridify.Syntax
          }
       }
 
-      private static MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] {typeof(string)})!;
+      private static MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] { typeof(string) })!;
 
-      private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] {typeof(string)})!;
+      private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] { typeof(string) })!;
 
-      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] {typeof(string)})!;
+      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
 
       private static MethodInfo GetToStringMethod() => typeof(object).GetMethod("ToString")!;
 

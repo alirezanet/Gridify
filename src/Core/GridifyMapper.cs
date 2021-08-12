@@ -8,24 +8,36 @@ namespace Gridify
 {
    public class GridifyMapper<T> : IGridifyMapper<T>
    {
-      private readonly HashSet<IGMap<T>> _mappings;
+      public GridifyMapperConfiguration Configuration { get; }
+      private readonly List<IGMap<T>> _mappings;
 
-      public GridifyMapper(bool caseSensitive = false)
+      public GridifyMapper()
       {
-         CaseSensitive = caseSensitive;
-         _mappings = new HashSet<IGMap<T>>();
+         Configuration = new GridifyMapperConfiguration();
+         _mappings = new List<IGMap<T>>();
       }
 
-      public bool CaseSensitive { get; }
+      public GridifyMapper(GridifyMapperConfiguration configuration)
+      {
+         Configuration = configuration;
+         _mappings = new List<IGMap<T>>();
+      }
+
+      public GridifyMapper(Action<GridifyMapperConfiguration> configuration)
+      {
+         Configuration = new GridifyMapperConfiguration();
+         configuration.Invoke(Configuration);
+         _mappings = new List<IGMap<T>>();
+      }
 
       public IGridifyMapper<T> GenerateMappings()
       {
          foreach (var item in typeof(T).GetProperties())
          {
             // skip classes
-            if(item.PropertyType.IsClass && item.PropertyType != typeof(string))
+            if (item.PropertyType.IsClass && item.PropertyType != typeof(string))
                continue;
-            
+
             var name = char.ToLowerInvariant(item.Name[0]) + item.Name.Substring(1); // camel-case name
             _mappings.Add(new GMap<T>(name, CreateExpression(item.Name)));
          }
@@ -56,9 +68,9 @@ namespace Gridify
 
       public IGridifyMapper<T> RemoveMap(string from)
       {
-         _ = CaseSensitive
-            ? _mappings.RemoveWhere(q => from.Equals(q.From))
-            : _mappings.RemoveWhere(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
+         var map = GetGMap(from);
+         if (map != null)
+            _mappings.Remove(map);
          return this;
       }
 
@@ -70,21 +82,21 @@ namespace Gridify
 
       public bool HasMap(string from)
       {
-         return CaseSensitive
+         return Configuration.CaseSensitive
             ? _mappings.Any(q => q.From == from)
             : _mappings.Any(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
       }
 
       public IGMap<T>? GetGMap(string from)
       {
-         return CaseSensitive
+         return Configuration.CaseSensitive
             ? _mappings.FirstOrDefault(q => from.Equals(q.From))
             : _mappings.FirstOrDefault(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
       }
 
       public Expression<Func<T, object>> GetExpression(string key)
       {
-         var expression = CaseSensitive
+         var expression = Configuration.CaseSensitive
             ? _mappings.FirstOrDefault(q => key.Equals(q.From))?.To
             : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
          if (expression == null)
@@ -94,7 +106,7 @@ namespace Gridify
 
       public IEnumerable<IGMap<T>> GetCurrentMaps()
       {
-         return _mappings.AsEnumerable();
+         return _mappings;
       }
 
       private static Expression<Func<T, object>> CreateExpression(string from)
