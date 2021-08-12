@@ -243,7 +243,11 @@ var gridifiedData = myRepository.Persons.Gridify(gQuery, customMappings);
 by default `GridifyMapper` is `Case-insensitive` but you can change this behavior if you need `Case-Sensitive` mappings.
 
 ```c#
-var customMappings = new GridifyMapper<Person>(true); // mapper is case-sensitive now.
+var customMappings = new GridifyMapper<Person>( q => 
+{ 
+   q.CaseSensitive = true;   // enalbe case-sensitvity.
+   q.AllowNullSearch = true; // enable searching for null values
+}); 
 ```
 
 
