@@ -245,8 +245,8 @@ by default `GridifyMapper` is `Case-insensitive` but you can change this behavio
 ```c#
 var customMappings = new GridifyMapper<Person>( q => 
 { 
-   q.CaseSensitive = true;   // enalbe case-sensitvity.
-   q.AllowNullSearch = true; // enable searching for null values
+   q.CaseSensitive = true;    // enalbe case-sensitvity.
+   q.AllowNullSearch = false; // disable searching for null values
 }); 
 ```
 
