@@ -4,7 +4,7 @@
 
 Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** using text-based data.
 
-The best use case of this library is Asp-net APIs. when you need to get some string base filtering conditions to filter data or sort it by a field name or apply pagination concepts to your lists and return a **pageable**, data grid ready information, from any repository or database.
+The best use case of this library is Asp-net APIs. When you need to get some string base filtering conditions to filter data or sort it by a field name or apply pagination concepts to your lists and return a **pageable**, data grid ready information, from any repository or database.
 
 ---
 
@@ -29,7 +29,7 @@ complete request sample:
 http://exampleDomain.com/api/GetPersons?pageSize=100&page=1&orderBy=FirstName&filter=Age%3D%3D10
 ```
 
-also we can totally ignore GridifyQuery
+Also, we can totally ignore GridifyQuery
 
 ```url
 http://exampleDomain.com/api/GetPersons
@@ -76,8 +76,8 @@ var query = myDbContext.Persons.ApplyFiltering("name = John");
 
 ## Performance comparison
 
-Filtering is the most expensive feature in gridify. the below benchmark is comparing filtering in the most known dynamic linq libraries. as you can see, gridify has the closest result to the native linq.
-also, I Should note other features like Pagination and Sorting has almost zero overhead in Gridify.
+Filtering is the most expensive feature in gridify. the following benchmark is comparing filtering in the most known dynamic linq libraries. As you can see, gridify has the closest result to the native linq.
+Also, i Should note other features like Pagination and Sorting have almost zero overhead in Gridify.
 
 BenchmarkDotNet=v0.13.0, OS=Windows 10.0.19043.1110 (21H1/May2021Update)
 11th Gen Intel Core i5-11400F 2.60GHz, 1 CPU, 12 logical and 6 physical cores
@@ -115,21 +115,21 @@ The library adds below extension methods to `IQueryable`:
 
 | Extension              | Description                                                                                                                   |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| ApplyFiltering (string)| Apply Filtering using a raw `string` and returns an `IQueryable<T>`                         |
-| ApplyFiltering (GridifyQuery)| Apply Filtering using `string Filter` property of `GridifyQuery` class and returns an `IQueryable<T>`                         |
-| ApplyOrdering          | Apply Ordering using `string OrderBy` and `bool IsSortAsc` properties of `GridifyQuery` class and returns an `IQueryable<T>`   |
+| ApplyFiltering (string)| Apply filtering using a raw `string` and returns an `IQueryable<T>`                         |
+| ApplyFiltering (GridifyQuery)| Apply filtering using `string Filter` property of `GridifyQuery` class and returns an `IQueryable<T>`                         |
+| ApplyOrdering          | Apply ordering using `string OrderBy` and `bool IsSortAsc` properties of `GridifyQuery` class and returns an `IQueryable<T>`   |
 | ApplyPaging            | Apply paging using `short Page` and `int PageSize` properties of `GridifyQuery` class and returns an `IQueryable<T>`          |
-| ApplyOrderingAndPaging | Apply Both Ordering and paging and returns an `IQueryable<T>`                                                                 |
-| ApplyFilterAndOrdering | Apply Both Filtering and Ordering and returns an `IQueryable<T>`                                                                 |
-| ApplyEverything        | Apply Filtering,Ordering and paging and returns an `IQueryable<T>`                                                            |
+| ApplyOrderingAndPaging | Apply both Ordering and paging and returns an `IQueryable<T>`                                                                 |
+| ApplyFilterAndOrdering | Apply both filtering and ordering and returns an `IQueryable<T>`                                                                 |
+| ApplyEverything        | Apply filtering,ordering and paging and returns an `IQueryable<T>`                                                            |
 | GridifyQueryable       | Like ApplyEverything but it returns a `QueryablePaging<T>` that have an extra `int Count` property to use for pagination |
-| Gridify                | Receives a `GridifyQuery` ,Load All requested data and returns `Paging<T>`                                                    |
+| Gridify                | Receives a `GridifyQuery` , loads All requested data and returns `Paging<T>`                                                    |
 
 **TIP**:
 
-`Gridify` function is an _ALL-IN-ONE package_, that applies **filtering** and **ordering** and **paging** to your data and returns a `Paging<T>`,
+`Gridify` function is an _ALL-IN-ONE package_, that applies **filtering** and **ordering** and **paging** to your data and returns a `Paging<T>`.
 
-but for example, if you need to just filter your data without paging or sorting options you can use `ApplyFiltering` function instead.
+But for example, if you need to just filter your data without paging or sorting options you can use `ApplyFiltering` function instead.
 
 ---
 
@@ -153,11 +153,11 @@ but for example, if you need to just filter your data without paging or sorting 
 | OR - &#124;&#124;     | <code>&#124;</code>  | <code>"FirstName=Value&#124;LastName=Value2"</code>
 | Parenthesis           | `()`     | <code>"(FirstName=*Jo,Age<30)&#124;(FirstName!=Hn,Age>30)"</code> |
 
-we can easily create complex queries using Parenthesis`()` with AND (`,`) + OR (`|`) operators.
+We can easily create complex queries using parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
 **Escape character hint**:
 
-Filtering has four special character `, | ( )` to handle complex queries. if you want to use these characters in your query values (after `=`), you should add a backslash <code>\ </code> before them.
+Filtering has four special character `, | ( )` to handle complex queries. If you want to use these characters in your query values (after `=`), you should add a backslash <code>\ </code> before them.
 
 JavaScript escape example:
 ```javascript
@@ -190,7 +190,7 @@ var gq = new GridifyQuery() { OrderBy = "Id desc, FirstName asc, LastName" };
 
 ## Custom Mapping Support
 
-By default Gridify is using a `GridifyMapper` object that automatically maps your string based field names to actual properties in your Entities but if you have a custom **DTO** (Data Transfer Object) you can create a custom instance of `GridifyMapper` and use it to create your mappings.
+By default Gridify is using a `GridifyMapper` object that automatically maps your string based field names to actual properties in your entities but if you have a custom **DTO** (Data Transfer Object) you can create a custom instance of `GridifyMapper` and use it to create your mappings.
 
 ```c#
 // example Entities
@@ -240,7 +240,7 @@ var gridifiedData = myRepository.Persons.Gridify(gQuery, customMappings);
 
 ```
 
-by default `GridifyMapper` is `Case-insensitive` but you can change this behavior if you need `Case-Sensitive` mappings.
+By default `GridifyMapper` is `Case-insensitive` but you can change this behavior if you need `Case-Sensitive` mappings.
 
 ```c#
 var customMappings = new GridifyMapper<Person>( q => 
@@ -253,7 +253,7 @@ var customMappings = new GridifyMapper<Person>( q =>
 
 ## Value Convertor
 If you need to change your search values before the filtering operation you can use this feature, 
-the third parameter of the GridifyMapper `AddMap` method accept a function that you can use to convert the input values.
+the third parameter of the GridifyMapper `AddMap` method accepts a function that you can use to convert the input values.
 eg:
    
 ```c#
@@ -278,9 +278,9 @@ var result = new Paging<Person> (qp.Count,qp.Query.ProjectTo<PersonDTO>().ToList
 
 ## EntityFramework integration
 
-if you need to use gridify **async** feature for entityFramework Core, use **`Gridify.EntityFramework`** package instead.
+If you need to use the **async** feature for entityFramework core, use **`Gridify.EntityFramework`** package instead.
 
-this package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` functions.
+This package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` functions.
 
 ```terminal
 dotnet add package Gridify.EntityFramework
@@ -290,4 +290,4 @@ dotnet add package Gridify.EntityFramework
 
 ## Contribution
 
-Any Contribution to improve documentation and library is appreciated feel free to send pull-Request. <3
+Any contribution to improve documentation and library is appreciated. Feel free to send pull-Request. <3
