@@ -249,7 +249,18 @@ var customMappings = new GridifyMapper<Person>( q =>
    q.AllowNullSearch = false; // disable searching for null values
 }); 
 ```
+---
 
+## Value Convertor
+If you need to change your search values before the filtering operation you can use this feature, 
+the third parameter of the GridifyMapper `AddMap` method accept a function that you can use to convert the input values.
+eg:
+   
+```c#
+// convert values to lower case
+var gm = new GridifyMapper<Person>()
+       .AddMap("name" , q => q.FullName , v => v.ToLower() )
+```
 
 ---
 
