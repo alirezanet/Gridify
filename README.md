@@ -290,4 +290,4 @@ dotnet add package Gridify.EntityFramework
 
 ## Contribution
 
-Any contribution to improve documentation and library is appreciated. Feel free to send pull-Request. <3
+Any contribution to improve documentation and library is appreciated. Feel free to send pull-Requests. <3
