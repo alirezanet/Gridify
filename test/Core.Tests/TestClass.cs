@@ -8,7 +8,7 @@ namespace Gridify.Tests
       {
       }
 
-      public TestClass(int id, string name, TestClass classProp, Guid myGuid = default, DateTime? date = default)
+      public TestClass(int id, string name, TestClass? classProp, Guid myGuid = default, DateTime? date = default)
       {
          Id = id;
          Name = name;
@@ -18,8 +18,8 @@ namespace Gridify.Tests
       }
 
       public int Id { get; set; }
-      public string Name { get; set; }
-      public TestClass ChildClass { get; set; }
+      public string Name { get; set; } = string.Empty;
+      public TestClass? ChildClass { get; set; }
       public DateTime? MyDateTime { get; set; }
       public Guid MyGuid { get; set; }
 
@@ -30,7 +30,7 @@ namespace Gridify.Tests
          {
             Id = Id,
             Name = Name,
-            ChildClass = ChildClass != null ? (TestClass) ChildClass.Clone() : null,
+            ChildClass = (TestClass)ChildClass?.Clone()!,
             MyGuid = MyGuid
          };
       }

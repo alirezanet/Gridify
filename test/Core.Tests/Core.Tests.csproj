@@ -4,6 +4,7 @@
       <IsPackable>false</IsPackable>
       <LangVersion>latest</LangVersion>
       <TargetFrameworks>net5.0;</TargetFrameworks>
+      <Nullable>enable</Nullable>
    </PropertyGroup>
 
    <ItemGroup>

@@ -98,6 +98,7 @@ Global
 		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Release|x64.ActiveCfg = Release|Any CPU
 		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Release|x86.ActiveCfg = Release|Any CPU
+		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DBD6F424-B54C-47C5-9B1D-9E74B55D323E} = {0FCD2937-1953-465E-8608-42B8EB8757C7}

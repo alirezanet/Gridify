@@ -53,10 +53,10 @@ namespace Gridify.Syntax
                return new SyntaxToken(SyntaxKind.NotStartsWith, _position += 2, "!^");
             case '!' when peek == '$':
                return new SyntaxToken(SyntaxKind.NotEndsWith, _position += 2, "!$");
-            case '=' when peek == '=':
-               return new SyntaxToken(SyntaxKind.Equal, _position += 2, "==");
             case '=' when peek == '*':
                return new SyntaxToken(SyntaxKind.Like, _position += 2, "=*");
+            case '=' :
+               return new SyntaxToken(SyntaxKind.Equal, _position ++ , "=");
             case '!' when peek == '=':
                return new SyntaxToken(SyntaxKind.NotEqual, _position += 2, "!=");
             case '!' when peek == '*':

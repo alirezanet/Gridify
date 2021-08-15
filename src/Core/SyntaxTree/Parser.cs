@@ -106,7 +106,7 @@ namespace Gridify.Syntax
             return NextToken();
 
          _diagnostics.Add($"Unexpected token <{Current.Kind}>, expected <{kind}>");
-         return new SyntaxToken(kind, Current.Position, null);
+         return new SyntaxToken(kind, Current.Position, string.Empty);
       }
 
       private ExpressionSyntax ParsePrimaryExpression()

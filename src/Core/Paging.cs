@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Gridify
 {
@@ -6,14 +7,15 @@ namespace Gridify
    {
       public Paging()
       {
+         Data = Enumerable.Empty<T>();
       }
 
-      public Paging(int totalItems,IEnumerable<T> items)
+      public Paging(int count,IEnumerable<T> data)
       {
-         TotalItems = totalItems;
-         Items = items;
+         Count = count;
+         Data = data;
       }
-      public int TotalItems { get; set; }
-      public IEnumerable<T> Items { get; set; }
+      public int Count { get; set; }
+      public IEnumerable<T> Data { get; set; }
    }
 }

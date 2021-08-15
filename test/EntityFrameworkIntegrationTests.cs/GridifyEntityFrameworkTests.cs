@@ -18,7 +18,7 @@ namespace EntityFrameworkIntegrationTests.cs
          // System.ArgumentException: An item with the same key has already been added. Key: Param_0
         
          // arrange
-         var gq = new GridifyQuery { Filter = "name==n1|name==n2"};
+         var gq = new GridifyQuery { Filter = "name=n1|name=n2"};
          
          _dbContext.Users.Gridify(gq);
          _dbContext.Users.Gridify(gq);
@@ -34,7 +34,7 @@ namespace EntityFrameworkIntegrationTests.cs
       public void GridifyQueryableDateTimeShouldNotThrowException()
       {
          // arrange
-         var gq = new GridifyQuery {IsSortAsc = true, SortBy = "CreateDate"};
+         var gq = new GridifyQuery {OrderBy = "CreateDate"};
 
          // act
          var exception = Record.Exception(() => _dbContext.Users.GridifyQueryable(gq));

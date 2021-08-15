@@ -22,7 +22,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_SingleField()
       {
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering("name==John")
+            .ApplyFiltering("name=John")
             .ToList();
          var expected = _fakeRepository.Where(q => q.Name == "John").ToList();
          Assert.Equal(expected.Count, actual.Count);
@@ -34,7 +34,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_SingleField_GridifyQuery()
       {
-         var gq = new GridifyQuery {Filter = "name==John"};
+         var gq = new GridifyQuery { Filter = "name=John" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -48,13 +48,13 @@ namespace Gridify.Tests
       public void ApplyFiltering_NullHandlingUsingCustomConvertor()
       {
          // create custom mapper
-         var gm = new GridifyMapper<TestClass>().GenerateMappings();
+         var gm = new GridifyMapper<TestClass>(q => q.AllowNullSearch = false).GenerateMappings();
 
          // map any string to related property , also use Client convertor to handle custom scenarios
-         gm.AddMap("date", g => g.MyDateTime, q => q == "null" ? null : q);
+         gm.AddMap("date", g => g.MyDateTime!, q => (q == "null" ? null : q)!);
 
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering("date==null", gm)
+            .ApplyFiltering("date=null", gm)
             .ToList();
 
          var expected = _fakeRepository.Where(q => q.MyDateTime == null).ToList();
@@ -62,11 +62,43 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
+      [Fact]
+      public void ApplyFiltering_NullHandlingUsingMapper()
+      {
+         // create custom mapper
+         var gm = new GridifyMapper<TestClass>(q => q.AllowNullSearch = true) // default is true
+            .GenerateMappings();
+
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering("MyDateTime=null", gm)
+            .ToList();
+
+         var expected = _fakeRepository.Where(q => q.MyDateTime == null).ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+      
+      [Fact]
+      public void ApplyFiltering_DisableNullHandlingUsingMapper()
+      {
+         // create custom mapper
+         var gm = new GridifyMapper<TestClass>(q => q.AllowNullSearch = false) // default is true
+            .GenerateMappings();
+
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering("MyDateTime=null", gm)
+            .ToList();
+
+         var expected = _fakeRepository.Where(q => q.MyDateTime.ToString() == "null").ToList();
+         Assert.Equal(expected, actual);
+         Assert.Empty(actual);
+      }
 
       [Fact]
       public void ApplyFiltering_DuplicateFiledName()
       {
-         const string gq = "name==John|name==Sara";
+         const string gq = "name=John|name=Sara";
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -78,13 +110,13 @@ namespace Gridify.Tests
 
 
       [Theory]
-      [InlineData(@" name ==\(LI\,AM\)", "(LI,AM)")]
-      [InlineData(@" name ==jessi==ca", "jessi==ca")]
-      [InlineData(@" name ==\\Liam", @"\Liam")]
-      [InlineData(@" name ==LI \| AM", @"LI | AM")]
+      [InlineData(@" name =\(LI\,AM\)", "(LI,AM)")]
+      [InlineData(@" name =jessi=ca", "jessi=ca")]
+      [InlineData(@" name =\\Liam", @"\Liam")]
+      [InlineData(@" name =LI \| AM", @"LI | AM")]
       public void ApplyFiltering_EscapeSpecialCharacters(string textFilter, string rawText)
       {
-         var gq = new GridifyQuery {Filter = textFilter};
+         var gq = new GridifyQuery { Filter = textFilter };
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -97,7 +129,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_ParenthesisQueryWithoutEscapeShouldThrowException()
       {
-         var gq = new GridifyQuery {Filter = @"name==(LI,AM)"};
+         var gq = new GridifyQuery { Filter = @"name=(LI,AM)" };
          Action act = () => _fakeRepository.AsQueryable()
             .ApplyFiltering(gq);
 
@@ -110,7 +142,7 @@ namespace Gridify.Tests
       {
          var guidString = "e2cec5dd-208d-4bb5-a852-50008f8ba366";
          var guid = Guid.Parse(guidString);
-         var gq = new GridifyQuery {Filter = "myGuid==" + guidString};
+         var gq = new GridifyQuery { Filter = "myGuid=" + guidString };
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -124,7 +156,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_SingleBrokenGuidField()
       {
          var brokenGuidString = "e2cec5dd-208d-4bb5-a852-";
-         var gq = new GridifyQuery {Filter = "myGuid==" + brokenGuidString};
+         var gq = new GridifyQuery { Filter = "myGuid=" + brokenGuidString };
 
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
@@ -138,7 +170,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_SingleBrokenGuidField_NotEqual()
       {
          var brokenGuidString = "e2cec5dd-208d-4bb5-a852-";
-         var gq = new GridifyQuery {Filter = "myGuid!=" + brokenGuidString};
+         var gq = new GridifyQuery { Filter = "myGuid!=" + brokenGuidString };
 
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
@@ -151,7 +183,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_InvalidFilterExpressionShouldThrowException()
       {
-         var gq = new GridifyQuery {Filter = "=guid,d="};
+         var gq = new GridifyQuery { Filter = "=guid,d=" };
          Assert.Throws<GridifyFilteringException>(() =>
             _fakeRepository.AsQueryable().ApplyFiltering(gq).ToList());
       }
@@ -159,7 +191,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_InvalidCharacterShouldThrowException()
       {
-         var gq = new GridifyQuery {Filter = "@name==ali"};
+         var gq = new GridifyQuery { Filter = "@name=ali" };
          Assert.Throws<GridifyFilteringException>(() =>
             _fakeRepository.AsQueryable().ApplyFiltering(gq).ToList());
       }
@@ -188,7 +220,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_CustomConvertor()
       {
-         const string gq = "name==liam";
+         const string gq = "name=liam";
          var gm = new GridifyMapper<TestClass>()
             .GenerateMappings()
             .AddMap("name", q => q.Name, q => q.ToUpper()); // using client side Custom convertor
@@ -303,7 +335,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_MultipleCondition()
       {
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering("name==Jack|name==Rose|id>=7")
+            .ApplyFiltering("name=Jack|name=Rose|id>=7")
             .ToList();
          var expected = _fakeRepository.Where(q => q.Name == "Jack" || q.Name == "Rose" || q.Id >= 7).ToList();
          Assert.Equal(expected.Count, actual.Count);
@@ -327,7 +359,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_NestedParenthesisWithSpace()
       {
          // we shouldn't add spaces for values 
-         var gq = new GridifyQuery {Filter = " ( name =*J| ( name =*S , Id <5 ) )"};
+         var gq = new GridifyQuery { Filter = " ( name =*J| ( name =*S , Id <5 ) )" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -340,7 +372,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_UsingChildClassProperty()
       {
-         var gq = new GridifyQuery {Filter = "Child_Name==Bob"};
+         var gq = new GridifyQuery { Filter = "Child_Name=Bob" };
          var gm = new GridifyMapper<TestClass>()
             .GenerateMappings()
             .AddMap("Child_name", q => q.ChildClass.Name);
@@ -361,9 +393,9 @@ namespace Gridify.Tests
       #region "ApplyOrdering"
 
       [Fact]
-      public void ApplyOrdering_SortBy_Ascending()
+      public void ApplyOrdering_OrderBy_Ascending()
       {
-         var gq = new GridifyQuery {SortBy = "name", IsSortAsc = true};
+         var gq = new GridifyQuery { OrderBy = "name" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrdering(gq)
             .ToList();
@@ -372,9 +404,9 @@ namespace Gridify.Tests
       }
 
       [Fact]
-      public void ApplyOrdering_SortBy_DateTime()
+      public void ApplyOrdering_OrderBy_DateTime()
       {
-         var gq = new GridifyQuery {SortBy = "MyDateTime", IsSortAsc = true};
+         var gq = new GridifyQuery { OrderBy = "MyDateTime" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrdering(gq)
             .ToList();
@@ -385,9 +417,9 @@ namespace Gridify.Tests
       }
 
       [Fact]
-      public void ApplyOrdering_SortBy_Descending()
+      public void ApplyOrdering_OrderBy_Descending()
       {
-         var gq = new GridifyQuery {SortBy = "Name", IsSortAsc = false};
+         var gq = new GridifyQuery { OrderBy = "Name desc" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrdering(gq)
             .ToList();
@@ -398,9 +430,28 @@ namespace Gridify.Tests
       }
 
       [Fact]
+      public void ApplyOrdering_MultipleOrderBy()
+      {
+         var gq = new GridifyQuery { OrderBy = "MyDateTime desc , id , name asc" };
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyOrdering(gq)
+            .ToList();
+         var expected = _fakeRepository
+            .OrderByDescending(q => q.MyDateTime)
+            .ThenBy(q => q.Id)
+            .ThenBy(q => q.Name)
+            .ToList();
+
+         Assert.Equal(expected.First().Id, actual.First().Id);
+         Assert.Equal(expected.Last().Id, actual.Last().Id);
+         Assert.Equal(expected, actual);
+      }
+
+
+      [Fact]
       public void ApplyOrdering_SortUsingChildClassProperty()
       {
-         var gq = new GridifyQuery {SortBy = "Child_Name", IsSortAsc = false};
+         var gq = new GridifyQuery { OrderBy = "Child_Name desc" };
          var gm = new GridifyMapper<TestClass>()
             .GenerateMappings()
             .AddMap("Child_Name", q => q.ChildClass.Name);
@@ -416,7 +467,7 @@ namespace Gridify.Tests
       }
 
       [Fact]
-      public void ApplyOrdering_EmptySortBy_ShouldSkip()
+      public void ApplyOrdering_EmptyOrderBy_ShouldSkip()
       {
          var gq = new GridifyQuery();
          var actual = _fakeRepository.AsQueryable()
@@ -466,7 +517,7 @@ namespace Gridify.Tests
       [InlineData(20, 10)]
       public void ApplyPaging_UsingCustomValues(short page, int pageSize)
       {
-         var gq = new GridifyQuery {Page = page, PageSize = pageSize};
+         var gq = new GridifyQuery { Page = page, PageSize = pageSize };
          var actual = _fakeRepository.AsQueryable()
             .ApplyPaging(gq)
             .ToList();
@@ -489,21 +540,20 @@ namespace Gridify.Tests
          var actual = _fakeRepository.AsQueryable()
             .Gridify(q =>
             {
-               q.Filter = "name==John";
+               q.Filter = "name=John";
                q.PageSize = 13;
-               q.SortBy = "name";
-               q.IsSortAsc = false;
+               q.OrderBy = "name desc";
             });
 
          var query = _fakeRepository.AsQueryable().Where(q => q.Name == "John").OrderByDescending(q => q.Name);
          var totalItems = query.Count();
          var items = query.Skip(-2).Take(15).ToList();
-         var expected = new Paging<TestClass>() {Items = items, TotalItems = totalItems};
+         var expected = new Paging<TestClass>() { Data = items, Count = totalItems };
 
-         Assert.Equal(expected.TotalItems, actual.TotalItems);
-         Assert.Equal(expected.Items.Count(), actual.Items.Count());
-         Assert.True(actual.Items.Any());
-         Assert.Equal(expected.Items.First().Id , actual.Items.First().Id);
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected.Data.Count(), actual.Data.Count());
+         Assert.True(actual.Data.Any());
+         Assert.Equal(expected.Data.First().Id, actual.Data.First().Id);
       }
 
       [Theory]
@@ -516,7 +566,8 @@ namespace Gridify.Tests
       [InlineData(19, 10, true)]
       public void ApplyOrderingAndPaging_UsingCustomValues(short page, int pageSize, bool isSortAsc)
       {
-         var gq = new GridifyQuery {Page = page, PageSize = pageSize, SortBy = "Name", IsSortAsc = isSortAsc};
+         var orderByExp = "name " + (isSortAsc ? "asc" : "desc");
+         var gq = new GridifyQuery { Page = page, PageSize = pageSize, OrderBy = orderByExp };
          // actual
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrderingAndPaging(gq)
@@ -545,22 +596,22 @@ namespace Gridify.Tests
          var lst = new List<TestClass>();
          lst.Add(new TestClass(1, "John", null, Guid.NewGuid(), DateTime.Now));
          lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid(), DateTime.UtcNow));
-         lst.Add(new TestClass(3, "Jack", (TestClass) lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2)));
+         lst.Add(new TestClass(3, "Jack", (TestClass)lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2)));
          lst.Add(new TestClass(4, "Rose", null, Guid.Parse("e2cec5dd-208d-4bb5-a852-50008f8ba366")));
          lst.Add(new TestClass(5, "Ali", null));
-         lst.Add(new TestClass(6, "Hamid", (TestClass) lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
-         lst.Add(new TestClass(7, "Hasan", (TestClass) lst[1].Clone()));
-         lst.Add(new TestClass(8, "Farhad", (TestClass) lst[2].Clone(), Guid.Empty));
+         lst.Add(new TestClass(6, "Hamid", (TestClass)lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
+         lst.Add(new TestClass(7, "Hasan", (TestClass)lst[1].Clone()));
+         lst.Add(new TestClass(8, "Farhad", (TestClass)lst[2].Clone(), Guid.Empty));
          lst.Add(new TestClass(9, "Sara", null));
          lst.Add(new TestClass(10, "Jorge", null));
          lst.Add(new TestClass(11, "joe", null));
-         lst.Add(new TestClass(12, "jimmy", (TestClass) lst[0].Clone()));
+         lst.Add(new TestClass(12, "jimmy", (TestClass)lst[0].Clone()));
          lst.Add(new TestClass(13, "Nazanin", null));
          lst.Add(new TestClass(14, "Reza", null));
-         lst.Add(new TestClass(15, "Korosh", (TestClass) lst[0].Clone()));
-         lst.Add(new TestClass(16, "Kamran", (TestClass) lst[1].Clone()));
-         lst.Add(new TestClass(17, "Saeid", (TestClass) lst[2].Clone()));
-         lst.Add(new TestClass(18, "jessi==ca", null));
+         lst.Add(new TestClass(15, "Korosh", (TestClass)lst[0].Clone()));
+         lst.Add(new TestClass(16, "Kamran", (TestClass)lst[1].Clone()));
+         lst.Add(new TestClass(17, "Saeid", (TestClass)lst[2].Clone()));
+         lst.Add(new TestClass(18, "jessi=ca", null));
          lst.Add(new TestClass(19, "Ped=ram", null));
          lst.Add(new TestClass(20, "Peyman!", null));
          lst.Add(new TestClass(21, "Fereshte", null));
