@@ -6,6 +6,8 @@ Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** us
 
 The best use case of this library is Asp-net APIs. When you need to get some string base filtering conditions to filter data or sort it by a field name or apply pagination concepts to your lists and return a **pageable**, data grid ready information, from any repository or database.
 
+**_You can find the version 1.x documentation on the [Version1 Branch](https://github.com/alirezanet/Gridify/tree/version-1.x)_**
+
 ---
 
 ## WebApi Simple Usage example
