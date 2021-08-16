@@ -81,18 +81,20 @@ var query = myDbContext.Persons.ApplyFiltering("name = John");
 Filtering is the most expensive feature in gridify. the following benchmark is comparing filtering in the most known dynamic linq libraries. As you can see, gridify has the closest result to the native linq.
 Also, i Should note other features like Pagination and Sorting have almost zero overhead in Gridify.
 
-BenchmarkDotNet=v0.13.0, OS=Windows 10.0.19043.1110 (21H1/May2021Update)
+BenchmarkDotNet=v0.13.0, OS=Windows 10.0.19043.1165 (21H1/May2021Update)
 11th Gen Intel Core i5-11400F 2.60GHz, 1 CPU, 12 logical and 6 physical cores
 .NET SDK=5.0.301
 [Host]     : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
+DefaultJob : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
 
 
-|      Method |       Mean |    Error |   StdDev | Ratio | RatioSD |   Gen 0 |  Gen 1 | Allocated |
-|------------ |-----------:|---------:|---------:|------:|--------:|--------:|-------:|----------:|
-| Native Linq |   869.3 us | 10.54 us |  9.86 us |  1.00 |    0.00 |  5.8594 | 2.9297 |     36 KB |
-|     Gridify |   928.1 us | 13.41 us | 11.89 us |  1.07 |    0.02 |  6.8359 | 2.9297 |     46 KB |
-|Dynamic Linq | 1,068.5 us | 10.66 us |  9.97 us |  1.23 |    0.02 | 19.5313 | 9.7656 |    122 KB |
-|       Sieve | 1,126.8 us | 10.73 us | 10.04 us |  1.30 |    0.02 |  8.7891 | 3.9063 |     54 KB |
+|      Method |       Mean |    Error |   StdDev | Ratio | RatioSD |   Gen 0 |   Gen 1 | Allocated |
+|------------ |-----------:|---------:|---------:|------:|--------:|--------:|--------:|----------:|
+| Native Linq |   737.0 us |  4.95 us |  4.39 us |  1.00 |    0.00 |  5.8594 |  2.9297 |     36 KB |
+|     Gridify |   774.5 us | 13.60 us | 12.72 us |  1.05 |    0.02 |  6.8359 |  2.9297 |     46 KB |
+| DynamicLinq |   902.7 us | 16.33 us | 15.28 us |  1.22 |    0.02 | 19.5313 |  9.7656 |    122 KB |
+|       Sieve |   982.3 us | 11.06 us | 10.35 us |  1.33 |    0.01 |  8.7891 |  3.9063 |     54 KB |
+|         Fop | 2,954.8 us | 14.16 us | 12.55 us |  4.01 |    0.03 | 50.7813 | 23.4375 |    311 KB |
 
 ---
 

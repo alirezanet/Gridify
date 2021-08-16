@@ -7,7 +7,7 @@ namespace Benchmarks
    {
       private static void Main()
       {
-         BenchmarkRunner.Run<LibraryComparisionBenchmark>();
+         BenchmarkRunner.Run<LibraryComparisionFilteringBenchmark>();
          Console.Read();
       }
 
