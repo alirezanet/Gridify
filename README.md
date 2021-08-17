@@ -76,7 +76,7 @@ var query = myDbContext.Persons.ApplyFiltering("name = John");
 // myDbContext.Persons.Where(p => p.Name == "John");
 ```
 
-### see more examples in the [tests](https://github.com/alirezanet/Gridify/blob/ca492ca943c3406c8a5f4c130097ee2e6d7e06ec/test/Core.Tests/GridifyExtensionsShould.cs#L22) 
+### see more examples in the [tests](https://github.com/alirezanet/Gridify/blob/89ff1ce981726c20591b043fee72eb5faa68f458/test/Core.Tests/GridifyExtensionsShould.cs#L22) 
 
 ---
 
@@ -269,6 +269,18 @@ eg:
 var gm = new GridifyMapper<Person>()
        .AddMap("name" , q => q.FullName , v => v.ToLower() )
 ```
+ 
+---
+   
+## EntityFramework integration
+
+If you need to use the **async** feature for entityFramework core, use **`Gridify.EntityFramework`** package instead.
+
+This package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` functions.
+
+```terminal
+dotnet add package Gridify.EntityFramework
+```
 
 ---
 
@@ -285,6 +297,15 @@ var result = new Paging<Person> (qp.Count,qp.Query.ProjectTo<PersonDTO>().ToList
 ```
 Or simply add these two extentions to your project
 ```c#
+public static Paging<TDestination> GridifyTo<TSource, TDestination>(this IQueryable<TSource> query,
+                        IMapper autoMapper, IGridifyQuery gridifyQuery, IGridifyMapper<TSource> mapper = null)
+{
+   mapper = mapper.FixMapper();
+   var res = query.GridifyQueryable(gridifyQuery, mapper);
+   return new Paging<TDestination> (res.Count , res.Query.ProjectTo<TDestination>(autoMapper.ConfigurationProvider).ToList());
+}   
+
+// only if you have Gridify.EntityFramework package installed.
 public static async Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination>(this IQueryable<TSource> query,
                         IMapper autoMapper, IGridifyQuery gridifyQuery, IGridifyMapper<TSource> mapper = null)
 {
@@ -292,27 +313,9 @@ public static async Task<Paging<TDestination>> GridifyToAsync<TSource, TDestinat
    var res = await query.GridifyQueryableAsync(gridifyQuery, mapper);
    return new Paging<TDestination> (res.Count , await res.Query.ProjectTo<TDestination>(autoMapper.ConfigurationProvider).ToListAsync());
 }
-public static Paging<TDestination> GridifyTo<TSource, TDestination>(this IQueryable<TSource> query,
-                        IMapper autoMapper, IGridifyQuery gridifyQuery, IGridifyMapper<TSource> mapper = null)
-{
-   mapper = mapper.FixMapper();
-   var res = query.GridifyQueryable(gridifyQuery, mapper);
-   return new Paging<TDestination> (res.Count , res.Query.ProjectTo<TDestination>(autoMapper.ConfigurationProvider).ToList());
-}
+
 ```
    
----
-   
-## EntityFramework integration
-
-If you need to use the **async** feature for entityFramework core, use **`Gridify.EntityFramework`** package instead.
-
-This package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` functions.
-
-```terminal
-dotnet add package Gridify.EntityFramework
-```
-
 ---
 
 ## Contribution
