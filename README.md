@@ -283,7 +283,26 @@ var result = query.ProjectTo<PersonDTO>().ToList();
 QueryablePaging<Person> qp = myDbContext.Persons.GridifyQueryable(gridifyQuery);
 var result = new Paging<Person> (qp.Count,qp.Query.ProjectTo<PersonDTO>().ToList ());
 ```
-
+Or simply add these two extentions to your project
+```c#
+public static async Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination>(this IQueryable<TSource> query,
+                        IMapper autoMapper, IGridifyQuery gridifyQuery, IGridifyMapper<TSource> mapper = null)
+{
+   mapper = mapper.FixMapper();
+   var res = await query.GridifyQueryableAsync(gridifyQuery, mapper);
+   return new Paging<TDestination> (res.Count , await res.Query.ProjectTo<TDestination>(autoMapper.ConfigurationProvider).ToListAsync());
+}
+public static Paging<TDestination> GridifyTo<TSource, TDestination>(this IQueryable<TSource> query,
+                        IMapper autoMapper, IGridifyQuery gridifyQuery, IGridifyMapper<TSource> mapper = null)
+{
+   mapper = mapper.FixMapper();
+   var res = query.GridifyQueryable(gridifyQuery, mapper);
+   return new Paging<TDestination> (res.Count , res.Query.ProjectTo<TDestination>(autoMapper.ConfigurationProvider).ToList());
+}
+```
+   
+---
+   
 ## EntityFramework integration
 
 If you need to use the **async** feature for entityFramework core, use **`Gridify.EntityFramework`** package instead.
