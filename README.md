@@ -28,7 +28,11 @@ public IActionResult GetPersons([FromQuery] GridifyQuery gQuery)
 complete request sample:
 
 ```url
-http://exampleDomain.com/api/GetPersons?pageSize=100&page=1&orderBy=FirstName&filter=Age%3D%3D10
+http://exampleDomain.com/api/GetPersons?
+          pageSize=100&
+          page=1&
+          orderBy=FirstName&
+          filter=Age>10
 ```
 
 Also, we can totally ignore GridifyQuery
