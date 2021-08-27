@@ -1,8 +1,3 @@
-using System;
-using System.Linq;
-using System.Linq.Expressions;
-using Gridify.Syntax;
-
 namespace Gridify
 {
    public class GridifyQuery : IGridifyQuery
@@ -10,7 +5,7 @@ namespace Gridify
       public GridifyQuery()
       {
       }
-      public GridifyQuery(string orderBy, short page, int pageSize, string filter)
+      public GridifyQuery(short page, int pageSize, string filter, string? orderBy = null)
       {
          Page = page;
          PageSize = pageSize;
