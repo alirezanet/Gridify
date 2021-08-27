@@ -77,8 +77,12 @@
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Core\Gridify.csproj">
-        <Project>{dbd6f424-b54c-47c5-9b1d-9e74b55d323e}</Project>
+      <ProjectReference Include="..\..\src\Gridify.EntityFramework\Gridify.EntityFramework.csproj">
+        <Project>{d1296959-f923-44b6-a8f9-967d5fb7c4c1}</Project>
+        <Name>Gridify.EntityFramework</Name>
+      </ProjectReference>
+      <ProjectReference Include="..\..\src\Gridify\Gridify.csproj">
+        <Project>{833ccd80-4261-405a-8a4a-bd9b3c375496}</Project>
         <Name>Gridify</Name>
       </ProjectReference>
     </ItemGroup>
