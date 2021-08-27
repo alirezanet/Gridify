@@ -49,7 +49,7 @@ namespace Benchmarks
       [Benchmark]
       public void Fop()
       {
-         // for doesn't have filtering only feature
+         // fop doesn't have filtering only feature
          Ds.ApplyFop(FopExpressionBuilder<TestClass>.Build("Name~=a", "Name", 1, 1000)).Item1.Consume(Consumer);
          Ds.ApplyFop(FopExpressionBuilder<TestClass>.Build("Id>5", "Name", 1, 1000)).Item1.Consume(Consumer);
          Ds.ApplyFop(FopExpressionBuilder<TestClass>.Build("Name==Ali", "Name", 1, 1000)).Item1.Consume(Consumer);
