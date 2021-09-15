@@ -3,7 +3,7 @@
    <PropertyGroup>
       <TargetFramework>netstandard2.0</TargetFramework>
       <PackageId>Gridify</PackageId>
-      <Version>2.0.0-alpha.1</Version>
+      <Version>2.0.0-beta.1</Version>
       <Authors>Alireza Sabouri</Authors>
       <Company>TuxTeam</Company>
       <PackageDescription>Gridify, Easy and optimized way to apply Filtering, Sorting, and Pagination using text-based data.</PackageDescription>

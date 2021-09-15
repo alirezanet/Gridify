@@ -1,5 +1,3 @@
-using System;
-
 namespace Gridify
 {
    public interface IGridifyPagination

@@ -269,7 +269,20 @@ eg:
 var gm = new GridifyMapper<Person>()
        .AddMap("name" , q => q.FullName , v => v.ToLower() )
 ```
- 
+
+---
+
+## Filtering on Nested Collections 
+You can use LINQ `Select` and `SelectMany` methods to filter your data using its nested collections.
+
+In this example, we have 3 nested collections, but filtering will apply to the `Property1` of the third level.
+```c#
+var gm = new GridifyMapper<Level1>()
+    .AddMap("prop1", l1 => l1.Level2List.SelectMany(l2 => l2.Level3List).Select(l3 => l3.Property1);
+ ```
+
+if you have only two-level nesting, you don't need to use `SelectMany`. 
+
 ---
    
 ## EntityFramework integration

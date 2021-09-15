@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Core.Tests")]
+[assembly: InternalsVisibleTo("Gridify.Tests")]
 namespace Gridify.Syntax
 {
    public sealed class SyntaxTree

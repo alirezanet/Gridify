@@ -375,14 +375,14 @@ namespace Gridify.Tests
          var gq = new GridifyQuery { Filter = "Child_Name=Bob" };
          var gm = new GridifyMapper<TestClass>()
             .GenerateMappings()
-            .AddMap("Child_name", q => q.ChildClass.Name);
+            .AddMap("Child_name", q => q.ChildClass!.Name);
 
          var actual = _fakeRepository.AsQueryable()
             .Where(q => q.ChildClass != null)
             .ApplyFiltering(gq, gm)
             .ToList();
 
-         var expected = _fakeRepository.Where(q => q.ChildClass != null && q.ChildClass.Name == "Bob").ToList();
+         var expected = _fakeRepository.Where(q => q.ChildClass is { Name: "Bob" }).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -454,14 +454,14 @@ namespace Gridify.Tests
          var gq = new GridifyQuery { OrderBy = "Child_Name desc" };
          var gm = new GridifyMapper<TestClass>()
             .GenerateMappings()
-            .AddMap("Child_Name", q => q.ChildClass.Name);
+            .AddMap("Child_Name", q => q.ChildClass!.Name);
 
          var actual = _fakeRepository.AsQueryable().Where(q => q.ChildClass != null)
             .ApplyOrdering(gq, gm)
             .ToList();
 
          var expected = _fakeRepository.Where(q => q.ChildClass != null)
-            .OrderByDescending(q => q.ChildClass.Name).ToList();
+            .OrderByDescending(q => q.ChildClass!.Name).ToList();
 
          Assert.Equal(expected, actual);
       }

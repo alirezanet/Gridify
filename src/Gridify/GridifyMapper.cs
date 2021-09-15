@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace Gridify
 {
@@ -52,7 +53,8 @@ namespace Gridify
             throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
 
          RemoveMap(from);
-         _mappings.Add(new GMap<T>(from, to, convertor));
+         var isNested = Regex.IsMatch(to.ToString(), @"\.Select\s*\(");
+         _mappings.Add(new GMap<T>(from, to, convertor, isNested));
          return this;
       }
 
