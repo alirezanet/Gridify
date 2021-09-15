@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -18,13 +19,14 @@ namespace Gridify.Syntax
             if (left == null || right == null) return null;
 
             var gMap = mapper.GetGMap(left);
+
             if (gMap == null) return null;
 
-            if (!gMap.IsNestedCollection)
-               return GenerateExpression(mapper, gMap, right, op);
-            
-            return GenerateNestedExpression(mapper, gMap, right, op);
+            if (gMap.IsNestedCollection)
+               return GenerateNestedExpression(mapper, gMap, right, op);
 
+            return GenerateExpression( gMap.To.Body, gMap.To.Parameters[0], right, 
+               op,mapper.Configuration.AllowNullSearch, gMap.Convertor) as Expression<Func<T, bool>>;
          }
          catch (Exception)
          {
@@ -34,29 +36,74 @@ namespace Gridify.Syntax
          }
       }
 
-      private static Expression<Func<T, bool>> GenerateNestedExpression<T>(IGridifyMapper<T> mapper, IGMap<T> gMap, string right, SyntaxToken op)
+      private static Expression<Func<T, bool>>? GenerateNestedExpression<T>(
+         IGridifyMapper<T> mapper,
+         IGMap<T> gMap,
+         string stringValue,
+         SyntaxNode op)
       {
-         throw new NotImplementedException();
+         var body = gMap.To.Body;
+         
+         if (body is MethodCallExpression selectExp && selectExp.Method.Name == "Select")
+         {
+            var targetExp = selectExp.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
+            var conditionExp = GenerateExpression( targetExp!.Body, targetExp.Parameters[0], stringValue, op, mapper.Configuration.AllowNullSearch, gMap.Convertor);
+            
+            if (conditionExp == null) return null;
+            
+            return ParseMethodCallExpression(selectExp, conditionExp) as Expression<Func<T,bool>> ;
+         }
+
+         // this should never happening
+         throw new GridifyFilteringException($"The 'Select' method on '{gMap.From}' not found");
       }
 
-      private static Expression<Func<T, bool>>? GenerateExpression<T>(IGridifyMapper<T> mapper, IGMap<T> gMap, string stringValue, SyntaxToken op)
+      private static LambdaExpression ParseMethodCallExpression(MethodCallExpression exp, LambdaExpression predicate)
       {
-         var exp = gMap.To;
-         var body = exp.Body;
+         switch (exp.Arguments.First())
+         {
+            case MemberExpression member:
+               return GetAnyExpression(member,predicate);
+            case MethodCallExpression subExp when subExp.Arguments.Last() is LambdaExpression { Body: MemberExpression lambdaMember }:
+            {
+               var newPredicate = GetAnyExpression(lambdaMember,predicate);
+               return ParseMethodCallExpression(subExp,newPredicate);
+            }
+            default:
+               throw new InvalidOperationException();
+         }
+      }
 
+      private static LambdaExpression GetAnyExpression(MemberExpression member, LambdaExpression predicate)
+      {
+         var param = member.Expression as ParameterExpression;
+         var prop = Expression.Property(param!, member.Member.Name);
+         var tp = prop.Type.GenericTypeArguments[0];
+         var anyMethod = GetAnyMethod(tp);
+         var newExp = Expression.Call(anyMethod, prop, predicate);
+         return Expression.Lambda(newExp, param);
+      }
+      private static LambdaExpression? GenerateExpression(
+         Expression body,
+         ParameterExpression parameter,
+         string stringValue,
+         SyntaxNode op,
+         bool allowNullSearch,
+         Func<string, object>? convertor)
+      {
          // Remove the boxing for value types
-         if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression) body).Operand;
+         if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression)body).Operand;
 
          object? value = stringValue;
 
          // execute user custom Convertor
-         if (gMap.Convertor != null)
-            value = gMap.Convertor.Invoke(stringValue);
+         if (convertor != null)
+            value = convertor.Invoke(stringValue);
 
          if (value != null && body.Type != value.GetType())
             try
             {
-               if (mapper.Configuration.AllowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
+               if (allowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
                   value = null;
                else
                {
@@ -70,7 +117,7 @@ namespace Gridify.Syntax
             catch (FormatException)
             {
                // return no records in case of any exception in formatting
-               return q => false;
+               return Expression.Lambda(Expression.Constant(false), parameter); // q => false
             }
 
          Expression be;
@@ -145,14 +192,16 @@ namespace Gridify.Syntax
                return null;
          }
 
-         return Expression.Lambda<Func<T, bool>>(be, exp.Parameters);
+         return Expression.Lambda(be, parameter);
       }
 
-      private static MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] {typeof(string)})!;
+      private static MethodInfo GetAnyMethod(Type @type) =>
+         typeof(Enumerable).GetMethods().Single(m => m.Name == "Any" && m.GetParameters().Length == 2).MakeGenericMethod(@type);
+      private static MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] { typeof(string) })!;
 
-      private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] {typeof(string)})!;
+      private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] { typeof(string) })!;
 
-      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] {typeof(string)})!;
+      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
 
       private static MethodInfo GetToStringMethod() => typeof(object).GetMethod("ToString")!;
 
