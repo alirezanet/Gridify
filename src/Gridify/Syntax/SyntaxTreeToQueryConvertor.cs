@@ -213,7 +213,6 @@ namespace Gridify.Syntax
 
       private static MethodInfo GetAnyMethod(Type @type) =>
          typeof(Enumerable).GetMethods().Single(m => m.Name == "Any" && m.GetParameters().Length == 2).MakeGenericMethod(@type);
-
       private static MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] { typeof(string) })!;
 
       private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] { typeof(string) })!;
