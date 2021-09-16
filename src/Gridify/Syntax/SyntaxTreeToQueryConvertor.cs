@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -10,8 +12,6 @@ namespace Gridify.Syntax
    {
       private static Expression<Func<T, bool>>? ConvertBinaryExpressionSyntaxToQuery<T>(BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)
       {
-         try
-         {
             var left = (binarySyntax.Left as FieldExpressionSyntax)?.FieldToken.Text.Trim();
             var right = (binarySyntax.Right as ValueExpressionSyntax)?.ValueToken.Text;
             var op = binarySyntax.OperatorToken;
@@ -25,15 +25,8 @@ namespace Gridify.Syntax
             if (gMap.IsNestedCollection)
                return GenerateNestedExpression(mapper, gMap, right, op);
 
-            return GenerateExpression( gMap.To.Body, gMap.To.Parameters[0], right, 
-               op,mapper.Configuration.AllowNullSearch, gMap.Convertor) as Expression<Func<T, bool>>;
-         }
-         catch (Exception)
-         {
-            // Unhandled exceptions ignores gridify completely,
-            // Not sure this is the best approach or not yet
-            return null;
-         }
+            return GenerateExpression(gMap.To.Body, gMap.To.Parameters[0], right,
+               op, mapper.Configuration.AllowNullSearch, gMap.Convertor) as Expression<Func<T, bool>>;
       }
 
       private static Expression<Func<T, bool>>? GenerateNestedExpression<T>(
@@ -43,15 +36,16 @@ namespace Gridify.Syntax
          SyntaxNode op)
       {
          var body = gMap.To.Body;
-         
+
          if (body is MethodCallExpression selectExp && selectExp.Method.Name == "Select")
          {
             var targetExp = selectExp.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
-            var conditionExp = GenerateExpression( targetExp!.Body, targetExp.Parameters[0], stringValue, op, mapper.Configuration.AllowNullSearch, gMap.Convertor);
-            
+            var conditionExp = GenerateExpression(targetExp!.Body, targetExp.Parameters[0], stringValue, op, mapper.Configuration.AllowNullSearch,
+               gMap.Convertor);
+
             if (conditionExp == null) return null;
-            
-            return ParseMethodCallExpression(selectExp, conditionExp) as Expression<Func<T,bool>> ;
+
+            return ParseMethodCallExpression(selectExp, conditionExp) as Expression<Func<T, bool>>;
          }
 
          // this should never happening
@@ -63,26 +57,48 @@ namespace Gridify.Syntax
          switch (exp.Arguments.First())
          {
             case MemberExpression member:
-               return GetAnyExpression(member,predicate);
-            case MethodCallExpression subExp when subExp.Arguments.Last() is LambdaExpression { Body: MemberExpression lambdaMember }:
+               return GetAnyExpression(member, predicate);
+            case MethodCallExpression subExp when subExp.Method.Name == "SelectMany" &&  subExp.Arguments.Last() is LambdaExpression { Body: MemberExpression lambdaMember }:
             {
-               var newPredicate = GetAnyExpression(lambdaMember,predicate);
-               return ParseMethodCallExpression(subExp,newPredicate);
+               var newPredicate = GetAnyExpression(lambdaMember, predicate);
+               return ParseMethodCallExpression(subExp, newPredicate);
+            }
+            case MethodCallExpression subExp when subExp.Method.Name == "Select" && subExp.Arguments.Last() is LambdaExpression { Body: MemberExpression lambdaMember } lambda:
+            {
+               var newExp = new PredicateBuilder.ReplaceExpressionVisitor(predicate.Parameters[0], lambdaMember).Visit(predicate.Body);
+               var newPredicate = GetExpressionWithNullCheck(lambdaMember, lambda.Parameters[0], newExp!); 
+               return ParseMethodCallExpression(subExp, newPredicate);
             }
             default:
                throw new InvalidOperationException();
          }
       }
 
-      private static LambdaExpression GetAnyExpression(MemberExpression member, LambdaExpression predicate)
+      private static ParameterExpression GetParameterExpression(MemberExpression member)
       {
-         var param = member.Expression as ParameterExpression;
+         return Expression.Parameter(member.Expression.Type, member.Expression.ToString()); 
+      }
+      private static LambdaExpression GetAnyExpression(MemberExpression member, Expression predicate)
+      {
+         var param = GetParameterExpression(member);
          var prop = Expression.Property(param!, member.Member.Name);
+
          var tp = prop.Type.GenericTypeArguments[0];
          var anyMethod = GetAnyMethod(tp);
-         var newExp = Expression.Call(anyMethod, prop, predicate);
-         return Expression.Lambda(newExp, param);
+         var anyExp = Expression.Call(anyMethod, prop, predicate);
+
+         return GetExpressionWithNullCheck(prop, param, anyExp);
+         
+         // return Expression.Lambda(anyExp, param);
       }
+
+      private static LambdaExpression GetExpressionWithNullCheck(MemberExpression prop, ParameterExpression param, Expression right)
+      {
+         var nullChecker = Expression.NotEqual(prop, Expression.Constant(null));
+         var exp = Expression.AndAlso(nullChecker, right);
+         return Expression.Lambda(exp, param); 
+      }
+
       private static LambdaExpression? GenerateExpression(
          Expression body,
          ParameterExpression parameter,
