@@ -11,7 +11,7 @@ namespace Gridify.Tests
 
       public GridifyNestedCollectionTests()
       {
-         _fakeRepository3Nesting = new List<Level1>(GetSampleDataWith3Nestings());
+         _fakeRepository3Nesting = new List<Level1>(GetSampleDataWith3Nesting());
          _fakeRepository2Nesting = new List<Level2>(GetSampleDataWith2Nestings());
       }
 
@@ -52,12 +52,41 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
+      [Fact]
+      public void Filtering_OnThirdLevelNestedPropertyUsingSecondLevelProp()
+      {
+         var gm = new GridifyMapper<Level1>()
+            .GenerateMappings()
+            .AddMap("lvl", l1 => l1.Level2List.Select(l2 => l2.ChildProp).SelectMany(sl2 => sl2.Level3List).Select(l3=>l3.Level));
+
+
+         var actual = _fakeRepository3Nesting.AsQueryable()
+            .ApplyFiltering("lvl < 2", gm)
+            .ToList();
+
+         var expected = _fakeRepository3Nesting.Where(l1 => l1.Level2List != null && l1.Level2List.Any(l2 => l2.ChildProp != null && l2.ChildProp.Level3List != null &&
+                                                      l2.ChildProp.Level3List.Any(l3 => l3.Level < 2))).ToList();
+
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      } 
+   
 
 
       #region TestData
 
-      private IEnumerable<Level1> GetSampleDataWith3Nestings()
+      private IEnumerable<Level1> GetSampleDataWith3Nesting()
       {
+         var subLvl2 = new ChildProp()
+         {
+            Level3List = new List<Level3>() { new Level3() { Property1 = 2.0, Property2 = 100.0, Level = 1 }}
+         };
+         var subLvl2_2 = new ChildProp()
+         {
+            Level3List = new List<Level3>() { new Level3() { Property1 = 3.0, Property2 = 100.0, Level = 3 }}
+         };
+         
          yield return new Level1()
          {
             Id = 1,
@@ -66,11 +95,11 @@ namespace Gridify.Tests
             {
                new Level2()
                {
-                  Id = 101, Name = "Level2_1", Level3List = new List<Level3>() { new Level3() { Property1 = 2.0, Property2 = 100.0, Level = 0 } }
+                  Id = 101, Name = "Level2_1", ChildProp = subLvl2 , Level3List = new List<Level3>() { new Level3() { Property1 = 2.0, Property2 = 100.0, Level = 0 } }
                },
                new Level2()
                {
-                  Id = 102, Name = "Level2_2", Level3List = new List<Level3>() { new Level3() { Property1 = 3.0, Property2 = 200.0, Level = 0 } }
+                  Id = 102, Name = "Level2_2", ChildProp = new ChildProp() ,Level3List = new List<Level3>() { new Level3() { Property1 = 3.0, Property2 = 200.0, Level = 0 } }
                },
                new Level2()
                {
@@ -90,11 +119,11 @@ namespace Gridify.Tests
                },
                new Level2()
                {
-                  Id = 102, Name = "Level2_2", Level3List = new List<Level3>() { new Level3() { Property1 = 5.0, Property2 = 200.0, Level = 0 } }
+                  Id = 102, Name = "Level2_2", ChildProp = new ChildProp(), Level3List = new List<Level3>() { new Level3() { Property1 = 5.0, Property2 = 200.0, Level = 0 } }
                },
                new Level2()
                {
-                  Id = 103, Name = "Level2_3", Level3List = new List<Level3>() { new Level3() { Property1 = 6.0, Property2 = 300.0, Level = 0 } }
+                  Id = 103, Name = "Level2_3", ChildProp = subLvl2_2 ,Level3List = new List<Level3>() { new Level3() { Property1 = 6.0, Property2 = 300.0, Level = 0 } }
                }
             }
          };
@@ -158,8 +187,14 @@ namespace Gridify.Tests
          public int Id { get; set; }
          public string Name { get; set; }
          public List<Level3> Level3List { get; set; }
+         
+         public ChildProp ChildProp { get; set; }
       }
-
+      
+      public class ChildProp
+      {
+         public List<Level3> Level3List { get; set; }
+      }
       public class Level3
       {
          public int Level { get; set; }
