@@ -174,7 +174,7 @@ namespace Gridify.Tests
             }
          };
       }
-
+#nullable disable
       public class Level1
       {
          public int Id { get; set; }
