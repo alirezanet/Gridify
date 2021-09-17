@@ -8,6 +8,6 @@ namespace Gridify
       string From { get; set; }
       Expression<Func<T, object?>> To { get; set; }
       Func<string, object>? Convertor { get; set; }
-      bool IsNestedCollection { get; set; }
+      bool IsNestedCollection { get; }
    }
 }
