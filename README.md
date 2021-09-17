@@ -294,9 +294,39 @@ This package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` 
 ```terminal
 dotnet add package Gridify.EntityFramework
 ```
+   
+---
+## Compile and Reuse
+You can get Gridify generated expressions using the `GetFilteringExpression` and `GetOrderingExpression` methods, so you can store an expression and use it multiple times without having any overheads, also if you compile an expression you get a massive performance boost. but you should only use a compiled expression if you are not using Gridify alongside an ORM like Entity-Framework.
+eg:
+```c#
+var gm = new GridifyMapper<Person>().GenerateMappings();
+var gq = new GridifyQuery() {Filter = "name=John"};
+var expression = gq.GetFilteringExpression(gm);
+var compiledExpression = expression.Compile();  
+```
+   
+**expression usage:**
+```c#  
+myDbContext.Persons.Where(expression);
+```
+   
+**compiled expression usage:**
+```c#
+myPersonList.Where(compiledExpression);
+```
+   
+   
+This is the performance improvement example when you use a compiled expression
+   
+|          Method |         Mean |      Error |     StdDev | Ratio | RatioSD |    Gen 0 |   Gen 1 | Allocated |
+|---------------- |-------------:|-----------:|-----------:|------:|--------:|---------:|--------:|----------:|
+| GridifyCompiled |     1.837 us |  0.0201 us |  0.0179 us | 0.001 |    0.00 |   0.4692 |       - |     984 B |
+|      NativeLinQ | 1,368.110 us | 19.5299 us | 17.3127 us | 1.000 |    0.00 |  17.5781 |  9.7656 |  37,348 B |
+|         Gridify | 1,476.890 us | 14.2971 us | 11.9387 us | 1.079 |    0.02 |  21.4844 |  9.7656 |  48,116 B |
 
 ---
-
+   
 ## Combine Gridify with AutoMapper
 
 ```c#
