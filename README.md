@@ -1,10 +1,14 @@
-# Gridify
+# Gridify (A Modern Dynamic LINQ library)
 
 <img alt="GitHub" src="https://img.shields.io/github/license/alirezanet/gridify"> ![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff) ![Nuget](https://img.shields.io/nuget/v/gridify?label=stable) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/gridify?label=latest) ![GitHub branch checks state](https://img.shields.io/github/checks-status/alirezanet/gridify/master?label=tests) <img alt="Zero-Dependencies" src="https://img.shields.io/badge/Dependencies-0-orange">
 
 Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** using text-based data.
 
+Gridify is a **dynamic LINQ library** that converts your strings to a LINQ expression in the easiest way possible with really good performance.
+
 The best use case of this library is Asp-net APIs. When you need to get some string base filtering conditions to filter data or sort it by a field name or apply pagination concepts to your lists and return a **pageable**, data grid ready information, from any repository or database.
+Although, we are not limited to Asp.net projects and we can use this library on any .Net projects and on any collections.
+
 
 **_You can find the version 1.x documentation on the [Version1 Branch](https://github.com/alirezanet/Gridify/tree/version-1.x)_**
 
