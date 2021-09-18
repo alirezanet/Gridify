@@ -34,7 +34,7 @@ namespace Benchmarks
       {
          _data = GetSampleData().ToArray();
 
-         // compiled query
+         // compiled query (this is not included in our readme benchmarks)
          var gm = new GridifyMapper<TestClass>().GenerateMappings();
          var gq1 = new GridifyQuery() {Filter = "Name=*a"};
          var gq2 = new GridifyQuery() {Filter = "Id>5"};
@@ -61,7 +61,7 @@ namespace Benchmarks
          Ds.ApplyFiltering("Name=Ali").Consume(Consumer);
       }
 
-      [Benchmark]
+      [Benchmark] // compiled query (this is not included in our readme benchmarks)w
       public void GridifyCompiled()
       {
          EnumerableDs.Where(compiled1).Consume(Consumer);
