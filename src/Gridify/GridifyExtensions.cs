@@ -101,7 +101,7 @@ namespace Gridify
       /// <param name="mapper">this is an optional parameter to apply filtering and ordering using a custom mapping configuration</param>
       /// <typeparam name="T">type of target entity</typeparam>
       /// <returns>returns user query after applying filtering, ordering and paging </returns>
-      public static IQueryable<T> ApplyEverything<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
+      public static IQueryable<T> ApplyFilteringOrderingPaging<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
       {
          if (gridifyQuery == null) return query;
          mapper = mapper.FixMapper();
@@ -236,7 +236,7 @@ namespace Gridify
          return query;
       }
 
-      public static IQueryable<T> ApplyFilterAndOrdering<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
+      public static IQueryable<T> ApplyFilteringAndOrdering<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
       {
          mapper = mapper.FixMapper();
          query = query.ApplyFiltering(gridifyQuery, mapper);
