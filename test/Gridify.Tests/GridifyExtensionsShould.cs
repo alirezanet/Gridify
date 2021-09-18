@@ -257,7 +257,7 @@ namespace Gridify.Tests
          var gq = new GridifyQuery();
 
          var actual = _fakeRepository.AsQueryable()
-            .ApplyEverything(gq)
+            .ApplyFilteringOrderingPaging(gq)
             .ToList();
 
          var expected = _fakeRepository.Skip(0).Take(GridifyExtensions.DefaultPageSize).ToList();
