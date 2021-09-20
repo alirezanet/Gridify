@@ -390,7 +390,7 @@ namespace Gridify.Tests
       }
 
       [Fact]
-      public void ApplyFiltering_CaseInsensitiveSearch() //issue #21
+      public void ApplyFiltering_CaseInsensitiveSearchUsingConvertor() //issue #21
       {
          var gq = new GridifyQuery { Filter = "name=BOB" };
          var gm = new GridifyMapper<TestClass>()
@@ -405,6 +405,24 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
+      
+      [Fact]
+      public void ApplyFiltering_CaseInsensitiveSearch() //issue #21
+      {
+         var gq = new GridifyQuery { Filter = "name=BOB/i" };
+         var gm = new GridifyMapper<TestClass>()
+            .AddMap("name", q => q.Name.ToLower() , c => c.ToLower());
+
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(gq, gm)
+            .ToList();
+
+         var expected = _fakeRepository.Where(q => q.Name.ToLower() == "BOB".ToLower()).ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
 
       #endregion
 
