@@ -165,9 +165,19 @@ But for example, if you need to just filter your data without paging or sorting 
 
 We can easily create complex queries using parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
-**Escape character hint**:
+---
+## Case-Insensitive search
 
-Filtering has five special character `, | ( ) /i` to handle complex queries and case-insensitive search. If you want to use these characters in your query values (after operator), you should add a backslash <code>\ </code> before them.
+The **'/i'** operator can be use after string values for case insensitive search:
+```c#
+var gq = new GridifyQuery() { Filter = "FirstName=John/i" };
+// this is matched by => JOHN - john - John - jOHn - ...
+```
+---
+   
+## Escape character
+
+Filtering has five special character `, | ( ) /i` to handle complex queries and case-insensitive search. If you want to use these characters in your query values (after operator), you should add a backslash <code>\ </code> before them. having bellow regex could be helpfull `([(),|]|\/i)`.
 
 JavaScript escape example:
 ```javascript
@@ -178,17 +188,9 @@ Csharp escape example:
 var value = "(test,test2)";
 var esc = Regex.Replace(value, "([(),|]|\/i)", "\\$1" ); // esc = \(test\,test2\)
 ```
-
+   
 ---
-## Case-Insensitive search
-
-The **'/i'** operator can be use after string values for case insensitive search:
-```c#
-var gq = new GridifyQuery() { Filter = "FirstName=John/i" };
-// this is matched by => JOHN - john - John - jOHn - ...
-```
----
-
+   
 ## Multiple OrderBy
 OrderBy accepts comma-separated field names followed by `asc` or `desc` keyword.
 by default, if you don't add these keywords,
