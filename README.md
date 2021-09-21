@@ -180,7 +180,7 @@ var esc = Regex.Replace(value, "([(),|]|\/i)", "\\$1" ); // esc = \(test\,test2\
 ```
 
 ---
-**Case-Insensitive search**
+## Case-Insensitive search
 
 The **'/i'** operator can be use after string values for case insensitive search:
 ```c#
