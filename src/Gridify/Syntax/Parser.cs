@@ -90,7 +90,8 @@ namespace Gridify.Syntax
       private ExpressionSyntax ParseValueExpression()
       {
          var valueToken = Match(SyntaxKind.ValueToken);
-         return new ValueExpressionSyntax(valueToken);
+         var isCaseInsensitive = IsMatch(SyntaxKind.CaseInsensitive);
+         return new ValueExpressionSyntax(valueToken, isCaseInsensitive);
       }
 
       private SyntaxToken NextToken()
@@ -98,6 +99,13 @@ namespace Gridify.Syntax
          var current = Current;
          _position++;
          return current;
+      }
+
+      private bool IsMatch(SyntaxKind kind)
+      {
+         if (Current.Kind != kind) return false;
+         NextToken();
+         return true;
       }
 
       private SyntaxToken Match(SyntaxKind kind)

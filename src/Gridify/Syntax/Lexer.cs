@@ -61,6 +61,8 @@ namespace Gridify.Syntax
                return new SyntaxToken(SyntaxKind.NotEqual, _position += 2, "!=");
             case '!' when peek == '*':
                return new SyntaxToken(SyntaxKind.NotLike, _position += 2, "!*");
+            case '/' when peek == 'i':
+               return new SyntaxToken(SyntaxKind.CaseInsensitive, _position += 2, "/i");
             case '<':
                return peek == '=' ? new SyntaxToken(SyntaxKind.LessOrEqualThan, _position += 2, "<=") :
                   new SyntaxToken(SyntaxKind.LessThan, _position++, "<");
@@ -103,7 +105,9 @@ namespace Gridify.Syntax
 
             var exitCharacters = new[] {'(', ')', ',', '|'};
             var lastChar = '\0';
-            while ((!exitCharacters.Contains(Current) || exitCharacters.Contains(Current) && lastChar == '\\') && _position < _text.Length)
+            while ((!exitCharacters.Contains(Current) || exitCharacters.Contains(Current) && lastChar == '\\') &&
+                   _position < _text.Length &&
+                   (!(Current == '/' && Peek(1) == 'i') || (Current == '/' && Peek(1) == 'i') && lastChar == '\\')) // exit on case-insensitive operator
             {
                lastChar = Current;
                Next();

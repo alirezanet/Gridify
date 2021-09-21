@@ -30,6 +30,7 @@
       ValueToken,
       ParenthesizedExpression,
       NotStartsWith,
-      NotEndsWith
+      NotEndsWith,
+      CaseInsensitive
    }
 }

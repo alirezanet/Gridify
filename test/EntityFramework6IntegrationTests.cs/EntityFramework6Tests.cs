@@ -55,7 +55,7 @@ namespace EntityFramework6IntegrationTests.cs
          using (var context = new EntityContext(connection))
          {
             var gm = new GridifyQuery() { OrderBy = "name desc" , Filter = "id > 3"};
-            var expected = context.Customers.ApplyFilterAndOrdering(gm).ToList();
+            var expected = context.Customers.ApplyFilteringAndOrdering(gm).ToList();
             var actual = context.Customers
                .Where(q=>q.Id > 3)   
                .OrderByDescending(q => q.Name)
