@@ -15,7 +15,7 @@ namespace Gridify.Syntax
          BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)
       {
          var left = (binarySyntax.Left as FieldExpressionSyntax)?.FieldToken.Text.Trim();
-         var right = (binarySyntax.Right as ValueExpressionSyntax)?.ValueToken.Text;
+         var right = (binarySyntax.Right as ValueExpressionSyntax);
          var op = binarySyntax.OperatorToken;
 
          if (left == null || right == null) return null;
@@ -41,7 +41,7 @@ namespace Gridify.Syntax
       private static Expression<Func<T, bool>>? GenerateNestedExpression<T>(
          IGridifyMapper<T> mapper,
          IGMap<T> gMap,
-         string stringValue,
+         ValueExpressionSyntax value,
          SyntaxNode op)
       {
          var body = gMap.To.Body;
@@ -49,7 +49,7 @@ namespace Gridify.Syntax
          if (body is MethodCallExpression selectExp && selectExp.Method.Name == "Select")
          {
             var targetExp = selectExp.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
-            var conditionExp = GenerateExpression(targetExp!.Body, targetExp.Parameters[0], stringValue, op, mapper.Configuration.AllowNullSearch,
+            var conditionExp = GenerateExpression(targetExp!.Body, targetExp.Parameters[0], value, op, mapper.Configuration.AllowNullSearch,
                gMap.Convertor);
 
             if (conditionExp == null) return null;
@@ -68,13 +68,15 @@ namespace Gridify.Syntax
             case MemberExpression member:
                return GetAnyExpression(member, predicate);
             case MethodCallExpression subExp when subExp.Method.Name == "SelectMany" &&
-                                                  subExp.Arguments.Last() is LambdaExpression {Body: MemberExpression lambdaMember}:
+                                                  subExp.Arguments.Last() is LambdaExpression { Body: MemberExpression lambdaMember }:
             {
                var newPredicate = GetAnyExpression(lambdaMember, predicate);
                return ParseMethodCallExpression(subExp, newPredicate);
             }
             case MethodCallExpression subExp when subExp.Method.Name == "Select" && subExp.Arguments.Last() is LambdaExpression
-               {Body: MemberExpression lambdaMember} lambda:
+            {
+               Body: MemberExpression lambdaMember
+            } lambda:
             {
                var newExp = new PredicateBuilder.ReplaceExpressionVisitor(predicate.Parameters[0], lambdaMember).Visit(predicate.Body);
                var newPredicate = GetExpressionWithNullCheck(lambdaMember, lambda.Parameters[0], newExp!);
@@ -112,39 +114,45 @@ namespace Gridify.Syntax
       private static LambdaExpression? GenerateExpression(
          Expression body,
          ParameterExpression parameter,
-         string stringValue,
+         ValueExpressionSyntax valueExpression,
          SyntaxNode op,
          bool allowNullSearch,
          Func<string, object>? convertor)
       {
          // Remove the boxing for value types
-         if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression) body).Operand;
+         if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression)body).Operand;
 
-         object? value = stringValue;
+         object? value = valueExpression.ValueToken.Text;
 
          // execute user custom Convertor
          if (convertor != null)
-            value = convertor.Invoke(stringValue);
+            value = convertor.Invoke(valueExpression.ValueToken.Text) ?? null;
 
-         if (value != null && body.Type != value.GetType())
+         if (allowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value?.ToString() == "null")
+            value = null;
+
+         // type fixer
+         if (value is not null && body.Type != value.GetType())
+         {
             try
             {
-               if (allowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
-                  value = null;
-               else
-               {
-                  // handle broken guids,  github issue #2
-                  if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
+               // handle broken guids,  github issue #2
+               if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
 
-                  var converter = TypeDescriptor.GetConverter(body.Type);
-                  value = converter.ConvertFromString(value.ToString())!;
-               }
+               var converter = TypeDescriptor.GetConverter(body.Type);
+               value = converter.ConvertFromString(value.ToString())!;
             }
             catch (FormatException)
             {
                // return no records in case of any exception in formatting
                return Expression.Lambda(Expression.Constant(false), parameter); // q => false
             }
+         }
+         else if (valueExpression.IsCaseInsensitive)
+         {
+            value = value?.ToString().ToLower();
+            body = Expression.Call(body, GetToLowerMethod());
+         }
 
          Expression be;
 
@@ -224,16 +232,18 @@ namespace Gridify.Syntax
       private static MethodInfo GetAnyMethod(Type @type) =>
          typeof(Enumerable).GetMethods().Single(m => m.Name == "Any" && m.GetParameters().Length == 2).MakeGenericMethod(@type);
 
-      private static MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] {typeof(string)})!;
+      private static MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] { typeof(string) })!;
 
-      private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] {typeof(string)})!;
+      private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] { typeof(string) })!;
 
-      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] {typeof(string)})!;
+      private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
 
+      private static MethodInfo GetToLowerMethod() => typeof(string).GetMethod("ToLower", new Type[] { })!;
       private static MethodInfo GetToStringMethod() => typeof(object).GetMethod("ToString")!;
 
+
       internal static (Expression<Func<T, bool>> Expression, bool IsNested)
-         GenerateQuery<T>(ExpressionSyntax expression, IGridifyMapper<T> mapper,bool isParenthesisOpen=false)
+         GenerateQuery<T>(ExpressionSyntax expression, IGridifyMapper<T> mapper, bool isParenthesisOpen = false)
       {
          while (true)
             switch (expression.Kind)
@@ -245,9 +255,9 @@ namespace Gridify.Syntax
                   if (bExp!.Left is FieldExpressionSyntax && bExp.Right is ValueExpressionSyntax)
                      return ConvertBinaryExpressionSyntaxToQuery(bExp, mapper) ?? throw new GridifyFilteringException("Invalid expression");
 
-                  (Expression<Func<T, bool>> exp,bool isNested) leftQuery;
-                  (Expression<Func<T, bool>> exp,bool isNested) rightQuery;
-                  
+                  (Expression<Func<T, bool>> exp, bool isNested) leftQuery;
+                  (Expression<Func<T, bool>> exp, bool isNested) rightQuery;
+
                   if (bExp.Left is ParenthesizedExpressionSyntax lpExp)
                   {
                      leftQuery = GenerateQuery(lpExp.Expression, mapper, true);
@@ -257,14 +267,14 @@ namespace Gridify.Syntax
 
 
                   if (bExp.Right is ParenthesizedExpressionSyntax rpExp)
-                     rightQuery = GenerateQuery(rpExp.Expression, mapper,true);
+                     rightQuery = GenerateQuery(rpExp.Expression, mapper, true);
                   else
                      rightQuery = GenerateQuery(bExp.Right, mapper);
 
                   // check for nested collections
                   if (isParenthesisOpen &&
-                      CheckIfCanMerge(leftQuery, rightQuery,bExp.OperatorToken.Kind) is Expression<Func<T, bool>> mergedResult)
-                     return (mergedResult,true);
+                      CheckIfCanMerge(leftQuery, rightQuery, bExp.OperatorToken.Kind) is Expression<Func<T, bool>> mergedResult)
+                     return (mergedResult, true);
 
                   var result = bExp.OperatorToken.Kind switch
                   {
@@ -285,7 +295,7 @@ namespace Gridify.Syntax
       }
 
       private static LambdaExpression? CheckIfCanMerge<T>((Expression<Func<T, bool>> exp, bool isNested) leftQuery,
-         (Expression<Func<T, bool>> exp, bool isNested) rightQuery,SyntaxKind op)
+         (Expression<Func<T, bool>> exp, bool isNested) rightQuery, SyntaxKind op)
       {
          if (leftQuery.isNested && rightQuery.isNested)
          {
@@ -303,7 +313,7 @@ namespace Gridify.Syntax
                if (leftLambda is null || rightLambda is null)
                   return null;
 
-               var visitedRight= new PredicateBuilder.ReplaceExpressionVisitor(rightLambda.Parameters[0], leftLambda.Parameters[0])
+               var visitedRight = new PredicateBuilder.ReplaceExpressionVisitor(rightLambda.Parameters[0], leftLambda.Parameters[0])
                   .Visit(rightLambda.Body);
 
                var mergedExpression = op switch
@@ -312,12 +322,13 @@ namespace Gridify.Syntax
                   SyntaxKind.Or => Expression.OrElse(leftLambda.Body, visitedRight),
                   _ => throw new InvalidOperationException()
                };
-               
+
                var mergedLambda = Expression.Lambda(mergedExpression, leftLambda.Parameters);
                var newLambda = GetAnyExpression(leftMember, mergedLambda) as Expression<Func<T, bool>>;
                return newLambda;
             }
          }
+
          return null;
       }
 
@@ -325,12 +336,10 @@ namespace Gridify.Syntax
       {
          return exp switch
          {
-            BinaryExpression {Right: MethodCallExpression cExp} => cExp,
+            BinaryExpression { Right: MethodCallExpression cExp } => cExp,
             MethodCallExpression mcExp => mcExp,
             _ => throw new InvalidExpressionException()
          };
       }
-
-
    }
 }

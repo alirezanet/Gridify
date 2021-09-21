@@ -409,12 +409,10 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_CaseInsensitiveSearch() //issue #21
       {
-         var gq = new GridifyQuery { Filter = "name=BOB/i" };
-         var gm = new GridifyMapper<TestClass>()
-            .AddMap("name", q => q.Name.ToLower() , c => c.ToLower());
+         var gq = new GridifyQuery { Filter = "name=BOB/i " };
 
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering(gq, gm)
+            .ApplyFiltering(gq)
             .ToList();
 
          var expected = _fakeRepository.Where(q => q.Name.ToLower() == "BOB".ToLower()).ToList();
@@ -422,7 +420,19 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
+      
+      [Fact]
+      public void ApplyFiltering_EscapeCaseInsensitiveSearch() //issue #21
+      {
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(@"name=Case\/i" )
+            .ToList();
 
+         var expected = _fakeRepository.Where(q => q.Name == "Case/i").ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
 
       #endregion
 
@@ -655,6 +665,7 @@ namespace Gridify.Tests
          lst.Add(new TestClass(22, @"\Liam", null));
          lst.Add(new TestClass(23, "LI | AM", null));
          lst.Add(new TestClass(24, "(LI,AM)", null));
+         lst.Add(new TestClass(25, "Case/i", null));
 
          return lst;
       }

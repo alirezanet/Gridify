@@ -167,18 +167,26 @@ We can easily create complex queries using parenthesis`()` with AND (`,`) + OR (
 
 **Escape character hint**:
 
-Filtering has four special character `, | ( )` to handle complex queries. If you want to use these characters in your query values (after `=`), you should add a backslash <code>\ </code> before them.
+Filtering has five special character `, | ( ) /i` to handle complex queries and case-insensitive search. If you want to use these characters in your query values (after operator), you should add a backslash <code>\ </code> before them.
 
 JavaScript escape example:
 ```javascript
-let esc = (v) => v.replace(/([(),|])/g, '\\$1')
+let esc = (v) => v.replace(/([(),|]|\/i)/g, '\\$1')
 ```
 Csharp escape example:
 ```csharp
 var value = "(test,test2)";
-var esc = Regex.Replace(value, "([(),|])", "\\$1" ); // esc = \(test\,test2\)
+var esc = Regex.Replace(value, "([(),|]|\/i)", "\\$1" ); // esc = \(test\,test2\)
 ```
 
+---
+**Case-Insensitive search**
+
+The **'/i'** operator can be use after string values for case insensitive search:
+```c#
+var gq = new GridifyQuery() { Filter = "FirstName=John/i" };
+// this is matched by => JOHN - john - John - jOHn - ...
+```
 ---
 
 ## Multiple OrderBy
