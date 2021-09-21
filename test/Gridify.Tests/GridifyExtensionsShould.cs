@@ -433,6 +433,19 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
+      
+      [Fact]
+      public void ApplyFiltering_CaseInsensitiveOperatorAtTheBeginningOfValue_ShouldIgnore() 
+      {
+         var actual = _fakeRepository.AsQueryable()
+            .ApplyFiltering(@"name=\/icase" )
+            .ToList();
+
+         var expected = _fakeRepository.Where(q => q.Name == "/icase").ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.False(actual.Any());
+      }
 
       #endregion
 
@@ -666,6 +679,7 @@ namespace Gridify.Tests
          lst.Add(new TestClass(23, "LI | AM", null));
          lst.Add(new TestClass(24, "(LI,AM)", null));
          lst.Add(new TestClass(25, "Case/i", null));
+         lst.Add(new TestClass(25, "/iCase", null));
 
          return lst;
       }
