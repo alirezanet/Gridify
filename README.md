@@ -87,21 +87,19 @@ var query = myDbContext.Persons.ApplyFiltering("name = John");
 Filtering is the most expensive feature in gridify. the following benchmark is comparing filtering in the most known dynamic linq libraries. As you can see, gridify has the closest result to the native linq.
 Also, i Should note other features like Pagination and Sorting have almost zero overhead in Gridify.
 
-BenchmarkDotNet=v0.13.0, OS=Windows 10.0.19043.1165 (21H1/May2021Update)
+BenchmarkDotNet=v0.13.0, OS=Windows 10.0.19043.1237 (21H1/May2021Update)
 11th Gen Intel Core i5-11400F 2.60GHz, 1 CPU, 12 logical and 6 physical cores
 .NET SDK=5.0.301
-[Host]     : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
 DefaultJob : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
 
 
 |      Method |       Mean |    Error |   StdDev | Ratio | RatioSD |   Gen 0 |   Gen 1 | Allocated |
 |------------ |-----------:|---------:|---------:|------:|--------:|--------:|--------:|----------:|
-| Native Linq |   737.0 us |  4.95 us |  4.39 us |  1.00 |    0.00 |  5.8594 |  2.9297 |     36 KB |
-|     Gridify |   774.5 us | 13.60 us | 12.72 us |  1.05 |    0.02 |  6.8359 |  2.9297 |     46 KB |
-| DynamicLinq |   902.7 us | 16.33 us | 15.28 us |  1.22 |    0.02 | 19.5313 |  9.7656 |    122 KB |
-|       Sieve |   982.3 us | 11.06 us | 10.35 us |  1.33 |    0.01 |  8.7891 |  3.9063 |     54 KB |
-|         Fop | 2,954.8 us | 14.16 us | 12.55 us |  4.01 |    0.03 | 50.7813 | 23.4375 |    311 KB |
-
+|     Native LINQ |   724.329 us |  6.4686 us |  6.0507 us | 1.000 |    0.00 |  5.8594 |  2.9297 |  37,392 B |
+|         Gridify |   736.854 us |  5.7427 us |  5.0907 us | 1.018 |    0.01 |  5.8594 |  2.9297 |  39,924 B |
+|     DynamicLinq |   886.773 us |  8.4943 us |  7.5299 us | 1.225 |    0.01 | 19.5313 |  9.7656 | 125,122 B |
+|           Sieve |   961.574 us |  6.6389 us |  5.8852 us | 1.328 |    0.01 |  8.7891 |  3.9063 |  55,186 B |
+|             Fop | 2,933.332 us | 49.7515 us | 61.0994 us | 4.076 |    0.11 | 46.8750 | 23.4375 | 315,830 B |
 ---
 
 ## Installation
@@ -333,10 +331,9 @@ This is the performance improvement example when you use a compiled expression
    
 |          Method |         Mean |      Error |     StdDev | Ratio | RatioSD |    Gen 0 |   Gen 1 | Allocated |
 |---------------- |-------------:|-----------:|-----------:|------:|--------:|---------:|--------:|----------:|
-| GridifyCompiled |     1.837 us |  0.0201 us |  0.0179 us | 0.001 |    0.00 |   0.4692 |       - |     984 B |
-|      NativeLinQ | 1,368.110 us | 19.5299 us | 17.3127 us | 1.000 |    0.00 |  17.5781 |  9.7656 |  37,348 B |
-|         Gridify | 1,476.890 us | 14.2971 us | 11.9387 us | 1.079 |    0.02 |  21.4844 |  9.7656 |  48,116 B |
-
+| GridifyCompiled |     1.008 us |  0.0035 us |  0.0031 us | 0.001 |    0.00 |  0.1564 |       - |     984 B  |
+|      NativeLinQ |   724.329 us |  6.4686 us |  6.0507 us | 1.000 |    0.00 |  5.8594 |  2.9297 |   37,392 B |
+|         Gridify |   736.854 us |  5.7427 us |  5.0907 us | 1.018 |    0.01 |  5.8594 |  2.9297 |   39,924 B |
 ---
    
 ## Combine Gridify with AutoMapper
