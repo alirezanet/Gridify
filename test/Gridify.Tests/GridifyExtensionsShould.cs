@@ -574,7 +574,7 @@ namespace Gridify.Tests
       [InlineData(5, 3)]
       [InlineData(1, 15)]
       [InlineData(20, 10)]
-      public void ApplyPaging_UsingCustomValues(short page, int pageSize)
+      public void ApplyPaging_UsingCustomValues(int page, int pageSize)
       {
          var gq = new GridifyQuery {Page = page, PageSize = pageSize};
          var actual = _fakeRepository.AsQueryable()
@@ -623,7 +623,7 @@ namespace Gridify.Tests
       [InlineData(4, 3, true)]
       [InlineData(0, 15, false)]
       [InlineData(19, 10, true)]
-      public void ApplyOrderingAndPaging_UsingCustomValues(short page, int pageSize, bool isSortAsc)
+      public void ApplyOrderingAndPaging_UsingCustomValues(int page, int pageSize, bool isSortAsc)
       {
          var orderByExp = "name " + (isSortAsc ? "asc" : "desc");
          var gq = new GridifyQuery {Page = page, PageSize = pageSize, OrderBy = orderByExp};
