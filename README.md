@@ -304,6 +304,11 @@ This package have two additional `GridifyAsync()` and `GridifyQueryableAsync()` 
 ```terminal
 dotnet add package Gridify.EntityFramework
 ```
+Also, I recommended to Enable EntityFramework compatibility layer if you using gridify on EF context.
+```c#
+ // You should use this configuration in your startup class or main method.
+ GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+```
    
 ---
 ## Compile and Reuse
