@@ -163,6 +163,13 @@ But for example, if you need to just filter your data without paging or sorting 
 
 We can easily create complex queries using parenthesis`()` with AND (`,`) + OR (`|`) operators.
 
+Also, If you don't specify any value after `=` or `!=` operators, gridify search for the `default` and `null` values.
+```c#
+   var gq = new GridifyQuery() { Filter = "Name=" };
+   // this is equal to :
+   // Persons.Where(p => p.Name is null || p.Name == string.Empty() )
+```
+
 ---
 ## Case-Insensitive search
 
