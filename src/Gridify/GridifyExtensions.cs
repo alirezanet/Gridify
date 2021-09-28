@@ -8,12 +8,6 @@ namespace Gridify
 {
    public static partial class GridifyExtensions
    {
-      #region "Static Shared"
-
-      public static int DefaultPageSize = 20;
-
-      #endregion
-
       #region "Private"
 
       /// <summary>
@@ -29,7 +23,7 @@ namespace Gridify
 
          // set default for PageSize
          if (gridifyPagination.PageSize <= 0)
-            gridifyPagination.PageSize = DefaultPageSize;
+            gridifyPagination.PageSize = GridifyGlobalConfiguration.DefaultPageSize;
 
          return gridifyPagination;
       }
@@ -49,12 +43,13 @@ namespace Gridify
          if (syntaxTree.Diagnostics.Any())
             throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
 
-         var (queryExpression,_) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
+         var (queryExpression, _) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
          if (queryExpression == null) throw new GridifyQueryException("Can not create expression with current data");
          return queryExpression;
       }
 
-      public static IEnumerable<Expression<Func<T, object>>> GetOrderingExpressions<T>(this IGridifyOrdering gridifyOrdering, IGridifyMapper<T>? mapper = null)
+      public static IEnumerable<Expression<Func<T, object>>> GetOrderingExpressions<T>(this IGridifyOrdering gridifyOrdering,
+         IGridifyMapper<T>? mapper = null)
       {
          mapper = mapper.FixMapper();
 
@@ -65,7 +60,7 @@ namespace Gridify
          {
             // skip if there is no mappings available
             if (!mapper.HasMap(member)) continue;
-            
+
             yield return mapper.GetExpression(member)!;
          }
       }
@@ -101,7 +96,8 @@ namespace Gridify
       /// <param name="mapper">this is an optional parameter to apply filtering and ordering using a custom mapping configuration</param>
       /// <typeparam name="T">type of target entity</typeparam>
       /// <returns>returns user query after applying filtering, ordering and paging </returns>
-      public static IQueryable<T> ApplyFilteringOrderingPaging<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
+      public static IQueryable<T> ApplyFilteringOrderingPaging<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery,
+         IGridifyMapper<T>? mapper = null)
       {
          if (gridifyQuery == null) return query;
          mapper = mapper.FixMapper();
@@ -121,11 +117,14 @@ namespace Gridify
       /// <param name="startWithThenBy">if you already have an ordering with start with ThenBy, new orderings will add on top of your orders</param>
       /// <typeparam name="T">type of target entity</typeparam>
       /// <returns>returns user query after applying Ordering </returns>
-      public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> query, IGridifyOrdering? gridifyOrdering, IGridifyMapper<T>? mapper = null, bool startWithThenBy = false)
+      public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> query, IGridifyOrdering? gridifyOrdering, IGridifyMapper<T>? mapper = null,
+         bool startWithThenBy = false)
       {
          if (gridifyOrdering == null) return query;
          mapper = mapper.FixMapper();
-         return string.IsNullOrWhiteSpace(gridifyOrdering.OrderBy) ? query : ProcessOrdering(query, gridifyOrdering.OrderBy!,startWithThenBy, mapper);
+         return string.IsNullOrWhiteSpace(gridifyOrdering.OrderBy)
+            ? query
+            : ProcessOrdering(query, gridifyOrdering.OrderBy!, startWithThenBy, mapper);
       }
 
       private static IQueryable<T> ProcessOrdering<T>(IQueryable<T> query, string orderings, bool startWithThenBy, IGridifyMapper<T> mapper)
@@ -135,7 +134,7 @@ namespace Gridify
          {
             // skip if there is no mappings available
             if (!mapper.HasMap(member)) continue;
-            
+
             if (isFirst)
             {
                query = query.OrderByMember(mapper.GetExpression(member), isAscending);
@@ -144,6 +143,7 @@ namespace Gridify
             else
                query = query.ThenByMember(mapper.GetExpression(member), isAscending);
          }
+
          return query;
       }
 
@@ -157,9 +157,9 @@ namespace Gridify
                var spliced = orderingExp.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
                var isAsc = spliced.Last() switch
                {
-                  "desc" =>  false,
+                  "desc" => false,
                   "asc" => true,
-                   _ => throw new GridifyOrderingException("Invalid keyword. expected 'desc' or 'asc'")
+                  _ => throw new GridifyOrderingException("Invalid keyword. expected 'desc' or 'asc'")
                };
                yield return (spliced.First(), isAsc);
             }
@@ -229,14 +229,15 @@ namespace Gridify
          if (syntaxTree.Diagnostics.Any())
             throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
 
-         var (queryExpression,_) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
+         var (queryExpression, _) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
 
          query = query.Where(queryExpression);
 
          return query;
       }
 
-      public static IQueryable<T> ApplyFilteringAndOrdering<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
+      public static IQueryable<T> ApplyFilteringAndOrdering<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery,
+         IGridifyMapper<T>? mapper = null)
       {
          mapper = mapper.FixMapper();
          query = query.ApplyFiltering(gridifyQuery, mapper);
