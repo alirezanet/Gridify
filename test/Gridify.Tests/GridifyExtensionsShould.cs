@@ -446,6 +446,60 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.False(actual.Any());
       }
+      
+      [Fact] // issue #27
+      public void ApplyFiltering_GreaterThanBetweenTwoStrings() 
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name > ali" ).ToList();
+
+         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "ali", StringComparison.Ordinal) > 0 ).ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+      [Fact] // issue #27
+      public void ApplyFiltering_LessThanBetweenTwoStrings() 
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name < v" ).ToList();
+
+         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "v", StringComparison.Ordinal ) < 0  ).ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+      
+      [Fact] // issue #27
+      public void ApplyFiltering_LessThanOrEqualBetweenTwoStrings() 
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name <= l" ).ToList();
+         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "l", StringComparison.Ordinal ) <= 0  ).ToList();
+         
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+      
+      [Fact] // issue #27
+      public void ApplyFiltering_GreaterThanOrEqualBetweenTwoStrings() 
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name >= c" ).ToList();
+         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "c", StringComparison.Ordinal ) >= 0  ).ToList();
+         
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+      
+      [Fact] // issue #27
+      public void ApplyFiltering_GreaterThanOrEqual_CaseInsensitive_BetweenTwoStrings() 
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name >= j/i" ).ToList();
+         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "j", StringComparison.OrdinalIgnoreCase ) >= 0  ).ToList();
+         
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
 
       #endregion
 
