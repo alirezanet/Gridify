@@ -34,7 +34,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_SingleField_GridifyQuery()
       {
-         var gq = new GridifyQuery {Filter = "name=John"};
+         var gq = new GridifyQuery { Filter = "name=John" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -117,7 +117,7 @@ namespace Gridify.Tests
       [InlineData(@" name =LI \| AM", @"LI | AM")]
       public void ApplyFiltering_EscapeSpecialCharacters(string textFilter, string rawText)
       {
-         var gq = new GridifyQuery {Filter = textFilter};
+         var gq = new GridifyQuery { Filter = textFilter };
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -130,7 +130,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_ParenthesisQueryWithoutEscapeShouldThrowException()
       {
-         var gq = new GridifyQuery {Filter = @"name=(LI,AM)"};
+         var gq = new GridifyQuery { Filter = @"name=(LI,AM)" };
          Action act = () => _fakeRepository.AsQueryable()
             .ApplyFiltering(gq);
 
@@ -143,7 +143,7 @@ namespace Gridify.Tests
       {
          var guidString = "e2cec5dd-208d-4bb5-a852-50008f8ba366";
          var guid = Guid.Parse(guidString);
-         var gq = new GridifyQuery {Filter = "myGuid=" + guidString};
+         var gq = new GridifyQuery { Filter = "myGuid=" + guidString };
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -157,7 +157,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_SingleBrokenGuidField()
       {
          var brokenGuidString = "e2cec5dd-208d-4bb5-a852-";
-         var gq = new GridifyQuery {Filter = "myGuid=" + brokenGuidString};
+         var gq = new GridifyQuery { Filter = "myGuid=" + brokenGuidString };
 
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
@@ -171,7 +171,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_SingleBrokenGuidField_NotEqual()
       {
          var brokenGuidString = "e2cec5dd-208d-4bb5-a852-";
-         var gq = new GridifyQuery {Filter = "myGuid!=" + brokenGuidString};
+         var gq = new GridifyQuery { Filter = "myGuid!=" + brokenGuidString };
 
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
@@ -184,7 +184,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_InvalidFilterExpressionShouldThrowException()
       {
-         var gq = new GridifyQuery {Filter = "=guid,d="};
+         var gq = new GridifyQuery { Filter = "=guid,d=" };
          Assert.Throws<GridifyFilteringException>(() =>
             _fakeRepository.AsQueryable().ApplyFiltering(gq).ToList());
       }
@@ -192,7 +192,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_InvalidCharacterShouldThrowException()
       {
-         var gq = new GridifyQuery {Filter = "@name=ali"};
+         var gq = new GridifyQuery { Filter = "@name=ali" };
          Assert.Throws<GridifyFilteringException>(() =>
             _fakeRepository.AsQueryable().ApplyFiltering(gq).ToList());
       }
@@ -360,7 +360,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_NestedParenthesisWithSpace()
       {
          // we shouldn't add spaces for values 
-         var gq = new GridifyQuery {Filter = " ( name =*J| ( name =*S , Id <5 ) )"};
+         var gq = new GridifyQuery { Filter = " ( name =*J| ( name =*S , Id <5 ) )" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
@@ -373,7 +373,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyFiltering_UsingChildClassProperty()
       {
-         var gq = new GridifyQuery {Filter = "Child_Name=Bob"};
+         var gq = new GridifyQuery { Filter = "Child_Name=Bob" };
          var gm = new GridifyMapper<TestClass>()
             .GenerateMappings()
             .AddMap("Child_name", q => q.ChildClass!.Name);
@@ -383,7 +383,7 @@ namespace Gridify.Tests
             .ApplyFiltering(gq, gm)
             .ToList();
 
-         var expected = _fakeRepository.Where(q => q.ChildClass is {Name: "Bob"}).ToList();
+         var expected = _fakeRepository.Where(q => q.ChildClass is { Name: "Bob" }).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -394,7 +394,7 @@ namespace Gridify.Tests
       {
          var gq = new GridifyQuery { Filter = "name=BOB" };
          var gm = new GridifyMapper<TestClass>()
-            .AddMap("name", q => q.Name.ToLower() , c => c.ToLower());
+            .AddMap("name", q => q.Name.ToLower(), c => c.ToLower());
 
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq, gm)
@@ -405,7 +405,7 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
-      
+
       [Fact]
       public void ApplyFiltering_CaseInsensitiveSearch() //issue #21
       {
@@ -420,12 +420,12 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
-      
+
       [Fact]
       public void ApplyFiltering_EscapeCaseInsensitiveSearch() //issue #21
       {
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering(@"name=Case\/i" )
+            .ApplyFiltering(@"name=Case\/i")
             .ToList();
 
          var expected = _fakeRepository.Where(q => q.Name == "Case/i").ToList();
@@ -433,12 +433,12 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
-      
+
       [Fact]
-      public void ApplyFiltering_CaseInsensitiveOperatorAtTheBeginningOfValue_ShouldIgnore() 
+      public void ApplyFiltering_CaseInsensitiveOperatorAtTheBeginningOfValue_ShouldIgnore()
       {
          var actual = _fakeRepository.AsQueryable()
-            .ApplyFiltering(@"name=\/icase" )
+            .ApplyFiltering(@"name=\/icase")
             .ToList();
 
          var expected = _fakeRepository.Where(q => q.Name == "/icase").ToList();
@@ -446,60 +446,112 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.False(actual.Any());
       }
-      
-      [Fact] // issue #27
-      public void ApplyFiltering_GreaterThanBetweenTwoStrings() 
-      {
-         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name > ali" ).ToList();
 
-         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "ali", StringComparison.Ordinal) > 0 ).ToList();
-         Assert.Equal(expected.Count, actual.Count);
-         Assert.Equal(expected, actual);
-         Assert.True(actual.Any());
-      }
       [Fact] // issue #27
-      public void ApplyFiltering_LessThanBetweenTwoStrings() 
+      public void ApplyFiltering_GreaterThanBetweenTwoStrings()
       {
-         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name < v" ).ToList();
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name > ali").ToList();
 
-         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "v", StringComparison.Ordinal ) < 0  ).ToList();
+         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "ali", StringComparison.Ordinal) > 0).ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
+      [Fact] // issue #27
+      public void ApplyFiltering_LessThanBetweenTwoStrings()
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name < v").ToList();
+
+         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "v", StringComparison.Ordinal) < 0).ToList();
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
+      [Fact] // issue #27
+      public void ApplyFiltering_LessThanOrEqualBetweenTwoStrings()
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name <= l").ToList();
+         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "l", StringComparison.Ordinal) <= 0).ToList();
+
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
+      [Fact] // issue #27
+      public void ApplyFiltering_GreaterThanOrEqualBetweenTwoStrings()
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name >= c").ToList();
+         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "c", StringComparison.Ordinal) >= 0).ToList();
+
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
+      [Fact] // issue #27
+      public void ApplyFiltering_GreaterThanOrEqual_CaseInsensitive_BetweenTwoStrings()
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name >= j/i").ToList();
+         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "j", StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
+      [Fact] // issue #25
+      public void ApplyFiltering_Equal_ProcessingNullOrDefaultValue()
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("tag=").ToList();
+         var expected = _fakeRepository.Where(q => string.IsNullOrEmpty(q.Tag)).ToList();
+         var expected2 = _fakeRepository.Where(q => q.Tag is null or "").ToList();
+
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected2.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.Equal(expected2, actual);
+         Assert.True(actual.Any());
+      }
+      
+      [Fact] // issue #25
+      public void ApplyFiltering_NotEqual_ProcessingNullOrDefaultValue()
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("tag!=").ToList();
+         var expected = _fakeRepository.Where(q => !string.IsNullOrEmpty(q.Tag)).ToList();
+         var expected2 = _fakeRepository.Where(q => q.Tag is not null && q.Tag != "").ToList();
+
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected2.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.Equal(expected2, actual);
+         Assert.True(actual.Any());
+      }
+      
+      [Fact] // issue #25
+      public void ApplyFiltering_Equal_ProcessingNullOrDefaultValueNonStringTypes()
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("myGuid=").ToList();
+         var expected = _fakeRepository.Where(q => q.MyGuid == null || q.MyGuid == default ) .ToList();
+        
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+      [Fact] // issue #25
+      public void ApplyFiltering_NotEqual_ProcessingNullOrDefaultValueNonStringTypes()
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("myGuid!=").ToList();
+         var expected = _fakeRepository.Where(q => q.MyGuid != null && q.MyGuid != default ).ToList();
+        
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
       
-      [Fact] // issue #27
-      public void ApplyFiltering_LessThanOrEqualBetweenTwoStrings() 
-      {
-         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name <= l" ).ToList();
-         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "l", StringComparison.Ordinal ) <= 0  ).ToList();
-         
-         Assert.Equal(expected.Count, actual.Count);
-         Assert.Equal(expected, actual);
-         Assert.True(actual.Any());
-      }
-      
-      [Fact] // issue #27
-      public void ApplyFiltering_GreaterThanOrEqualBetweenTwoStrings() 
-      {
-         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name >= c" ).ToList();
-         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "c", StringComparison.Ordinal ) >= 0  ).ToList();
-         
-         Assert.Equal(expected.Count, actual.Count);
-         Assert.Equal(expected, actual);
-         Assert.True(actual.Any());
-      }
-      
-      [Fact] // issue #27
-      public void ApplyFiltering_GreaterThanOrEqual_CaseInsensitive_BetweenTwoStrings() 
-      {
-         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name >= j/i" ).ToList();
-         var expected = _fakeRepository.Where(q => string.Compare(q.Name, "j", StringComparison.OrdinalIgnoreCase ) >= 0  ).ToList();
-         
-         Assert.Equal(expected.Count, actual.Count);
-         Assert.Equal(expected, actual);
-         Assert.True(actual.Any());
-      }
+
 
       #endregion
 
@@ -508,7 +560,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyOrdering_OrderBy_Ascending()
       {
-         var gq = new GridifyQuery {OrderBy = "name"};
+         var gq = new GridifyQuery { OrderBy = "name" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrdering(gq)
             .ToList();
@@ -519,7 +571,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyOrdering_OrderBy_DateTime()
       {
-         var gq = new GridifyQuery {OrderBy = "MyDateTime"};
+         var gq = new GridifyQuery { OrderBy = "MyDateTime" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrdering(gq)
             .ToList();
@@ -532,7 +584,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyOrdering_OrderBy_Descending()
       {
-         var gq = new GridifyQuery {OrderBy = "Name desc"};
+         var gq = new GridifyQuery { OrderBy = "Name desc" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrdering(gq)
             .ToList();
@@ -545,7 +597,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyOrdering_MultipleOrderBy()
       {
-         var gq = new GridifyQuery {OrderBy = "MyDateTime desc , id , name asc"};
+         var gq = new GridifyQuery { OrderBy = "MyDateTime desc , id , name asc" };
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrdering(gq)
             .ToList();
@@ -564,7 +616,7 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyOrdering_SortUsingChildClassProperty()
       {
-         var gq = new GridifyQuery {OrderBy = "Child_Name desc"};
+         var gq = new GridifyQuery { OrderBy = "Child_Name desc" };
          var gm = new GridifyMapper<TestClass>()
             .GenerateMappings()
             .AddMap("Child_Name", q => q.ChildClass!.Name);
@@ -630,7 +682,7 @@ namespace Gridify.Tests
       [InlineData(20, 10)]
       public void ApplyPaging_UsingCustomValues(int page, int pageSize)
       {
-         var gq = new GridifyQuery {Page = page, PageSize = pageSize};
+         var gq = new GridifyQuery { Page = page, PageSize = pageSize };
          var actual = _fakeRepository.AsQueryable()
             .ApplyPaging(gq)
             .ToList();
@@ -661,7 +713,7 @@ namespace Gridify.Tests
          var query = _fakeRepository.AsQueryable().Where(q => q.Name == "John").OrderByDescending(q => q.Name);
          var totalItems = query.Count();
          var items = query.Skip(-2).Take(15).ToList();
-         var expected = new Paging<TestClass>() {Data = items, Count = totalItems};
+         var expected = new Paging<TestClass>() { Data = items, Count = totalItems };
 
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected.Data.Count(), actual.Data.Count());
@@ -680,7 +732,7 @@ namespace Gridify.Tests
       public void ApplyOrderingAndPaging_UsingCustomValues(int page, int pageSize, bool isSortAsc)
       {
          var orderByExp = "name " + (isSortAsc ? "asc" : "desc");
-         var gq = new GridifyQuery {Page = page, PageSize = pageSize, OrderBy = orderByExp};
+         var gq = new GridifyQuery { Page = page, PageSize = pageSize, OrderBy = orderByExp };
          // actual
          var actual = _fakeRepository.AsQueryable()
             .ApplyOrderingAndPaging(gq)
@@ -709,31 +761,31 @@ namespace Gridify.Tests
          var lst = new List<TestClass>();
          lst.Add(new TestClass(1, "John", null, Guid.NewGuid(), DateTime.Now));
          lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid(), DateTime.UtcNow));
-         lst.Add(new TestClass(3, "Jack", (TestClass) lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2)));
+         lst.Add(new TestClass(3, "Jack", (TestClass)lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2)));
          lst.Add(new TestClass(4, "Rose", null, Guid.Parse("e2cec5dd-208d-4bb5-a852-50008f8ba366")));
-         lst.Add(new TestClass(5, "Ali", null));
-         lst.Add(new TestClass(6, "Hamid", (TestClass) lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
-         lst.Add(new TestClass(7, "Hasan", (TestClass) lst[1].Clone()));
-         lst.Add(new TestClass(8, "Farhad", (TestClass) lst[2].Clone(), Guid.Empty));
+         lst.Add(new TestClass(5, "Ali", null, tag: "123"));
+         lst.Add(new TestClass(6, "Hamid", (TestClass)lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
+         lst.Add(new TestClass(7, "Hasan", (TestClass)lst[1].Clone()));
+         lst.Add(new TestClass(8, "Farhad", (TestClass)lst[2].Clone(), Guid.Empty));
          lst.Add(new TestClass(9, "Sara", null));
          lst.Add(new TestClass(10, "Jorge", null));
          lst.Add(new TestClass(11, "joe", null));
-         lst.Add(new TestClass(12, "jimmy", (TestClass) lst[0].Clone()));
-         lst.Add(new TestClass(13, "Nazanin", null));
-         lst.Add(new TestClass(14, "Reza", null));
-         lst.Add(new TestClass(15, "Korosh", (TestClass) lst[0].Clone()));
-         lst.Add(new TestClass(16, "Kamran", (TestClass) lst[1].Clone()));
-         lst.Add(new TestClass(17, "Saeid", (TestClass) lst[2].Clone()));
+         lst.Add(new TestClass(12, "jimmy", (TestClass)lst[0].Clone()));
+         lst.Add(new TestClass(13, "Nazanin", null, tag: "test0"));
+         lst.Add(new TestClass(14, "Reza", null, tag: "test1"));
+         lst.Add(new TestClass(15, "Korosh", (TestClass)lst[0].Clone()));
+         lst.Add(new TestClass(16, "Kamran", (TestClass)lst[1].Clone()));
+         lst.Add(new TestClass(17, "Saeid", (TestClass)lst[2].Clone()));
          lst.Add(new TestClass(18, "jessi=ca", null));
-         lst.Add(new TestClass(19, "Ped=ram", null));
+         lst.Add(new TestClass(19, "Ped=ram", null, tag: "test3"));
          lst.Add(new TestClass(20, "Peyman!", null));
-         lst.Add(new TestClass(21, "Fereshte", null));
+         lst.Add(new TestClass(21, "Fereshte", null, tag: null));
          lst.Add(new TestClass(22, "LIAM", null));
-         lst.Add(new TestClass(22, @"\Liam", null));
+         lst.Add(new TestClass(22, @"\Liam", null, tag: null));
          lst.Add(new TestClass(23, "LI | AM", null));
-         lst.Add(new TestClass(24, "(LI,AM)", null));
-         lst.Add(new TestClass(25, "Case/i", null));
-         lst.Add(new TestClass(25, "/iCase", null));
+         lst.Add(new TestClass(24, "(LI,AM)", null, tag: string.Empty));
+         lst.Add(new TestClass(25, "Case/i", null, tag: string.Empty));
+         lst.Add(new TestClass(26, "/iCase", null));
 
          return lst;
       }

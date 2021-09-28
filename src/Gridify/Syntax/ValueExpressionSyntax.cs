@@ -4,10 +4,11 @@ namespace Gridify.Syntax
 {
    internal sealed class ValueExpressionSyntax : ExpressionSyntax
    {
-      public ValueExpressionSyntax(SyntaxToken valueToken, bool isCaseInsensitive)
+      public ValueExpressionSyntax(SyntaxToken valueToken,bool isCaseInsensitive, bool isNullOrDefault)
       {
          ValueToken = valueToken;
          IsCaseInsensitive = isCaseInsensitive;
+         IsNullOrDefault = isNullOrDefault;
       }
 
       public override SyntaxKind Kind => SyntaxKind.ValueExpression;
@@ -19,5 +20,6 @@ namespace Gridify.Syntax
 
       public SyntaxToken ValueToken { get; }
       public bool IsCaseInsensitive { get; }
+      public bool IsNullOrDefault { get; }
    }
 }

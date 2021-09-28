@@ -21,5 +21,10 @@ namespace Gridify.Syntax
          Position = position;
          Text = text;
       }
+
+      public SyntaxToken()
+      {
+         Text = string.Empty;
+      }
    }
 }

@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -128,19 +126,20 @@ namespace Gridify.Syntax
          if (convertor != null)
             value = convertor.Invoke(valueExpression.ValueToken.Text) ?? null;
 
+         // handle the `null` keyword in value
          if (allowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value?.ToString() == "null")
             value = null;
 
          // type fixer
-         if (value is not null && body.Type != value?.GetType())
+         if (value is not null && body.Type != value.GetType())
          {
             try
             {
                // handle broken guids,  github issue #2
-               if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
+               if (body.Type == typeof(Guid) && !Guid.TryParse(value!.ToString(), out _)) value = Guid.NewGuid().ToString();
 
                var converter = TypeDescriptor.GetConverter(body.Type);
-               value = converter.ConvertFromString(value.ToString())!;
+               value = converter.ConvertFromString(value!.ToString())!;
             }
             catch (FormatException)
             {
@@ -150,8 +149,8 @@ namespace Gridify.Syntax
          }
 
          // handle case-Insensitive search 
-         if (value is not null && valueExpression.IsCaseInsensitive 
-                               && op.Kind is not SyntaxKind.GreaterThan 
+         if (value is not null && valueExpression.IsCaseInsensitive
+                               && op.Kind is not SyntaxKind.GreaterThan
                                && op.Kind is not SyntaxKind.LessThan
                                && op.Kind is not SyntaxKind.GreaterOrEqualThan
                                && op.Kind is not SyntaxKind.LessOrEqualThan)
@@ -167,11 +166,33 @@ namespace Gridify.Syntax
 
          switch (op.Kind)
          {
-            case SyntaxKind.Equal:
+            case SyntaxKind.Equal when !valueExpression.IsNullOrDefault:
                be = Expression.Equal(body, Expression.Constant(value, body.Type));
                break;
-            case SyntaxKind.NotEqual:
+            case SyntaxKind.Equal when valueExpression.IsNullOrDefault:
+               if (body.Type == typeof(string))
+                  be = Expression.Call(null, GetIsNullOrEmptyMethod(), body);
+               else
+               {
+                  var canBeNull = !body.Type.IsValueType || (Nullable.GetUnderlyingType(body.Type) != null);
+                  be = canBeNull
+                     ? Expression.OrElse(Expression.Equal(body, Expression.Constant(null)), Expression.Equal(body, Expression.Default(body.Type)))
+                     : Expression.Equal(body, Expression.Default(body.Type));
+               }
+               break;
+            case SyntaxKind.NotEqual when !valueExpression.IsNullOrDefault:
                be = Expression.NotEqual(body, Expression.Constant(value, body.Type));
+               break;
+            case SyntaxKind.NotEqual when valueExpression.IsNullOrDefault:
+               if (body.Type == typeof(string))
+                  be = Expression.Not(Expression.Call(null, GetIsNullOrEmptyMethod(), body));
+               else
+               {
+                  var canBeNull = !body.Type.IsValueType || (Nullable.GetUnderlyingType(body.Type) != null);
+                  be = canBeNull
+                     ? Expression.AndAlso(Expression.NotEqual(body, Expression.Constant(null)), Expression.NotEqual(body, Expression.Default(body.Type)))
+                     : Expression.NotEqual(body, Expression.Default(body.Type));
+               }
                break;
             case SyntaxKind.GreaterThan when areBothStrings == false:
                be = Expression.GreaterThan(body, Expression.Constant(value, body.Type));
@@ -269,7 +290,7 @@ namespace Gridify.Syntax
       private static MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] { typeof(string) })!;
 
       private static MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
-
+      private static MethodInfo GetIsNullOrEmptyMethod() => typeof(string).GetMethod("IsNullOrEmpty", new[] { typeof(string) })!;
       private static MethodInfo GetToLowerMethod() => typeof(string).GetMethod("ToLower", new Type[] { })!;
 
       private static MethodInfo GetCompareMethod() =>
