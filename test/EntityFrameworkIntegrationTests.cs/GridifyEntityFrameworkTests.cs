@@ -46,12 +46,15 @@ namespace EntityFrameworkIntegrationTests.cs
       }
 
       // issue #27 ef core feedback
-      // here is working because EF In-Memory provider can support the StringComparison parameter
+      // here is working without using the `EnableEntityFrameworkCompatibilityLayer`
+      // because EF In-Memory provider can support the StringComparison parameter
       // but it doesn't work in other sql providers
       // https://github.com/alirezanet/Gridify/issues/27#issuecomment-929221457
       [Fact]
       public void ApplyFiltering_GreaterThanBetweenTwoStringsInEF()
       {
+         Gridify.GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+         
          _dbContext.Users.AddRange(
             new User() { Name = "ahmad" },
             new User() { Name = "ali" },

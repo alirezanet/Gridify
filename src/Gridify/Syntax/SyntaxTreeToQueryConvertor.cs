@@ -179,6 +179,7 @@ namespace Gridify.Syntax
                      ? Expression.OrElse(Expression.Equal(body, Expression.Constant(null)), Expression.Equal(body, Expression.Default(body.Type)))
                      : Expression.Equal(body, Expression.Default(body.Type));
                }
+
                break;
             case SyntaxKind.NotEqual when !valueExpression.IsNullOrDefault:
                be = Expression.NotEqual(body, Expression.Constant(value, body.Type));
@@ -190,9 +191,11 @@ namespace Gridify.Syntax
                {
                   var canBeNull = !body.Type.IsValueType || (Nullable.GetUnderlyingType(body.Type) != null);
                   be = canBeNull
-                     ? Expression.AndAlso(Expression.NotEqual(body, Expression.Constant(null)), Expression.NotEqual(body, Expression.Default(body.Type)))
+                     ? Expression.AndAlso(Expression.NotEqual(body, Expression.Constant(null)),
+                        Expression.NotEqual(body, Expression.Default(body.Type)))
                      : Expression.NotEqual(body, Expression.Default(body.Type));
                }
+
                break;
             case SyntaxKind.GreaterThan when areBothStrings == false:
                be = Expression.GreaterThan(body, Expression.Constant(value, body.Type));
@@ -207,20 +210,16 @@ namespace Gridify.Syntax
                be = Expression.LessThanOrEqual(body, Expression.Constant(value, body.Type));
                break;
             case SyntaxKind.GreaterThan when areBothStrings:
-               be = Expression.GreaterThan(Expression.Call(null, GetCompareMethod(), body, Expression.Constant(value, typeof(string)),
-                  GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
+               be = GetGreaterThanExpression(body, valueExpression, value);
                break;
             case SyntaxKind.LessThan when areBothStrings:
-               be = Expression.LessThan(Expression.Call(null, GetCompareMethod(), body, Expression.Constant(value, typeof(string)),
-                  GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
+               be = GetLessThanExpression(body, valueExpression, value);
                break;
             case SyntaxKind.GreaterOrEqualThan when areBothStrings:
-               be = Expression.GreaterThanOrEqual(Expression.Call(null, GetCompareMethod(), body, Expression.Constant(value, typeof(string)),
-                  GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
+               be = GetGreaterThanOrEqualExpression(body, valueExpression, value);
                break;
             case SyntaxKind.LessOrEqualThan when areBothStrings:
-               be = Expression.LessThanOrEqual(Expression.Call(null, GetCompareMethod(), body, Expression.Constant(value, typeof(string)),
-                  GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
+               be = GetLessThanOrEqualExpression(body, valueExpression, value);
                break;
             case SyntaxKind.Like:
                be = Expression.Call(body, GetContainsMethod(), Expression.Constant(value, body.Type));
@@ -275,6 +274,50 @@ namespace Gridify.Syntax
          return Expression.Lambda(be, parameter);
       }
 
+      private static BinaryExpression GetLessThanOrEqualExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
+      {
+         if (GridifyExtensions.EntityFrameworkCompatibilityLayer)
+            return Expression.LessThanOrEqual(Expression.Call(null, GetCompareMethod(), body, Expression.Constant(value, typeof(string))),
+               Expression.Constant(0));
+         
+         return Expression.LessThanOrEqual(Expression.Call(null, GetCompareMethodWithStringComparison(), body,
+            Expression.Constant(value, typeof(string)),
+            GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
+      }
+
+      private static BinaryExpression GetGreaterThanOrEqualExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
+      {
+         if (GridifyExtensions.EntityFrameworkCompatibilityLayer)
+            return Expression.GreaterThanOrEqual(Expression.Call(null, GetCompareMethod(), body, Expression.Constant(value, typeof(string))),
+               Expression.Constant(0));
+         
+         return Expression.GreaterThanOrEqual(Expression.Call(null, GetCompareMethodWithStringComparison(), body,
+            Expression.Constant(value, typeof(string)),
+            GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
+      }
+
+      private static BinaryExpression GetLessThanExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
+      {
+         if (GridifyExtensions.EntityFrameworkCompatibilityLayer)
+            return Expression.LessThan(Expression.Call(null, GetCompareMethod(), body, Expression.Constant(value, typeof(string))),
+               Expression.Constant(0));
+         
+         return Expression.LessThan(Expression.Call(null, GetCompareMethodWithStringComparison(), body,
+            Expression.Constant(value, typeof(string)),
+            GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
+      }
+
+      private static BinaryExpression GetGreaterThanExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
+      {
+         if (GridifyExtensions.EntityFrameworkCompatibilityLayer)
+            return Expression.GreaterThan(Expression.Call(null, GetCompareMethod(), body, Expression.Constant(value, typeof(string))),
+               Expression.Constant(0));
+         
+         return Expression.GreaterThan(Expression.Call(null, GetCompareMethodWithStringComparison(), body,
+            Expression.Constant(value, typeof(string)),
+            GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
+      }
+
       private static ConstantExpression GetStringComparisonCaseExpression(bool isCaseInsensitive)
       {
          return isCaseInsensitive
@@ -293,8 +336,11 @@ namespace Gridify.Syntax
       private static MethodInfo GetIsNullOrEmptyMethod() => typeof(string).GetMethod("IsNullOrEmpty", new[] { typeof(string) })!;
       private static MethodInfo GetToLowerMethod() => typeof(string).GetMethod("ToLower", new Type[] { })!;
 
-      private static MethodInfo GetCompareMethod() =>
+      private static MethodInfo GetCompareMethodWithStringComparison() =>
          typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) })!;
+
+      private static MethodInfo GetCompareMethod() =>
+         typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string) })!;
 
       private static MethodInfo GetToStringMethod() => typeof(object).GetMethod("ToString")!;
 

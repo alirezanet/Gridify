@@ -2,12 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using Gridify.Syntax;
 
+[assembly: InternalsVisibleTo("Gridify.EntityFramework")]
 namespace Gridify
 {
    public static partial class GridifyExtensions
    {
+      internal static bool EntityFrameworkCompatibilityLayer { get; set; }
+      public static int DefaultPageSize { get; set; } = 20;
+      
       #region "Private"
 
       /// <summary>
@@ -23,7 +28,7 @@ namespace Gridify
 
          // set default for PageSize
          if (gridifyPagination.PageSize <= 0)
-            gridifyPagination.PageSize = GridifyGlobalConfiguration.DefaultPageSize;
+            gridifyPagination.PageSize = DefaultPageSize;
 
          return gridifyPagination;
       }
