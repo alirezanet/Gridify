@@ -6,6 +6,7 @@ namespace Gridify.EntityFramework
 {
    public static partial class GridifyExtensions
    {
+      
       #region "EntityFramework Integration"
 
       public async static Task<QueryablePaging<T>> GridifyQueryableAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery,

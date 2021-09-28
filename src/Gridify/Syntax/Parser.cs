@@ -89,9 +89,13 @@ namespace Gridify.Syntax
 
       private ExpressionSyntax ParseValueExpression()
       {
+         // field=
+         if (Current.Kind != SyntaxKind.ValueToken)
+            return new ValueExpressionSyntax(new SyntaxToken(), false, true);
+         
          var valueToken = Match(SyntaxKind.ValueToken);
          var isCaseInsensitive = IsMatch(SyntaxKind.CaseInsensitive);
-         return new ValueExpressionSyntax(valueToken, isCaseInsensitive);
+         return new ValueExpressionSyntax(valueToken, isCaseInsensitive,false);
       }
 
       private SyntaxToken NextToken()
