@@ -27,6 +27,18 @@ namespace EntityFrameworkIntegrationTests.cs
          Assert.Equal(expected , actual);
       }
       
+      // issue #24,  
+      // https://github.com/alirezanet/Gridify/issues/24
+      [Fact]
+      public void ApplyFiltering_GeneratedSqlShouldMatch_UsingVariable_SqlServerProvider()
+      {
+         var name = "vahid";
+         var actual = _dbContext.Users.ApplyFiltering("name = vahid").ToQueryString();
+         var expected = _dbContext.Users.Where(q => q.Name == name).ToQueryString();
+
+         Assert.Equal(expected , actual);
+      }
+      
       // issue #27 ef core sqlServer feedback
       // https://github.com/alirezanet/Gridify/issues/27#issuecomment-929221457
       [Fact]
