@@ -17,7 +17,7 @@ namespace EntityFrameworkIntegrationTests.cs
          GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
       }
 
-      // issue #25 
+      // issue #24,  
       // https://github.com/alirezanet/Gridify/issues/24
       [Fact]
       public void ApplyFiltering_GeneratedSqlShouldMatch_SqlServerProvider()
