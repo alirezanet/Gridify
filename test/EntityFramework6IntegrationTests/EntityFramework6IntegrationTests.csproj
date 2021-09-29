@@ -9,8 +9,8 @@
         <ProjectGuid>{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}</ProjectGuid>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>EntityFramework6IntegrationTests.cs</RootNamespace>
-        <AssemblyName>EntityFramework6IntegrationTests.cs</AssemblyName>
+        <RootNamespace>EntityFramework6IntegrationTests</RootNamespace>
+        <AssemblyName>EntityFramework6IntegrationTests</AssemblyName>
         <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
     </PropertyGroup>
