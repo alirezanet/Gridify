@@ -12,6 +12,7 @@ namespace EntityFrameworkIntegrationTests.cs
       public GridifyEntityFrameworkTests()
       {
          _dbContext = new MyDbContext();
+         AddTestUsers();
       }
 
       [Fact]
@@ -53,24 +54,29 @@ namespace EntityFrameworkIntegrationTests.cs
       [Fact]
       public void ApplyFiltering_GreaterThanBetweenTwoStringsInEF()
       {
-         Gridify.GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
-         
+         GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+
+         var actual = _dbContext.Users.ApplyFiltering("name > h").ToList();
+         var expected = _dbContext.Users.Where(q => string.Compare(q.Name, "h") > 0).ToList();
+
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+      
+
+      private void AddTestUsers()
+      {
          _dbContext.Users.AddRange(
             new User() { Name = "ahmad" },
             new User() { Name = "ali" },
             new User() { Name = "vahid" },
             new User() { Name = "hamid" },
+            new User() { Name = "Hamed" },
             new User() { Name = "sara" },
             new User() { Name = "Ali" });
 
          _dbContext.SaveChanges();
-
-         var actual = _dbContext.Users.ApplyFiltering("name > h").ToList();
-         var expected = _dbContext.Users.Where(q => string.Compare(q.Name, "h", StringComparison.Ordinal) > 0).ToList();
-
-         Assert.Equal(expected.Count, actual.Count);
-         Assert.Equal(expected, actual);
-         Assert.True(actual.Any());
       }
    }
 }

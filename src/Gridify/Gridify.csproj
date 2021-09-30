@@ -3,7 +3,7 @@
    <PropertyGroup>
       <TargetFramework>netstandard2.0</TargetFramework>
       <PackageId>Gridify</PackageId>
-      <Version>2.2.0</Version>
+      <Version>2.2.1</Version>
       <Authors>Alireza Sabouri</Authors>
       <Company>TuxTeam</Company>
       <PackageDescription>Gridify, Easy and optimized way to apply Filtering, Sorting, and Pagination using text-based data.</PackageDescription>
@@ -15,5 +15,9 @@
       
       <!-- <GeneratePackageOnBuild>true</GeneratePackageOnBuild> -->
    </PropertyGroup>
+
+   <ItemGroup>
+     <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+   </ItemGroup>
 
 </Project>

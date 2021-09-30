@@ -270,7 +270,7 @@ namespace Gridify.Tests
 
 
       [Fact]
-      public void ApplyFiltering_StartsWithOnNotStringsShouldThrowError()
+      public void ApplyFiltering_StartsWithOnNotStringsShouldNotThrowError()
       {
          const string gq = "Id^2";
 
@@ -515,7 +515,7 @@ namespace Gridify.Tests
          Assert.Equal(expected2, actual);
          Assert.True(actual.Any());
       }
-      
+
       [Fact] // issue #25
       public void ApplyFiltering_NotEqual_ProcessingNullOrDefaultValue()
       {
@@ -529,29 +529,28 @@ namespace Gridify.Tests
          Assert.Equal(expected2, actual);
          Assert.True(actual.Any());
       }
-      
+
       [Fact] // issue #25
       public void ApplyFiltering_Equal_ProcessingNullOrDefaultValueNonStringTypes()
       {
          var actual = _fakeRepository.AsQueryable().ApplyFiltering("myGuid=").ToList();
-         var expected = _fakeRepository.Where(q => q.MyGuid == null || q.MyGuid == default ) .ToList();
-        
+         var expected = _fakeRepository.Where(q => q.MyGuid == null || q.MyGuid == default).ToList();
+
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
+
       [Fact] // issue #25
       public void ApplyFiltering_NotEqual_ProcessingNullOrDefaultValueNonStringTypes()
       {
          var actual = _fakeRepository.AsQueryable().ApplyFiltering("myGuid!=").ToList();
-         var expected = _fakeRepository.Where(q => q.MyGuid != null && q.MyGuid != default ).ToList();
-        
+         var expected = _fakeRepository.Where(q => q.MyGuid != null && q.MyGuid != default).ToList();
+
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
-      
-
 
       #endregion
 

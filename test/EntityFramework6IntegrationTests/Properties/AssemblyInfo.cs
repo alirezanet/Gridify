@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EntityFramework6IntegrationTests.cs")]
+[assembly: AssemblyTitle("EntityFramework6IntegrationTests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("EntityFramework6IntegrationTests.cs")]
+[assembly: AssemblyProduct("EntityFramework6IntegrationTests")]
 [assembly: AssemblyCopyright("Copyright ©  1400")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
