@@ -48,6 +48,17 @@ namespace Gridify.Tests
          _sut.RemoveMap(nameof(TestClass.Name));
          Assert.Single(_sut.GetCurrentMaps());
       }
+      
+      [Fact]
+      public void GridifyMapperToStringShouldReturnFieldsList()
+      {
+         _sut.AddMap("name", q => q.Name);
+         _sut.AddMap("childDate", q => q.ChildClass!.MyDateTime);
+         var actual = _sut.ToString();
+         
+         Assert.Equal("name,childDate", actual);
+      }
+
 
       [Fact]
       public void AddMap_DuplicateKey_ShouldThrowErrorIfOverrideIfExistsIsFalse()

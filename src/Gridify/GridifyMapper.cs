@@ -111,6 +111,8 @@ namespace Gridify
          return _mappings;
       }
 
+      public override string ToString() => string.Join(",", _mappings.Select(q => q.From));
+
       private static Expression<Func<T, object>> CreateExpression(string from)
       {
          // x =>
