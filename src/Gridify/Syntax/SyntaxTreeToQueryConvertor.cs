@@ -12,7 +12,10 @@ namespace Gridify.Syntax
       private static (Expression<Func<T, bool>> Expression, bool IsNested)? ConvertBinaryExpressionSyntaxToQuery<T>(
          BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)
       {
-         var left = (binarySyntax.Left as FieldExpressionSyntax)?.FieldToken.Text.Trim();
+         
+         var fieldExpression = binarySyntax.Left as FieldExpressionSyntax;
+         
+         var left = fieldExpression?.FieldToken.Text.Trim();
          var right = (binarySyntax.Right as ValueExpressionSyntax);
          var op = binarySyntax.OperatorToken;
 
@@ -21,6 +24,9 @@ namespace Gridify.Syntax
          var gMap = mapper.GetGMap(left);
 
          if (gMap == null) return null;
+         
+         if (fieldExpression!.IsCollection)
+           gMap.To = UpdateExpressionIndex(gMap.To,fieldExpression.Index);
 
          if (gMap.IsNestedCollection)
          {
@@ -34,6 +40,15 @@ namespace Gridify.Syntax
                op, mapper.Configuration.AllowNullSearch, gMap.Convertor) is not Expression<Func<T, bool>> result) return null;
             return (result, false);
          }
+      }
+
+      private static LambdaExpression UpdateExpressionIndex(LambdaExpression exp, int index)
+      {
+	      var parameter = exp.Parameters[0];
+         var unary = exp.Body as UnaryExpression;
+         var body = unary!.Operand as MemberExpression;
+         var newBody = new PredicateBuilder.ReplaceExpressionVisitor(exp.Parameters[1],Expression.Constant(index,typeof(int))).Visit(body!);
+         return Expression.Lambda(newBody,parameter);
       }
 
       private static Expression<Func<T, bool>>? GenerateNestedExpression<T>(

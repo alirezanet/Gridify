@@ -58,6 +58,18 @@ namespace Gridify
          return this;
       }
 
+      public IGridifyMapper<T> AddMap(string from, Expression<Func<T, int, object?>> to, Func<string, object>? convertor = null!,
+         bool overrideIfExists = true)
+      {
+         if (!overrideIfExists && HasMap(from))
+            throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
+
+         RemoveMap(from);
+         var isNested = Regex.IsMatch(to.ToString(), @"\.Select\s*\(");
+         _mappings.Add(new GMap<T>(from, to, convertor, isNested));
+         return this;
+      }
+
       public IGridifyMapper<T> AddMap(IGMap<T> gMap, bool overrideIfExists = true)
       {
          if (!overrideIfExists && HasMap(gMap.From))
@@ -96,7 +108,7 @@ namespace Gridify
             : _mappings.FirstOrDefault(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
       }
 
-      public Expression<Func<T, object>> GetExpression(string key)
+      public LambdaExpression GetLambdaExpression(string key)
       {
          var expression = Configuration.CaseSensitive
             ? _mappings.FirstOrDefault(q => key.Equals(q.From))?.To
@@ -104,6 +116,16 @@ namespace Gridify
          if (expression == null)
             throw new GridifyMapperException($"Mapping Key `{key}` not found.");
          return expression!;
+      }
+      
+      public Expression<Func<T,object?>> GetExpression(string key)
+      {
+         var expression = Configuration.CaseSensitive
+            ? _mappings.FirstOrDefault(q => key.Equals(q.From))?.To
+            : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
+         if (expression == null)
+            throw new GridifyMapperException($"Mapping Key `{key}` not found.");
+         return expression as Expression<Func<T,object?>> ?? throw new GridifyMapperException($"Expression fir the `{key}` not found.");
       }
 
       public IEnumerable<IGMap<T>> GetCurrentMaps()
