@@ -245,7 +245,7 @@ namespace Gridify.Tests
             .ApplyFiltering(gq)
             .ToList();
 
-         var expected = _fakeRepository.Where(q => q.Name.StartsWith("A")).ToList();
+         var expected = _fakeRepository.Where(q => q.Name!.StartsWith("A")).ToList();
 
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
@@ -294,7 +294,7 @@ namespace Gridify.Tests
             .ApplyFiltering(gq)
             .ToList();
 
-         var expected = _fakeRepository.Where(q => !q.Name.StartsWith("A")).ToList();
+         var expected = _fakeRepository.Where(q => !q.Name!.StartsWith("A")).ToList();
 
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
@@ -310,7 +310,7 @@ namespace Gridify.Tests
             .ApplyFiltering(gq)
             .ToList();
 
-         var expected = _fakeRepository.Where(q => q.Name.EndsWith("li")).ToList();
+         var expected = _fakeRepository.Where(q => q.Name!.EndsWith("li")).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -325,7 +325,7 @@ namespace Gridify.Tests
             .ApplyFiltering(gq)
             .ToList();
 
-         var expected = _fakeRepository.Where(q => !q.Name.EndsWith("i")).ToList();
+         var expected = _fakeRepository.Where(q => !q.Name!.EndsWith("i")).ToList();
 
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
@@ -350,7 +350,7 @@ namespace Gridify.Tests
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering("(name=*J|name=*S),(Id<5)")
             .ToList();
-         var expected = _fakeRepository.Where(q => (q.Name.Contains("J") || q.Name.Contains("S")) && q.Id < 5).ToList();
+         var expected = _fakeRepository.Where(q => (q.Name!.Contains("J") || q.Name.Contains("S")) && q.Id < 5).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -364,7 +364,7 @@ namespace Gridify.Tests
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq)
             .ToList();
-         var expected = _fakeRepository.Where(q => q.Name.Contains("J") || q.Name.Contains("S") && q.Id < 5).ToList();
+         var expected = _fakeRepository.Where(q => q.Name!.Contains("J") || q.Name.Contains("S") && q.Id < 5).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -394,13 +394,13 @@ namespace Gridify.Tests
       {
          var gq = new GridifyQuery { Filter = "name=BOB" };
          var gm = new GridifyMapper<TestClass>()
-            .AddMap("name", q => q.Name.ToLower(), c => c.ToLower());
+            .AddMap("name", q => q.Name!.ToLower(), c => c.ToLower());
 
          var actual = _fakeRepository.AsQueryable()
             .ApplyFiltering(gq, gm)
             .ToList();
 
-         var expected = _fakeRepository.Where(q => q.Name.ToLower() == "BOB".ToLower()).ToList();
+         var expected = _fakeRepository.Where(q => q.Name!.ToLower() == "BOB".ToLower()).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -415,7 +415,7 @@ namespace Gridify.Tests
             .ApplyFiltering(gq)
             .ToList();
 
-         var expected = _fakeRepository.Where(q => q.Name.ToLower() == "BOB".ToLower()).ToList();
+         var expected = _fakeRepository.Where(q => q.Name!.ToLower() == "BOB".ToLower()).ToList();
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -534,7 +534,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_Equal_ProcessingNullOrDefaultValueNonStringTypes()
       {
          var actual = _fakeRepository.AsQueryable().ApplyFiltering("myGuid=").ToList();
-         var expected = _fakeRepository.Where(q => q.MyGuid == null || q.MyGuid == default).ToList();
+         var expected = _fakeRepository.Where(q => q.MyGuid == default).ToList();
 
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
@@ -545,7 +545,7 @@ namespace Gridify.Tests
       public void ApplyFiltering_NotEqual_ProcessingNullOrDefaultValueNonStringTypes()
       {
          var actual = _fakeRepository.AsQueryable().ApplyFiltering("myGuid!=").ToList();
-         var expected = _fakeRepository.Where(q => q.MyGuid != null && q.MyGuid != default).ToList();
+         var expected = _fakeRepository.Where(q => q.MyGuid != default).ToList();
 
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);

@@ -75,7 +75,7 @@ namespace Gridify.Syntax
          {
             var start = _position;
 
-            while (char.IsLetterOrDigit(Current) || Current is '_')
+            while (char.IsLetterOrDigit(Current) || Current is '_' or '[' or ']')  
                Next();
 
             var length = _position - start;
