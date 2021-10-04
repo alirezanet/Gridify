@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Gridify.Syntax
 {
@@ -92,10 +94,10 @@ namespace Gridify.Syntax
          // field=
          if (Current.Kind != SyntaxKind.ValueToken)
             return new ValueExpressionSyntax(new SyntaxToken(), false, true);
-         
+
          var valueToken = Match(SyntaxKind.ValueToken);
          var isCaseInsensitive = IsMatch(SyntaxKind.CaseInsensitive);
-         return new ValueExpressionSyntax(valueToken, isCaseInsensitive,false);
+         return new ValueExpressionSyntax(valueToken, isCaseInsensitive, false);
       }
 
       private SyntaxToken NextToken()
@@ -123,16 +125,34 @@ namespace Gridify.Syntax
 
       private ExpressionSyntax ParsePrimaryExpression()
       {
-         if (Current.Kind == SyntaxKind.OpenParenthesisToken)
-         {
-            var left = NextToken();
-            var expression = ParseTerm();
-            var right = Match(SyntaxKind.CloseParenthesis);
-            return new ParenthesizedExpressionSyntax(left, expression, right);
-         }
+         if (Current.Kind != SyntaxKind.OpenParenthesisToken) return ParseFieldExpression();
+         
+         var left = NextToken();
+         var expression = ParseTerm();
+         var right = Match(SyntaxKind.CloseParenthesis);
+         return new ParenthesizedExpressionSyntax(left, expression, right);
 
+      }
+
+      private ExpressionSyntax ParseFieldExpression()
+      {
          var fieldToken = Match(SyntaxKind.FieldToken);
-         return new FieldExpressionSyntax(fieldToken);
+
+         // for performance reason we simply check the last character first 
+         if (!fieldToken.Text.EndsWith("]")) return new FieldExpressionSyntax(fieldToken);
+         
+         // extract indexes from the field names
+         var regex = new Regex(@"(\w+)\[(\d+)\]");
+         var match = regex.Match(fieldToken.Text);
+         if (!match.Success)
+         {
+            _diagnostics.Add($"Invalid token <{SyntaxKind.FieldToken}> with value <{fieldToken.Text}>, expected an field token with an index");
+            return new FieldExpressionSyntax(new SyntaxToken(SyntaxKind.BadToken, 0, fieldToken.Text)); 
+         }
+         
+         var index = int.Parse(match.Groups[2].Value);
+         fieldToken = new SyntaxToken(SyntaxKind.FieldToken, 0, match.Groups[1].Value);
+         return new FieldExpressionSyntax(fieldToken, index);
       }
    }
 }
