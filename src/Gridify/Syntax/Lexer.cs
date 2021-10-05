@@ -46,44 +46,95 @@ namespace Gridify.Syntax
             case '|':
                return new SyntaxToken(SyntaxKind.Or, _position++, "|");
             case '^':
+            {
+               _waitingForValue = true;
                return new SyntaxToken(SyntaxKind.StartsWith, _position++, "^");
+            }
             case '$':
+            {
+               _waitingForValue = true;
                return new SyntaxToken(SyntaxKind.EndsWith, _position++, "$");
+            }
             case '!' when peek == '^':
+            {
+               _waitingForValue = true;
                return new SyntaxToken(SyntaxKind.NotStartsWith, _position += 2, "!^");
+            }
             case '!' when peek == '$':
+            {
+               _waitingForValue = true;
                return new SyntaxToken(SyntaxKind.NotEndsWith, _position += 2, "!$");
+            }
             case '=' when peek == '*':
+            {
+               _waitingForValue = true;
                return new SyntaxToken(SyntaxKind.Like, _position += 2, "=*");
-            case '=' :
+            }
+            case '=':
+            {
+               _waitingForValue = true;
                return new SyntaxToken(SyntaxKind.Equal, _position ++ , "=");
+            }
             case '!' when peek == '=':
+            {
+               _waitingForValue = true;
                return new SyntaxToken(SyntaxKind.NotEqual, _position += 2, "!=");
+            }
             case '!' when peek == '*':
+            {
+               _waitingForValue = true;
                return new SyntaxToken(SyntaxKind.NotLike, _position += 2, "!*");
+            }
             case '/' when peek == 'i':
                return new SyntaxToken(SyntaxKind.CaseInsensitive, _position += 2, "/i");
             case '<':
+            {
+               _waitingForValue = true;
                return peek == '=' ? new SyntaxToken(SyntaxKind.LessOrEqualThan, _position += 2, "<=") :
                   new SyntaxToken(SyntaxKind.LessThan, _position++, "<");
+            }
             case '>':
+            {
+               _waitingForValue = true;
                return peek == '=' ? new SyntaxToken(SyntaxKind.GreaterOrEqualThan, _position += 2, ">=") : 
                   new SyntaxToken(SyntaxKind.GreaterThan, _position++, ">");
+            }
+         }
+
+         if (Current == '[')
+         {
+            Next();
+            var start = _position; 
+            while (char.IsDigit(Current))  
+               Next();
+      
+            var length = _position - start;
+            var text = _text.Substring(start, length);
+
+            if (Current == ']')
+            {
+               _position++;
+               return new SyntaxToken(SyntaxKind.FieldIndexToken, start, text);
+            }
+            
+            _diagnostics.Add($"bad character input: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
+            return new SyntaxToken(SyntaxKind.BadToken, _position, Current.ToString());
+
          }
 
          if (char.IsLetter(Current) && !_waitingForValue)
          {
             var start = _position;
 
-            while (char.IsLetterOrDigit(Current) || Current is '_' or '[' or ']')  
+            while (char.IsLetterOrDigit(Current) || Current is '_')  
                Next();
 
             var length = _position - start;
             var text = _text.Substring(start, length);
-
-            _waitingForValue = true;
+            
             return new SyntaxToken(SyntaxKind.FieldToken, start, text);
          }
+         
 
          if (char.IsWhiteSpace(Current))
          {

@@ -31,6 +31,7 @@
       ParenthesizedExpression,
       NotStartsWith,
       NotEndsWith,
-      CaseInsensitive
+      CaseInsensitive,
+      FieldIndexToken
    }
 }

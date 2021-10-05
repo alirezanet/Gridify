@@ -96,7 +96,7 @@ namespace Gridify.Syntax
             return new ValueExpressionSyntax(new SyntaxToken(), false, true);
 
          var valueToken = Match(SyntaxKind.ValueToken);
-         var isCaseInsensitive = IsMatch(SyntaxKind.CaseInsensitive);
+         var isCaseInsensitive = IsMatch(SyntaxKind.CaseInsensitive, out _);
          return new ValueExpressionSyntax(valueToken, isCaseInsensitive, false);
       }
 
@@ -107,10 +107,15 @@ namespace Gridify.Syntax
          return current;
       }
 
-      private bool IsMatch(SyntaxKind kind)
+      private bool IsMatch(SyntaxKind kind, out SyntaxToken token)
       {
-         if (Current.Kind != kind) return false;
-         NextToken();
+         if (Current.Kind != kind)
+         {
+            token = Current;
+            return false;
+         }
+
+         token = NextToken();
          return true;
       }
 
@@ -126,33 +131,21 @@ namespace Gridify.Syntax
       private ExpressionSyntax ParsePrimaryExpression()
       {
          if (Current.Kind != SyntaxKind.OpenParenthesisToken) return ParseFieldExpression();
-         
+
          var left = NextToken();
          var expression = ParseTerm();
          var right = Match(SyntaxKind.CloseParenthesis);
          return new ParenthesizedExpressionSyntax(left, expression, right);
-
       }
 
       private ExpressionSyntax ParseFieldExpression()
       {
          var fieldToken = Match(SyntaxKind.FieldToken);
 
-         // for performance reason we simply check the last character first 
-         if (!fieldToken.Text.EndsWith("]")) return new FieldExpressionSyntax(fieldToken);
-         
-         // extract indexes from the field names
-         var regex = new Regex(@"(\w+)\[(\d+)\]");
-         var match = regex.Match(fieldToken.Text);
-         if (!match.Success)
-         {
-            _diagnostics.Add($"Invalid token <{SyntaxKind.FieldToken}> with value <{fieldToken.Text}>, expected an field token with an index");
-            return new FieldExpressionSyntax(new SyntaxToken(SyntaxKind.BadToken, 0, fieldToken.Text)); 
-         }
-         
-         var index = int.Parse(match.Groups[2].Value);
-         fieldToken = new SyntaxToken(SyntaxKind.FieldToken, 0, match.Groups[1].Value);
-         return new FieldExpressionSyntax(fieldToken, index);
+         if (IsMatch(SyntaxKind.FieldIndexToken, out SyntaxToken fieldSyntaxToken))
+            return new FieldExpressionSyntax(fieldToken, int.Parse(fieldSyntaxToken.Text));
+
+         return new FieldExpressionSyntax(fieldToken);
       }
    }
 }
