@@ -118,14 +118,14 @@ namespace Gridify
          return expression!;
       }
       
-      public Expression<Func<T,object?>> GetExpression(string key)
+      public Expression<Func<T,object>> GetExpression(string key)
       {
          var expression = Configuration.CaseSensitive
             ? _mappings.FirstOrDefault(q => key.Equals(q.From))?.To
             : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
          if (expression == null)
             throw new GridifyMapperException($"Mapping Key `{key}` not found.");
-         return expression as Expression<Func<T,object?>> ?? throw new GridifyMapperException($"Expression fir the `{key}` not found.");
+         return expression as Expression<Func<T,object>> ?? throw new GridifyMapperException($"Expression fir the `{key}` not found.");
       }
 
       public IEnumerable<IGMap<T>> GetCurrentMaps()
