@@ -16,7 +16,7 @@ namespace Gridify
       IGridifyMapper<T> RemoveMap(string propertyName);
       IGridifyMapper<T> RemoveMap(IGMap<T> gMap);
       LambdaExpression GetLambdaExpression(string from);
-      Expression<Func<T, object?>> GetExpression(string key);
+      Expression<Func<T, object>> GetExpression(string key);
       IGMap<T>? GetGMap(string from);
       bool HasMap(string key);
       public GridifyMapperConfiguration Configuration { get; }

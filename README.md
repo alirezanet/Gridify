@@ -90,16 +90,17 @@ Also, i Should note other features like Pagination and Sorting have almost zero 
 BenchmarkDotNet=v0.13.0, OS=Windows 10.0.19043.1237 (21H1/May2021Update)
 11th Gen Intel Core i5-11400F 2.60GHz, 1 CPU, 12 logical and 6 physical cores
 .NET SDK=5.0.301
+[Host]     : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
 DefaultJob : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
 
 
-|      Method |       Mean |    Error |   StdDev | Ratio | RatioSD |   Gen 0 |   Gen 1 | Allocated |
-|------------ |-----------:|---------:|---------:|------:|--------:|--------:|--------:|----------:|
-|     Native LINQ |   724.329 us |  6.4686 us |  6.0507 us | 1.000 |    0.00 |  5.8594 |  2.9297 |  37,392 B |
-|         Gridify |   736.854 us |  5.7427 us |  5.0907 us | 1.018 |    0.01 |  5.8594 |  2.9297 |  39,924 B |
-|     DynamicLinq |   886.773 us |  8.4943 us |  7.5299 us | 1.225 |    0.01 | 19.5313 |  9.7656 | 125,122 B |
-|           Sieve |   961.574 us |  6.6389 us |  5.8852 us | 1.328 |    0.01 |  8.7891 |  3.9063 |  55,186 B |
-|             Fop | 2,933.332 us | 49.7515 us | 61.0994 us | 4.076 |    0.11 | 46.8750 | 23.4375 | 315,830 B |
+|      Method |       Mean |    Error |   StdDev | Ratio |   Gen 0 |   Gen 1 | Allocated |
+|------------ |-----------:|---------:|---------:|------:|--------:|--------:|----------:|
+| Native LINQ |   740.9 us |  7.80 us |  6.92 us |  1.00 |  5.8594 |  2.9297 |     37 KB |
+|     Gridify |   762.6 us | 10.06 us |  9.41 us |  1.03 |  5.8594 |  2.9297 |     39 KB |
+| DynamicLinq |   902.1 us | 11.56 us | 10.81 us |  1.22 | 19.5313 |  9.7656 |    122 KB |
+|       Sieve |   977.9 us |  6.80 us |  6.37 us |  1.32 |  7.8125 |  3.9063 |     54 KB |
+|         Fop | 2,959.8 us | 39.11 us | 36.58 us |  3.99 | 46.8750 | 23.4375 |    306 KB |
 ---
 
 ## Installation

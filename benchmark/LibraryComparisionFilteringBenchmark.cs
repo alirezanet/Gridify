@@ -63,7 +63,7 @@ namespace Benchmarks
          Ds.ApplyFiltering("Name=Ali", gm).Consume(Consumer);
       }
 
-      [Benchmark] // compiled query (this is not included in our readme benchmarks)w
+      // [Benchmark] // compiled query (this is not included in our readme benchmarks)w
       public void GridifyCompiled()
       {
          EnumerableDs.Where(compiled1).Consume(Consumer);

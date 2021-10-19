@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Gridify.Syntax
 {
@@ -92,10 +94,10 @@ namespace Gridify.Syntax
          // field=
          if (Current.Kind != SyntaxKind.ValueToken)
             return new ValueExpressionSyntax(new SyntaxToken(), false, true);
-         
+
          var valueToken = Match(SyntaxKind.ValueToken);
-         var isCaseInsensitive = IsMatch(SyntaxKind.CaseInsensitive);
-         return new ValueExpressionSyntax(valueToken, isCaseInsensitive,false);
+         var isCaseInsensitive = IsMatch(SyntaxKind.CaseInsensitive, out _);
+         return new ValueExpressionSyntax(valueToken, isCaseInsensitive, false);
       }
 
       private SyntaxToken NextToken()
@@ -105,10 +107,15 @@ namespace Gridify.Syntax
          return current;
       }
 
-      private bool IsMatch(SyntaxKind kind)
+      private bool IsMatch(SyntaxKind kind, out SyntaxToken token)
       {
-         if (Current.Kind != kind) return false;
-         NextToken();
+         if (Current.Kind != kind)
+         {
+            token = Current;
+            return false;
+         }
+
+         token = NextToken();
          return true;
       }
 
@@ -123,15 +130,21 @@ namespace Gridify.Syntax
 
       private ExpressionSyntax ParsePrimaryExpression()
       {
-         if (Current.Kind == SyntaxKind.OpenParenthesisToken)
-         {
-            var left = NextToken();
-            var expression = ParseTerm();
-            var right = Match(SyntaxKind.CloseParenthesis);
-            return new ParenthesizedExpressionSyntax(left, expression, right);
-         }
+         if (Current.Kind != SyntaxKind.OpenParenthesisToken) return ParseFieldExpression();
 
+         var left = NextToken();
+         var expression = ParseTerm();
+         var right = Match(SyntaxKind.CloseParenthesis);
+         return new ParenthesizedExpressionSyntax(left, expression, right);
+      }
+
+      private ExpressionSyntax ParseFieldExpression()
+      {
          var fieldToken = Match(SyntaxKind.FieldToken);
+
+         if (IsMatch(SyntaxKind.FieldIndexToken, out SyntaxToken fieldSyntaxToken))
+            return new FieldExpressionSyntax(fieldToken, int.Parse(fieldSyntaxToken.Text));
+
          return new FieldExpressionSyntax(fieldToken);
       }
    }
