@@ -27,7 +27,7 @@ public Paging<Person> GetPersons([FromQuery] GridifyQuery gQuery)
 }
 ```
 
-complete request sample:
+complete request sample: 
 
 ```url
 http://exampleDomain.com/api/GetPersons?
@@ -35,6 +35,9 @@ http://exampleDomain.com/api/GetPersons?
           page=1&
           orderBy=FirstName&
           filter=Age>10
+          
+// to make the example readable this not encoded url,
+// make sure to always encode the query strings before passing it to your APIs
 ```
 
 Also, we can totally ignore GridifyQuery
