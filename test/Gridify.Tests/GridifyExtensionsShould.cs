@@ -457,6 +457,7 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
+      
 
       [Fact] // issue #27
       public void ApplyFiltering_LessThanBetweenTwoStrings()
@@ -551,6 +552,18 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
+      
+      [Fact] // issue #33
+      public void ApplyFiltering_WithSpaces()
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name =ali reza").ToList();
+         var expected = _fakeRepository.Where(q => q.Name == "ali reza" ).ToList();
+         
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
 
       #endregion
 
@@ -784,7 +797,8 @@ namespace Gridify.Tests
          lst.Add(new TestClass(23, "LI | AM", null));
          lst.Add(new TestClass(24, "(LI,AM)", null, tag: string.Empty));
          lst.Add(new TestClass(25, "Case/i", null, tag: string.Empty));
-         lst.Add(new TestClass(26, "/iCase", null));
+         lst.Add(new TestClass(26, "/iCase", null)); 
+         lst.Add(new TestClass(27, "ali reza", null));
 
          return lst;
       }
