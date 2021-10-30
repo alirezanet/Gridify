@@ -81,7 +81,7 @@ var query = myDbContext.Persons.ApplyFiltering("name = John");
 // myDbContext.Persons.Where(p => p.Name == "John");
 ```
 
-### see more examples in the [tests](https://github.com/alirezanet/Gridify/blob/89ff1ce981726c20591b043fee72eb5faa68f458/test/Core.Tests/GridifyExtensionsShould.cs#L22) 
+### see more examples in the [tests](https://github.com/alirezanet/Gridify/blob/6e9c954aae1d5d212412300173229e36e551ec26/test/Gridify.Tests/GridifyExtensionsShould.cs?_pjax=%23js-repo-pjax-container%3Afirst-of-type%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%3Afirst-of-type%2C%20%5Bdata-pjax-container%5D%3Afirst-of-type#L22) 
 
 ---
 
