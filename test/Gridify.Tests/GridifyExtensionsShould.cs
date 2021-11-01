@@ -682,11 +682,37 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyOrdering_NullGridifyQuery_ShouldSkip()
       {
+         GridifyQuery gq = null;
          var actual = _fakeRepository.AsQueryable()
-            .ApplyOrdering(null)
+            .ApplyOrdering(gq)
             .ToList();
          var expected = _fakeRepository.ToList();
          Assert.Equal(expected, actual);
+      }
+      
+      [Fact] // issue #34
+      public void ApplyOrdering_UnmappedFields_ShouldThrowException()
+      {
+         var gm = new GridifyMapper<TestClass>()
+            .AddMap("Id", q => q.Id);
+
+         var exp = Assert.Throws<GridifyMapperException>(() => _fakeRepository.AsQueryable().ApplyOrdering("name,id", gm).ToList());
+         Assert.Equal("Mapping 'name' not found",exp.Message); 
+      }
+      
+      [Fact] // issue #34
+      public void ApplyOrdering_UnmappedFields_ShouldSkipWhenIgnored()
+      {
+         var gm = new GridifyMapper<TestClass>(configuration => configuration.IgnoreNotMappedFields = true)
+            .AddMap("Id", q => q.Id);
+      
+         // name=*a filter should be ignored
+         var actual = _fakeRepository.AsQueryable().ApplyOrdering("name,id", gm).ToList();
+         var expected = _fakeRepository.OrderBy(q => q.Id ).ToList();
+      
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
       }
 
       #endregion

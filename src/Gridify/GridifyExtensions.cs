@@ -6,13 +6,14 @@ using System.Runtime.CompilerServices;
 using Gridify.Syntax;
 
 [assembly: InternalsVisibleTo("Gridify.EntityFramework")]
+
 namespace Gridify
 {
    public static partial class GridifyExtensions
    {
       internal static bool EntityFrameworkCompatibilityLayer { get; set; }
       public static int DefaultPageSize { get; set; } = 20;
-      
+
       #region "Private"
 
       /// <summary>
@@ -132,13 +133,37 @@ namespace Gridify
             : ProcessOrdering(query, gridifyOrdering.OrderBy!, startWithThenBy, mapper);
       }
 
+      /// <summary>
+      /// adds Ordering to the query
+      /// </summary>
+      /// <param name="query">the original(target) queryable object</param>
+      /// <param name="orderBy">the ordering fields</param>
+      /// <param name="mapper">this is an optional parameter to apply ordering using a custom mapping configuration</param>
+      /// <param name="startWithThenBy">if you already have an ordering with start with ThenBy, new orderings will add on top of your orders</param>
+      /// <typeparam name="T">type of target entity</typeparam>
+      /// <returns>returns user query after applying Ordering </returns>
+      public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> query, string orderBy, IGridifyMapper<T>? mapper = null,
+         bool startWithThenBy = false)
+      {
+         mapper = mapper.FixMapper();
+         return string.IsNullOrWhiteSpace(orderBy)
+            ? query
+            : ProcessOrdering(query, orderBy, startWithThenBy, mapper);
+      }
+
       private static IQueryable<T> ProcessOrdering<T>(IQueryable<T> query, string orderings, bool startWithThenBy, IGridifyMapper<T> mapper)
       {
          var isFirst = !startWithThenBy;
          foreach (var (member, isAscending) in ParseOrderings(orderings))
          {
-            // skip if there is no mappings available
-            if (!mapper.HasMap(member)) continue;
+            if (!mapper.HasMap(member))
+            {
+               // skip if there is no mappings available
+               if (mapper.Configuration.IgnoreNotMappedFields)
+                  continue;
+
+               throw new GridifyMapperException($"Mapping '{member}' not found");
+            }
 
             if (isFirst)
             {
