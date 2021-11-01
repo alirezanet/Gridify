@@ -97,7 +97,7 @@ namespace Gridify.Tests
       }
 
       [Fact]
-      public void ApplyFiltering_DuplicateFiledName()
+      public void ApplyFiltering_DuplicatefieldName()
       {
          const string gq = "name=John|name=Sara";
          var actual = _fakeRepository.AsQueryable()
@@ -564,6 +564,31 @@ namespace Gridify.Tests
          Assert.True(actual.Any());
       }
 
+
+      [Fact] // issue #34
+      public void ApplyFiltering_UnmappedFields_ShouldThrowException()
+      {
+         var gm = new GridifyMapper<TestClass>()
+            .AddMap("Id", q => q.Id);
+
+         var exp = Assert.Throws<GridifyMapperException>(() => _fakeRepository.AsQueryable().ApplyFiltering("name=John,id>0", gm).ToList());
+         Assert.Equal("Mapping 'name' not found",exp.Message); 
+      }
+      
+      [Fact] // issue #34
+      public void ApplyFiltering_UnmappedFields_ShouldSkipWhenIgnored()
+      {
+         var gm = new GridifyMapper<TestClass>(configuration => configuration.IgnoreNotMappedFields = true)
+            .AddMap("Id", q => q.Id);
+      
+         // name=*a filter should be ignored
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name=*a, id>15", gm).ToList();
+         var expected = _fakeRepository.Where(q => q.Id > 15).ToList();
+      
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
 
       #endregion
 

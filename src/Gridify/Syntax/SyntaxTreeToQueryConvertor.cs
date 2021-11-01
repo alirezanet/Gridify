@@ -12,9 +12,8 @@ namespace Gridify.Syntax
       private static (Expression<Func<T, bool>> Expression, bool IsNested)? ConvertBinaryExpressionSyntaxToQuery<T>(
          BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)
       {
-         
          var fieldExpression = binarySyntax.Left as FieldExpressionSyntax;
-         
+
          var left = fieldExpression?.FieldToken.Text.Trim();
          var right = (binarySyntax.Right as ValueExpressionSyntax);
          var op = binarySyntax.OperatorToken;
@@ -23,10 +22,10 @@ namespace Gridify.Syntax
 
          var gMap = mapper.GetGMap(left);
 
-         if (gMap == null) return null;
-         
+         if (gMap == null) throw new GridifyMapperException($"Mapping '{left}' not found");
+
          if (fieldExpression!.IsCollection)
-           gMap.To = UpdateExpressionIndex(gMap.To,fieldExpression.Index);
+            gMap.To = UpdateExpressionIndex(gMap.To, fieldExpression.Index);
 
          if (gMap.IsNestedCollection)
          {
@@ -44,11 +43,11 @@ namespace Gridify.Syntax
 
       private static LambdaExpression UpdateExpressionIndex(LambdaExpression exp, int index)
       {
-	      var parameter = exp.Parameters[0];
+         var parameter = exp.Parameters[0];
          var unary = exp.Body as UnaryExpression;
          var body = unary!.Operand as MemberExpression;
-         var newBody = new PredicateBuilder.ReplaceExpressionVisitor(exp.Parameters[1],Expression.Constant(index,typeof(int))).Visit(body!);
-         return Expression.Lambda(newBody,parameter);
+         var newBody = new PredicateBuilder.ReplaceExpressionVisitor(exp.Parameters[1], Expression.Constant(index, typeof(int))).Visit(body!);
+         return Expression.Lambda(newBody, parameter);
       }
 
       private static Expression<Func<T, bool>>? GenerateNestedExpression<T>(
@@ -382,7 +381,19 @@ namespace Gridify.Syntax
                   var bExp = expression as BinaryExpressionSyntax;
 
                   if (bExp!.Left is FieldExpressionSyntax && bExp.Right is ValueExpressionSyntax)
-                     return ConvertBinaryExpressionSyntaxToQuery(bExp, mapper) ?? throw new GridifyFilteringException("Invalid expression");
+                  {
+                     try
+                     {
+                        return ConvertBinaryExpressionSyntaxToQuery(bExp, mapper) ?? throw new GridifyFilteringException("Invalid expression");
+                     }
+                     catch (GridifyMapperException e)
+                     {
+                        if (mapper.Configuration.IgnoreNotMappedFields)
+                           return (_ => true, false);
+
+                        throw;
+                     }
+                  }
 
                   (Expression<Func<T, bool>> exp, bool isNested) leftQuery;
                   (Expression<Func<T, bool>> exp, bool isNested) rightQuery;
