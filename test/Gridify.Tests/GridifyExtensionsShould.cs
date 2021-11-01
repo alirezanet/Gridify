@@ -97,7 +97,7 @@ namespace Gridify.Tests
       }
 
       [Fact]
-      public void ApplyFiltering_DuplicateFiledName()
+      public void ApplyFiltering_DuplicatefieldName()
       {
          const string gq = "name=John|name=Sara";
          var actual = _fakeRepository.AsQueryable()
@@ -457,6 +457,7 @@ namespace Gridify.Tests
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
+      
 
       [Fact] // issue #27
       public void ApplyFiltering_LessThanBetweenTwoStrings()
@@ -547,6 +548,43 @@ namespace Gridify.Tests
          var actual = _fakeRepository.AsQueryable().ApplyFiltering("myGuid!=").ToList();
          var expected = _fakeRepository.Where(q => q.MyGuid != default).ToList();
 
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+      
+      [Fact] // issue #33
+      public void ApplyFiltering_WithSpaces()
+      {
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name =ali reza").ToList();
+         var expected = _fakeRepository.Where(q => q.Name == "ali reza" ).ToList();
+         
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
+      }
+
+
+      [Fact] // issue #34
+      public void ApplyFiltering_UnmappedFields_ShouldThrowException()
+      {
+         var gm = new GridifyMapper<TestClass>()
+            .AddMap("Id", q => q.Id);
+
+         var exp = Assert.Throws<GridifyMapperException>(() => _fakeRepository.AsQueryable().ApplyFiltering("name=John,id>0", gm).ToList());
+         Assert.Equal("Mapping 'name' not found",exp.Message); 
+      }
+      
+      [Fact] // issue #34
+      public void ApplyFiltering_UnmappedFields_ShouldSkipWhenIgnored()
+      {
+         var gm = new GridifyMapper<TestClass>(configuration => configuration.IgnoreNotMappedFields = true)
+            .AddMap("Id", q => q.Id);
+      
+         // name=*a filter should be ignored
+         var actual = _fakeRepository.AsQueryable().ApplyFiltering("name=*a, id>15", gm).ToList();
+         var expected = _fakeRepository.Where(q => q.Id > 15).ToList();
+      
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
@@ -644,11 +682,37 @@ namespace Gridify.Tests
       [Fact]
       public void ApplyOrdering_NullGridifyQuery_ShouldSkip()
       {
+         GridifyQuery gq = null;
          var actual = _fakeRepository.AsQueryable()
-            .ApplyOrdering(null)
+            .ApplyOrdering(gq)
             .ToList();
          var expected = _fakeRepository.ToList();
          Assert.Equal(expected, actual);
+      }
+      
+      [Fact] // issue #34
+      public void ApplyOrdering_UnmappedFields_ShouldThrowException()
+      {
+         var gm = new GridifyMapper<TestClass>()
+            .AddMap("Id", q => q.Id);
+
+         var exp = Assert.Throws<GridifyMapperException>(() => _fakeRepository.AsQueryable().ApplyOrdering("name,id", gm).ToList());
+         Assert.Equal("Mapping 'name' not found",exp.Message); 
+      }
+      
+      [Fact] // issue #34
+      public void ApplyOrdering_UnmappedFields_ShouldSkipWhenIgnored()
+      {
+         var gm = new GridifyMapper<TestClass>(configuration => configuration.IgnoreNotMappedFields = true)
+            .AddMap("Id", q => q.Id);
+      
+         // name orderBy should be ignored
+         var actual = _fakeRepository.AsQueryable().ApplyOrdering("name,id", gm).ToList();
+         var expected = _fakeRepository.OrderBy(q => q.Id ).ToList();
+      
+         Assert.Equal(expected.Count, actual.Count);
+         Assert.Equal(expected, actual);
+         Assert.True(actual.Any());
       }
 
       #endregion
@@ -784,7 +848,8 @@ namespace Gridify.Tests
          lst.Add(new TestClass(23, "LI | AM", null));
          lst.Add(new TestClass(24, "(LI,AM)", null, tag: string.Empty));
          lst.Add(new TestClass(25, "Case/i", null, tag: string.Empty));
-         lst.Add(new TestClass(26, "/iCase", null));
+         lst.Add(new TestClass(26, "/iCase", null)); 
+         lst.Add(new TestClass(27, "ali reza", null));
 
          return lst;
       }
