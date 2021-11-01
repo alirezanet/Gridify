@@ -135,7 +135,7 @@ namespace Gridify
 
       /// <summary>
       /// Converts current mappings to a comma seperated list of map names.
-      /// eg, filed1,field2,field3 
+      /// eg, field1,field2,field3 
       /// </summary>
       /// <returns>a comma seperated string</returns>
       public override string ToString() => string.Join(",", _mappings.Select(q => q.From));
