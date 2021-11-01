@@ -706,7 +706,7 @@ namespace Gridify.Tests
          var gm = new GridifyMapper<TestClass>(configuration => configuration.IgnoreNotMappedFields = true)
             .AddMap("Id", q => q.Id);
       
-         // name=*a filter should be ignored
+         // name orderBy should be ignored
          var actual = _fakeRepository.AsQueryable().ApplyOrdering("name,id", gm).ToList();
          var expected = _fakeRepository.OrderBy(q => q.Id ).ToList();
       
