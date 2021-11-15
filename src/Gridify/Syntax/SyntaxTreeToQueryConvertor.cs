@@ -107,7 +107,7 @@ namespace Gridify.Syntax
       private static LambdaExpression GetAnyExpression(MemberExpression member, Expression predicate)
       {
          var param = GetParameterExpression(member);
-         var prop = Expression.Property(param!, member.Member.Name);
+         var prop = Expression.PropertyOrField(param!, member.Member.Name);
 
          var tp = prop.Type.GenericTypeArguments[0];
          var anyMethod = GetAnyMethod(tp);
