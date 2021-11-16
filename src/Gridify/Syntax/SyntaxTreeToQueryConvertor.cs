@@ -43,11 +43,8 @@ namespace Gridify.Syntax
 
       private static LambdaExpression UpdateExpressionIndex(LambdaExpression exp, int index)
       {
-         var parameter = exp.Parameters[0];
-         var unary = exp.Body as UnaryExpression;
-         var body = unary!.Operand as MemberExpression;
-         var newBody = new PredicateBuilder.ReplaceExpressionVisitor(exp.Parameters[1], Expression.Constant(index, typeof(int))).Visit(body!);
-         return Expression.Lambda(newBody, parameter);
+         var body = new PredicateBuilder.ReplaceExpressionVisitor(exp.Parameters[1], Expression.Constant(index, typeof(int))).Visit(exp.Body);
+         return Expression.Lambda(body, exp.Parameters);
       }
 
       private static Expression<Func<T, bool>>? GenerateNestedExpression<T>(
@@ -107,7 +104,7 @@ namespace Gridify.Syntax
       private static LambdaExpression GetAnyExpression(MemberExpression member, Expression predicate)
       {
          var param = GetParameterExpression(member);
-         var prop = Expression.Property(param!, member.Member.Name);
+         var prop = Expression.PropertyOrField(param!, member.Member.Name);
 
          var tp = prop.Type.GenericTypeArguments[0];
          var anyMethod = GetAnyMethod(tp);
