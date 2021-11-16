@@ -21,6 +21,8 @@ namespace Gridify.Tests
          var expression = query.Compile();
 
          var actual = level1List.Where(expression).ToList();
+
+         Assert.Single(actual);
          Assert.True(actual.Any());
       }
 
