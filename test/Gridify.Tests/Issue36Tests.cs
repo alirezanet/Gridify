@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+// ReSharper disable All
+#pragma warning disable 8618
 
 namespace Gridify.Tests
 {

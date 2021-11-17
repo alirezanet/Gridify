@@ -384,7 +384,7 @@ namespace Gridify.Syntax
                      {
                         return ConvertBinaryExpressionSyntaxToQuery(bExp, mapper) ?? throw new GridifyFilteringException("Invalid expression");
                      }
-                     catch (GridifyMapperException e)
+                     catch (GridifyMapperException)
                      {
                         if (mapper.Configuration.IgnoreNotMappedFields)
                            return (_ => true, false);
