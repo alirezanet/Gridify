@@ -27,11 +27,12 @@ namespace Gridify.Syntax
          if (fieldExpression!.IsCollection)
             gMap.To = UpdateExpressionIndex(gMap.To, fieldExpression.Index);
 
-         if (gMap.IsNestedCollection)
+         var isNested = ((GMap<T>)gMap).IsNestedCollection();
+         if (isNested)
          {
             var result = GenerateNestedExpression(mapper, gMap, right, op);
             if (result == null) return null;
-            return (result, gMap.IsNestedCollection);
+            return (result, isNested);
          }
          else
          {

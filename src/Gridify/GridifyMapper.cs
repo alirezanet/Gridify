@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 
 namespace Gridify
 {
@@ -53,8 +52,7 @@ namespace Gridify
             throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
 
          RemoveMap(from);
-         var isNested = Regex.IsMatch(to.ToString(), @"\.Select\s*\(");
-         _mappings.Add(new GMap<T>(from, to, convertor, isNested));
+         _mappings.Add(new GMap<T>(from, to, convertor));
          return this;
       }
 
@@ -65,8 +63,7 @@ namespace Gridify
             throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
 
          RemoveMap(from);
-         var isNested = Regex.IsMatch(to.ToString(), @"\.Select\s*\(");
-         _mappings.Add(new GMap<T>(from, to, convertor, isNested));
+         _mappings.Add(new GMap<T>(from, to, convertor));
          return this;
       }
 
@@ -117,7 +114,7 @@ namespace Gridify
             throw new GridifyMapperException($"Mapping Key `{key}` not found.");
          return expression!;
       }
-      
+
       public Expression<Func<T,object>> GetExpression(string key)
       {
          var expression = Configuration.CaseSensitive
@@ -135,7 +132,7 @@ namespace Gridify
 
       /// <summary>
       /// Converts current mappings to a comma seperated list of map names.
-      /// eg, field1,field2,field3 
+      /// eg, field1,field2,field3
       /// </summary>
       /// <returns>a comma seperated string</returns>
       public override string ToString() => string.Join(",", _mappings.Select(q => q.From));

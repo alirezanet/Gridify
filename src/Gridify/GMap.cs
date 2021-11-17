@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace Gridify
 {
@@ -8,22 +9,21 @@ namespace Gridify
       public string From { get; set; }
       public LambdaExpression To { get; set; }
       public Func<string, object>? Convertor { get; set; }
-      public bool IsNestedCollection { get; }
 
-      public GMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null, bool isNestedCollection = false)
+      public GMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null)
       {
          From = from;
          To = to;
          Convertor = convertor;
-         IsNestedCollection = isNestedCollection;
       }
-      
-      public GMap(string from, Expression<Func<T,int, object?>> to, Func<string, object>? convertor = null, bool isNestedCollection = false)
+
+      internal bool IsNestedCollection() => Regex.IsMatch(To.ToString(), @"\.Select\s*\(");
+
+      public GMap(string from, Expression<Func<T, int, object?>> to, Func<string, object>? convertor = null)
       {
          From = from;
          To = to;
          Convertor = convertor;
-         IsNestedCollection = isNestedCollection;
       }
    }
 }
