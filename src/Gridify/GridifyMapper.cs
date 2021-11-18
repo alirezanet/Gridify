@@ -11,23 +11,32 @@ namespace Gridify
       public GridifyMapperConfiguration Configuration { get; }
       private readonly List<IGMap<T>> _mappings;
 
-      public GridifyMapper()
+      public GridifyMapper(bool autoGenerateMappings = false)
       {
          Configuration = new GridifyMapperConfiguration();
          _mappings = new List<IGMap<T>>();
+
+         if (autoGenerateMappings)
+            GenerateMappings();
       }
 
-      public GridifyMapper(GridifyMapperConfiguration configuration)
+      public GridifyMapper(GridifyMapperConfiguration configuration, bool autoGenerateMappings = false)
       {
          Configuration = configuration;
          _mappings = new List<IGMap<T>>();
+
+         if (autoGenerateMappings)
+            GenerateMappings();
       }
 
-      public GridifyMapper(Action<GridifyMapperConfiguration> configuration)
+      public GridifyMapper(Action<GridifyMapperConfiguration> configuration,bool autoGenerateMappings = false)
       {
          Configuration = new GridifyMapperConfiguration();
          configuration.Invoke(Configuration);
          _mappings = new List<IGMap<T>>();
+
+         if (autoGenerateMappings)
+            GenerateMappings();
       }
 
       public IGridifyMapper<T> GenerateMappings()
