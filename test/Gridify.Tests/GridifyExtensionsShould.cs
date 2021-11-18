@@ -819,7 +819,7 @@ namespace Gridify.Tests
 
       #region "Data"
 
-      private static IEnumerable<TestClass> GetSampleData()
+      public static IEnumerable<TestClass> GetSampleData()
       {
          var lst = new List<TestClass>();
          lst.Add(new TestClass(1, "John", null, Guid.NewGuid(), DateTime.Now));
