@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Gridify.Syntax
 {
-   public static class ExpressionToQueryConvertor
+   internal static class ExpressionToQueryConvertor
    {
       private static (Expression<Func<T, bool>> Expression, bool IsNested)? ConvertBinaryExpressionSyntaxToQuery<T>(
          BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)

@@ -275,6 +275,14 @@ namespace Gridify
          return query;
       }
 
+      public static Expression<Func<T, bool>> CreateQuery<T>(this SyntaxTree syntaxTree, IGridifyMapper<T>? mapper = null)
+      {
+         mapper = mapper.FixMapper();
+         var exp = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper).Expression;
+         if (exp == null) throw new GridifyQueryException("Invalid SyntaxTree.");
+         return exp;
+      }
+
       public static IQueryable<T> ApplyOrderingAndPaging<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
       {
          mapper = mapper.FixMapper();

@@ -212,10 +212,7 @@ namespace Gridify
          if (syntaxTree.Diagnostics.Any())
             throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
 
-         _mapper = _mapper.FixMapper();
-         var (queryExpression, _) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, _mapper);
-         if (queryExpression == null) throw new GridifyQueryException($"Filter condition is not valid, '{condition}'.");
-         return queryExpression;
+         return syntaxTree.CreateQuery(_mapper);
       }
    }
 }
