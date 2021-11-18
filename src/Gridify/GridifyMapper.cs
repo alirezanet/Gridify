@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 
 namespace Gridify
 {
@@ -12,23 +11,32 @@ namespace Gridify
       public GridifyMapperConfiguration Configuration { get; }
       private readonly List<IGMap<T>> _mappings;
 
-      public GridifyMapper()
+      public GridifyMapper(bool autoGenerateMappings = false)
       {
          Configuration = new GridifyMapperConfiguration();
          _mappings = new List<IGMap<T>>();
+
+         if (autoGenerateMappings)
+            GenerateMappings();
       }
 
-      public GridifyMapper(GridifyMapperConfiguration configuration)
+      public GridifyMapper(GridifyMapperConfiguration configuration, bool autoGenerateMappings = false)
       {
          Configuration = configuration;
          _mappings = new List<IGMap<T>>();
+
+         if (autoGenerateMappings)
+            GenerateMappings();
       }
 
-      public GridifyMapper(Action<GridifyMapperConfiguration> configuration)
+      public GridifyMapper(Action<GridifyMapperConfiguration> configuration,bool autoGenerateMappings = false)
       {
          Configuration = new GridifyMapperConfiguration();
          configuration.Invoke(Configuration);
          _mappings = new List<IGMap<T>>();
+
+         if (autoGenerateMappings)
+            GenerateMappings();
       }
 
       public IGridifyMapper<T> GenerateMappings()
@@ -53,8 +61,7 @@ namespace Gridify
             throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
 
          RemoveMap(from);
-         var isNested = Regex.IsMatch(to.ToString(), @"\.Select\s*\(");
-         _mappings.Add(new GMap<T>(from, to, convertor, isNested));
+         _mappings.Add(new GMap<T>(from, to, convertor));
          return this;
       }
 
@@ -65,8 +72,7 @@ namespace Gridify
             throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
 
          RemoveMap(from);
-         var isNested = Regex.IsMatch(to.ToString(), @"\.Select\s*\(");
-         _mappings.Add(new GMap<T>(from, to, convertor, isNested));
+         _mappings.Add(new GMap<T>(from, to, convertor));
          return this;
       }
 
@@ -117,7 +123,7 @@ namespace Gridify
             throw new GridifyMapperException($"Mapping Key `{key}` not found.");
          return expression!;
       }
-      
+
       public Expression<Func<T,object>> GetExpression(string key)
       {
          var expression = Configuration.CaseSensitive
@@ -135,7 +141,7 @@ namespace Gridify
 
       /// <summary>
       /// Converts current mappings to a comma seperated list of map names.
-      /// eg, field1,field2,field3 
+      /// eg, field1,field2,field3
       /// </summary>
       /// <returns>a comma seperated string</returns>
       public override string ToString() => string.Join(",", _mappings.Select(q => q.From));

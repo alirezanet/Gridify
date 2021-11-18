@@ -1,6 +1,6 @@
 # Gridify (A Modern Dynamic LINQ library)
 
-<img alt="GitHub" src="https://img.shields.io/github/license/alirezanet/gridify"> ![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff) ![Nuget](https://img.shields.io/nuget/v/gridify?label=stable) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/gridify?label=latest) ![GitHub branch checks state](https://img.shields.io/github/checks-status/alirezanet/gridify/master?label=tests)  
+<img alt="GitHub" src="https://img.shields.io/github/license/alirezanet/gridify"> ![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff) ![Nuget](https://img.shields.io/nuget/v/gridify?label=stable) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/gridify?label=latest) ![GitHub branch checks state](https://img.shields.io/github/checks-status/alirezanet/gridify/master?label=tests)
 
 Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** using text-based data.
 
@@ -21,13 +21,13 @@ Although, we are not limited to Asp.net projects and we can use this library on 
 
 public Paging<Person> GetPersons([FromQuery] GridifyQuery gQuery)
 {
-    // Gridify => Filter,Sort & Apply Paging 
-    // in short, Gridify returns data especially for data Grids. 
+    // Gridify => Filter,Sort & Apply Paging
+    // in short, Gridify returns data especially for data Grids.
     return myDbContext.Persons.Gridify(gQuery);
 }
 ```
 
-complete request sample: 
+complete request sample:
 
 ```url
 http://exampleDomain.com/api/GetPersons?
@@ -35,7 +35,7 @@ http://exampleDomain.com/api/GetPersons?
           page=1&
           orderBy=FirstName&
           filter=Age>10
-          
+
 // to make the example readable this not encoded url,
 // make sure to always encode the query strings before passing it to your APIs
 ```
@@ -50,7 +50,7 @@ http://exampleDomain.com/api/GetPersons
 
 ## What is GridifyQuery (basic usage example)
 
-GridifyQuery is a simple class for configuring Filtering,Paging,Sorting. 
+GridifyQuery is a simple class for configuring Filtering,Paging,Sorting.
 
 ```c#
 // usually, we don't need to create this object manually
@@ -77,11 +77,11 @@ Also, if you don't need paging and sorting features simply use `ApplyFiltering` 
 
 ```c#
 var query = myDbContext.Persons.ApplyFiltering("name = John");
-// this is equal to : 
+// this is equal to :
 // myDbContext.Persons.Where(p => p.Name == "John");
 ```
 
-### see more examples in the [tests](https://github.com/alirezanet/Gridify/blob/6e9c954aae1d5d212412300173229e36e551ec26/test/Gridify.Tests/GridifyExtensionsShould.cs?_pjax=%23js-repo-pjax-container%3Afirst-of-type%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%3Afirst-of-type%2C%20%5Bdata-pjax-container%5D%3Afirst-of-type#L22) 
+### see more examples in the [tests](https://github.com/alirezanet/Gridify/blob/6e9c954aae1d5d212412300173229e36e551ec26/test/Gridify.Tests/GridifyExtensionsShould.cs?_pjax=%23js-repo-pjax-container%3Afirst-of-type%2C%20div%5Bitemtype%3D%22http%3A%2F%2Fschema.org%2FSoftwareSourceCode%22%5D%20main%3Afirst-of-type%2C%20%5Bdata-pjax-container%5D%3Afirst-of-type#L22)
 
 ---
 
@@ -183,7 +183,7 @@ var gq = new GridifyQuery() { Filter = "FirstName=John/i" };
 // this is matched by => JOHN - john - John - jOHn - ...
 ```
 ---
-   
+
 ## Escape character
 
 Filtering has five special character `, | ( ) /i` to handle complex queries and case-insensitive search. If you want to use these characters in your query values (after operator), you should add a backslash <code>\ </code> before them. having bellow regex could be helpfull `([(),|]|\/i)`.
@@ -197,9 +197,9 @@ Csharp escape example:
 var value = "(test,test2)";
 var esc = Regex.Replace(value, "([(),|]|\/i)", "\\$1" ); // esc = \(test\,test2\)
 ```
-   
+
 ---
-   
+
 ## Multiple OrderBy
 OrderBy accepts comma-separated field names followed by `asc` or `desc` keyword.
 by default, if you don't add these keywords,
@@ -212,7 +212,7 @@ var gq = new GridifyQuery() { OrderBy = "Id" }; // default assending its equal t
 var gq = new GridifyQuery() { OrderBy = "Id desc" }; // use desending ordering
 
 // multiple orderings example
-var gq = new GridifyQuery() { OrderBy = "Id desc, FirstName asc, LastName" }; 
+var gq = new GridifyQuery() { OrderBy = "Id desc, FirstName asc, LastName" };
 ```
 
 ---
@@ -272,19 +272,19 @@ var gridifiedData = myRepository.Persons.Gridify(gQuery, customMappings);
 By default `GridifyMapper` is `Case-insensitive` but you can change this behavior if you need `Case-Sensitive` mappings.
 
 ```c#
-var customMappings = new GridifyMapper<Person>( q => 
-{ 
+var customMappings = new GridifyMapper<Person>( q =>
+{
    q.CaseSensitive = true;    // enalbe case-sensitvity.
    q.AllowNullSearch = false; // disable searching for null values
-}); 
+});
 ```
 ---
 
 ## Value Convertor
-If you need to change your search values before the filtering operation you can use this feature, 
+If you need to change your search values before the filtering operation you can use this feature,
 the third parameter of the GridifyMapper `AddMap` method accepts a function that you can use to convert the input values.
 eg:
-   
+
 ```c#
 // convert values to lower case
 var gm = new GridifyMapper<Person>()
@@ -293,7 +293,7 @@ var gm = new GridifyMapper<Person>()
 
 ---
 
-## Filtering on Nested Collections 
+## Filtering on Nested Collections
 You can use LINQ `Select` and `SelectMany` methods to filter your data using its nested collections.
 
 In this example, we have 3 nested collections, but filtering will apply to the `Property1` of the third level.
@@ -302,10 +302,10 @@ var gm = new GridifyMapper<Level1>()
     .AddMap("prop1", l1 => l1.Level2List.SelectMany(l2 => l2.Level3List).Select(l3 => l3.Property1);
  ```
 
-if you have only two-level nesting, you don't need to use `SelectMany`. 
+if you have only two-level nesting, you don't need to use `SelectMany`.
 
 ---
-   
+
 ## EntityFramework integration
 
 If you need to use the **async** feature for entityFramework core, use **`Gridify.EntityFramework`** package instead.
@@ -320,7 +320,7 @@ Also, I recommended to Enable EntityFramework compatibility layer if you using g
  // You should use this configuration in your startup class or main method.
  GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
 ```
-   
+
 ---
 ## Compile and Reuse
 You can get Gridify generated expressions using the `GetFilteringExpression` and `GetOrderingExpression` methods, so you can store an expression and use it multiple times without having any overheads, also if you compile an expression you get a massive performance boost. but you should only use a compiled expression if you are not using Gridify alongside an ORM like Entity-Framework.
@@ -329,29 +329,64 @@ eg:
 var gm = new GridifyMapper<Person>().GenerateMappings();
 var gq = new GridifyQuery() {Filter = "name=John"};
 var expression = gq.GetFilteringExpression(gm);
-var compiledExpression = expression.Compile();  
+var compiledExpression = expression.Compile();
 ```
-   
+
 **expression usage:**
-```c#  
+```c#
 myDbContext.Persons.Where(expression);
 ```
-   
+
 **compiled expression usage:**
 ```c#
 myPersonList.Where(compiledExpression);
 ```
-   
-   
+
+
 This is the performance improvement example when you use a compiled expression
-   
+
 |          Method |         Mean |      Error |     StdDev | Ratio | RatioSD |    Gen 0 |   Gen 1 | Allocated |
 |---------------- |-------------:|-----------:|-----------:|------:|--------:|---------:|--------:|----------:|
 | GridifyCompiled |     1.008 us |  0.0035 us |  0.0031 us | 0.001 |    0.00 |  0.1564 |       - |     984 B  |
 |      NativeLinQ |   724.329 us |  6.4686 us |  6.0507 us | 1.000 |    0.00 |  5.8594 |  2.9297 |   37,392 B |
 |         Gridify |   736.854 us |  5.7427 us |  5.0907 us | 1.018 |    0.01 |  5.8594 |  2.9297 |   39,924 B |
 ---
-   
+
+
+## QueryBuilder
+
+The QueryBuilder class is really useful if want want to manually build your query, also when you don't want to use the extension methods.
+
+| Method                   | Description                                                                                                                   |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| AddCondition             | Adds a string base Filtering query    |
+| AddOrderBy               | Adds a string base Ordering query     |
+| AddPaging                | Add and configure Page and PageSize   |
+| AddQuery                 | Accepts a GridifyQuery object to configure filtering,ordering and paging     |
+| AddMapper                | Accepts a GridifyMapper to use in build methods  |
+| AddMap                   | Add a single Map to existing mapper    |
+| RemoveMap                | Remove a single Map from existing mapper    |
+| ConfigureDefaultMapper   | Configuring default mapper when we didn't use AddMapper method   |
+| Build                    | Applies filtering ordering and paging to a context    |
+| BuildFilteringExpression | Returns filtering expression    |
+| BuildOrderingExpression  | Returns ordering expression    |
+| BuildQueryableEvaluator  | Returns an evaluator delegate that can be use to evaluate an queryable context    |
+| BuildCollectionEvaluator | Returns an evaluator delegate that can be use to evaluate an enumerable context   |
+| BuildWithPaging          | Applies filtering ordering and paging to a context, and returns paging result     |
+| BuildWithQueryablePaging | Applies filtering ordering and paging to a context, and returns queryable paging result    |
+| Evaluate                 | Directly Evaluate a context to check if all conditions are valid or not    |
+
+usage eg:
+```c#
+var builder = new QueryBuilder<Person>()
+        .AddCondition("name=John")
+        .addOrderBy("age, id");
+
+ var query = builder.build(persons);
+```
+
+---
+
 ## Combine Gridify with AutoMapper
 
 ```c#
@@ -371,7 +406,7 @@ public static Paging<TDestination> GridifyTo<TSource, TDestination>(this IQuerya
    mapper = mapper.FixMapper();
    var res = query.GridifyQueryable(gridifyQuery, mapper);
    return new Paging<TDestination> (res.Count , res.Query.ProjectTo<TDestination>(autoMapper.ConfigurationProvider).ToList());
-}   
+}
 
 // only if you have Gridify.EntityFramework package installed.
 public static async Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination>(this IQueryable<TSource> query,
@@ -383,7 +418,7 @@ public static async Task<Paging<TDestination>> GridifyToAsync<TSource, TDestinat
 }
 
 ```
-   
+
 ---
 
 ## Contribution
