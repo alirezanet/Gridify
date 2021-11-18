@@ -60,6 +60,12 @@ namespace Gridify
 
       public IQueryBuilder<T> ConfigureDefaultMapper(GridifyMapperConfiguration mapperConfiguration)
       {
+         if (_mapper != null && _mapper.GetCurrentMaps().Any())
+         {
+            var tempMapper = new GridifyMapper<T>(mapperConfiguration, true);
+            _mapper.GetCurrentMaps().ToList().ForEach(map => tempMapper.AddMap(map));
+            _mapper = tempMapper;
+         }
          _mapper = new GridifyMapper<T>(mapperConfiguration, true);
          return this;
       }
@@ -75,6 +81,13 @@ namespace Gridify
       {
          _mapper ??= new GridifyMapper<T>(true);
          _mapper.AddMap(map, overwrite);
+         return this;
+      }
+
+      public IQueryBuilder<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null, bool overwrite = true)
+      {
+         _mapper ??= new GridifyMapper<T>(true);
+         _mapper.AddMap(from, to, convertor, overwrite);
          return this;
       }
 
