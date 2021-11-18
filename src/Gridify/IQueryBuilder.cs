@@ -14,12 +14,12 @@ namespace Gridify
       /// </summary>
       /// <param name="mapper"></param>
       /// <returns>returns IQueryBuilder</returns>
-      IQueryBuilder<T> AddMapper(IGridifyMapper<T> mapper);
+      IQueryBuilder<T> UseMapper(IGridifyMapper<T> mapper);
       IQueryBuilder<T> AddCondition(string condition);
       IQueryBuilder<T> AddCondition(IGridifyFiltering condition);
       IQueryBuilder<T> AddQuery(IGridifyQuery gridifyQuery);
       IQueryBuilder<T> AddOrderBy(string orderBy);
-      IQueryBuilder<T> AddPaging(int page, int pageSize);
+      IQueryBuilder<T> ConfigurePaging(int page, int pageSize);
       IQueryBuilder<T> ConfigureDefaultMapper(GridifyMapperConfiguration mapperConfiguration);
       IQueryBuilder<T> ConfigureDefaultMapper(Action<GridifyMapperConfiguration> mapperConfiguration);
       IQueryBuilder<T> AddMap(IGMap<T> map, bool overwrite = true);

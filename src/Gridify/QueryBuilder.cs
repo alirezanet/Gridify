@@ -13,7 +13,7 @@ namespace Gridify
       private string _orderBy = string.Empty;
       private (int page, int pageSize)? _paging;
 
-      public IQueryBuilder<T> AddMapper(IGridifyMapper<T> mapper)
+      public IQueryBuilder<T> UseMapper(IGridifyMapper<T> mapper)
       {
          _mapper = mapper;
          return this;
@@ -52,7 +52,7 @@ namespace Gridify
          return this;
       }
 
-      public IQueryBuilder<T> AddPaging(int page, int pageSize)
+      public IQueryBuilder<T> ConfigurePaging(int page, int pageSize)
       {
          _paging = (page, pageSize);
          return this;

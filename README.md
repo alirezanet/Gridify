@@ -361,9 +361,9 @@ The QueryBuilder class is really useful if you want to manually build your query
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
 | AddCondition             | Adds a string base Filtering query    |
 | AddOrderBy               | Adds a string base Ordering query     |
-| AddPaging                | Add and configure Page and PageSize   |
+| ConfigurePaging          | Configure Page and PageSize   |
 | AddQuery                 | Accepts a GridifyQuery object to configure filtering,ordering and paging     |
-| AddMapper                | Accepts a GridifyMapper to use in build methods  |
+| UseMapper                | Accepts a GridifyMapper to use in build methods  |
 | AddMap                   | Add a single Map to existing mapper    |
 | RemoveMap                | Remove a single Map from existing mapper    |
 | ConfigureDefaultMapper   | Configuring default mapper when we didn't use AddMapper method   |
