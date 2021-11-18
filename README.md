@@ -355,7 +355,7 @@ This is the performance improvement example when you use a compiled expression
 
 ## QueryBuilder
 
-The QueryBuilder class is really useful if want want to manually build your query, also when you don't want to use the extension methods.
+The QueryBuilder class is really useful if you want to manually build your query, also when you don't want to use the extension methods.
 
 | Method                   | Description                                                                                                                   |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
