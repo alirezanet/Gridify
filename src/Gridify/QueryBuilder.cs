@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Gridify;
 using Gridify.Syntax;
 
 namespace Gridify
@@ -142,7 +141,7 @@ namespace Gridify
       {
          if (string.IsNullOrEmpty(_orderBy)) throw new GridifyOrderingException("Please use 'AddOrderBy' to specify at least an single order");
 
-         var gm = new GridifyQuery() { OrderBy = _orderBy };
+         var gm = new GridifyQuery { OrderBy = _orderBy };
          _mapper ??= new GridifyMapper<T>(true);
          return gm.GetOrderingExpressions(_mapper);
       }
