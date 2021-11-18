@@ -44,7 +44,7 @@ namespace Gridify.Syntax
 
       private static LambdaExpression UpdateExpressionIndex(LambdaExpression exp, int index)
       {
-         var body = new PredicateBuilder.ReplaceExpressionVisitor(exp.Parameters[1], Expression.Constant(index, typeof(int))).Visit(exp.Body);
+         var body = new ReplaceExpressionVisitor(exp.Parameters[1], Expression.Constant(index, typeof(int))).Visit(exp.Body);
          return Expression.Lambda(body, exp.Parameters);
       }
 
@@ -88,7 +88,7 @@ namespace Gridify.Syntax
                Body: MemberExpression lambdaMember
             } lambda:
             {
-               var newExp = new PredicateBuilder.ReplaceExpressionVisitor(predicate.Parameters[0], lambdaMember).Visit(predicate.Body);
+               var newExp = new ReplaceExpressionVisitor(predicate.Parameters[0], lambdaMember).Visit(predicate.Body);
                var newPredicate = GetExpressionWithNullCheck(lambdaMember, lambda.Parameters[0], newExp!);
                return ParseMethodCallExpression(subExp, newPredicate);
             }
@@ -160,7 +160,7 @@ namespace Gridify.Syntax
             }
          }
 
-         // handle case-Insensitive search 
+         // handle case-Insensitive search
          if (value is not null && valueExpression.IsCaseInsensitive
                                && op.Kind is not SyntaxKind.GreaterThan
                                && op.Kind is not SyntaxKind.LessThan
@@ -291,7 +291,7 @@ namespace Gridify.Syntax
          if (!GridifyExtensions.EntityFrameworkCompatibilityLayer)
             return Expression.Constant(value, type);
 
-         // active parameterized query for EF 
+         // active parameterized query for EF
          const string fieldName = "Value";
          var (instance, type1) = GridifyTypeBuilder.CreateNewObject(type, fieldName, value);
          return Expression.PropertyOrField(Expression.Constant(instance, type1), fieldName);
@@ -444,14 +444,14 @@ namespace Gridify.Syntax
                 rightExp.Arguments.First() is MemberExpression rightMember &&
                 leftMember.Type == rightMember.Type)
             {
-               // we can merge 
+               // we can merge
                var leftLambda = leftExp.Arguments.Last() as LambdaExpression;
                var rightLambda = rightExp.Arguments.Last() as LambdaExpression;
 
                if (leftLambda is null || rightLambda is null)
                   return null;
 
-               var visitedRight = new PredicateBuilder.ReplaceExpressionVisitor(rightLambda.Parameters[0], leftLambda.Parameters[0])
+               var visitedRight = new ReplaceExpressionVisitor(rightLambda.Parameters[0], leftLambda.Parameters[0])
                   .Visit(rightLambda.Body);
 
                var mergedExpression = op switch
