@@ -24,14 +24,6 @@ namespace Gridify
       /// <inheritdoc />
       public IQueryBuilder<T> UseEmptyMapper(GridifyMapperConfiguration? mapperConfiguration = null)
       {
-         if (_mapper != null && _mapper.GetCurrentMaps().Any())
-         {
-            var tempMapper = mapperConfiguration != null ? new GridifyMapper<T>(mapperConfiguration) : new GridifyMapper<T>();
-            _mapper.GetCurrentMaps().ToList().ForEach(map => tempMapper.AddMap(map));
-            _mapper = tempMapper;
-            return this;
-         }
-
          _mapper = mapperConfiguration != null ? new GridifyMapper<T>(mapperConfiguration) : new GridifyMapper<T>();
          return this;
       }

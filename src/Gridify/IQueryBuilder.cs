@@ -20,8 +20,8 @@ namespace Gridify
       /// Using this method the default gridify mapper has no predefined mappings and
       /// you need to manually add your maps to the mapper using AddMap method.
       /// mapper will be used to convert your provided string conditions to a lambda expression.
-      /// also when you use this method, previous mapper will be replaced so
-      /// Make sure to use AppMap method after calling this method.
+      /// also when you use this method, previous mapper will be replaced,
+      /// so make sure to use this before AddMap method.
       /// </summary>
       /// <param name="mapperConfiguration">optional mapper configuration</param>
       /// <returns>returns IQueryBuilder</returns>
