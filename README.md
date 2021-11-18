@@ -380,7 +380,7 @@ usage eg:
 ```c#
 var builder = new QueryBuilder<Person>()
         .AddCondition("name=John")
-        .addOrderBy("age, id");
+        .AddOrderBy("age, id");
 
  var query = builder.build(persons);
 ```
