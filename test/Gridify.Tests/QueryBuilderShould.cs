@@ -32,14 +32,29 @@ namespace Gridify.Tests
          Assert.Equal(_testRecordsCount, count3);
       }
 
-      // [Fact]
-      // public void AddCondition_Should_Filter_By_Property_Name()
-      // {
-      //    var builder = new QueryBuilder<TestClass>()
-      //       .AddCondition("Name =* a");
-      //
-      //
-      // }
+      [Fact] // issue #38
+      public void Evaluator_Should_Check_All_Conditions_Without_And()
+      {
+         var builder = new QueryBuilder<TestClass>()
+            .AddCondition("name =Ali, id < 6")
+            .AddCondition("name =Sara, Id > 6");
+
+         // using CollectionEvaluator
+         var evaluator = builder.BuildCollectionEvaluator();
+         Assert.True(evaluator(_fakeRepository));
+
+         // using QueryableEvaluator
+         var queryableEvaluator = builder.BuildQueryableEvaluator();
+         Assert.True(queryableEvaluator(_fakeRepository.AsQueryable()));
+
+         // Using Evaluate method (collection)
+         var isValid = builder.Evaluate(_fakeRepository);
+         Assert.True(isValid);
+
+         // Using Evaluate method (queryable)
+         var isQueryValid = builder.Evaluate(_fakeRepository.AsQueryable());
+         Assert.True(isQueryValid);
+      }
 
    }
 }
