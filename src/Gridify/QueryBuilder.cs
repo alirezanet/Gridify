@@ -48,7 +48,7 @@ namespace Gridify
 
       public IQueryBuilder<T> AddOrderBy(string orderBy)
       {
-         _orderBy = orderBy;
+         _orderBy = string.IsNullOrEmpty(_orderBy) ? orderBy : $"{_orderBy}, {orderBy}";
          return this;
       }
 
