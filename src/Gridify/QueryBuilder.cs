@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Gridify;
 using Gridify.Syntax;
 
 namespace Gridify
@@ -13,18 +14,44 @@ namespace Gridify
       private string _orderBy = string.Empty;
       private (int page, int pageSize)? _paging;
 
-      public IQueryBuilder<T> UseMapper(IGridifyMapper<T> mapper)
+      /// <inheritdoc />
+      public IQueryBuilder<T> UseCustomMapper(IGridifyMapper<T> mapper)
       {
          _mapper = mapper;
          return this;
       }
 
+      /// <inheritdoc />
+      public IQueryBuilder<T> UseEmptyMapper(GridifyMapperConfiguration? mapperConfiguration = null)
+      {
+         if (_mapper != null && _mapper.GetCurrentMaps().Any())
+         {
+            var tempMapper = mapperConfiguration != null ? new GridifyMapper<T>(mapperConfiguration) : new GridifyMapper<T>();
+            _mapper.GetCurrentMaps().ToList().ForEach(map => tempMapper.AddMap(map));
+            _mapper = tempMapper;
+            return this;
+         }
+
+         _mapper = mapperConfiguration != null ? new GridifyMapper<T>(mapperConfiguration) : new GridifyMapper<T>();
+         return this;
+      }
+
+      /// <inheritdoc />
+      public IQueryBuilder<T> UseEmptyMapper(Action<GridifyMapperConfiguration> mapperConfiguration)
+      {
+         var mapperConfigurationInstance = new GridifyMapperConfiguration();
+         mapperConfiguration(mapperConfigurationInstance);
+         return UseEmptyMapper(mapperConfigurationInstance);
+      }
+
+      /// <inheritdoc />
       public IQueryBuilder<T> AddCondition(string condition)
       {
          _conditions.Add(ConvertConditionToExpression(condition));
          return this;
       }
 
+      /// <inheritdoc />
       public IQueryBuilder<T> AddCondition(IGridifyFiltering condition)
       {
          if (condition.Filter != null)
@@ -32,6 +59,7 @@ namespace Gridify
          return this;
       }
 
+      /// <inheritdoc />
       public IQueryBuilder<T> AddQuery(IGridifyQuery gridifyQuery)
       {
          if (gridifyQuery.Filter != null)
@@ -46,18 +74,21 @@ namespace Gridify
          return this;
       }
 
+      /// <inheritdoc />
       public IQueryBuilder<T> AddOrderBy(string orderBy)
       {
          _orderBy = string.IsNullOrEmpty(_orderBy) ? orderBy : $"{_orderBy}, {orderBy}";
          return this;
       }
 
+      /// <inheritdoc />
       public IQueryBuilder<T> ConfigurePaging(int page, int pageSize)
       {
          _paging = (page, pageSize);
          return this;
       }
 
+      /// <inheritdoc />
       public IQueryBuilder<T> ConfigureDefaultMapper(GridifyMapperConfiguration mapperConfiguration)
       {
          if (_mapper != null && _mapper.GetCurrentMaps().Any())
@@ -65,11 +96,14 @@ namespace Gridify
             var tempMapper = new GridifyMapper<T>(mapperConfiguration, true);
             _mapper.GetCurrentMaps().ToList().ForEach(map => tempMapper.AddMap(map));
             _mapper = tempMapper;
+            return this;
          }
+
          _mapper = new GridifyMapper<T>(mapperConfiguration, true);
          return this;
       }
 
+      /// <inheritdoc />
       public IQueryBuilder<T> ConfigureDefaultMapper(Action<GridifyMapperConfiguration> mapperConfiguration)
       {
          var mapperConfigurationInstance = new GridifyMapperConfiguration();
@@ -77,6 +111,7 @@ namespace Gridify
          return ConfigureDefaultMapper(mapperConfigurationInstance);
       }
 
+      /// <inheritdoc />
       public IQueryBuilder<T> AddMap(IGMap<T> map, bool overwrite = true)
       {
          _mapper ??= new GridifyMapper<T>(true);
@@ -84,6 +119,7 @@ namespace Gridify
          return this;
       }
 
+      /// <inheritdoc />
       public IQueryBuilder<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null, bool overwrite = true)
       {
          _mapper ??= new GridifyMapper<T>(true);
@@ -91,6 +127,7 @@ namespace Gridify
          return this;
       }
 
+      /// <inheritdoc />
       public IQueryBuilder<T> RemoveMap(IGMap<T> map)
       {
          _mapper ??= new GridifyMapper<T>(true);
@@ -98,6 +135,7 @@ namespace Gridify
          return this;
       }
 
+      /// <inheritdoc />
       public Expression<Func<T, bool>> BuildFilteringExpression()
       {
          if (_conditions.Count == 0)
@@ -107,6 +145,7 @@ namespace Gridify
             => x is null ? y : x.And(y)) as Expression<Func<T, bool>>)!;
       }
 
+      /// <inheritdoc />
       public IEnumerable<Expression<Func<T, object>>> BuildOrderingExpression()
       {
          if (string.IsNullOrEmpty(_orderBy)) throw new GridifyOrderingException("Please use 'AddOrderBy' to specify at least an single order");
@@ -116,6 +155,7 @@ namespace Gridify
          return gm.GetOrderingExpressions(_mapper);
       }
 
+      /// <inheritdoc />
       public Func<IQueryable<T>, bool> BuildQueryableEvaluator()
       {
          return collection =>
@@ -126,6 +166,7 @@ namespace Gridify
          };
       }
 
+      /// <inheritdoc />
       public Func<IEnumerable<T>, bool> BuildCollectionEvaluator()
       {
          return collection =>
@@ -136,16 +177,19 @@ namespace Gridify
          };
       }
 
+      /// <inheritdoc />
       public bool Evaluate(IQueryable<T> query)
       {
          return BuildQueryableEvaluator()(query);
       }
 
+      /// <inheritdoc />
       public bool Evaluate(IEnumerable<T> collection)
       {
          return BuildCollectionEvaluator()(collection);
       }
 
+      /// <inheritdoc />
       public IQueryable<T> Build(IQueryable<T> context)
       {
          var query = context;
@@ -162,6 +206,7 @@ namespace Gridify
          return query;
       }
 
+      /// <inheritdoc />
       public IEnumerable<T> Build(IEnumerable<T> collection)
       {
          if (_conditions.Count > 0)
@@ -176,18 +221,21 @@ namespace Gridify
          return collection;
       }
 
+      /// <inheritdoc />
       public Paging<T> BuildWithPaging(IEnumerable<T> collection)
       {
          var query = collection.AsQueryable();
          return BuildWithPaging(query);
       }
 
+      /// <inheritdoc />
       public Paging<T> BuildWithPaging(IQueryable<T> collection)
       {
          var (count, query) = BuildWithQueryablePaging(collection);
          return new Paging<T>(count, query);
       }
 
+      /// <inheritdoc />
       public QueryablePaging<T> BuildWithQueryablePaging(IQueryable<T> collection)
       {
          var query = collection;
