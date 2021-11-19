@@ -26,7 +26,6 @@ namespace Benchmarks
          _data = LibraryComparisionFilteringBenchmark.GetSampleData().ToArray();
 
          var builder = new QueryBuilder<TestClass>()
-            .AddOrderBy("name")
             .AddCondition("id>2")
             .AddCondition("name=*a");
 
