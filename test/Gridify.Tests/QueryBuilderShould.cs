@@ -69,5 +69,23 @@ namespace Gridify.Tests
 
       }
 
+      [Fact]
+      public void BuildFilteringExpression_Should_Return_Correct_Expression()
+      {
+         var builder = new QueryBuilder<TestClass>()
+            .AddCondition("name =*a")
+            .AddCondition("id > 2");
+
+         var expectedExpressionString = new GridifyQuery() { Filter = "name=*a,id>2" }.GetFilteringExpression<TestClass>().ToString();
+         var actualExpression = builder.BuildFilteringExpression();
+
+         var expectedResult = _fakeRepository.Where(q =>
+                     q.Id > 2 && q.Name != null && q.Name.Contains("a"));
+
+         var actualResult =  _fakeRepository.AsQueryable().Where(actualExpression);
+
+         Assert.Equal(expectedExpressionString, actualExpression.ToString());
+         Assert.Equal(expectedResult, actualResult);
+      }
    }
 }
