@@ -32,6 +32,8 @@ namespace Gridify
 
       /// <summary>
       /// Using this method you can add gridify supported string base filtering statements
+      /// Each added condition can be use to evaluate a context, also all conditions will be
+      /// ANDed together for filtering.
       /// </summary>
       /// <example> (Name=John,Age>10) </example>
       /// <param name="condition">string based filtering</param>
