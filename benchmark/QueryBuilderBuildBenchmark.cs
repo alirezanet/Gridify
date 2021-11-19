@@ -16,9 +16,11 @@ namespace Benchmarks
    {
       private readonly IEnumerable<TestClass> _data;
       private static readonly Consumer Consumer = new();
-      private readonly Func<IEnumerable<TestClass>, IEnumerable<TestClass>> CompiledFunc;
-      private readonly Func<IQueryable<TestClass>, IQueryable<TestClass>> QueryableFunc;
-      private readonly Func<TestClass, bool> CompileFiltering;
+      private readonly Func<IEnumerable<TestClass>, IEnumerable<TestClass>> BuildCompiledFuc;
+      private readonly Func<IQueryable<TestClass>, IQueryable<TestClass>> BuildFunc;
+      private readonly Func<TestClass, bool> BuildFilteringExpressionFunc;
+      private readonly Func<IEnumerable<TestClass>, Paging<TestClass>> BuildWithPagingCompiledFunc;
+      private readonly Func<IQueryable<TestClass>, Paging<TestClass>> BuildWithPagingFunc;
 
 
       public QueryBuilderBuildBenchmark()
@@ -29,35 +31,56 @@ namespace Benchmarks
             .AddCondition("id>2")
             .AddCondition("name=*a");
 
-         CompiledFunc = builder.BuildCompiled();
-         QueryableFunc = builder.Build();
-         CompileFiltering = builder.BuildFilteringExpression().Compile();
+         BuildCompiledFuc = builder.BuildCompiled();
+         BuildFunc = builder.Build();
+         BuildFilteringExpressionFunc = builder.BuildFilteringExpression().Compile();
+         BuildWithPagingCompiledFunc = builder.BuildWithPagingCompiled();
+         BuildWithPagingFunc = builder.BuildWithPaging();
 
-         if (AllSame(CompiledFunc(_data).Count(), QueryableFunc(_data.AsQueryable()).Count(), _data.Where(CompileFiltering).Count()) &&
-             AllSame(CompiledFunc(_data).First().Id, QueryableFunc(_data.AsQueryable()).First().Id, _data.Where(CompileFiltering).First().Id) &&
-             AllSame(CompiledFunc(_data).Last().Id, QueryableFunc(_data.AsQueryable()).Last().Id, _data.Where(CompileFiltering).Last().Id) &&
-             CompiledFunc(_data).Count() < 2)
-         {
-            throw new Exception("MISS MATCH OUTPUT");
-         }
+         TestOutputs();
       }
 
-      [Benchmark]
-      public void BuildCompiled()
-      {
-         CompiledFunc(_data).Consume(Consumer);
-      }
-
-      [Benchmark] // this method is only for filtering operations
+      [Benchmark(Baseline = true)] // this method is only for filtering operations
       public void UseGetFilteringExpression()
       {
-         _data.Where(CompileFiltering).Consume(Consumer);
+         _data.Where(BuildFilteringExpressionFunc).Consume(Consumer);
       }
 
       [Benchmark]
       public void Build()
       {
-         QueryableFunc(_data.AsQueryable()).Consume(Consumer);
+         BuildFunc(_data.AsQueryable()).Consume(Consumer);
+      }
+
+      [Benchmark]
+      public void BuildCompiled()
+      {
+         BuildCompiledFuc(_data).Consume(Consumer);
+      }
+
+      [Benchmark]
+      public void BuildWithPaging()
+      {
+         BuildWithPagingFunc(_data.AsQueryable()).Data.Consume(Consumer);
+      }
+
+      [Benchmark]
+      public void BuildWithPagingCompiled()
+      {
+         BuildWithPagingCompiledFunc(_data.AsQueryable()).Data.Consume(Consumer);
+      }
+
+      private void TestOutputs()
+      {
+         if (AllSame(BuildCompiledFuc(_data).Count(), BuildFunc(_data.AsQueryable()).Count(), _data.Where(BuildFilteringExpressionFunc).Count()) &&
+             AllSame(BuildCompiledFuc(_data).First().Id, BuildFunc(_data.AsQueryable()).First().Id,
+                _data.Where(BuildFilteringExpressionFunc).First().Id) &&
+             AllSame(BuildCompiledFuc(_data).Last().Id, BuildFunc(_data.AsQueryable()).Last().Id,
+                _data.Where(BuildFilteringExpressionFunc).Last().Id) &&
+             BuildCompiledFuc(_data).Count() < 2)
+         {
+            throw new Exception("MISS MATCH OUTPUT");
+         }
       }
 
       private static bool AllSame<T>(params T[] items)
