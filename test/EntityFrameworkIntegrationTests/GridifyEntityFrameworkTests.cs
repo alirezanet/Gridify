@@ -1,20 +1,18 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Gridify;
 using Xunit;
 
 namespace EntityFrameworkIntegrationTests.cs
 {
-   public class GridifyEntityFrameworkTests
+   public class GridifyEntityFrameworkTests : IClassFixture<DatabaseFixture>
    {
-      private readonly MyDbContext _dbContext;
+      private readonly DatabaseFixture fixture;
+      private MyDbContext _ctx => fixture._dbContext;
 
-      public GridifyEntityFrameworkTests()
+      public GridifyEntityFrameworkTests(DatabaseFixture fixture)
       {
-         _dbContext = new MyDbContext();
-         AddTestUsers();
+         this.fixture = fixture;
       }
-
       [Fact]
       public void EntityFrameworkServiceProviderCachingShouldNotThrowException()
       {
@@ -23,11 +21,11 @@ namespace EntityFrameworkIntegrationTests.cs
          // arrange
          var gq = new GridifyQuery { Filter = "name=n1|name=n2" };
 
-         _dbContext.Users.Gridify(gq);
-         _dbContext.Users.Gridify(gq);
+         _ctx.Users.Gridify(gq);
+         _ctx.Users.Gridify(gq);
 
          //act
-         var exception = Record.Exception(() => _dbContext.Users.GridifyQueryable(gq));
+         var exception = Record.Exception(() => _ctx.Users.GridifyQueryable(gq));
 
          // assert
          Assert.Null(exception);
@@ -40,7 +38,7 @@ namespace EntityFrameworkIntegrationTests.cs
          var gq = new GridifyQuery { OrderBy = "CreateDate" };
 
          // act
-         var exception = Record.Exception(() => _dbContext.Users.GridifyQueryable(gq));
+         var exception = Record.Exception(() => _ctx.Users.GridifyQueryable(gq));
 
          // assert
          Assert.Null(exception);
@@ -56,27 +54,31 @@ namespace EntityFrameworkIntegrationTests.cs
       {
          GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
 
-         var actual = _dbContext.Users.ApplyFiltering("name > h").ToList();
-         var expected = _dbContext.Users.Where(q => string.Compare(q.Name, "h") > 0).ToList();
+         var actual = _ctx.Users.ApplyFiltering("name > h").ToList();
+         var expected = _ctx.Users.Where(q => string.Compare(q.Name, "h") > 0).ToList();
 
          Assert.Equal(expected.Count, actual.Count);
          Assert.Equal(expected, actual);
          Assert.True(actual.Any());
       }
-      
 
-      private void AddTestUsers()
+      [Fact]
+      public void Builder_BuildEvaluator_Should_Correctly_Evaluate_All_Conditions()
       {
-         _dbContext.Users.AddRange(
-            new User() { Name = "ahmad" },
-            new User() { Name = "ali" },
-            new User() { Name = "vahid" },
-            new User() { Name = "hamid" },
-            new User() { Name = "Hamed" },
-            new User() { Name = "sara" },
-            new User() { Name = "Ali" });
+         var builder = new QueryBuilder<User>()
+            .AddCondition("name=*a")
+            .AddCondition("id>3");
 
-         _dbContext.SaveChanges();
+         var evaluator = builder.BuildEvaluator();
+         var actual = evaluator(_ctx.Users);
+
+         Assert.True(actual);
+         Assert.True(builder.Evaluate(_ctx.Users));
+
+         builder.AddCondition("name=fakeName");
+         Assert.False(builder.Evaluate(_ctx.Users));
+
       }
+
    }
 }
