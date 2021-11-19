@@ -60,7 +60,7 @@ namespace Gridify
             AddOrderBy(gridifyQuery.OrderBy!);
 
          if (gridifyQuery.PageSize == 0) gridifyQuery.PageSize = GridifyExtensions.DefaultPageSize;
-            ConfigurePaging(gridifyQuery.Page, gridifyQuery.PageSize);
+         ConfigurePaging(gridifyQuery.Page, gridifyQuery.PageSize);
 
          return this;
       }
@@ -198,15 +198,28 @@ namespace Gridify
       }
 
       /// <inheritdoc />
-      public Func<IQueryable<T>,IQueryable<T>> Build()
+      public Func<IQueryable<T>, IQueryable<T>> Build()
       {
          return Build;
       }
 
       /// <inheritdoc />
-      public Func<IEnumerable<T>,IEnumerable<T>> BuildAsEnumerable()
+      public Func<IEnumerable<T>, IEnumerable<T>> BuildCompiled()
       {
-         return Build;
+         var compiled = BuildFilteringExpression().Compile();
+         return (collection) =>
+         {
+            if (_conditions.Count > 0)
+               collection = collection.Where(compiled);
+
+            if (!string.IsNullOrEmpty(_orderBy))
+               collection = collection.AsQueryable().ApplyOrdering(_orderBy);
+
+            if (_paging.HasValue)
+               collection = collection.Skip(_paging.Value.page * _paging.Value.pageSize).Take(_paging.Value.pageSize);
+
+            return collection;
+         };
       }
 
       /// <inheritdoc />
@@ -283,5 +296,6 @@ namespace Gridify
 
          return syntaxTree.CreateQuery(_mapper);
       }
+
    }
 }

@@ -80,15 +80,16 @@ namespace Gridify
 
       /// <summary>
       /// Returns a delegate that can be used to apply the filtering, ordering and paging to a collection.
+      /// also, Internally it compiles the expressions to increase performance.
       ///  </summary>
       /// <example>
       /// <code>
-      /// var func = builder.BuildAsEnumerable();
+      /// var func = builder.BuildCompiled();
       /// var result = func(enumerableCollection);
       /// </code>
       /// </example>
       /// <returns>A delegate as type <![CDATA[Func<IEnumerable<T>, IEnumerable<T>>]]></returns>
-      Func<IEnumerable<T>, IEnumerable<T>> BuildAsEnumerable();
+      Func<IEnumerable<T>, IEnumerable<T>> BuildCompiled();
 
       /// <summary>
       /// Directly applies the filtering, ordering and paging to a queryable.
