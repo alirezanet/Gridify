@@ -197,7 +197,7 @@ namespace Gridify
       public Func<IEnumerable<T>, IEnumerable<T>> BuildCompiled()
       {
          var compiled = BuildFilteringExpression().Compile();
-         return (collection) =>
+         return collection =>
          {
             if (_conditions.Count > 0)
                collection = collection.Where(compiled);
@@ -253,9 +253,24 @@ namespace Gridify
          return BuildWithPaging;
       }
 
-      public Func<IEnumerable<T>, Paging<T>> BuildWithPagingAsEnumerable()
+      public Func<IEnumerable<T>, Paging<T>> BuildWithPagingCompiled()
       {
-         return BuildWithPaging;
+         var compiled = BuildFilteringExpression().Compile();
+         return collection =>
+         {
+            if (_conditions.Count > 0)
+               collection = collection.Where(compiled);
+
+            if (!string.IsNullOrEmpty(_orderBy)) // TODO: this also should be compiled
+               collection = collection.AsQueryable().ApplyOrdering(_orderBy);
+
+            var result = collection.ToList();
+            var count = result.Count();
+
+            return _paging.HasValue
+               ? new Paging<T>(count, result.Skip(_paging.Value.page * _paging.Value.pageSize).Take(_paging.Value.pageSize))
+               : new Paging<T>(count, result);
+         };
       }
 
 
@@ -286,6 +301,5 @@ namespace Gridify
 
          return syntaxTree.CreateQuery(_mapper);
       }
-
    }
 }

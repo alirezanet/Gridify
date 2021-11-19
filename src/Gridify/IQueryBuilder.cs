@@ -195,6 +195,6 @@ namespace Gridify
       /// </code>
       /// </example>
       /// <returns><![CDATA[ Func<IQueryable<T>,Paging<T>> ]]></returns>
-      Func<IEnumerable<T>,Paging<T>> BuildWithPagingAsEnumerable();
+      Func<IEnumerable<T>,Paging<T>> BuildWithPagingCompiled();
    }
 }
