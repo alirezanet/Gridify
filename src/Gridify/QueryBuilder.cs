@@ -60,7 +60,7 @@ namespace Gridify
             AddOrderBy(gridifyQuery.OrderBy!);
 
          if (gridifyQuery.PageSize == 0) gridifyQuery.PageSize = GridifyExtensions.DefaultPageSize;
-            ConfigurePaging(gridifyQuery.Page, gridifyQuery.PageSize);
+         ConfigurePaging(gridifyQuery.Page, gridifyQuery.PageSize);
 
          return this;
       }
@@ -137,16 +137,6 @@ namespace Gridify
       }
 
       /// <inheritdoc />
-      public IEnumerable<Expression<Func<T, object>>> BuildOrderingExpression()
-      {
-         if (string.IsNullOrEmpty(_orderBy)) throw new GridifyOrderingException("Please use 'AddOrderBy' to specify at least an single order");
-
-         var gm = new GridifyQuery { OrderBy = _orderBy };
-         _mapper ??= new GridifyMapper<T>(true);
-         return gm.GetOrderingExpressions(_mapper);
-      }
-
-      /// <inheritdoc />
       public Func<IQueryable<T>, bool> BuildQueryableEvaluator()
       {
          return collection =>
@@ -198,6 +188,31 @@ namespace Gridify
       }
 
       /// <inheritdoc />
+      public Func<IQueryable<T>, IQueryable<T>> Build()
+      {
+         return Build;
+      }
+
+      /// <inheritdoc />
+      public Func<IEnumerable<T>, IEnumerable<T>> BuildCompiled()
+      {
+         var compiled = BuildFilteringExpression().Compile();
+         return collection =>
+         {
+            if (_conditions.Count > 0)
+               collection = collection.Where(compiled);
+
+            if (!string.IsNullOrEmpty(_orderBy)) // TODO: this also should be compiled
+               collection = collection.AsQueryable().ApplyOrdering(_orderBy);
+
+            if (_paging.HasValue)
+               collection = collection.Skip(_paging.Value.page * _paging.Value.pageSize).Take(_paging.Value.pageSize);
+
+            return collection;
+         };
+      }
+
+      /// <inheritdoc />
       public IEnumerable<T> Build(IEnumerable<T> collection)
       {
          if (_conditions.Count > 0)
@@ -225,6 +240,39 @@ namespace Gridify
          var (count, query) = BuildWithQueryablePaging(collection);
          return new Paging<T>(count, query);
       }
+
+      /// <inheritdoc />
+      public Func<IQueryable<T>, QueryablePaging<T>> BuildWithQueryablePaging()
+      {
+         return BuildWithQueryablePaging;
+      }
+
+      /// <inheritdoc />
+      public Func<IQueryable<T>, Paging<T>> BuildWithPaging()
+      {
+         return BuildWithPaging;
+      }
+
+      public Func<IEnumerable<T>, Paging<T>> BuildWithPagingCompiled()
+      {
+         var compiled = BuildFilteringExpression().Compile();
+         return collection =>
+         {
+            if (_conditions.Count > 0)
+               collection = collection.Where(compiled);
+
+            if (!string.IsNullOrEmpty(_orderBy)) // TODO: this also should be compiled
+               collection = collection.AsQueryable().ApplyOrdering(_orderBy);
+
+            var result = collection.ToList();
+            var count = result.Count();
+
+            return _paging.HasValue
+               ? new Paging<T>(count, result.Skip(_paging.Value.page * _paging.Value.pageSize).Take(_paging.Value.pageSize))
+               : new Paging<T>(count, result);
+         };
+      }
+
 
       /// <inheritdoc />
       public QueryablePaging<T> BuildWithQueryablePaging(IQueryable<T> collection)

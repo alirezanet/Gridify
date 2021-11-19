@@ -36,7 +36,6 @@ namespace Gridify
 
       #endregion
 
-      // TODO: should have some tests
       public static Expression<Func<T, bool>> GetFilteringExpression<T>(this IGridifyFiltering gridifyFiltering, IGridifyMapper<T>? mapper = null)
       {
          if (string.IsNullOrWhiteSpace(gridifyFiltering.Filter))

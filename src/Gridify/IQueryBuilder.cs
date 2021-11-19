@@ -60,15 +60,141 @@ namespace Gridify
       IQueryBuilder<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
       IQueryBuilder<T> RemoveMap(IGMap<T> map);
       Expression<Func<T, bool>> BuildFilteringExpression();
-      IEnumerable<Expression<Func<T, object>>> BuildOrderingExpression();
       Func<IQueryable<T>, bool> BuildQueryableEvaluator();
       Func<IEnumerable<T>, bool> BuildCollectionEvaluator();
       bool Evaluate(IQueryable<T> query);
       bool Evaluate(IEnumerable<T> collection);
+
+      /// <summary>
+      /// Returns a delegate that can be used to apply the filtering, ordering and paging to a queryable.
+      ///  </summary>
+      /// <example>
+      /// <code>
+      /// var func = builder.Build();
+      /// var query = func(queryableContext);
+      /// </code>
+      /// </example>
+      /// <returns>A delegate as type <![CDATA[Func<IQueryable<T>, IQueryable<T>>]]></returns>
+      Func<IQueryable<T>, IQueryable<T>> Build();
+
+      /// <summary>
+      /// Returns a delegate that can be used to apply the filtering, ordering and paging to a collection.
+      /// also, Internally it compiles the expressions to increase performance.
+      ///  </summary>
+      /// <example>
+      /// <code>
+      /// var func = builder.BuildCompiled();
+      /// var result = func(enumerableCollection);
+      /// </code>
+      /// </example>
+      /// <returns>A delegate as type <![CDATA[Func<IEnumerable<T>, IEnumerable<T>>]]></returns>
+      Func<IEnumerable<T>, IEnumerable<T>> BuildCompiled();
+
+      /// <summary>
+      /// Directly applies the filtering, ordering and paging to a queryable.
+      ///  </summary>
+      /// <example>
+      /// <code>
+      /// var query = builder.Build(queryableContext);
+      /// </code>
+      /// </example>
+      /// <returns><![CDATA[IQueryable<T>]]></returns>
       IQueryable<T> Build(IQueryable<T> context);
+
+      /// <summary>
+      /// Directly applies the filtering, ordering and paging to a enumerable collection.
+      ///  </summary>
+      /// <example>
+      /// <code>
+      /// var result = builder.Build(enumerableCollection);
+      /// </code>
+      /// </example>
+      /// <returns><![CDATA[IEnumerable<T>]]></returns>
       IEnumerable<T> Build(IEnumerable<T> collection);
+
+      /// <summary>
+      /// Directly applies the filtering, ordering and paging to a enumerable collection.
+      /// also returns the total count of the collection.
+      ///  </summary>
+      /// <example>
+      /// <code>
+      /// var pagingResult = builder.BuildWithPaging(enumerableCollection);
+      /// // or
+      /// var (count, result) = builder.BuildWithPaging(enumerableCollection);
+      /// </code>
+      /// </example>
+      /// <returns><![CDATA[Paging<T>]]></returns>
       Paging<T> BuildWithPaging(IEnumerable<T> collection);
+
+      /// <summary>
+      /// Directly applies the filtering, ordering and paging to a queryable.
+      /// also load the data and returns the total count of the records.
+      ///  </summary>
+      /// <example>
+      /// <code>
+      /// var pagingResult = builder.BuildWithPaging(queryableContext);
+      /// // or
+      /// var (count, result) = builder.BuildWithPaging(queryableContext);
+      /// </code>
+      /// </example>
+      /// <returns><![CDATA[Paging<T>]]></returns>
       Paging<T> BuildWithPaging(IQueryable<T> collection);
+
+      /// <summary>
+      /// Directly applies the filtering, ordering and paging to a queryable.
+      /// also returns the total count of the records.
+      ///  </summary>
+      /// <example>
+      /// <code>
+      /// var queryablePaging = builder.BuildWithQueryablePaging(queryableContext);
+      /// // or
+      /// var (count, query) = builder.BuildWithQueryablePaging(queryableContext);
+      /// </code>
+      /// </example>
+      /// <returns><![CDATA[QueryablePaging<T>]]></returns>
       QueryablePaging<T> BuildWithQueryablePaging(IQueryable<T> collection);
+
+      /// <summary>
+      /// Returns a delegate that can be used to apply the filtering, ordering and paging to a queryable.
+      /// also returns the total count of the records.
+      /// </summary>
+      /// <example>
+      /// <code>
+      /// var func = builder.BuildWithQueryablePaging();
+      /// var query = func(queryableContext);
+      /// </code>
+      /// </example>
+      /// <returns>A delegate as type <![CDATA[Func<IQueryable<T>,QueryablePaging<T>>]]></returns>
+      Func<IQueryable<T>,QueryablePaging<T>> BuildWithQueryablePaging();
+
+      /// <summary>
+      /// Returns a delegate that can be used to apply the filtering, ordering and paging to a queryable.
+      /// also load the data and returns the total count of the records.
+      ///  </summary>
+      /// <example>
+      /// <code>
+      /// var func = builder.BuildWithPaging();
+      /// var pagingQuery = func(queryableContext);
+      /// // or
+      /// var (count, query) = func(queryableContext);
+      /// </code>
+      /// </example>
+      /// <returns><![CDATA[ Func<IQueryable<T>,Paging<T>> ]]></returns>
+      Func<IQueryable<T>,Paging<T>> BuildWithPaging();
+
+      /// <summary>
+      /// Returns a delegate that can be used to apply the filtering, ordering and paging to a enumerable collection.
+      /// also load the data and returns the total count of the records.
+      ///  </summary>
+      /// <example>
+      /// <code>
+      /// var func = builder.BuildWithPagingAsEnumerable();
+      /// var pagingResult = func(enumerableCollection);
+      /// // or
+      /// var (count, result) = func(enumerableCollection);
+      /// </code>
+      /// </example>
+      /// <returns><![CDATA[ Func<IQueryable<T>,Paging<T>> ]]></returns>
+      Func<IEnumerable<T>,Paging<T>> BuildWithPagingCompiled();
    }
 }
