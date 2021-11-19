@@ -137,16 +137,6 @@ namespace Gridify
       }
 
       /// <inheritdoc />
-      public IEnumerable<Expression<Func<T, object>>> BuildOrderingExpression()
-      {
-         if (string.IsNullOrEmpty(_orderBy)) throw new GridifyOrderingException("Please use 'AddOrderBy' to specify at least an single order");
-
-         var gm = new GridifyQuery { OrderBy = _orderBy };
-         _mapper ??= new GridifyMapper<T>(true);
-         return gm.GetOrderingExpressions(_mapper);
-      }
-
-      /// <inheritdoc />
       public Func<IQueryable<T>, bool> BuildQueryableEvaluator()
       {
          return collection =>
@@ -212,7 +202,7 @@ namespace Gridify
             if (_conditions.Count > 0)
                collection = collection.Where(compiled);
 
-            if (!string.IsNullOrEmpty(_orderBy))
+            if (!string.IsNullOrEmpty(_orderBy)) // TODO: this also should be compiled
                collection = collection.AsQueryable().ApplyOrdering(_orderBy);
 
             if (_paging.HasValue)

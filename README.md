@@ -370,8 +370,7 @@ The QueryBuilder class is really useful if you want to manually build your query
 | ConfigureDefaultMapper       | Configuring default mapper when we didn't use AddMapper method   |
 | Build                        | Applies filtering ordering and paging to a queryable context             |
 | BuildAsEnumerable            | Applies filtering ordering and paging to a enumerable collection    |
-| BuildFilteringExpression     | Returns filtering expression    |
-| BuildOrderingExpression      | Returns ordering expression    |
+| BuildFilteringExpression     | Returns filtering expression that can be compiled for later use for enumerable collections  |
 | BuildQueryableEvaluator      | Returns an evaluator delegate that can be use to evaluate an queryable context    |
 | BuildCollectionEvaluator     | Returns an evaluator delegate that can be use to evaluate an enumerable context   |
 | BuildWithPaging              | Applies filtering ordering and paging to a context, and returns paging result     |

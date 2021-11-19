@@ -60,7 +60,6 @@ namespace Gridify
       IQueryBuilder<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
       IQueryBuilder<T> RemoveMap(IGMap<T> map);
       Expression<Func<T, bool>> BuildFilteringExpression();
-      IEnumerable<Expression<Func<T, object>>> BuildOrderingExpression();
       Func<IQueryable<T>, bool> BuildQueryableEvaluator();
       Func<IEnumerable<T>, bool> BuildCollectionEvaluator();
       bool Evaluate(IQueryable<T> query);
