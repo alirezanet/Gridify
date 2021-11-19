@@ -367,24 +367,24 @@ also if you store a compiled expression you get a massive performance boost.
 **Important note**: you should only use a **compiled** expression if you are **not** using Gridify alongside an ORM like Entity-Framework.
 
 ```c#
-	// eg.1 - using GridifyQuery - Compield - where only ------------------
-	var gq = new GridifyQuery() { Filter = "name=John" };
-	var expression = gq.GetFilteringExpression<Person>();
-	var compiledExpression = expression.Compile();
-	var result = persons.Where(compiledExpression);
+// eg.1 - using GridifyQuery - Compield - where only ----------------------
+var gq = new GridifyQuery() { Filter = "name=John" };
+var expression = gq.GetFilteringExpression<Person>();
+var compiledExpression = expression.Compile();
+var result = persons.Where(compiledExpression);
 
-	// eg.2 - using QueryBuilder - Compield - where only ------------------
-	var compiledExpression = new QueryBuilder<Person>()
-                                .AddCondition("name=John")
-                                .BuildFilteringExpression()
-                                .Compile();
-	var result = persons.Where(compiledExpression);
+// eg.2 - using QueryBuilder - Compield - where only ----------------------
+var compiledExpression = new QueryBuilder<Person>()
+                         .AddCondition("name=John")
+                         .BuildFilteringExpression()
+                         .Compile();
+var result = persons.Where(compiledExpression);
 
-	// eg.3 - using QueryBuilder - BuildCompiled -------------------------
-	var func = new QueryBuilder<Person>()
-                    .AddCondition("name=John")
-                    .BuildCompiled();
-	var result = func(persons);
+// eg.3 - using QueryBuilder - BuildCompiled ------------------------------
+var func = new QueryBuilder<Person>()
+          .AddCondition("name=John")
+          .BuildCompiled();
+var result = func(persons);
 
 ```
 
