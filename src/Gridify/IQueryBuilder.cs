@@ -46,7 +46,7 @@ namespace Gridify
       IQueryBuilder<T> AddCondition(IGridifyFiltering condition);
 
       /// <summary>
-      /// Using this method you can use GridifyQuery object to configure filtering, sorting and paging
+      /// Using this method you can use GridifyQuery object to add filtering and sorting and configure paging
       /// </summary>
       /// <param name="gridifyQuery">Accept IGridifyQuery so we can pass GridifyQuery object</param>
       /// <returns>returns IQueryBuilder</returns>

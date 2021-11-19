@@ -54,13 +54,13 @@ namespace Gridify
       public IQueryBuilder<T> AddQuery(IGridifyQuery gridifyQuery)
       {
          if (gridifyQuery.Filter != null)
-            _conditions.Add(ConvertConditionToExpression(gridifyQuery.Filter));
+            AddCondition(gridifyQuery.Filter);
 
          if (!string.IsNullOrEmpty(gridifyQuery.OrderBy))
-            _orderBy = gridifyQuery.OrderBy!;
+            AddOrderBy(gridifyQuery.OrderBy!);
 
          if (gridifyQuery.PageSize == 0) gridifyQuery.PageSize = GridifyExtensions.DefaultPageSize;
-         _paging = (gridifyQuery.Page, gridifyQuery.PageSize);
+            ConfigurePaging(gridifyQuery.Page, gridifyQuery.PageSize);
 
          return this;
       }
