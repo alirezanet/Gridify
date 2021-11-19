@@ -357,27 +357,27 @@ This is the performance improvement example when you use a compiled expression
 
 The QueryBuilder class is really useful if you want to manually build your query, also when you don't want to use the extension methods.
 
-| Method                   | Description                                                                                                                   |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| AddCondition             | Adds a string base Filtering query    |
-| AddOrderBy               | Adds a string base Ordering query     |
-| ConfigurePaging          | Configure Page and PageSize   |
-| AddQuery                 | Accepts a GridifyQuery object to configure filtering,ordering and paging     |
-| UseCustomMapper          | Accepts a GridifyMapper to use in build methods  |
-| UseEmptyMapper           | Setup an Empty new GridifyMapper without auto generated mappings |
-| AddMap                   | Add a single Map to existing mapper    |
-| RemoveMap                | Remove a single Map from existing mapper    |
-| ConfigureDefaultMapper   | Configuring default mapper when we didn't use AddMapper method   |
-| Build                    | Applies filtering ordering and paging to a context, if you pass a enumerable collection it automatically compile the expressions   |
-| BuildCompiled            | Applies filtering ordering and paging to a enumerable collection    |
-| BuildFilteringExpression | Returns filtering expression    |
-| BuildOrderingExpression  | Returns ordering expression    |
-| BuildQueryableEvaluator  | Returns an evaluator delegate that can be use to evaluate an queryable context    |
-| BuildCollectionEvaluator | Returns an evaluator delegate that can be use to evaluate an enumerable context   |
-| BuildWithPaging          | Applies filtering ordering and paging to a context, and returns paging result     |
-| BuildWithPagingCompiled  | Applies filtering ordering and paging to a enumerable collection, and returns paging result     |
-| BuildWithQueryablePaging | Applies filtering ordering and paging to a context, and returns queryable paging result    |
-| Evaluate                 | Directly Evaluate a context to check if all conditions are valid or not    |
+| Method                       | Description                                                                                                                   |
+| ------------------------     | ----------------------------------------------------------------------------------------------------------------------------- |
+| AddCondition                 | Adds a string base Filtering query    |
+| AddOrderBy                   | Adds a string base Ordering query     |
+| ConfigurePaging              | Configure Page and PageSize   |
+| AddQuery                     | Accepts a GridifyQuery object to configure filtering,ordering and paging     |
+| UseCustomMapper              | Accepts a GridifyMapper to use in build methods  |
+| UseEmptyMapper               | Setup an Empty new GridifyMapper without auto generated mappings |
+| AddMap                       | Add a single Map to existing mapper    |
+| RemoveMap                    | Remove a single Map from existing mapper    |
+| ConfigureDefaultMapper       | Configuring default mapper when we didn't use AddMapper method   |
+| Build                        | Applies filtering ordering and paging to a queryable context             |
+| BuildAsEnumerable            | Applies filtering ordering and paging to a enumerable collection    |
+| BuildFilteringExpression     | Returns filtering expression    |
+| BuildOrderingExpression      | Returns ordering expression    |
+| BuildQueryableEvaluator      | Returns an evaluator delegate that can be use to evaluate an queryable context    |
+| BuildCollectionEvaluator     | Returns an evaluator delegate that can be use to evaluate an enumerable context   |
+| BuildWithPaging              | Applies filtering ordering and paging to a context, and returns paging result     |
+| BuildWithPagingAsEnumerable  | Applies filtering ordering and paging to a enumerable collection, and returns paging result     |
+| BuildWithQueryablePaging     | Applies filtering ordering and paging to a context, and returns queryable paging result    |
+| Evaluate                     | Directly Evaluate a context to check if all conditions are valid or not    |
 
 usage eg:
 ```c#

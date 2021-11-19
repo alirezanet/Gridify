@@ -204,7 +204,7 @@ namespace Gridify
       }
 
       /// <inheritdoc />
-      public Func<IEnumerable<T>,IEnumerable<T>> BuildCompiled()
+      public Func<IEnumerable<T>,IEnumerable<T>> BuildAsEnumerable()
       {
          return Build;
       }
@@ -250,7 +250,7 @@ namespace Gridify
          return BuildWithPaging;
       }
 
-      public Func<IEnumerable<T>, Paging<T>> BuildWithPagingCompiled()
+      public Func<IEnumerable<T>, Paging<T>> BuildWithPagingAsEnumerable()
       {
          return BuildWithPaging;
       }

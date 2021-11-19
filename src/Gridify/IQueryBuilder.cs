@@ -79,17 +79,16 @@ namespace Gridify
       Func<IQueryable<T>, IQueryable<T>> Build();
 
       /// <summary>
-      /// Returns a delegate that can be used to apply the filtering, ordering and paging to a queryable.
-      /// Internally filtering expression will be compiled to gain performance.
+      /// Returns a delegate that can be used to apply the filtering, ordering and paging to a collection.
       ///  </summary>
       /// <example>
       /// <code>
-      /// var func = builder.BuildCompiled();
+      /// var func = builder.BuildAsEnumerable();
       /// var result = func(enumerableCollection);
       /// </code>
       /// </example>
       /// <returns>A delegate as type <![CDATA[Func<IEnumerable<T>, IEnumerable<T>>]]></returns>
-      Func<IEnumerable<T>, IEnumerable<T>> BuildCompiled();
+      Func<IEnumerable<T>, IEnumerable<T>> BuildAsEnumerable();
 
       /// <summary>
       /// Directly applies the filtering, ordering and paging to a queryable.
@@ -186,17 +185,16 @@ namespace Gridify
       /// <summary>
       /// Returns a delegate that can be used to apply the filtering, ordering and paging to a enumerable collection.
       /// also load the data and returns the total count of the records.
-      /// Internally filtering expression will be compiled to gain performance.
       ///  </summary>
       /// <example>
       /// <code>
-      /// var func = builder.BuildWithPagingCompiled();
+      /// var func = builder.BuildWithPagingAsEnumerable();
       /// var pagingResult = func(enumerableCollection);
       /// // or
       /// var (count, result) = func(enumerableCollection);
       /// </code>
       /// </example>
       /// <returns><![CDATA[ Func<IQueryable<T>,Paging<T>> ]]></returns>
-      Func<IEnumerable<T>,Paging<T>> BuildWithPagingCompiled();
+      Func<IEnumerable<T>,Paging<T>> BuildWithPagingAsEnumerable();
    }
 }
