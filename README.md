@@ -374,7 +374,7 @@ The QueryBuilder class is really useful if you want to manually build your query
 | BuildQueryableEvaluator      | Returns an evaluator delegate that can be use to evaluate an queryable context    |
 | BuildCollectionEvaluator     | Returns an evaluator delegate that can be use to evaluate an enumerable context   |
 | BuildWithPaging              | Applies filtering ordering and paging to a context, and returns paging result     |
-| BuildWithPagingCompiled      | Compiles the expressions and returns a delegate for applying filtering ordering and paging to a enumerable collection, and returns paging result    |
+| BuildWithPagingCompiled      | Compiles the expressions and returns a delegate for applying filtering ordering and paging to a enumerable collection, that returns paging result    |
 | BuildWithQueryablePaging     | Applies filtering ordering and paging to a context, and returns queryable paging result    |
 | Evaluate                     | Directly Evaluate a context to check if all conditions are valid or not    |
 
