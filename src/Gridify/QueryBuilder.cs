@@ -198,6 +198,18 @@ namespace Gridify
       }
 
       /// <inheritdoc />
+      public Func<IQueryable<T>,IQueryable<T>> Build()
+      {
+         return Build;
+      }
+
+      /// <inheritdoc />
+      public Func<IEnumerable<T>,IEnumerable<T>> BuildCompiled()
+      {
+         return Build;
+      }
+
+      /// <inheritdoc />
       public IEnumerable<T> Build(IEnumerable<T> collection)
       {
          if (_conditions.Count > 0)
@@ -225,6 +237,24 @@ namespace Gridify
          var (count, query) = BuildWithQueryablePaging(collection);
          return new Paging<T>(count, query);
       }
+
+      /// <inheritdoc />
+      public Func<IQueryable<T>, QueryablePaging<T>> BuildWithQueryablePaging()
+      {
+         return BuildWithQueryablePaging;
+      }
+
+      /// <inheritdoc />
+      public Func<IQueryable<T>, Paging<T>> BuildWithPaging()
+      {
+         return BuildWithPaging;
+      }
+
+      public Func<IEnumerable<T>, Paging<T>> BuildWithPagingCompiled()
+      {
+         return BuildWithPaging;
+      }
+
 
       /// <inheritdoc />
       public QueryablePaging<T> BuildWithQueryablePaging(IQueryable<T> collection)

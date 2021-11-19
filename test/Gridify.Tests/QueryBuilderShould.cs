@@ -56,5 +56,18 @@ namespace Gridify.Tests
          Assert.True(isQueryValid);
       }
 
+      [Fact]
+      public void Build()
+      {
+         var builder = new QueryBuilder<TestClass>()
+            .AddCondition("name =*al")
+            .AddOrderBy("name");
+
+         var compiled = builder.Build();
+         var result = compiled(_fakeRepository.AsQueryable());
+         Assert.True(result.Any());
+
+      }
+
    }
 }
