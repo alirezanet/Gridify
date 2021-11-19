@@ -137,7 +137,7 @@ namespace Gridify
       }
 
       /// <inheritdoc />
-      public Func<IQueryable<T>, bool> BuildQueryableEvaluator()
+      public Func<IQueryable<T>, bool> BuildEvaluator()
       {
          return collection =>
          {
@@ -148,26 +148,28 @@ namespace Gridify
       }
 
       /// <inheritdoc />
-      public Func<IEnumerable<T>, bool> BuildCollectionEvaluator()
+      public Func<IEnumerable<T>, bool> BuildCompiledEvaluator()
       {
+         var compiledCond = _conditions.Select(q => q.Compile() as Func<T, bool>);
+         var length = _conditions.Count;
          return collection =>
          {
-            return _conditions.Count == 0 ||
-                   _conditions.Aggregate(true, (current, expression)
-                      => current & collection.Any((expression as Expression<Func<T, bool>>)!.Compile()));
+            return length == 0 ||
+                   compiledCond.Aggregate(true, (current, expression)
+                      =>  current && collection.Any(expression!));
          };
       }
 
       /// <inheritdoc />
       public bool Evaluate(IQueryable<T> query)
       {
-         return BuildQueryableEvaluator()(query);
+         return BuildEvaluator()(query);
       }
 
       /// <inheritdoc />
       public bool Evaluate(IEnumerable<T> collection)
       {
-         return BuildCollectionEvaluator()(collection);
+         return BuildCompiledEvaluator()(collection);
       }
 
       /// <inheritdoc />

@@ -322,36 +322,6 @@ Also, I recommended to Enable EntityFramework compatibility layer if you using g
 ```
 
 ---
-## Compile and Reuse
-You can get Gridify generated expressions using the `GetFilteringExpression` and `GetOrderingExpression` methods, so you can store an expression and use it multiple times without having any overheads, also if you compile an expression you get a massive performance boost. but you should only use a compiled expression if you are not using Gridify alongside an ORM like Entity-Framework.
-eg:
-```c#
-var gm = new GridifyMapper<Person>().GenerateMappings();
-var gq = new GridifyQuery() {Filter = "name=John"};
-var expression = gq.GetFilteringExpression(gm);
-var compiledExpression = expression.Compile();
-```
-
-**expression usage:**
-```c#
-myDbContext.Persons.Where(expression);
-```
-
-**compiled expression usage:**
-```c#
-myPersonList.Where(compiledExpression);
-```
-
-
-This is the performance improvement example when you use a compiled expression
-
-|          Method |         Mean |      Error |     StdDev | Ratio | RatioSD |    Gen 0 |   Gen 1 | Allocated |
-|---------------- |-------------:|-----------:|-----------:|------:|--------:|---------:|--------:|----------:|
-| GridifyCompiled |     1.008 us |  0.0035 us |  0.0031 us | 0.001 |    0.00 |  0.1564 |       - |     984 B  |
-|      NativeLinQ |   724.329 us |  6.4686 us |  6.0507 us | 1.000 |    0.00 |  5.8594 |  2.9297 |   37,392 B |
-|         Gridify |   736.854 us |  5.7427 us |  5.0907 us | 1.018 |    0.01 |  5.8594 |  2.9297 |   39,924 B |
----
-
 
 ## QueryBuilder
 
@@ -371,8 +341,8 @@ The QueryBuilder class is really useful if you want to manually build your query
 | Build                        | Applies filtering ordering and paging to a queryable context             |
 | BuildCompiled                | Compiles the expressions and returns a delegate for applying filtering ordering and paging to a enumerable collection    |
 | BuildFilteringExpression     | Returns filtering expression that can be compiled for later use for enumerable collections  |
-| BuildQueryableEvaluator      | Returns an evaluator delegate that can be use to evaluate an queryable context    |
-| BuildCollectionEvaluator     | Returns an evaluator delegate that can be use to evaluate an enumerable context   |
+| BuildEvaluator               | Returns an evaluator delegate that can be use to evaluate an queryable context    |
+| BuildCompiledEvaluator       | Returns an compiled evaluator delegate that can be use to evaluate an enumerable collection   |
 | BuildWithPaging              | Applies filtering ordering and paging to a context, and returns paging result     |
 | BuildWithPagingCompiled      | Compiles the expressions and returns a delegate for applying filtering ordering and paging to a enumerable collection, that returns paging result    |
 | BuildWithQueryablePaging     | Applies filtering ordering and paging to a context, and returns queryable paging result    |
@@ -387,6 +357,44 @@ var builder = new QueryBuilder<Person>()
  var query = builder.build(persons);
 ```
 
+---
+
+## Compile and Reuse
+You can access Gridify generated expressions using the `GetFilteringExpression` of `GridifyQuery` or `BuildCompiled` methods of `QueryBuilder` class,
+by storing an expression you can use it multiple times without having any overheads,
+also if you store a compiled expression you get a massive performance boost.
+
+**Important note**: you should only use a **compiled** expression if you are **not** using Gridify alongside an ORM like Entity-Framework.
+
+```c#
+	// eg.1 - using GridifyQuery - Compield - where only ------------------
+	var gq = new GridifyQuery() { Filter = "name=John" };
+	var expression = gq.GetFilteringExpression<Person>();
+	var compiledExpression = expression.Compile();
+	var result = persons.Where(compiledExpression);
+
+	// eg.2 - using QueryBuilder - Compield - where only ------------------
+	var compiledExpression = new QueryBuilder<Person>()
+                                .AddCondition("name=John")
+                                .BuildFilteringExpression()
+                                .Compile();
+	var result = persons.Where(compiledExpression);
+
+	// eg.3 - using QueryBuilder - BuildCompiled -------------------------
+	var func = new QueryBuilder<Person>()
+                    .AddCondition("name=John")
+                    .BuildCompiled();
+	var result = func(persons);
+
+```
+
+This is the performance improvement example when you use a compiled expression
+
+|          Method |         Mean |      Error |     StdDev | Ratio | RatioSD |    Gen 0 |   Gen 1 | Allocated |
+|---------------- |-------------:|-----------:|-----------:|------:|--------:|---------:|--------:|----------:|
+| GridifyCompiled |     1.008 us |  0.0035 us |  0.0031 us | 0.001 |    0.00 |  0.1564 |       - |     984 B  |
+|      NativeLINQ |   724.329 us |  6.4686 us |  6.0507 us | 1.000 |    0.00 |  5.8594 |  2.9297 |   37,392 B |
+|         Gridify |   736.854 us |  5.7427 us |  5.0907 us | 1.018 |    0.01 |  5.8594 |  2.9297 |   39,924 B |
 ---
 
 ## Combine Gridify with AutoMapper

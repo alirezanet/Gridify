@@ -32,6 +32,8 @@ namespace Gridify
 
       /// <summary>
       /// Using this method you can add gridify supported string base filtering statements
+      /// Each added condition can be use to evaluate a context, also all conditions will be
+      /// ANDed together for filtering.
       /// </summary>
       /// <example> (Name=John,Age>10) </example>
       /// <param name="condition">string based filtering</param>
@@ -60,9 +62,31 @@ namespace Gridify
       IQueryBuilder<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
       IQueryBuilder<T> RemoveMap(IGMap<T> map);
       Expression<Func<T, bool>> BuildFilteringExpression();
-      Func<IQueryable<T>, bool> BuildQueryableEvaluator();
-      Func<IEnumerable<T>, bool> BuildCollectionEvaluator();
+
+      /// <summary>
+      /// Creates an evaluator delegate that can be use to evaluate an queryable context
+      /// </summary>
+      /// <returns>A delegate as type <![CDATA[Func<IQueryable<T>, bool>]]></returns>
+      Func<IQueryable<T>, bool> BuildEvaluator();
+
+      /// <summary>
+      /// Creates an compiled evaluator delegate that can be use to evaluate an enumerable collection
+      /// </summary>
+      /// <returns>A delegate as type <![CDATA[Func<IEnumerable<T>, bool>]]></returns>
+      Func<IEnumerable<T>, bool> BuildCompiledEvaluator();
+
+      /// <summary>
+      /// Directly Evaluate a queryable context to check if all conditions are valid or not
+      /// </summary>
+      /// <param name="query"></param>
+      /// <returns></returns>
       bool Evaluate(IQueryable<T> query);
+
+      /// <summary>
+      /// Directly Evaluate a collection to check if all conditions are valid or not
+      /// </summary>
+      /// <param name="collection"></param>
+      /// <returns></returns>
       bool Evaluate(IEnumerable<T> collection);
 
       /// <summary>

@@ -40,11 +40,11 @@ namespace Gridify.Tests
             .AddCondition("name =Sara, Id > 6");
 
          // using CollectionEvaluator
-         var evaluator = builder.BuildCollectionEvaluator();
+         var evaluator = builder.BuildCompiledEvaluator();
          Assert.True(evaluator(_fakeRepository));
 
          // using QueryableEvaluator
-         var queryableEvaluator = builder.BuildQueryableEvaluator();
+         var queryableEvaluator = builder.BuildEvaluator();
          Assert.True(queryableEvaluator(_fakeRepository.AsQueryable()));
 
          // Using Evaluate method (collection)

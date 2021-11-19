@@ -41,7 +41,7 @@ namespace Benchmarks
       }
 
       [Benchmark(Baseline = true)] // this method is only for filtering operations
-      public void UseGetFilteringExpression()
+      public void BuildFilteringExpression()
       {
          _data.Where(BuildFilteringExpressionFunc).Consume(Consumer);
       }
