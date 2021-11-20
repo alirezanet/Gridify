@@ -32,7 +32,7 @@ namespace Gridify.Tests
       {
          public string Name { get; set; }
 
-         public List<Level2> Level2List = new List<Level2>()
+         public Level2[] Level2List = new Level2[]
          {
             new Level2()
             {

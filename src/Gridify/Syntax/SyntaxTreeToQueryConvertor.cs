@@ -107,7 +107,12 @@ namespace Gridify.Syntax
          var param = GetParameterExpression(member);
          var prop = Expression.PropertyOrField(param!, member.Member.Name);
 
-         var tp = prop.Type.GenericTypeArguments[0];
+         var tp = prop.Type.IsGenericType
+                     ? prop.Type.GenericTypeArguments.First()  // list
+                     : prop.Type.GetElementType();             // array
+
+         if (tp == null) throw new GridifyFilteringException($"Can not detect the '{member.Member.Name}' property type.");
+
          var anyMethod = GetAnyMethod(tp);
          var anyExp = Expression.Call(anyMethod, prop, predicate);
 
