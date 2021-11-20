@@ -150,7 +150,7 @@ namespace Gridify
       /// <inheritdoc />
       public Func<IEnumerable<T>, bool> BuildCompiledEvaluator()
       {
-         var compiledCond = _conditions.Select(q => q.Compile() as Func<T, bool>);
+         var compiledCond = _conditions.Select(q => q.Compile() as Func<T, bool>).ToList();
          var length = _conditions.Count;
          return collection =>
          {
