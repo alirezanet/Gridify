@@ -7,8 +7,9 @@ namespace Benchmarks
    {
       private static void Main()
       {
-         // BenchmarkRunner.Run<LibraryComparisionFilteringBenchmark>();
-         BenchmarkRunner.Run<QueryBuilderBuildBenchmark>();
+         BenchmarkRunner.Run<LibraryComparisionFilteringBenchmark>();
+         // BenchmarkRunner.Run<QueryBuilderBuildBenchmark>();
+         // BenchmarkRunner.Run<QueryBuilderEvaluatorBenchmark>();
          Console.Read();
       }
    }

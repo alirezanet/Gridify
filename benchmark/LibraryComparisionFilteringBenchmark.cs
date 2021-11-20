@@ -130,3 +130,20 @@ namespace Benchmarks
       }
    }
 }
+
+/* Last Run:
+ BenchmarkDotNet=v0.13.0, OS=Windows 10.0.19043.1237 (21H1/May2021Update)
+11th Gen Intel Core i5-11400F 2.60GHz, 1 CPU, 12 logical and 6 physical cores
+.NET SDK=5.0.301
+[Host]     : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
+DefaultJob : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
+
+
+|      Method |       Mean |    Error |   StdDev | Ratio |   Gen 0 |   Gen 1 | Allocated |
+|------------ |-----------:|---------:|---------:|------:|--------:|--------:|----------:|
+| Native LINQ |   740.9 us |  7.80 us |  6.92 us |  1.00 |  5.8594 |  2.9297 |     37 KB |
+|     Gridify |   762.6 us | 10.06 us |  9.41 us |  1.03 |  5.8594 |  2.9297 |     39 KB |
+| DynamicLinq |   902.1 us | 11.56 us | 10.81 us |  1.22 | 19.5313 |  9.7656 |    122 KB |
+|       Sieve |   977.9 us |  6.80 us |  6.37 us |  1.32 |  7.8125 |  3.9063 |     54 KB |
+|         Fop | 2,959.8 us | 39.11 us | 36.58 us |  3.99 | 46.8750 | 23.4375 |    306 KB |
+*/
