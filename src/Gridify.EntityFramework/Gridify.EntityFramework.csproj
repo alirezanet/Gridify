@@ -9,12 +9,26 @@
    <PropertyGroup>
       <TargetFramework>netstandard2.0</TargetFramework>
       <PackageId>Gridify.EntityFramework</PackageId>
-      <Version>2.4.4</Version>
+      <Version>2.4.5-alpha1</Version>
       <Authors>Alireza Sabouri</Authors>
       <Company>TuxTeam</Company>
       <PackageDescription>Gridify (EntityFramework), Easy and optimized way to apply Filtering, Sorting, and Pagination using text-based data.</PackageDescription>
       <RepositoryUrl>https://github.com/alirezanet/Gridify</RepositoryUrl>
       <PackageLicenseExpression>MIT</PackageLicenseExpression>
+      <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <!-- Optional: Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+      <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+      <!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
+      <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+      <!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+      <IncludeSymbols>true</IncludeSymbols>
+      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
    </PropertyGroup>
+
+   <ItemGroup>
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+   </ItemGroup>
 </Project>
