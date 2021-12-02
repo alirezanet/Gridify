@@ -23,9 +23,11 @@ jobs:
            uses: brandedoutcast/publish-nuget@v2.5.2
            with:
               PROJECT_FILE_PATH: src/Gridify/Gridify.csproj
+              INCLUDE_SYMBOLS: true
               NUGET_KEY: ${{secrets.NUGET_API_KEY}}
          - name: Publish Gridify.EntityFramework
            uses: brandedoutcast/publish-nuget@v2.5.2
            with:
               PROJECT_FILE_PATH: src/Gridify.EntityFramework/Gridify.EntityFramework.csproj
+              INCLUDE_SYMBOLS: true
               NUGET_KEY: ${{secrets.NUGET_API_KEY}}
