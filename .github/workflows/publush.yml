@@ -12,7 +12,7 @@ jobs:
          - name: Setup .NET
            uses: actions/setup-dotnet@v1
            with:
-              dotnet-version: 5.0.x
+              dotnet-version: 6.0.x
          - name: Restore dependencies
            run: dotnet restore
          - name: Build
@@ -20,13 +20,13 @@ jobs:
          - name: Test
            run: dotnet test --configuration Release --no-build --verbosity normal
          - name: Publish Gridify
-           uses: brandedoutcast/publish-nuget@v2.5.2
+           uses: brandedoutcast/publish-nuget@v2.5.5
            with:
               PROJECT_FILE_PATH: src/Gridify/Gridify.csproj
               INCLUDE_SYMBOLS: true
               NUGET_KEY: ${{secrets.NUGET_API_KEY}}
          - name: Publish Gridify.EntityFramework
-           uses: brandedoutcast/publish-nuget@v2.5.2
+           uses: brandedoutcast/publish-nuget@v2.5.5
            with:
               PROJECT_FILE_PATH: src/Gridify.EntityFramework/Gridify.EntityFramework.csproj
               INCLUDE_SYMBOLS: true
