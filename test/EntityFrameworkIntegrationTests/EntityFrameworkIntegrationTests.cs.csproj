@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
    <ItemGroup>
@@ -12,7 +12,7 @@
       <PackageReference Include="xunit.runner.visualstudio" Version="2.4.2" />
       <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
    </ItemGroup>
-   
+
    <ItemGroup>
      <ProjectReference Include="..\..\src\Gridify.EntityFramework\Gridify.EntityFramework.csproj" />
      <ProjectReference Include="..\..\src\Gridify\Gridify.csproj" />
