@@ -20,13 +20,13 @@ jobs:
          - name: Test
            run: dotnet test --configuration Release --no-build --verbosity normal
          - name: Publish Gridify
-           uses: alirezanet/publish-nuget@v3
+           uses: alirezanet/publish-nuget@v3.0.0
            with:
               PROJECT_FILE_PATH: src/Gridify/Gridify.csproj
               INCLUDE_SYMBOLS: true
               NUGET_KEY: ${{secrets.NUGET_API_KEY}}
          - name: Publish Gridify.EntityFramework
-           uses: alirezanet/publish-nuget@v3
+           uses: alirezanet/publish-nuget@v3.0.0
            with:
               PROJECT_FILE_PATH: src/Gridify.EntityFramework/Gridify.EntityFramework.csproj
               INCLUDE_SYMBOLS: true
