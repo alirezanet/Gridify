@@ -1,15 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-
    <PropertyGroup>
       <TargetFramework>netstandard2.0</TargetFramework>
       <PackageId>Gridify.EntityFramework</PackageId>
-      <Version>2.4.5-alpha3</Version>
+      <Version>2.4.5-alpha4</Version>
       <Authors>Alireza Sabouri</Authors>
       <Company>TuxTeam</Company>
       <PackageDescription>Gridify (EntityFramework), Easy and optimized way to apply Filtering, Sorting, and Pagination using text-based data.</PackageDescription>
       <RepositoryUrl>https://github.com/alirezanet/Gridify</RepositoryUrl>
-      <PackageLicenseExpression>MIT</PackageLicenseExpression>ha
+      <PackageLicenseExpression>MIT</PackageLicenseExpression>
       <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
       <PublishRepositoryUrl>true</PublishRepositoryUrl>
