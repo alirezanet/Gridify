@@ -2,18 +2,14 @@ import { defineUserConfig } from 'vuepress-vite'
 import type { DefaultThemeOptions } from 'vuepress-vite'
 import type { ViteBundlerOptions } from '@vuepress/bundler-vite'
 
+
+
 export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    lang: 'en-US',
    title: 'Gridify',
    description: 'A Modern Dynamic LINQ library for .NET',
    plugins: [
-      [
-         '@vuepress/plugin-search',
-         {
-            // exclude the homepage
-            isSearchable: (page) => page.path !== '/',
-          },
-      ],
+      ['@vuepress/plugin-search'],
    ],
    themeConfig: {
       editLinks: true,
@@ -24,22 +20,23 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
       docsDir: 'site/docs',
       sidebar: {
          '/guide/': [
-           {
-             text: 'Guide',
-             link: '/guide/',
-             children: [
-               '/guide/README.md',
-               '/guide/getting-started.md',
-               '/guide/extensions.md',
-               '/guide/filtering.md',
-               '/guide/ordering.md',
-               '/guide/gridifyMapper.md',
-               '/guide/gridifyQuery.md',
-               '/guide/queryBuilder.md',
-               '/guide/compile.md',
-               '/guide/autoMapper.md',
-             ],
-           },
+            {
+               text: 'Guide',
+               link: '/guide/',
+               children: [
+                  '/guide/README.md',
+                  '/guide/getting-started.md',
+                  '/guide/extensions.md',
+                  '/guide/filtering.md',
+                  '/guide/ordering.md',
+                  '/guide/gridifyMapper.md',
+                  '/guide/gridifyQuery.md',
+                  '/guide/queryBuilder.md',
+                  '/guide/compile.md',
+                  '/guide/entity-framework.md',
+                  '/guide/autoMapper.md',
+               ],
+            },
          ],
          '/contribution/': [
             {
@@ -53,8 +50,12 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
       },
       navbar: [
          {
-           text: 'Guide',
-           link: '/guide/',
+            text: 'Welcome',
+            link: '/',
+         },
+         {
+            text: 'Guide',
+            link: '/guide/',
          },
          {
             text: 'Contribution',
@@ -69,7 +70,7 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
             link: 'https://github.com/alirezanet/Gridify',
          },
 
-       ],
+      ],
    },
    dest: 'dist',
    port: 3000,
