@@ -13,7 +13,7 @@ also it extends dotnet LINQ to provide an easy way to filter, sort and paginate 
 There are two ways to use Gridify:
 
 - Using the [Extension](/guide/extensions.html) methods
-- Using QueryBuilder
+- Using [QueryBuilder](/guide/querybuilder.html)
 
 ## Performance
 

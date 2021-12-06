@@ -23,11 +23,11 @@ Gridify supports the following filtering operators:
 If you don't specify any value after `=` or `!=` operators, gridify search for the `default` and `null` values.
 
 ``` csharp
-var x = PersonsList.ApplyFiltering("name=");
+var x = personsRepo.ApplyFiltering("name=");
 ```
 this is equivalent to the bellow LINQ query:
 ``` csharp
-var x = PersonsList.Where(p =>
+var x = personsRepo.Where(p =>
              p.Name is null ||
              p.Name == string.Empty() );
 ```
@@ -51,7 +51,7 @@ You should only use this operator after the search value.
 Example:
 
 ``` csharp
-var x = PersonsList.ApplyFiltering("FirstName=John/i");
+var x = personsRepo.ApplyFiltering("FirstName=John/i");
 ```
 this query matches with JOHN - john - John - jOHn ...
 

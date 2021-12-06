@@ -8,11 +8,11 @@ by default, if you don't add these keywords, gridify assumes you need Ascending 
 ::: code-group-item Extentions
 ``` csharp
 // asc - desc
-var x = PersonsList.ApplyOrdering("Id"); // default assending its equal to "Id asc"
-var x = PersonsList.ApplyOrdering("Id desc"); // use desending ordering
+var x = personsRepo.ApplyOrdering("Id"); // default assending its equal to "Id asc"
+var x = personsRepo.ApplyOrdering("Id desc"); // use desending ordering
 
 // multiple orderings example
-var x = PersonsList.ApplyOrdering("Id desc, FirstName asc, LastName");
+var x = personsRepo.ApplyOrdering("Id desc, FirstName asc, LastName");
 ```
 :::
 
