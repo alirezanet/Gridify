@@ -5,8 +5,14 @@ sidebar: 'auto'
 # Gridify (v1)
 
 ::: danger
-This verion is outdated. you should consider upgrading to the latest version.
+Gridify version **1.x.x** is no longer maintained. you should consider upgrading to the latest version.
 :::
+
+
+The source code of this version is available on [version-1.x](https://github.com/alirezanet/Gridify/tree/version-1.x)
+
+
+## Introduction
 
 Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** using text-based data.
 
