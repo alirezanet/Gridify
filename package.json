@@ -10,9 +10,10 @@
   "author": "AliReZa Sabouri",
   "license": "MIT",
   "devDependencies": {
-    "vuepress-vite": "^2.0.0-beta.27",
     "@vuepress/bundler-vite": "^2.0.0-beta.27",
+    "@vuepress/plugin-register-components": "^2.0.0-beta.27",
     "@vuepress/plugin-search": "^2.0.0-beta.27",
-    "highlight.js": ">=10.4.1"
+    "highlight.js": ">=10.4.1",
+    "vuepress-vite": "^2.0.0-beta.27"
   }
 }
