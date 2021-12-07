@@ -9,10 +9,14 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    title: 'Gridify',
    description: 'A Modern Dynamic LINQ library for .NET',
    bundler: '@vuepress/bundler-vite',
-   bundlerConfig:{
-   },
    plugins: [
-      ['@vuepress/plugin-search'],
+      [
+         '@vuepress/plugin-search',
+         {
+            // exclude v1 route
+            isSearchable: (page) => !page.path.match(/^\/v1\/*.*$/),
+         },
+      ],
    ],
    themeConfig: {
       editLinks: true,
@@ -21,6 +25,7 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
       docsRepo: 'alirezanet/gridify',
       docsBranch: 'master',
       docsDir: '/docs',
+      repo: 'alirezanet/Gridify',
       sidebar: {
          '/guide/': [
             {
@@ -65,14 +70,26 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
             link: '/contribution/',
          },
          {
+            text: 'Version',
+            children: [
+               {
+                  text: 'v2',
+                  link: '/',
+                  activeMatch: '^((?!\/v1).)*$',
+               },
+               {
+                  text: 'v1',
+                  link: '/v1/',
+                  // this item will be active when current route path starts with /foo/
+                  // regular expression is supported
+                  activeMatch: '^\/v1\/*.*$',
+               },
+            ],
+         },
+         {
             text: 'Author',
             link: 'https://github.com/alirezanet',
          },
-         {
-            text: 'GitHub',
-            link: 'https://github.com/alirezanet/Gridify',
-         },
-
       ],
    },
    port: 3000,
