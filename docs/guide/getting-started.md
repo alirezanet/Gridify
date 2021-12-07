@@ -18,7 +18,7 @@ There are two packages available for gridify in the nuget repository.
 ::: tip
 If you are using the Entity framework in your project, you should install the `Gridify.EntityFramework` package instead of `Gridify`.
 
-This package has the same functionality as the `Gridify` package, but it is designed to be more compatible with [Entity Framework](/guide/entity-framework.html).
+This package has the same functionality as the `Gridify` package, but it is designed to be more compatible with [Entity Framework](./entity-framework.html).
 :::
 
 

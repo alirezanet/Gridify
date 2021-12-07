@@ -17,7 +17,7 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
       contributors: false,
       docsRepo: 'alirezanet/gridify',
       docsBranch: 'master',
-      docsDir: 'site/docs',
+      docsDir: '/docs',
       sidebar: {
          '/guide/': [
             {

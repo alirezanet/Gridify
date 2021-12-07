@@ -1,6 +1,6 @@
 # Compile and Reuse
 
-You can access Gridify generated expressions using the `GetFilteringExpression` of [GridifyQuery](/guide/gridifyQuery.html) or `BuildCompiled` methods of [QueryBuilder](/guide/queryBuilder.html) class,
+You can access Gridify generated expressions using the `GetFilteringExpression` of [GridifyQuery](./gridifyQuery.html) or `BuildCompiled` methods of [QueryBuilder](./queryBuilder.html) class,
 by storing an expression you can use it multiple times without having any overheads,
 also if you store a compiled expression you get a massive performance boost.
 
