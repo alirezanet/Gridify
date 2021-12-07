@@ -20,5 +20,5 @@ Returns a lambda expression for filtering using the Filter property.
 ``` csharp{2}
 var gq = new GridifyQuery() { Filter = "name=John" };
 var expression = gq.GetFilteringExpression<Person>();
-var result = personsRepo.Where(compiledExpression);
+var result = personsRepo.Where(expression);
 ```

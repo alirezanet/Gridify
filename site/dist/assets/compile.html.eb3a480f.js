@@ -1,0 +1,1 @@
+const e={key:"v-1cd98572",path:"/guide/compile.html",title:"Compile and Reuse",lang:"en-US",frontmatter:{},excerpt:"",headers:[{level:2,title:"Performance",slug:"performance",children:[]}],filePathRelative:"guide/compile.md",git:{updatedTime:1638823978e3}};export{e as data};

@@ -15,7 +15,9 @@ var result = new Paging<Person> (qp.Count, qp.Query.ProjectTo<PersonDTO>().ToLis
 ```
 
 ## GridifyTo!
-Gridify library does not have a built-in GridifyTo method because we don't want to have AutoMapper dependency. but if you are using AutoMapper in your project, I recommend you to add the bellow extension method to your project.
+Filtering, Ordering, Paging, and Projection are all done with GridifyTo.
+
+Gridify library does not have a built-in GridifyTo extension method because we don't want to have AutoMapper dependency. but if you are using AutoMapper in your project, I recommend you to add the bellow extension method to your project.
 
 ``` csharp
 public static Paging<TDestination> GridifyTo<TSource, TDestination>(this IQueryable<TSource> query,
