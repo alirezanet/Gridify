@@ -8,11 +8,11 @@ export const plugin: PluginConfig<PluginOptions>[] = [
          // exclude v1 route
          isSearchable: (page) => !page.path.match(/^\/v1\/*.*$/),
       },
-   ],
-   [
-      '@vuepress/register-components',
-      {
-         componentsDir: path.resolve(__dirname, '../components'),
-      },
    ]
+   // [
+   //    '@vuepress/plugin-register-components',
+   //    {
+   //       componentsDir: path.resolve(__dirname, '../components'),
+   //    },
+   // ]
 ]
