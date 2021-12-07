@@ -1,22 +1,15 @@
 import { defineUserConfig } from 'vuepress-vite'
 import type { DefaultThemeOptions } from 'vuepress-vite'
 import type { ViteBundlerOptions } from '@vuepress/bundler-vite'
-import { navbar, sidebar } from './configs'
+import { navbar, sidebar , plugin } from './configs'
+
 
 export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    lang: 'en-US',
    title: 'Gridify',
    description: 'A Modern Dynamic LINQ library for .NET',
    bundler: '@vuepress/bundler-vite',
-   plugins: [
-      [
-         '@vuepress/plugin-search',
-         {
-            // exclude v1 route
-            isSearchable: (page) => !page.path.match(/^\/v1\/*.*$/),
-         },
-      ],
-   ],
+   plugins: plugin,
    themeConfig: {
       editLinks: true,
       editLinkText: 'Help us improve this page!',
