@@ -1,7 +1,10 @@
 **/bin
 **/obj
 .vscode
-nuget.config* 
+nuget.config*
 .idea
 .vs
 packages
+node_modules
+.temp
+.cache

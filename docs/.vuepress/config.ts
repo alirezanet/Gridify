@@ -72,9 +72,8 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
 
       ],
    },
-   dest: 'dist',
    port: 3000,
-
+   base: '/Gridify/',
 
    head: [['link', { rel: 'icon', href: '/favicon.ico' }]],
 })
