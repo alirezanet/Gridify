@@ -2,7 +2,11 @@
 sidebar: 'auto'
 ---
 
-# Gridify
+# Gridify (v1)
+
+::: danger
+This verion is outdated. you should consider upgrading to the latest version.
+:::
 
 Easy and optimized way to apply **Filtering**, **Sorting** and **pagination** using text-based data.
 
