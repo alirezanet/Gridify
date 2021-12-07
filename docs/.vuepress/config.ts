@@ -8,6 +8,9 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    lang: 'en-US',
    title: 'Gridify',
    description: 'A Modern Dynamic LINQ library for .NET',
+   bundler: '@vuepress/bundler-vite',
+   bundlerConfig:{
+   },
    plugins: [
       ['@vuepress/plugin-search'],
    ],
