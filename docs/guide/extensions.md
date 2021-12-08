@@ -56,7 +56,7 @@ You can use this method if you want to apply  **filtering** and **ordering** and
 Like [ApplyFilteringOrderingPaging](#ApplyFilteringOrderingPaging) but it returns a `QuaryablePaging<T>` that have an extra `int Count` value that can be used for pagination.
 
 ## Gridify
-This is an ALL-IN-ONE package, it accepts `IGridifyQuery`, applys filtering, ordering and paging and returns a `Paging<T>` object.
-this method is complitely optimized to be used with any **Grid** component.
+This is an ALL-IN-ONE package, it accepts `IGridifyQuery`, applies filtering, ordering, and paging, and returns a `Paging<T>` object.
+this method is completely optimized to be used with any **Grid** component.
 
 
