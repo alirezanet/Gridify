@@ -3,7 +3,7 @@ home: true
 tagline: A Modern Dynamic LINQ library for .NET
 actions:
   - text: Get Started
-    link: /guide/getting-started.html
+    link: /guide/getting-started.md
     type: primary
   - text: Introduction
     link: /guide/

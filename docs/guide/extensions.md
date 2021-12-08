@@ -1,7 +1,7 @@
 # Extensions
 The Gridify library adds below extension methods to `IQueryable` and `IEnumerable` objects.
 
-All Gridify extension methods can accept [GridifyQuery](./gridifyQuery.html) and [GridifyMapper](./gridifyMapper.html) as parameter.
+All Gridify extension methods can accept [GridifyQuery](./gridifyQuery.md) and [GridifyMapper](./gridifyMapper.md) as parameter.
 make sure to check the documentation of these classes for more information.
 
 
@@ -18,7 +18,7 @@ var query = personsRepo.Where(p => p.Name == "John");
 
 the main difference is in the first example, we are using a string to filter, that can be dynamicly generated or passed from end-user but in the second example, we should hard code the query for supported fields.
 
-checkout the [Filtering Operators](./filtering.html) section for more information.
+checkout the [Filtering Operators](./filtering.md) section for more information.
 
 ## ApplyOrdering
 You can use this method if you want to only apply **ordering** on a Quariable collection, DbSet or Enumerable list.
@@ -30,7 +30,7 @@ this is completely equivalent to the bellow LINQ query:
 ``` csharp
 var query = personsRepo.OrderBy(x => x.Name).ThenByDescending(x => x.Age);
 ```
-checkout the [Ordering](./ordering.html) section for more information.
+checkout the [Ordering](./ordering.md) section for more information.
 
 ## ApplyPaging
 You can use this method if you want to only apply **paging** on a Quariable collection, DbSet or Enumerable list.
