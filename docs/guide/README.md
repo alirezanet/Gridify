@@ -3,17 +3,13 @@
 Gridify is a dynamic LINQ library that converts your *strings* to a LINQ query in the easiest way possible with excellent performance.
 gridify introduces an Easy and optimized way to apply Filtering, Sorting and pagination using text-based data.
 
-On of the best use cases of this library is Asp-net APIs, When you need to get some string base filtering conditions to filter data or sort it by a field name or apply pagination concepts to your lists and return a pageable, data grid ready information, from any repository or database. Although, we are not limited to Asp.net projects and we can use this library on any .Net projects and on any collections.
-
 ## How It Works
 
-Gridify use a simple string based query language to convert your string expressions to a LINQ expression.
-also it extends dotnet LINQ to provide an easy way to filter, sort and paginate your data.
+To better illustrate how a Gridify works, I have prepared a few examples.
 
-There are two ways to use Gridify:
-
-- Using the [Extension](./extensions.html) methods
-- Using [QueryBuilder](./querybuilder.html)
+Be sure to check out these examples
+- [Using Gridify in API Controllers](../example/api-controller.md)
+- Coming soon ...
 
 ## Performance
 

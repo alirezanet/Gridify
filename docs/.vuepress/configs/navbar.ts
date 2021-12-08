@@ -10,6 +10,16 @@ export const navbar: NavbarConfig = [
       link: '/guide/',
    },
    {
+      text: 'Examples',
+      children: [
+         {
+            text: 'API Controllers',
+            link: '/example/api-controller/',
+            activeMatch: '/example/vuepress/',
+         }
+      ]
+   },
+   {
       text: 'Contribution',
       link: '/contribution/',
    },
