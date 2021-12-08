@@ -5,7 +5,7 @@ by storing an expression you can use it multiple times without having any overhe
 also if you store a compiled expression you get a massive performance boost.
 
 ::: warning
-you should only use a **compiled** expression if you are **not** using Gridify alongside an ORM like Entity-Framework.
+you should only use a **compiled** expression (delegate) if you are **not** using Gridify alongside an ORM like Entity-Framework.
 :::
 
 ``` csharp

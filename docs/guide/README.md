@@ -1,7 +1,7 @@
 # Introduction
 
 Gridify is a dynamic LINQ library that converts your *strings* to a LINQ query in the easiest way possible with excellent performance.
-gridify introduces an Easy and optimized way to apply Filtering, Sorting and pagination using text-based data.
+it also, introduces an easy way to apply Filtering, Sorting and pagination using text-based data.
 
 ## How It Works
 
@@ -19,7 +19,7 @@ Filtering is the most expensive feature in gridify. the following benchmark is c
 |      Method |       Mean |    Error |   StdDev | Ratio |   Gen 0 |   Gen 1 | Allocated |
 |------------ |-----------:|---------:|---------:|------:|--------:|--------:|----------:|
 | Native LINQ |   740.9 us |  7.80 us |  6.92 us |  1.00 |  5.8594 |  2.9297 |     37 KB |
-| **Gridify** |   762.6 us | 10.06 us |  9.41 us |  1.03 |  5.8594 |  2.9297 |     39 KB |
+| **Gridify*** |   762.6 us | 10.06 us |  9.41 us |  1.03 |  5.8594 |  2.9297 |     39 KB |
 | DynamicLinq |   902.1 us | 11.56 us | 10.81 us |  1.22 | 19.5313 |  9.7656 |    122 KB |
 |       Sieve |   977.9 us |  6.80 us |  6.37 us |  1.32 |  7.8125 |  3.9063 |     54 KB |
 |         Fop | 2,959.8 us | 39.11 us | 36.58 us |  3.99 | 46.8750 | 23.4375 |    306 KB |

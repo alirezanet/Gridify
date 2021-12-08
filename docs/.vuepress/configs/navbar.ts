@@ -13,7 +13,7 @@ export const navbar: NavbarConfig = [
       text: 'Examples',
       children: [
          {
-            text: 'API Controllers',
+            text: 'Using Gridify in API Controllers',
             link: '/example/api-controller/',
             activeMatch: '/example/vuepress/',
          }
