@@ -1,12 +1,15 @@
 # Extensions
-The Gridify library adds below extension methods to `IQueryable` and `IEnumerable` objects.
+The Gridify library adds below extension methods to `IQueryable` objects.
 
 All Gridify extension methods can accept [GridifyQuery](./gridifyQuery.md) and [GridifyMapper](./gridifyMapper.md) as parameter.
 make sure to check the documentation of these classes for more information.
 
+::: tip
+If you want to use Gridify extension methods on an `IEnumerable` object, use `.AsQueryable()` first.
+:::
 
 ## ApplyFiltering
-You can use this method if you want to only apply **filtering** on a Quariable collection, DbSet or Enumerable list.
+You can use this method if you want to only apply **filtering** on a IQueriable or DbSet.
 
 ``` csharp
 var query = personsRepo.ApplyFiltering("name = John");
@@ -21,7 +24,7 @@ the main difference is in the first example, we are using a string to filter, th
 checkout the [Filtering Operators](./filtering.md) section for more information.
 
 ## ApplyOrdering
-You can use this method if you want to only apply **ordering** on a Quariable collection, DbSet or Enumerable list.
+You can use this method if you want to only apply **ordering** on a IQueriable or DbSet.
 
 ``` csharp
 var query = personsRepo.ApplyOrdering("name, age desc");
@@ -33,7 +36,7 @@ var query = personsRepo.OrderBy(x => x.Name).ThenByDescending(x => x.Age);
 checkout the [Ordering](./ordering.md) section for more information.
 
 ## ApplyPaging
-You can use this method if you want to only apply **paging** on a Quariable collection, DbSet or Enumerable list.
+You can use this method if you want to only apply **paging** on a IQueryable collection, DbSet.
 
 ``` csharp
 var query = personsRepo.ApplyPaging(3 , 20);
@@ -44,13 +47,13 @@ var query = personsRepo.Skip((3-1) * 20).Take(20);
 ```
 
 ## ApplyFilteringAndOrdering
-You can use this method if you want to apply **filtering** and **ordering** on a Quariable collection or DbSet. this method accepts `IGridifyQuery`.
+You can use this method if you want to apply **filtering** and **ordering** on a IQueryable collection or DbSet. this method accepts `IGridifyQuery`.
 
 ## ApplyOrderingAndPaging
-You can use this method if you want to apply **ordering** and **paging** on a Quariable collection or DbSet. this method accepts `IGridifyQuery`.
+You can use this method if you want to apply **ordering** and **paging** on a IQueryable collection or DbSet. this method accepts `IGridifyQuery`.
 
 ## ApplyFilteringOrderingPaging
-You can use this method if you want to apply  **filtering** and **ordering** and **paging** on a Quariable collection or DbSet. this method accepts `IGridifyQuery`.
+You can use this method if you want to apply  **filtering** and **ordering** and **paging** on a IQueryable collection or DbSet. this method accepts `IGridifyQuery`.
 
 ## GridifyQueryable
 Like [ApplyFilteringOrderingPaging](#ApplyFilteringOrderingPaging) but it returns a `QuaryablePaging<T>` that have an extra `int Count` value that can be used for pagination.
