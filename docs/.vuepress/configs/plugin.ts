@@ -8,7 +8,13 @@ export const plugin: PluginConfig<PluginOptions>[] = [
          // exclude v1 route
          isSearchable: (page) => !page.path.match(/^\/v1\/*.*$/),
       },
-   ]
+   ],
+   [
+      '@vuepress/plugin-google-analytics',
+      {
+        id: 'G-G5Z9S1WECF',
+      },
+   ],
    // [
    //    '@vuepress/plugin-register-components',
    //    {
