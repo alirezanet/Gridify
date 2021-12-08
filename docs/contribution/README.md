@@ -17,10 +17,20 @@ All the markdown source files are placed in `docs` directory.
 
 by running the following commands, you can check the documentation site locally:
 
+:::: code-group
+::: code-group-item yarn
+``` cmd
+yarn install
+yarn dev
+```
+:::
+::: code-group-item npm
 ``` cmd
 npm install
 npm run dev
 ```
+:::
+::::
 
 ## How to contribute
 check out the [github contributing guide](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project)
