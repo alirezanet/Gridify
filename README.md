@@ -9,7 +9,16 @@ Gridify is a dynamic LINQ library that converts your strings to a LINQ query in 
 ## Documentation
 Check out our docs at [https://alirezanet.github.io/Gridify/](https://alirezanet.github.io/Gridify/).
 
+## Want to support us?
+- Don't forget to ⭐ this repo on GitHub!
+- Share your feedback and ideas to improve the library!
+- Share the library on your favorite social media and your friends!
+- Help us to improve the documentation!
+- Buy us a coffee!
+
 ## Contribution
+Feel free to send us a pull request!
+
 Check out the [Contribution Page](https://alirezanet.github.io/Gridify/contribution)
 
 ## License
