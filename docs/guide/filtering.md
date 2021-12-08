@@ -69,3 +69,18 @@ var value = "(test,test2)";
 var esc = Regex.Replace(value, "([(),|]|\/i)", "\\$1" );
 // esc = \(test\,test2\)
 ```
+
+## Passing Indexes
+Since version `v2.3.0`, Gridify support passing indexes to the sub collections. We can pass the index using the `[ ]`  brackets.
+In the bellow example we want to filter data using `8th` index of our SubCollection.
+
+``` csharp{6}
+var gm = new GridifyMapper<TargetType>()
+	      .AddMap("prop", (x , index) => x.SubCollection[index].SomeProp);
+
+var gq = new GridifyQuery
+{
+    Filter = "prop[8] > 10"
+};
+```
+checkout [Use Indexes on Sub-Collections](./gridifyMapper.md#use-indexes-on-sub-collections) for more information.
