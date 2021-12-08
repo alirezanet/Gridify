@@ -5,7 +5,7 @@ it also, introduces an easy way to apply Filtering, Sorting and pagination using
 
 ## How It Works
 
-To better illustrate how a Gridify works, I have prepared a few examples.
+To better illustrate how Gridify works, I have prepared a few examples.
 
 Be sure to check out these examples
 - [Using Gridify in API Controllers](../example/api-controller.md)
