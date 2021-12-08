@@ -1,6 +1,6 @@
 {
-  "name": "docs",
-  "version": "1.0.0",
+  "name": "gridify",
+  "version": "1.0.1",
   "description": "Gridify documentation",
   "main": "index.js",
   "scripts": {
@@ -16,5 +16,6 @@
     "@vuepress/plugin-search": "^2.0.0-beta.27",
     "highlight.js": ">=10.4.1",
     "vuepress-vite": "^2.0.0-beta.27"
-  }
+  },
+  "repository": "https://github.com/alirezanet/Gridify.git"
 }
