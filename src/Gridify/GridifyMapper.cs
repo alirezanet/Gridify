@@ -39,6 +39,29 @@ namespace Gridify
             GenerateMappings();
       }
 
+      public IGridifyMapper<T> AddMap(string from, Func<string, object>? convertor = null!,bool overrideIfExists = true)
+      {
+         if (!overrideIfExists && HasMap(from))
+            throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
+
+         Expression<Func<T, object>> to;
+         try
+         {
+              to = CreateExpression(from);
+         }
+         catch (Exception)
+         {
+            if (Configuration.IgnoreNotMappedFields)
+               return this;
+
+            throw new GridifyMapperException($"Property '{from}' not found.");
+         }
+
+         RemoveMap(from);
+         _mappings.Add(new GMap<T>(from, to!, convertor));
+         return this;
+      }
+
       public IGridifyMapper<T> GenerateMappings()
       {
          foreach (var item in typeof(T).GetProperties())
@@ -146,7 +169,7 @@ namespace Gridify
       /// <returns>a comma seperated string</returns>
       public override string ToString() => string.Join(",", _mappings.Select(q => q.From));
 
-      private static Expression<Func<T, object>> CreateExpression(string from)
+      internal static Expression<Func<T, object>> CreateExpression(string from)
       {
          // x =>
          var parameter = Expression.Parameter(typeof(T));
