@@ -28,14 +28,14 @@ namespace Benchmarks
 
       private IQueryable<TestClass> Ds => _data.AsQueryable();
       private IEnumerable<TestClass> EnumerableDs => _data.ToList();
-      private IGridifyMapper<TestClass> gm { get; set; }
+     // private IGridifyMapper<TestClass> gm { get; set; }
 
       [GlobalSetup]
       public void Setup()
       {
          _data = GetSampleData().ToArray();
 
-         gm = new GridifyMapper<TestClass>().GenerateMappings();
+         var gm = new GridifyMapper<TestClass>().GenerateMappings();
 
          // compiled query (this is not included in our readme benchmarks)
          var gq1 = new GridifyQuery() { Filter = "Name=*a" };
@@ -58,6 +58,7 @@ namespace Benchmarks
       [Benchmark]
       public void Gridify()
       {
+         var gm = new GridifyMapper<TestClass>().GenerateMappings();
          Ds.ApplyFiltering("Name=*a", gm).Consume(Consumer);
          Ds.ApplyFiltering("Id>5", gm).Consume(Consumer);
          Ds.ApplyFiltering("Name=Ali", gm).Consume(Consumer);
