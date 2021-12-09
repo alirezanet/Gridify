@@ -105,7 +105,7 @@ namespace Gridify
       /// <param name="syntaxTree">optional syntaxTree to Lazy mapping generation</param>
       /// <typeparam name="T">type to set mappings</typeparam>
       /// <returns>return back mapper or new generated mapper if it was null</returns>
-      public static IGridifyMapper<T> FixMapper<T>(this IGridifyMapper<T>? mapper, SyntaxTree syntaxTree)
+      private static IGridifyMapper<T> FixMapper<T>(this IGridifyMapper<T>? mapper, SyntaxTree syntaxTree)
       {
          if (mapper != null) return mapper;
 
