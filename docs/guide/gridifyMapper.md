@@ -133,7 +133,7 @@ if you have only two-level nesting, you don't need to use `SelectMany`.
 
 ### Use Indexes on Sub-Collections
 
-Since version `v2.3.0`, GridifyMapper [AddMap](#addmap) method had a new overload that accepts a `index` parameter.
+Since version `v2.3.0`, GridifyMapper [AddMap](#addmap) method has a new overload that accepts a `index` parameter.
 In the bellow example we want to filter data using `8th` index of our SubCollection.
 
 ``` csharp{4}
