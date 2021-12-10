@@ -1,8 +1,7 @@
 import { defineUserConfig } from 'vuepress-vite'
 import type { DefaultThemeOptions } from 'vuepress-vite'
 import type { ViteBundlerOptions } from '@vuepress/bundler-vite'
-import { navbar, sidebar, plugin } from './configs'
-
+import { plugin, themeConfig, head } from './configs'
 
 export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    lang: 'en-US',
@@ -10,24 +9,8 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    description: 'A Modern Dynamic LINQ library for .NET',
    bundler: '@vuepress/bundler-vite',
    plugins: plugin,
-   themeConfig: {
-      logo: '/gridify-light-logo.svg',
-      logoDark: '/gridify-dark-logo.svg',
-      editLinks: true,
-      editLinkText: 'Help us improve this page!',
-      contributors: false,
-      docsRepo: 'alirezanet/gridify',
-      docsBranch: 'master',
-      docsDir: '/docs',
-      repo: 'alirezanet/Gridify',
-      sidebar: sidebar,
-      navbar: navbar,
-   },
+   themeConfig: themeConfig,
    port: 3000,
    base: '/Gridify/',
-
-   head: [
-      ['link', { rel: 'icon', href: 'favicon.ico', type: "image/x-icon" }],
-      ['link', { rel: 'shortcut icon', href: 'favicon.ico', type: "image/x-icon" }]
-   ],
+   head: head,
 })
