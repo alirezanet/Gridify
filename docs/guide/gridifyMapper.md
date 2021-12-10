@@ -160,10 +160,10 @@ checkout [Passing Indexes](./filtering.md#passing-indexes) for more information.
 ## GetExpression
 This method returns the selector expression that you can use it in LINQ queries.
 ``` csharp
-Expression<Func<T, object>> Selector = mapper.GetExpression(nameof(Person.Name));
+Expression<Func<Person, object>> selector = mapper.GetExpression(nameof(Person.Name));
 ```
 ## GetLambdaExpression
 This method returns the selector expression that you can use it in LINQ queries.
 ``` csharp
-LambdaExpression Selector = mapper.GetLambdaExpression(nameof(Person.Name));
+LambdaExpression selector = mapper.GetLambdaExpression(nameof(Person.Name));
 ```
