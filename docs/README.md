@@ -17,9 +17,3 @@ features:
      details: You can use Gridify in any .NET Core or .NET Framework project. In another words it can be used anywhere that LINQ is supported, Specially along with Entity Framework.
 footer: MIT Licensed | Copyright © 2021-present AliReZa Sabouri
 ---
-
-<style>
-   #main-title{
-      display: none
-   }
-</style>
