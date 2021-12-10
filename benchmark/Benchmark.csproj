@@ -7,10 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
+      <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
       <PackageReference Include="Fop" Version="1.0.1.9" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" Version="5.2.10" />
-      <PackageReference Include="Sieve" Version="2.4.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" Version="6.2.14" />
+      <PackageReference Include="Sieve" Version="2.5.1" />
     </ItemGroup>
 
     <ItemGroup>

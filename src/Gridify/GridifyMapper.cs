@@ -29,7 +29,7 @@ namespace Gridify
             GenerateMappings();
       }
 
-      public GridifyMapper(Action<GridifyMapperConfiguration> configuration,bool autoGenerateMappings = false)
+      public GridifyMapper(Action<GridifyMapperConfiguration> configuration, bool autoGenerateMappings = false)
       {
          Configuration = new GridifyMapperConfiguration();
          configuration.Invoke(Configuration);
@@ -37,6 +37,26 @@ namespace Gridify
 
          if (autoGenerateMappings)
             GenerateMappings();
+      }
+
+      public IGridifyMapper<T> AddMap(string from, Func<string, object>? convertor = null!, bool overrideIfExists = true)
+      {
+         if (!overrideIfExists && HasMap(from))
+            throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
+
+         Expression<Func<T, object>> to;
+         try
+         {
+            to = CreateExpression(from);
+         }
+         catch (Exception)
+         {
+            throw new GridifyMapperException($"Property '{from}' not found.");
+         }
+
+         RemoveMap(from);
+         _mappings.Add(new GMap<T>(from, to!, convertor));
+         return this;
       }
 
       public IGridifyMapper<T> GenerateMappings()
@@ -124,14 +144,14 @@ namespace Gridify
          return expression!;
       }
 
-      public Expression<Func<T,object>> GetExpression(string key)
+      public Expression<Func<T, object>> GetExpression(string key)
       {
          var expression = Configuration.CaseSensitive
             ? _mappings.FirstOrDefault(q => key.Equals(q.From))?.To
             : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
          if (expression == null)
             throw new GridifyMapperException($"Mapping Key `{key}` not found.");
-         return expression as Expression<Func<T,object>> ?? throw new GridifyMapperException($"Expression fir the `{key}` not found.");
+         return expression as Expression<Func<T, object>> ?? throw new GridifyMapperException($"Expression fir the `{key}` not found.");
       }
 
       public IEnumerable<IGMap<T>> GetCurrentMaps()
@@ -146,7 +166,7 @@ namespace Gridify
       /// <returns>a comma seperated string</returns>
       public override string ToString() => string.Join(",", _mappings.Select(q => q.From));
 
-      private static Expression<Func<T, object>> CreateExpression(string from)
+      internal static Expression<Func<T, object>> CreateExpression(string from)
       {
          // x =>
          var parameter = Expression.Parameter(typeof(T));

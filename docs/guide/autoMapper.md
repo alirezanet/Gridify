@@ -23,7 +23,6 @@ Gridify library does not have a built-in GridifyTo extension method because we d
 public static Paging<TDestination> GridifyTo<TSource, TDestination>(this IQueryable<TSource> query,
                     IMapper autoMapper, IGridifyQuery gridifyQuery, IGridifyMapper<TSource> mapper = null)
 {
-   mapper = mapper.FixMapper();
    var res = query.GridifyQueryable(gridifyQuery, mapper);
    return new Paging<TDestination> (res.Count , res.Query.ProjectTo<TDestination>(autoMapper.ConfigurationProvider).ToList());
 }
@@ -34,7 +33,6 @@ public static Paging<TDestination> GridifyTo<TSource, TDestination>(this IQuerya
 public static async Task<Paging<TDestination>> GridifyToAsync<TSource, TDestination>(this IQueryable<TSource> query,
                         IMapper autoMapper, IGridifyQuery gridifyQuery, IGridifyMapper<TSource> mapper = null)
 {
-   mapper = mapper.FixMapper();
    var res = await query.GridifyQueryableAsync(gridifyQuery, mapper);
    return new Paging<TDestination> (res.Count , await res.Query.ProjectTo<TDestination>(autoMapper.ConfigurationProvider).ToListAsync());
 }

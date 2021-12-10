@@ -22,35 +22,20 @@ namespace Benchmarks
    {
       private static readonly Consumer Consumer = new();
       private TestClass[] _data;
-      private Func<TestClass, bool> compiled1;
-      private Func<TestClass, bool> compiled2;
-      private Func<TestClass, bool> compiled3;
 
       private IQueryable<TestClass> Ds => _data.AsQueryable();
-      private IEnumerable<TestClass> EnumerableDs => _data.ToList();
-      private IGridifyMapper<TestClass> gm { get; set; }
 
       [GlobalSetup]
       public void Setup()
       {
          _data = GetSampleData().ToArray();
-
-         gm = new GridifyMapper<TestClass>().GenerateMappings();
-
-         // compiled query (this is not included in our readme benchmarks)
-         var gq1 = new GridifyQuery() { Filter = "Name=*a" };
-         var gq2 = new GridifyQuery() { Filter = "Id>5" };
-         var gq3 = new GridifyQuery() { Filter = "Name=Ali" };
-         compiled1 = gq1.GetFilteringExpression(gm).Compile();
-         compiled2 = gq2.GetFilteringExpression(gm).Compile();
-         compiled3 = gq3.GetFilteringExpression(gm).Compile();
       }
 
 
       [Benchmark(Baseline = true)]
       public void NativeLinQ()
       {
-         Ds.Where(q => q.Name.Contains("a")).Consume(Consumer);
+         Ds.Where(q => q.Name.Contains('a')).Consume(Consumer);
          Ds.Where(q => q.Id > 5).Consume(Consumer);
          Ds.Where(q => q.Name == "Ali").Consume(Consumer);
       }
@@ -58,17 +43,10 @@ namespace Benchmarks
       [Benchmark]
       public void Gridify()
       {
+         var gm = new GridifyMapper<TestClass>().GenerateMappings();
          Ds.ApplyFiltering("Name=*a", gm).Consume(Consumer);
          Ds.ApplyFiltering("Id>5", gm).Consume(Consumer);
          Ds.ApplyFiltering("Name=Ali", gm).Consume(Consumer);
-      }
-
-      // [Benchmark] // compiled query (this is not included in our readme benchmarks)w
-      public void GridifyCompiled()
-      {
-         EnumerableDs.Where(compiled1).Consume(Consumer);
-         EnumerableDs.Where(compiled2).Consume(Consumer);
-         EnumerableDs.Where(compiled3).Consume(Consumer);
       }
 
       [Benchmark]
@@ -131,19 +109,17 @@ namespace Benchmarks
    }
 }
 
-/* Last Run:
- BenchmarkDotNet=v0.13.0, OS=Windows 10.0.19043.1237 (21H1/May2021Update)
-11th Gen Intel Core i5-11400F 2.60GHz, 1 CPU, 12 logical and 6 physical cores
-.NET SDK=5.0.301
-[Host]     : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
-DefaultJob : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
-
-
-|      Method |       Mean |    Error |   StdDev | Ratio |   Gen 0 |   Gen 1 | Allocated |
-|------------ |-----------:|---------:|---------:|------:|--------:|--------:|----------:|
-| Native LINQ |   740.9 us |  7.80 us |  6.92 us |  1.00 |  5.8594 |  2.9297 |     37 KB |
-|     Gridify |   762.6 us | 10.06 us |  9.41 us |  1.03 |  5.8594 |  2.9297 |     39 KB |
-| DynamicLinq |   902.1 us | 11.56 us | 10.81 us |  1.22 | 19.5313 |  9.7656 |    122 KB |
-|       Sieve |   977.9 us |  6.80 us |  6.37 us |  1.32 |  7.8125 |  3.9063 |     54 KB |
-|         Fop | 2,959.8 us | 39.11 us | 36.58 us |  3.99 | 46.8750 | 23.4375 |    306 KB |
-*/
+// BenchmarkDotNet=v0.13.1, OS=Windows 10.0.22000
+// 11th Gen Intel Core i5-11400F 2.60GHz, 1 CPU, 12 logical and 6 physical cores
+//    .NET SDK=6.0.100
+//    [Host]     : .NET 6.0.0 (6.0.21.52210), X64 RyuJIT
+// DefaultJob : .NET 6.0.0 (6.0.21.52210), X64 RyuJIT
+//
+//
+//    |      Method |       Mean |    Error |   StdDev | Ratio | RatioSD |   Gen 0 |   Gen 1 | Allocated |
+//    |------------ |-----------:|---------:|---------:|------:|--------:|--------:|--------:|----------:|
+//    |  NativeLinQ |   823.8 us | 11.18 us |  9.91 us |  1.00 |    0.00 |  4.8828 |  1.9531 |     35 KB |
+//    |     Gridify |   853.1 us | 13.88 us | 12.98 us |  1.03 |    0.02 |  6.8359 |  2.9297 |     43 KB |
+//    | DynamicLinQ |   967.3 us |  6.65 us |  5.55 us |  1.17 |    0.01 | 19.5313 |  9.7656 |    123 KB |
+//    |       Sieve | 1,275.2 us |  5.62 us |  4.70 us |  1.55 |    0.02 |  7.8125 |  3.9063 |     55 KB |
+//    |         Fop | 3,480.2 us | 55.81 us | 52.21 us |  4.23 |    0.06 | 54.6875 | 27.3438 |    343 KB |

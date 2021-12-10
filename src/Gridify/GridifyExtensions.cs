@@ -41,13 +41,12 @@ namespace Gridify
          if (string.IsNullOrWhiteSpace(gridifyFiltering.Filter))
             throw new GridifyQueryException("Filter is not defined");
 
-         mapper = mapper.FixMapper();
-
          var syntaxTree = SyntaxTree.Parse(gridifyFiltering.Filter!);
 
          if (syntaxTree.Diagnostics.Any())
             throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
 
+         mapper = mapper.FixMapper(syntaxTree);
          var (queryExpression, _) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
          if (queryExpression == null) throw new GridifyQueryException("Can not create expression with current data");
          return queryExpression;
@@ -56,17 +55,34 @@ namespace Gridify
       public static IEnumerable<Expression<Func<T, object>>> GetOrderingExpressions<T>(this IGridifyOrdering gridifyOrdering,
          IGridifyMapper<T>? mapper = null)
       {
-         mapper = mapper.FixMapper();
-
          if (string.IsNullOrWhiteSpace(gridifyOrdering.OrderBy))
             throw new GridifyQueryException("OrderBy is not defined or not Found");
 
-         foreach (var (member, _) in ParseOrderings(gridifyOrdering.OrderBy!))
-         {
-            // skip if there is no mappings available
-            if (!mapper.HasMap(member)) continue;
 
-            yield return mapper.GetExpression(member)!;
+         var members = ParseOrderings(gridifyOrdering.OrderBy!).Select(q => q.memberName).ToList();
+         if (mapper is null)
+         {
+            foreach (var member in members)
+            {
+               Expression<Func<T, object>>? exp = null;
+               try
+               {
+                  exp = GridifyMapper<T>.CreateExpression(member);
+               }
+               catch (Exception)
+               {
+                  // skip if there is no mappings available
+               }
+
+               if (exp != null) yield return exp;
+            }
+         }
+         else
+         {
+            foreach (var member in members.Where(mapper.HasMap))
+            {
+               yield return mapper.GetExpression(member)!;
+            }
          }
       }
 
@@ -86,11 +102,41 @@ namespace Gridify
       /// if given mapper was null this function creates default generated mapper
       /// </summary>
       /// <param name="mapper">a <c>GridifyMapper<c /> that can be null</param>
+      /// <param name="syntaxTree">optional syntaxTree to Lazy mapping generation</param>
       /// <typeparam name="T">type to set mappings</typeparam>
       /// <returns>return back mapper or new generated mapper if it was null</returns>
-      public static IGridifyMapper<T> FixMapper<T>(this IGridifyMapper<T>? mapper)
+      private static IGridifyMapper<T> FixMapper<T>(this IGridifyMapper<T>? mapper, SyntaxTree syntaxTree)
       {
-         return mapper ?? GetDefaultMapper<T>();
+         if (mapper != null) return mapper;
+
+         mapper = new GridifyMapper<T>();
+         foreach (var field in syntaxTree.Root.Descendants()
+            .Where(q => q.Kind == SyntaxKind.FieldExpression)
+            .Cast<FieldExpressionSyntax>())
+         {
+            try
+            {
+               mapper.AddMap(field.FieldToken.Text);
+            }
+            catch (Exception)
+            {
+               if (!mapper.Configuration.IgnoreNotMappedFields)
+                  throw new GridifyMapperException($"Property '{field.FieldToken.Text}' not found.");
+            }
+         }
+
+         return mapper;
+      }
+
+      private static IEnumerable<SyntaxNode> Descendants(this SyntaxNode root)
+      {
+         var nodes = new Stack<SyntaxNode>(new[] { root });
+         while (nodes.Any())
+         {
+            SyntaxNode node = nodes.Pop();
+            yield return node;
+            foreach (var n in node.GetChildren()) nodes.Push(n);
+         }
       }
 
       /// <summary>
@@ -105,7 +151,6 @@ namespace Gridify
          IGridifyMapper<T>? mapper = null)
       {
          if (gridifyQuery == null) return query;
-         mapper = mapper.FixMapper();
 
          query = query.ApplyFiltering(gridifyQuery, mapper);
          query = query.ApplyOrdering(gridifyQuery, mapper);
@@ -126,7 +171,6 @@ namespace Gridify
          bool startWithThenBy = false)
       {
          if (gridifyOrdering == null) return query;
-         mapper = mapper.FixMapper();
          return string.IsNullOrWhiteSpace(gridifyOrdering.OrderBy)
             ? query
             : ProcessOrdering(query, gridifyOrdering.OrderBy!, startWithThenBy, mapper);
@@ -144,16 +188,50 @@ namespace Gridify
       public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> query, string orderBy, IGridifyMapper<T>? mapper = null,
          bool startWithThenBy = false)
       {
-         mapper = mapper.FixMapper();
          return string.IsNullOrWhiteSpace(orderBy)
             ? query
             : ProcessOrdering(query, orderBy, startWithThenBy, mapper);
       }
 
-      private static IQueryable<T> ProcessOrdering<T>(IQueryable<T> query, string orderings, bool startWithThenBy, IGridifyMapper<T> mapper)
+      public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, string props, IGridifyMapper<T>? mapper = null)
+      {
+         if (string.IsNullOrWhiteSpace(props))
+            return (IQueryable<object>)query;
+
+         if (mapper is null)
+            mapper = new GridifyMapper<T>(true);
+
+         var exp = mapper.GetExpression(props);
+         var result = query.Select(exp);
+
+         return result;
+      }
+
+      private static IQueryable<T> ProcessOrdering<T>(IQueryable<T> query, string orderings, bool startWithThenBy, IGridifyMapper<T>? mapper)
       {
          var isFirst = !startWithThenBy;
-         foreach (var (member, isAscending) in ParseOrderings(orderings))
+
+         var orders = ParseOrderings(orderings).ToList();
+
+         // build the mapper if it is null
+         if (mapper is null)
+         {
+            mapper = new GridifyMapper<T>();
+            foreach (var (member, _) in orders)
+            {
+               try
+               {
+                  mapper.AddMap(member);
+               }
+               catch (Exception e)
+               {
+                  if (!mapper.Configuration.IgnoreNotMappedFields)
+                     throw new GridifyMapperException($"Mapping '{member}' not found");
+               }
+            }
+         }
+
+         foreach (var (member, isAscending) in orders)
          {
             if (!mapper.HasMap(member))
             {
@@ -214,7 +292,7 @@ namespace Gridify
          IGridifyMapper<T>? mapper = null)
       {
          if (gridifyOrdering == null) return query;
-         mapper = mapper.FixMapper();
+
          if (string.IsNullOrWhiteSpace(gridifyOrdering.OrderBy))
             return query;
 
@@ -251,12 +329,12 @@ namespace Gridify
          if (string.IsNullOrWhiteSpace(filter))
             return query;
 
-         mapper = mapper.FixMapper();
-
          var syntaxTree = SyntaxTree.Parse(filter!);
 
          if (syntaxTree.Diagnostics.Any())
             throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
+
+         mapper = mapper.FixMapper(syntaxTree);
 
          var (queryExpression, _) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
 
@@ -268,15 +346,14 @@ namespace Gridify
       public static IQueryable<T> ApplyFilteringAndOrdering<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery,
          IGridifyMapper<T>? mapper = null)
       {
-         mapper = mapper.FixMapper();
          query = query.ApplyFiltering(gridifyQuery, mapper);
-         query = query.ApplyOrdering(gridifyQuery);
+         query = query.ApplyOrdering(gridifyQuery, mapper);
          return query;
       }
 
       public static Expression<Func<T, bool>> CreateQuery<T>(this SyntaxTree syntaxTree, IGridifyMapper<T>? mapper = null)
       {
-         mapper = mapper.FixMapper();
+         mapper = mapper.FixMapper(syntaxTree);
          var exp = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper).Expression;
          if (exp == null) throw new GridifyQueryException("Invalid SyntaxTree.");
          return exp;
@@ -284,7 +361,6 @@ namespace Gridify
 
       public static IQueryable<T> ApplyOrderingAndPaging<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
       {
-         mapper = mapper.FixMapper();
          query = query.ApplyOrdering(gridifyQuery, mapper);
          query = query.ApplyPaging(gridifyQuery);
          return query;
@@ -304,7 +380,6 @@ namespace Gridify
       /// <returns>returns a <c>QueryablePaging<T><c /> after applying filtering, ordering and paging</returns>
       public static QueryablePaging<T> GridifyQueryable<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
       {
-         mapper = mapper.FixMapper();
          query = query.ApplyFiltering(gridifyQuery, mapper);
          var count = query.Count();
          query = query.ApplyOrdering(gridifyQuery, mapper);
@@ -326,9 +401,8 @@ namespace Gridify
       /// <returns></returns>
       public static Paging<T> Gridify<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
       {
-         mapper = mapper.FixMapper();
-         var res = query.GridifyQueryable(gridifyQuery, mapper);
-         return new Paging<T>(res.Count, res.Query.ToList());
+         var (count, queryable) = query.GridifyQueryable(gridifyQuery, mapper);
+         return new Paging<T>(count, queryable.ToList());
       }
 
       /// <summary>
@@ -345,11 +419,10 @@ namespace Gridify
       /// <returns></returns>
       public static Paging<T> Gridify<T>(this IQueryable<T> query, Action<IGridifyQuery> queryOption, IGridifyMapper<T>? mapper = null)
       {
-         mapper = mapper.FixMapper();
          var gridifyQuery = new GridifyQuery();
-         queryOption?.Invoke(gridifyQuery);
-         var res = query.GridifyQueryable(gridifyQuery, mapper);
-         return new Paging<T>(res.Count, res.Query.ToList());
+         queryOption.Invoke(gridifyQuery);
+         var (count, queryable) = query.GridifyQueryable(gridifyQuery, mapper);
+         return new Paging<T>(count, queryable.ToList());
       }
 
       #endregion

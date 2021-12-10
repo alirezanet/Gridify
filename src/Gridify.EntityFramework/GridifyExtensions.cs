@@ -21,9 +21,8 @@ namespace Gridify.EntityFramework
 
       public static async Task<Paging<T>> GridifyAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
       {
-         mapper = mapper.FixMapper();
-         var res = await query.GridifyQueryableAsync(gridifyQuery, mapper);
-         return new Paging<T>(res.Count, await res.Query.ToListAsync());
+         var (count, queryable) = await query.GridifyQueryableAsync(gridifyQuery, mapper);
+         return new Paging<T>(count, await queryable.ToListAsync());
       }
 
       public async static Task<QueryablePaging<T>> GridifyQueryableAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery,
@@ -36,11 +35,11 @@ namespace Gridify.EntityFramework
          return new QueryablePaging<T>(count, query);
       }
 
-      public static async Task<Paging<T>> GridifyAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, CancellationToken token, IGridifyMapper<T> mapper = null)
+      public static async Task<Paging<T>> GridifyAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, CancellationToken token,
+         IGridifyMapper<T> mapper = null)
       {
-         mapper = mapper.FixMapper();
-         var res = await query.GridifyQueryableAsync(gridifyQuery, mapper, token);
-         return new Paging<T>(res.Count, await res.Query.ToListAsync(token));
+         var (count, queryable) = await query.GridifyQueryableAsync(gridifyQuery, mapper, token);
+         return new Paging<T>(count, await queryable.ToListAsync(token));
       }
 
       #endregion

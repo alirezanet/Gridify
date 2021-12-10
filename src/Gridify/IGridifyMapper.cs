@@ -12,6 +12,7 @@ namespace Gridify
          bool overrideIfExists = true);
 
       IGridifyMapper<T> AddMap(IGMap<T> gMap, bool overrideIfExists = true);
+      IGridifyMapper<T> AddMap(string from, Func<string, object>? convertor = null!,bool overrideIfExists = true);
       IGridifyMapper<T> GenerateMappings();
       IGridifyMapper<T> RemoveMap(string propertyName);
       IGridifyMapper<T> RemoveMap(IGMap<T> gMap);

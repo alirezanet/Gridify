@@ -1,6 +1,6 @@
 # Ordering Syntax
 
-The ordering query expression can be built with a comma-separated field names followed by **`asc`** or **`desc`** keywords.
+The ordering query expression can be built with a comma-delimited ordered list of field/property names followed by **`asc`** or **`desc`** keywords.
 
 by default, if you don't add these keywords, gridify assumes you need Ascending ordering.
 
