@@ -1,13 +1,13 @@
 # Gridify (A Modern Dynamic LINQ library)
 
+![GitHub](https://img.shields.io/github/license/alirezanet/gridify) ![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff) ![Nuget](https://img.shields.io/nuget/v/gridify?label=stable) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/gridify?label=latest) ![GitHub branch checks state](https://img.shields.io/github/checks-status/alirezanet/gridify/master?label=checks)
+
 <p align="center">
   <br>
-  <img width="400" src="./docs/.vuepress/public/gridify-g-logo.svg" alt="logo of gridify repository">
+  <img width="300" src="./docs/.vuepress/public/gridify-readme-logo.svg" alt="logo of gridify repository">
   <br>
   <br>
 </p>
-
-![GitHub](https://img.shields.io/github/license/alirezanet/gridify) ![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff) ![Nuget](https://img.shields.io/nuget/v/gridify?label=stable) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/gridify?label=latest) ![GitHub branch checks state](https://img.shields.io/github/checks-status/alirezanet/gridify/master?label=checks)
 
 ## Introduction
 
