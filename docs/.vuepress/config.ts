@@ -11,6 +11,8 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    bundler: '@vuepress/bundler-vite',
    plugins: plugin,
    themeConfig: {
+      logo: '/gridify-light-logo.svg',
+      logoDark: '/gridify-dark-logo.svg',
       editLinks: true,
       editLinkText: 'Help us improve this page!',
       contributors: false,
