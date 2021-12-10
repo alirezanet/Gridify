@@ -1,4 +1,4 @@
-# Filtering Syntax
+# Filtering
 
 Gridify supports the following filtering operators:
 

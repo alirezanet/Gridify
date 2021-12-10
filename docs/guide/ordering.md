@@ -1,4 +1,4 @@
-# Ordering Syntax
+# Ordering
 
 The ordering query expression can be built with a comma-delimited ordered list of field/property names followed by **`asc`** or **`desc`** keywords.
 

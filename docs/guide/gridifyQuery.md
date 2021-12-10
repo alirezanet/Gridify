@@ -15,10 +15,10 @@ Paging<Person> result = personsRepo.Gridify(gq);
 ```
 
 ## GetFilteringExpression
-Returns a lambda expression for filtering using the Filter property.
+This extension method, creates a lambda expression using the `GridifyQuery.Filter` property that you can use it in the LINQ `Where` method to filter the data.
 
 ``` csharp{2}
 var gq = new GridifyQuery() { Filter = "name=John" };
-var expression = gq.GetFilteringExpression<Person>();
+Expression<Func<T, bool>> expression = gq.GetFilteringExpression<Person>();
 var result = personsRepo.Where(expression);
 ```

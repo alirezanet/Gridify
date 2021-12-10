@@ -45,7 +45,13 @@ In the following, we will become more familiar with the above methods
 
 ## GenerateMappings
 This method generates all the mappings for **top level public properties** of the entity.
-we can use this method to generate the defult mappings.
+we can use this method to generate the default mappings.
+::: tip
+Another alternative to generate the default mappings is passing `true` to the GridifyMapper constructor.
+``` csharp
+var mapper = new GridifyMapper<Person>(true);
+```
+:::
 
 ## RemoveMap
 This method removes mapping from the mapper. Usually you will use this method after you have generated the mappings to ignore some properties that you don't want to be supported by gridify filtering or ordering actions.
@@ -66,6 +72,12 @@ mapper = mapper.AddMap("userName", p => p.UserName, v => v.ToLower());
 
 ## HasMap
 This method checks if the mapper has a mapping for the given field name.
+
+## RemoveMap
+This method removes a mapping from the mapper.
+
+## GetCurrentMaps
+This method returns list of current mappings.
 
 ## GridifyMapperConfiguration
 
@@ -144,3 +156,14 @@ var gm = new GridifyMapper<TargetType>()
 ```
 
 checkout [Passing Indexes](./filtering.md#passing-indexes) for more information.
+
+## GetExpression
+This method returns the selector expression that you can use it in LINQ queries.
+``` csharp
+Expression<Func<T, object>> Selector = mapper.GetExpression(nameof(Person.Name));
+```
+## GetLambdaExpression
+This method returns the selector expression that you can use it in LINQ queries.
+``` csharp
+LambdaExpression Selector = mapper.GetLambdaExpression(nameof(Person.Name));
+```
