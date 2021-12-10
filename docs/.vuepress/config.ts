@@ -1,7 +1,7 @@
 import { defineUserConfig } from 'vuepress-vite'
 import type { DefaultThemeOptions } from 'vuepress-vite'
 import type { ViteBundlerOptions } from '@vuepress/bundler-vite'
-import { navbar, sidebar , plugin } from './configs'
+import { navbar, sidebar, plugin } from './configs'
 
 
 export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
@@ -26,5 +26,8 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    port: 3000,
    base: '/Gridify/',
 
-   head: [['link', { rel: 'icon', href: '/favicon.ico' }]],
+   head: [
+      ['link', { rel: 'icon', href: '/favicon.ico', type: "image/x-icon" }],
+      ['link', { rel: 'shortcut icon', href: '/favicon.ico', type: "image/x-icon" }]
+   ],
 })

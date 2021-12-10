@@ -1,5 +1,6 @@
 ---
 home: true
+title: Welcome
 tagline: A Modern Dynamic LINQ library for .NET
 actions:
    - text: Get Started
