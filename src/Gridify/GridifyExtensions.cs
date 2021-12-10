@@ -110,17 +110,27 @@ namespace Gridify
          if (mapper != null) return mapper;
 
          mapper = new GridifyMapper<T>();
-         foreach (var node in syntaxTree.Root.Descendants().Where(q=>q.Kind == SyntaxKind.FieldExpression))
+         foreach (var field in syntaxTree.Root.Descendants()
+            .Where(q => q.Kind == SyntaxKind.FieldExpression)
+            .Cast<FieldExpressionSyntax>())
          {
-            var field = (FieldExpressionSyntax)node;
-            mapper.AddMap(field.FieldToken.Text);
+            try
+            {
+               mapper.AddMap(field.FieldToken.Text);
+            }
+            catch (Exception)
+            {
+               if (!mapper.Configuration.IgnoreNotMappedFields)
+                  throw new GridifyMapperException($"Property '{field.FieldToken.Text}' not found.");
+            }
          }
 
          return mapper;
       }
+
       private static IEnumerable<SyntaxNode> Descendants(this SyntaxNode root)
       {
-         var nodes = new Stack<SyntaxNode>(new[] {root});
+         var nodes = new Stack<SyntaxNode>(new[] { root });
          while (nodes.Any())
          {
             SyntaxNode node = nodes.Pop();
@@ -181,6 +191,20 @@ namespace Gridify
          return string.IsNullOrWhiteSpace(orderBy)
             ? query
             : ProcessOrdering(query, orderBy, startWithThenBy, mapper);
+      }
+
+      public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, string props, IGridifyMapper<T>? mapper = null)
+      {
+         if (string.IsNullOrWhiteSpace(props))
+            return (IQueryable<object>)query;
+
+         if (mapper is null)
+            mapper = new GridifyMapper<T>(true);
+
+         var exp = mapper.GetExpression(props);
+         var result = query.Select(exp);
+
+         return result;
       }
 
       private static IQueryable<T> ProcessOrdering<T>(IQueryable<T> query, string orderings, bool startWithThenBy, IGridifyMapper<T>? mapper)
