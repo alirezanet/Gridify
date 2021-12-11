@@ -10,5 +10,9 @@ export const head: HeadConfig[] = [
    ['meta', { property: 'og:image:type', content: 'image/png' }],
    ['meta', { property: 'og:image:width', content: '1280' }],
    ['meta', { property: 'og:image:height', content: '640' }],
-   ['meta', { property: 'og:image:title', content: 'Gridify' }],
+   ['meta', { property: 'og:title', content: 'Gridify' }],
+   ['meta', { property: 'og:type', content: 'website' }],
+   ['meta', { property: 'og:url', content: 'https://alirezanet.github.io/Gridify/' }],
+   ['meta', { property: 'og:description', content: 'A Modern Dynamic LINQ library for .NET' }],
 ]
+
