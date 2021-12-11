@@ -223,7 +223,7 @@ namespace Gridify
                {
                   mapper.AddMap(member);
                }
-               catch (Exception e)
+               catch (Exception)
                {
                   if (!mapper.Configuration.IgnoreNotMappedFields)
                      throw new GridifyMapperException($"Mapping '{member}' not found");
