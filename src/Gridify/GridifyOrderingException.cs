@@ -1,12 +1,11 @@
 using System;
 
-namespace Gridify
+namespace Gridify;
+
+public class GridifyOrderingException : Exception
 {
-   public class GridifyOrderingException : Exception
+   public GridifyOrderingException(string message) : base(message)
    {
-      public GridifyOrderingException(string message) : base(message)
-      {
         
-      }
    }
 }

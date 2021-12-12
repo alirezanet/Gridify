@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace Gridify.Syntax
+namespace Gridify.Syntax;
+
+public abstract class SyntaxNode
 {
-   public abstract class SyntaxNode
-   {
-      public abstract SyntaxKind Kind { get; }
-      public abstract IEnumerable<SyntaxNode> GetChildren();
-   }
+   public abstract SyntaxKind Kind { get; }
+   public abstract IEnumerable<SyntaxNode> GetChildren();
 }

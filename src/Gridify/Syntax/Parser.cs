@@ -1,151 +1,147 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
-namespace Gridify.Syntax
+namespace Gridify.Syntax;
+
+internal class Parser
 {
-   internal class Parser
+   private readonly List<string> _diagnostics = new();
+   private readonly SyntaxToken[] _tokens;
+   private int _position;
+
+   public Parser(string text)
    {
-      private readonly List<string> _diagnostics = new();
-      private readonly SyntaxToken[] _tokens;
-      private int _position;
-
-      public Parser(string text)
+      var tokens = new List<SyntaxToken>();
+      var lexer = new Lexer(text);
+      SyntaxToken token;
+      do
       {
-         var tokens = new List<SyntaxToken>();
-         var lexer = new Lexer(text);
-         SyntaxToken token;
-         do
-         {
-            token = lexer.NextToken();
-            if (token.Kind != SyntaxKind.BadToken && token.Kind != SyntaxKind.WhiteSpace) tokens.Add(token);
-         } while (token.Kind != SyntaxKind.End);
+         token = lexer.NextToken();
+         if (token.Kind != SyntaxKind.BadToken && token.Kind != SyntaxKind.WhiteSpace) tokens.Add(token);
+      } while (token.Kind != SyntaxKind.End);
 
-         _tokens = tokens.ToArray();
-         _diagnostics.AddRange(lexer.Diagnostics);
+      _tokens = tokens.ToArray();
+      _diagnostics.AddRange(lexer.Diagnostics);
+   }
+
+   private SyntaxToken Current => Peek(0);
+
+   private SyntaxToken Peek(int offset)
+   {
+      var index = _position + offset;
+      return index >= _tokens.Length ? _tokens[_tokens.Length - 1] : _tokens[index];
+   }
+
+   public SyntaxTree Parse()
+   {
+      var expression = ParseTerm();
+      var end = Match(SyntaxKind.End);
+      return new SyntaxTree(_diagnostics, expression, end);
+   }
+
+   private ExpressionSyntax ParseTerm()
+   {
+      var left = ParseFactor();
+      var binaryKinds = new[]
+      {
+         SyntaxKind.And,
+         SyntaxKind.Or
+      };
+
+      while (binaryKinds.Contains(Current.Kind))
+      {
+         var operatorToken = NextToken();
+         var right = ParseFactor();
+         left = new BinaryExpressionSyntax(left, operatorToken, right);
       }
 
-      private SyntaxToken Current => Peek(0);
+      return left;
+   }
 
-      private SyntaxToken Peek(int offset)
+   private ExpressionSyntax ParseFactor()
+   {
+      var left = ParsePrimaryExpression();
+      var binaryKinds = new[]
       {
-         var index = _position + offset;
-         return index >= _tokens.Length ? _tokens[_tokens.Length - 1] : _tokens[index];
+         SyntaxKind.Equal,
+         SyntaxKind.Like,
+         SyntaxKind.NotEqual,
+         SyntaxKind.NotLike,
+         SyntaxKind.GreaterThan,
+         SyntaxKind.LessThan,
+         SyntaxKind.GreaterOrEqualThan,
+         SyntaxKind.LessOrEqualThan,
+         SyntaxKind.StartsWith,
+         SyntaxKind.EndsWith,
+         SyntaxKind.NotStartsWith,
+         SyntaxKind.NotEndsWith
+      };
+
+      while (binaryKinds.Contains(Current.Kind))
+      {
+         var operatorToken = NextToken();
+         var right = ParseValueExpression();
+         left = new BinaryExpressionSyntax(left, operatorToken, right);
       }
 
-      public SyntaxTree Parse()
+      return left;
+   }
+
+   private ExpressionSyntax ParseValueExpression()
+   {
+      // field=
+      if (Current.Kind != SyntaxKind.ValueToken)
+         return new ValueExpressionSyntax(new SyntaxToken(), false, true);
+
+      var valueToken = Match(SyntaxKind.ValueToken);
+      var isCaseInsensitive = IsMatch(SyntaxKind.CaseInsensitive, out _);
+      return new ValueExpressionSyntax(valueToken, isCaseInsensitive, false);
+   }
+
+   private SyntaxToken NextToken()
+   {
+      var current = Current;
+      _position++;
+      return current;
+   }
+
+   private bool IsMatch(SyntaxKind kind, out SyntaxToken token)
+   {
+      if (Current.Kind != kind)
       {
-         var expression = ParseTerm();
-         var end = Match(SyntaxKind.End);
-         return new SyntaxTree(_diagnostics, expression, end);
+         token = Current;
+         return false;
       }
 
-      private ExpressionSyntax ParseTerm()
-      {
-         var left = ParseFactor();
-         var binaryKinds = new[]
-         {
-            SyntaxKind.And,
-            SyntaxKind.Or
-         };
+      token = NextToken();
+      return true;
+   }
 
-         while (binaryKinds.Contains(Current.Kind))
-         {
-            var operatorToken = NextToken();
-            var right = ParseFactor();
-            left = new BinaryExpressionSyntax(left, operatorToken, right);
-         }
+   private SyntaxToken Match(SyntaxKind kind)
+   {
+      if (Current.Kind == kind)
+         return NextToken();
 
-         return left;
-      }
+      _diagnostics.Add($"Unexpected token <{Current.Kind}>, expected <{kind}>");
+      return new SyntaxToken(kind, 0, string.Empty);
+   }
 
-      private ExpressionSyntax ParseFactor()
-      {
-         var left = ParsePrimaryExpression();
-         var binaryKinds = new[]
-         {
-            SyntaxKind.Equal,
-            SyntaxKind.Like,
-            SyntaxKind.NotEqual,
-            SyntaxKind.NotLike,
-            SyntaxKind.GreaterThan,
-            SyntaxKind.LessThan,
-            SyntaxKind.GreaterOrEqualThan,
-            SyntaxKind.LessOrEqualThan,
-            SyntaxKind.StartsWith,
-            SyntaxKind.EndsWith,
-            SyntaxKind.NotStartsWith,
-            SyntaxKind.NotEndsWith
-         };
+   private ExpressionSyntax ParsePrimaryExpression()
+   {
+      if (Current.Kind != SyntaxKind.OpenParenthesisToken) return ParseFieldExpression();
 
-         while (binaryKinds.Contains(Current.Kind))
-         {
-            var operatorToken = NextToken();
-            var right = ParseValueExpression();
-            left = new BinaryExpressionSyntax(left, operatorToken, right);
-         }
+      var left = NextToken();
+      var expression = ParseTerm();
+      var right = Match(SyntaxKind.CloseParenthesis);
+      return new ParenthesizedExpressionSyntax(left, expression, right);
+   }
 
-         return left;
-      }
+   private ExpressionSyntax ParseFieldExpression()
+   {
+      var fieldToken = Match(SyntaxKind.FieldToken);
 
-      private ExpressionSyntax ParseValueExpression()
-      {
-         // field=
-         if (Current.Kind != SyntaxKind.ValueToken)
-            return new ValueExpressionSyntax(new SyntaxToken(), false, true);
-
-         var valueToken = Match(SyntaxKind.ValueToken);
-         var isCaseInsensitive = IsMatch(SyntaxKind.CaseInsensitive, out _);
-         return new ValueExpressionSyntax(valueToken, isCaseInsensitive, false);
-      }
-
-      private SyntaxToken NextToken()
-      {
-         var current = Current;
-         _position++;
-         return current;
-      }
-
-      private bool IsMatch(SyntaxKind kind, out SyntaxToken token)
-      {
-         if (Current.Kind != kind)
-         {
-            token = Current;
-            return false;
-         }
-
-         token = NextToken();
-         return true;
-      }
-
-      private SyntaxToken Match(SyntaxKind kind)
-      {
-         if (Current.Kind == kind)
-            return NextToken();
-
-         _diagnostics.Add($"Unexpected token <{Current.Kind}>, expected <{kind}>");
-         return new SyntaxToken(kind, 0, string.Empty);
-      }
-
-      private ExpressionSyntax ParsePrimaryExpression()
-      {
-         if (Current.Kind != SyntaxKind.OpenParenthesisToken) return ParseFieldExpression();
-
-         var left = NextToken();
-         var expression = ParseTerm();
-         var right = Match(SyntaxKind.CloseParenthesis);
-         return new ParenthesizedExpressionSyntax(left, expression, right);
-      }
-
-      private ExpressionSyntax ParseFieldExpression()
-      {
-         var fieldToken = Match(SyntaxKind.FieldToken);
-
-         if (IsMatch(SyntaxKind.FieldIndexToken, out SyntaxToken fieldSyntaxToken))
-            return new FieldExpressionSyntax(fieldToken, int.Parse(fieldSyntaxToken.Text));
-
-         return new FieldExpressionSyntax(fieldToken);
-      }
+      return IsMatch(SyntaxKind.FieldIndexToken, out var fieldSyntaxToken)
+         ? new FieldExpressionSyntax(fieldToken, int.Parse(fieldSyntaxToken.Text))
+         : new FieldExpressionSyntax(fieldToken);
    }
 }

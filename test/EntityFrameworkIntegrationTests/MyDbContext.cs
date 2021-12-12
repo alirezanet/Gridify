@@ -1,25 +1,24 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 
-namespace EntityFrameworkIntegrationTests.cs
+namespace EntityFrameworkIntegrationTests.cs;
+
+public class MyDbContext : DbContext
 {
-   public class MyDbContext : DbContext
-   {
-      public DbSet<User> Users { get; set; }
+   public DbSet<User> Users { get; set; }
 
-      protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-      {
-         optionsBuilder.UseInMemoryDatabase("myTestDb");
-         optionsBuilder.EnableServiceProviderCaching(true);
-         base.OnConfiguring(optionsBuilder);
-      }
-   }
-
-   public class User
+   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
    {
-      public int Id { get; set; }
-      public string Name { get; set; }
-      public DateTime? CreateDate { get; set; }
-      public Guid FkGuid { get; set; }
+      optionsBuilder.UseInMemoryDatabase("myTestDb");
+      optionsBuilder.EnableServiceProviderCaching(true);
+      base.OnConfiguring(optionsBuilder);
    }
+}
+
+public class User
+{
+   public int Id { get; set; }
+   public string Name { get; set; }
+   public DateTime? CreateDate { get; set; }
+   public Guid FkGuid { get; set; }
 }

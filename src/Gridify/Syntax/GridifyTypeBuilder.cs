@@ -2,96 +2,95 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Gridify.Syntax
+namespace Gridify.Syntax;
+
+internal static class GridifyTypeBuilder
 {
-   internal static class GridifyTypeBuilder
+   private class FieldDescriptor
    {
-      private class FieldDescriptor
+      public FieldDescriptor(string fieldName, Type fieldType)
       {
-         public FieldDescriptor(string fieldName, Type fieldType)
-         {
-            FieldName = fieldName;
-            FieldType = fieldType;
-         }
-
-         public string FieldName { get; }
-         public Type FieldType { get; }
+         FieldName = fieldName;
+         FieldType = fieldType;
       }
 
-      public static (object Instance, Type type) CreateNewObject(Type type, string fieldName, object? value)
-      {
-         var myTypeInfo = CompileResultTypeInfo(type, fieldName);
-         var myType = myTypeInfo!.AsType();
-         var myObject = Activator.CreateInstance(myType);
-         myType.GetProperty(fieldName)!.SetValue(myObject, value);
-         return (myObject, myType);
-      }
+      public string FieldName { get; }
+      public Type FieldType { get; }
+   }
 
-      public static TypeInfo? CompileResultTypeInfo(Type type, string name)
-      {
-         TypeBuilder tb = GetTypeBuilder();
-         ConstructorBuilder constructor =
-            tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
+   public static (object Instance, Type type) CreateNewObject(Type type, string fieldName, object? value)
+   {
+      var myTypeInfo = CompileResultTypeInfo(type, fieldName);
+      var myType = myTypeInfo!.AsType();
+      var myObject = Activator.CreateInstance(myType);
+      myType.GetProperty(fieldName)!.SetValue(myObject, value);
+      return (myObject, myType);
+   }
 
-         var field = new FieldDescriptor(name, type);
-         CreateProperty(tb, field.FieldName, field.FieldType);
-         var objectTypeInfo = tb.CreateTypeInfo();
+   public static TypeInfo? CompileResultTypeInfo(Type type, string name)
+   {
+      TypeBuilder tb = GetTypeBuilder();
+      ConstructorBuilder constructor =
+         tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
-         return objectTypeInfo;
-      }
+      var field = new FieldDescriptor(name, type);
+      CreateProperty(tb, field.FieldName, field.FieldType);
+      var objectTypeInfo = tb.CreateTypeInfo();
 
-      private static TypeBuilder GetTypeBuilder()
-      {
-         const string? typeSignature = "GridifyDisplayClass";
-         var an = new AssemblyName(typeSignature);
-         var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(Guid.NewGuid().ToString()), AssemblyBuilderAccess.Run);
-         ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("RuntimeModule");
-         TypeBuilder tb = moduleBuilder.DefineType(typeSignature,
-            TypeAttributes.Public |
-            TypeAttributes.Class |
-            TypeAttributes.AutoClass |
-            TypeAttributes.AnsiClass |
-            TypeAttributes.BeforeFieldInit |
-            TypeAttributes.AutoLayout,
-            null);
-         return tb;
-      }
+      return objectTypeInfo;
+   }
 
-      private static void CreateProperty(TypeBuilder tb, string propertyName, Type propertyType)
-      {
-         FieldBuilder fieldBuilder = tb.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
+   private static TypeBuilder GetTypeBuilder()
+   {
+      const string? typeSignature = "GridifyDisplayClass";
+      var an = new AssemblyName(typeSignature);
+      var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(Guid.NewGuid().ToString()), AssemblyBuilderAccess.Run);
+      ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("RuntimeModule");
+      TypeBuilder tb = moduleBuilder.DefineType(typeSignature,
+         TypeAttributes.Public |
+         TypeAttributes.Class |
+         TypeAttributes.AutoClass |
+         TypeAttributes.AnsiClass |
+         TypeAttributes.BeforeFieldInit |
+         TypeAttributes.AutoLayout,
+         null);
+      return tb;
+   }
 
-         PropertyBuilder propertyBuilder = tb.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
-         MethodBuilder getPropMthdBldr = tb.DefineMethod("get_" + propertyName,
-            MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
-         ILGenerator getIl = getPropMthdBldr.GetILGenerator();
+   private static void CreateProperty(TypeBuilder tb, string propertyName, Type propertyType)
+   {
+      FieldBuilder fieldBuilder = tb.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
 
-         getIl.Emit(OpCodes.Ldarg_0);
-         getIl.Emit(OpCodes.Ldfld, fieldBuilder);
-         getIl.Emit(OpCodes.Ret);
+      PropertyBuilder propertyBuilder = tb.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
+      MethodBuilder getPropMthdBldr = tb.DefineMethod("get_" + propertyName,
+         MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
+      ILGenerator getIl = getPropMthdBldr.GetILGenerator();
 
-         MethodBuilder setPropMthdBldr =
-            tb.DefineMethod("set_" + propertyName,
-               MethodAttributes.Public |
-               MethodAttributes.SpecialName |
-               MethodAttributes.HideBySig,
-               null, new[] { propertyType });
+      getIl.Emit(OpCodes.Ldarg_0);
+      getIl.Emit(OpCodes.Ldfld, fieldBuilder);
+      getIl.Emit(OpCodes.Ret);
 
-         ILGenerator setIl = setPropMthdBldr.GetILGenerator();
-         var modifyProperty = setIl.DefineLabel();
-         var exitSet = setIl.DefineLabel();
+      MethodBuilder setPropMthdBldr =
+         tb.DefineMethod("set_" + propertyName,
+            MethodAttributes.Public |
+            MethodAttributes.SpecialName |
+            MethodAttributes.HideBySig,
+            null, new[] { propertyType });
 
-         setIl.MarkLabel(modifyProperty);
-         setIl.Emit(OpCodes.Ldarg_0);
-         setIl.Emit(OpCodes.Ldarg_1);
-         setIl.Emit(OpCodes.Stfld, fieldBuilder);
+      ILGenerator setIl = setPropMthdBldr.GetILGenerator();
+      var modifyProperty = setIl.DefineLabel();
+      var exitSet = setIl.DefineLabel();
 
-         setIl.Emit(OpCodes.Nop);
-         setIl.MarkLabel(exitSet);
-         setIl.Emit(OpCodes.Ret);
+      setIl.MarkLabel(modifyProperty);
+      setIl.Emit(OpCodes.Ldarg_0);
+      setIl.Emit(OpCodes.Ldarg_1);
+      setIl.Emit(OpCodes.Stfld, fieldBuilder);
 
-         propertyBuilder.SetGetMethod(getPropMthdBldr);
-         propertyBuilder.SetSetMethod(setPropMthdBldr);
-      }
+      setIl.Emit(OpCodes.Nop);
+      setIl.MarkLabel(exitSet);
+      setIl.Emit(OpCodes.Ret);
+
+      propertyBuilder.SetGetMethod(getPropMthdBldr);
+      propertyBuilder.SetSetMethod(setPropMthdBldr);
    }
 }

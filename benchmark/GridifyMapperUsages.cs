@@ -7,128 +7,127 @@ using BenchmarkDotNet.Order;
 using Gridify;
 using Gridify.Tests;
 
-namespace Benchmarks
+namespace Benchmarks;
+
+[MemoryDiagnoser]
+[RPlotExporter]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+public class GridifyMapperUsages
 {
-   [MemoryDiagnoser]
-   [RPlotExporter]
-   [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-   public class GridifyMapperUsages
+   private static readonly Consumer Consumer = new();
+   private TestClass[] _data;
+   private Func<TestClass, bool> compiled1;
+   private Func<TestClass, bool> compiled2;
+   private Func<TestClass, bool> compiled3;
+
+   private IQueryable<TestClass> Ds => _data.AsQueryable();
+   private IEnumerable<TestClass> EnumerableDs => _data.ToList();
+   private IGridifyMapper<TestClass> ggm { get; set; }
+
+   [GlobalSetup]
+   public void Setup()
    {
-      private static readonly Consumer Consumer = new();
-      private TestClass[] _data;
-      private Func<TestClass, bool> compiled1;
-      private Func<TestClass, bool> compiled2;
-      private Func<TestClass, bool> compiled3;
+      _data = GetSampleData().ToArray();
 
-      private IQueryable<TestClass> Ds => _data.AsQueryable();
-      private IEnumerable<TestClass> EnumerableDs => _data.ToList();
-      private IGridifyMapper<TestClass> ggm { get; set; }
+      ggm = new GridifyMapper<TestClass>().GenerateMappings();
 
-      [GlobalSetup]
-      public void Setup()
-      {
-         _data = GetSampleData().ToArray();
-
-         ggm = new GridifyMapper<TestClass>().GenerateMappings();
-
-         // compiled query (this is not included in our readme benchmarks)
-         var gq1 = new GridifyQuery() { Filter = "Name=*a" };
-         var gq2 = new GridifyQuery() { Filter = "Id>5" };
-         var gq3 = new GridifyQuery() { Filter = "Name=Ali" };
-         compiled1 = gq1.GetFilteringExpression(ggm).Compile();
-         compiled2 = gq2.GetFilteringExpression(ggm).Compile();
-         compiled3 = gq3.GetFilteringExpression(ggm).Compile();
-      }
+      // compiled query (this is not included in our readme benchmarks)
+      var gq1 = new GridifyQuery() { Filter = "Name=*a" };
+      var gq2 = new GridifyQuery() { Filter = "Id>5" };
+      var gq3 = new GridifyQuery() { Filter = "Name=Ali" };
+      compiled1 = gq1.GetFilteringExpression(ggm).Compile();
+      compiled2 = gq2.GetFilteringExpression(ggm).Compile();
+      compiled3 = gq3.GetFilteringExpression(ggm).Compile();
+   }
 
 
-      [Benchmark(Baseline = true)]
-      public void NativeLinQ()
-      {
-         Ds.Where(q => q.Name.Contains("a")).Consume(Consumer);
-         Ds.Where(q => q.Id > 5).Consume(Consumer);
-         Ds.Where(q => q.Name == "Ali").Consume(Consumer);
-      }
-      [Benchmark]
-      public void Gridify_GlobalMapper()
-      {
-         Ds.ApplyFiltering("Name=*a", ggm).Consume(Consumer);
-         Ds.ApplyFiltering("Id>5", ggm).Consume(Consumer);
-         Ds.ApplyFiltering("Name=Ali", ggm).Consume(Consumer);
-      }
-      [Benchmark]
-      public void Gridify_SingleMapper_Generated()
-      {
-         var gm = new GridifyMapper<TestClass>().GenerateMappings();
-         Ds.ApplyFiltering("Name=*a", gm).Consume(Consumer);
-         Ds.ApplyFiltering("Id>5", gm).Consume(Consumer);
-         Ds.ApplyFiltering("Name=Ali", gm).Consume(Consumer);
-      }
+   [Benchmark(Baseline = true)]
+   public void NativeLinQ()
+   {
+      Ds.Where(q => q.Name.Contains("a")).Consume(Consumer);
+      Ds.Where(q => q.Id > 5).Consume(Consumer);
+      Ds.Where(q => q.Name == "Ali").Consume(Consumer);
+   }
+   [Benchmark]
+   public void Gridify_GlobalMapper()
+   {
+      Ds.ApplyFiltering("Name=*a", ggm).Consume(Consumer);
+      Ds.ApplyFiltering("Id>5", ggm).Consume(Consumer);
+      Ds.ApplyFiltering("Name=Ali", ggm).Consume(Consumer);
+   }
+   [Benchmark]
+   public void Gridify_SingleMapper_Generated()
+   {
+      var gm = new GridifyMapper<TestClass>().GenerateMappings();
+      Ds.ApplyFiltering("Name=*a", gm).Consume(Consumer);
+      Ds.ApplyFiltering("Id>5", gm).Consume(Consumer);
+      Ds.ApplyFiltering("Name=Ali", gm).Consume(Consumer);
+   }
 
-      [Benchmark]
-      public void Gridify_SingleMapper_Manual()
-      {
-         var gm = new GridifyMapper<TestClass>()
-                  .AddMap("name")
-                  .AddMap("id");
+   [Benchmark]
+   public void Gridify_SingleMapper_Manual()
+   {
+      var gm = new GridifyMapper<TestClass>()
+         .AddMap("name")
+         .AddMap("id");
 
-         Ds.ApplyFiltering("Name=*a", gm).Consume(Consumer);
-         Ds.ApplyFiltering("Id>5", gm).Consume(Consumer);
-         Ds.ApplyFiltering("Name=Ali", gm).Consume(Consumer);
-      }
+      Ds.ApplyFiltering("Name=*a", gm).Consume(Consumer);
+      Ds.ApplyFiltering("Id>5", gm).Consume(Consumer);
+      Ds.ApplyFiltering("Name=Ali", gm).Consume(Consumer);
+   }
 
-      [Benchmark]
-      public void Gridify_NoMapper()
-      {
-         Ds.ApplyFiltering("Name=*a").Consume(Consumer);
-         Ds.ApplyFiltering("Id>5").Consume(Consumer);
-         Ds.ApplyFiltering("Name=Ali").Consume(Consumer);
-      }
-      [Benchmark]
-      public void Gridify_EachAction_Generated()
-      {
-         Ds.ApplyFiltering("Name=*a", new GridifyMapper<TestClass>().GenerateMappings()).Consume(Consumer);
-         Ds.ApplyFiltering("Id>5", new GridifyMapper<TestClass>().GenerateMappings()).Consume(Consumer);
-         Ds.ApplyFiltering("Name=Ali", new GridifyMapper<TestClass>().GenerateMappings()).Consume(Consumer);
-      }
+   [Benchmark]
+   public void Gridify_NoMapper()
+   {
+      Ds.ApplyFiltering("Name=*a").Consume(Consumer);
+      Ds.ApplyFiltering("Id>5").Consume(Consumer);
+      Ds.ApplyFiltering("Name=Ali").Consume(Consumer);
+   }
+   [Benchmark]
+   public void Gridify_EachAction_Generated()
+   {
+      Ds.ApplyFiltering("Name=*a", new GridifyMapper<TestClass>().GenerateMappings()).Consume(Consumer);
+      Ds.ApplyFiltering("Id>5", new GridifyMapper<TestClass>().GenerateMappings()).Consume(Consumer);
+      Ds.ApplyFiltering("Name=Ali", new GridifyMapper<TestClass>().GenerateMappings()).Consume(Consumer);
+   }
 
-      // [Benchmark]
-      // public void GridifyCompiled()
-      // {
-      //    EnumerableDs.Where(compiled1).Consume(Consumer);
-      //    EnumerableDs.Where(compiled2).Consume(Consumer);
-      //    EnumerableDs.Where(compiled3).Consume(Consumer);
-      // }
+   // [Benchmark]
+   // public void GridifyCompiled()
+   // {
+   //    EnumerableDs.Where(compiled1).Consume(Consumer);
+   //    EnumerableDs.Where(compiled2).Consume(Consumer);
+   //    EnumerableDs.Where(compiled3).Consume(Consumer);
+   // }
 
-      public static IEnumerable<TestClass> GetSampleData()
-      {
-         var lst = new List<TestClass>();
-         lst.Add(new TestClass(1, "John", null, Guid.NewGuid(), DateTime.Now));
-         lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid(), DateTime.UtcNow));
-         lst.Add(new TestClass(3, "Jack", (TestClass)lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2)));
-         lst.Add(new TestClass(4, "Rose", null, Guid.Parse("e2cec5dd-208d-4bb5-a852-50008f8ba366")));
-         lst.Add(new TestClass(5, "Ali", null));
-         lst.Add(new TestClass(6, "Hamid", (TestClass)lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
-         lst.Add(new TestClass(7, "Hasan", (TestClass)lst[1].Clone()));
-         lst.Add(new TestClass(8, "Farhad", (TestClass)lst[2].Clone(), Guid.Empty));
-         lst.Add(new TestClass(9, "Sara", null));
-         lst.Add(new TestClass(10, "Jorge", null));
-         lst.Add(new TestClass(11, "joe", null));
-         lst.Add(new TestClass(12, "jimmy", (TestClass)lst[0].Clone()));
-         lst.Add(new TestClass(13, "Nazanin", null));
-         lst.Add(new TestClass(14, "Reza", null));
-         lst.Add(new TestClass(15, "Korosh", (TestClass)lst[0].Clone()));
-         lst.Add(new TestClass(16, "Kamran", (TestClass)lst[1].Clone()));
-         lst.Add(new TestClass(17, "Saeid", (TestClass)lst[2].Clone()));
-         lst.Add(new TestClass(18, "jessi==ca", null));
-         lst.Add(new TestClass(19, "Ped=ram", null));
-         lst.Add(new TestClass(20, "Peyman!", null));
-         lst.Add(new TestClass(21, "Fereshte", null));
-         lst.Add(new TestClass(22, "LIAM", null));
-         lst.Add(new TestClass(22, @"\Liam", null));
-         lst.Add(new TestClass(23, "LI | AM", null));
-         lst.Add(new TestClass(24, "(LI,AM)", null));
-         return lst;
-      }
+   public static IEnumerable<TestClass> GetSampleData()
+   {
+      var lst = new List<TestClass>();
+      lst.Add(new TestClass(1, "John", null, Guid.NewGuid(), DateTime.Now));
+      lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid(), DateTime.UtcNow));
+      lst.Add(new TestClass(3, "Jack", (TestClass)lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2)));
+      lst.Add(new TestClass(4, "Rose", null, Guid.Parse("e2cec5dd-208d-4bb5-a852-50008f8ba366")));
+      lst.Add(new TestClass(5, "Ali", null));
+      lst.Add(new TestClass(6, "Hamid", (TestClass)lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
+      lst.Add(new TestClass(7, "Hasan", (TestClass)lst[1].Clone()));
+      lst.Add(new TestClass(8, "Farhad", (TestClass)lst[2].Clone(), Guid.Empty));
+      lst.Add(new TestClass(9, "Sara", null));
+      lst.Add(new TestClass(10, "Jorge", null));
+      lst.Add(new TestClass(11, "joe", null));
+      lst.Add(new TestClass(12, "jimmy", (TestClass)lst[0].Clone()));
+      lst.Add(new TestClass(13, "Nazanin", null));
+      lst.Add(new TestClass(14, "Reza", null));
+      lst.Add(new TestClass(15, "Korosh", (TestClass)lst[0].Clone()));
+      lst.Add(new TestClass(16, "Kamran", (TestClass)lst[1].Clone()));
+      lst.Add(new TestClass(17, "Saeid", (TestClass)lst[2].Clone()));
+      lst.Add(new TestClass(18, "jessi==ca", null));
+      lst.Add(new TestClass(19, "Ped=ram", null));
+      lst.Add(new TestClass(20, "Peyman!", null));
+      lst.Add(new TestClass(21, "Fereshte", null));
+      lst.Add(new TestClass(22, "LIAM", null));
+      lst.Add(new TestClass(22, @"\Liam", null));
+      lst.Add(new TestClass(23, "LI | AM", null));
+      lst.Add(new TestClass(24, "(LI,AM)", null));
+      return lst;
    }
 }
 
