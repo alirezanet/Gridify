@@ -27,7 +27,13 @@ bool isValid = gq.IsValid<Person>();
 
 ``` csharp
 var gq = new GridifyQuery() { Filter = "NonExist=John" , OrderBy = "Age" };
-// false (because NonExist is not a property of Person)
+// false (NonExist is not a property of Person)
+bool isValid = gq.IsValid<Person>();
+```
+
+``` csharp
+var gq = new GridifyQuery() { Filter = "@name=!" , OrderBy = "Age" };
+// false (this is not a valid filter)
 bool isValid = gq.IsValid<Person>();
 ```
 
@@ -38,7 +44,7 @@ var mapper = new GridifyMapper<Person>()
       .AddMap("name", q => q.Name);
 var gq = new GridifyQuery() { Filter = "name=John" , OrderBy = "Age" };
 
-// false (because Age is not mapped)
+// false (Age is not mapped)
 bool isValid = gq.IsValid(mapper);
 ```
 
