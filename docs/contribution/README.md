@@ -6,11 +6,10 @@ start contributing to the project by submitting pull requests
 
 ## Todos
 
--  :zap: Improve the documentation site
--  :zap: Improve code documentation (summary)
--  :zap: Add project Security Policy
--  :zap: Validation method [#48](https://github.com/alirezanet/Gridify/issues/48)
--  :zap: Add Support EF.Function.FreeText [#42](https://github.com/alirezanet/Gridify/issues/42)
+- :zap: Improve the documentation site
+- :zap: Improve code documentation (summary)
+- :zap: Add project Security Policy
+- :zap: Add Support EF.Function.FreeText [#42](https://github.com/alirezanet/Gridify/issues/42)
 
 ## Documentation
 
@@ -44,6 +43,6 @@ check out the [github contributing guide](https://git-scm.com/book/en/v2/GitHub-
 
 ## Contributors
 
--  [AliReZa Sabouri](https://github.com/alirezanet)
--  [Alireza Arabshahi](https://github.com/AlirezaArabshahi)
--  Add your name
+- [AliReZa Sabouri](https://github.com/alirezanet)
+- [Alireza Arabshahi](https://github.com/AlirezaArabshahi)
+- Add your name

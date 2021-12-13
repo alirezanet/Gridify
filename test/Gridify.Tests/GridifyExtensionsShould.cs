@@ -817,6 +817,42 @@ public class GridifyExtensionsShould
 
    #endregion
 
+   #region Validation
+
+   [Theory]
+   [InlineData("notExist=123", false)]
+   [InlineData("name=ali", true)]
+   [InlineData("name123,123", false)]
+   [InlineData("!name<23", false)]
+   [InlineData("(id=2,tag=someTag)", true)]
+   [InlineData("@name=john", false)]
+   //[InlineData("id<nonNumber", false)] // we don't validate runtime values yet.
+   public void IsValid_IGridifyFiltering_ShouldReturnExpectedResult( string filter, bool expected)
+   {
+      var gq = new GridifyQuery() { Filter = filter };
+      var actual = gq.IsValid<TestClass>();
+      Assert.Equal(expected, actual);
+   }
+
+   [Theory]
+   [InlineData("notExist", false)]
+   [InlineData("name", true)]
+   [InlineData("name,", false)]
+   [InlineData("!name", false)]
+   [InlineData("name des", false)]
+   [InlineData("id,name", true)]
+   [InlineData("id asc,name desc", true)]
+   [InlineData("id asc,name2 desc", false)]
+   public void IsValid_IGridifyOrdering_ShouldReturnExpectedResult(string order, bool expected)
+   {
+      var gq = new GridifyQuery() { OrderBy = order };
+      var actual = gq.IsValid<TestClass>();
+      Assert.Equal(expected, actual);
+   }
+
+
+   #endregion
+
    #region "Data"
 
    public static IEnumerable<TestClass> GetSampleData()

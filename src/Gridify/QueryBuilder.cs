@@ -8,7 +8,7 @@ namespace Gridify;
 
 public class QueryBuilder<T> : IQueryBuilder<T>
 {
-   private readonly List<LambdaExpression> _conditions = new();
+   private readonly List<string> _conditionList = new();
    private IGridifyMapper<T>? _mapper;
    private string _orderBy = string.Empty;
    private (int page, int pageSize)? _paging;
@@ -38,7 +38,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
    /// <inheritdoc />
    public IQueryBuilder<T> AddCondition(string condition)
    {
-      _conditions.Add(ConvertConditionToExpression(condition));
+      _conditionList.Add(condition);
       return this;
    }
 
@@ -46,7 +46,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
    public IQueryBuilder<T> AddCondition(IGridifyFiltering condition)
    {
       if (condition.Filter != null)
-         _conditions.Add(ConvertConditionToExpression(condition.Filter));
+         _conditionList.Add(condition.Filter);
       return this;
    }
 
@@ -127,11 +127,38 @@ public class QueryBuilder<T> : IQueryBuilder<T>
    }
 
    /// <inheritdoc />
+   public bool IsValid()
+   {
+      var isValid = true;
+      _mapper ??= new GridifyMapper<T>(true);
+      try
+      {
+         if (_conditionList.Count > 0)
+         {
+            var gqList = _conditionList.Select(q => new GridifyQuery() { Filter = q }).Cast<IGridifyFiltering>();
+            isValid = isValid && gqList.All(q => q.IsValid(_mapper));
+         }
+
+         if (!string.IsNullOrWhiteSpace(_orderBy))
+         {
+            IGridifyOrdering gq = new GridifyQuery() { OrderBy = _orderBy };
+            isValid = isValid && gq.IsValid(_mapper);
+         }
+      }
+      catch (Exception)
+      {
+         return false;
+      }
+      return isValid;
+   }
+
+   /// <inheritdoc />
    public Expression<Func<T, bool>> BuildFilteringExpression()
    {
-      if (_conditions.Count == 0)
+      if (_conditionList.Count == 0)
          return _ => true;
 
+      var _conditions = _conditionList.Select(ConvertConditionToExpression).ToList();
       return (_conditions.Aggregate(null, (LambdaExpression? x, LambdaExpression y)
          => x is null ? y : x.And(y)) as Expression<Func<T, bool>>)!;
    }
@@ -139,24 +166,26 @@ public class QueryBuilder<T> : IQueryBuilder<T>
    /// <inheritdoc />
    public Func<IQueryable<T>, bool> BuildEvaluator()
    {
+      var _conditions = _conditionList.Select(ConvertConditionToExpression).ToList();
       return collection =>
       {
          return _conditions.Count == 0 ||
                 _conditions.Aggregate(true, (current, expression) =>
-                   current & collection.Any((expression as Expression<Func<T, bool>>)!));
+                   current & collection.Any(expression));
       };
    }
 
    /// <inheritdoc />
    public Func<IEnumerable<T>, bool> BuildCompiledEvaluator()
    {
-      var compiledCond = _conditions.Select(q => q.Compile() as Func<T, bool>).ToList();
+      var _conditions = _conditionList.Select(ConvertConditionToExpression).ToList();
+      var compiledCond = _conditions.Select(q => q.Compile()).ToList();
       var length = _conditions.Count;
       return collection =>
       {
          return length == 0 ||
                 compiledCond.Aggregate(true, (current, expression)
-                   =>  current && collection.Any(expression!));
+                   => current && collection.Any(expression!));
       };
    }
 
@@ -177,7 +206,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
    {
       var query = context;
 
-      if (_conditions.Count > 0)
+      if (_conditionList.Count > 0)
          query = query.Where(BuildFilteringExpression());
 
       if (!string.IsNullOrEmpty(_orderBy))
@@ -201,7 +230,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
       var compiled = BuildFilteringExpression().Compile();
       return collection =>
       {
-         if (_conditions.Count > 0)
+         if (_conditionList.Count > 0)
             collection = collection.Where(compiled);
 
          if (!string.IsNullOrEmpty(_orderBy)) // TODO: this also should be compiled
@@ -217,7 +246,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
    /// <inheritdoc />
    public IEnumerable<T> Build(IEnumerable<T> collection)
    {
-      if (_conditions.Count > 0)
+      if (_conditionList.Count > 0)
          collection = collection.Where(BuildFilteringExpression().Compile());
 
       if (!string.IsNullOrEmpty(_orderBy))
@@ -260,7 +289,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
       var compiled = BuildFilteringExpression().Compile();
       return collection =>
       {
-         if (_conditions.Count > 0)
+         if (_conditionList.Count > 0)
             collection = collection.Where(compiled);
 
          if (!string.IsNullOrEmpty(_orderBy)) // TODO: this also should be compiled
@@ -280,7 +309,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
    public QueryablePaging<T> BuildWithQueryablePaging(IQueryable<T> collection)
    {
       var query = collection;
-      if (_conditions.Count > 0)
+      if (_conditionList.Count > 0)
          query = query.Where(BuildFilteringExpression());
 
       if (!string.IsNullOrEmpty(_orderBy))

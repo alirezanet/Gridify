@@ -61,6 +61,14 @@ public interface IQueryBuilder<T>
    IQueryBuilder<T> AddMap(IGMap<T> map, bool overwrite = true);
    IQueryBuilder<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
    IQueryBuilder<T> RemoveMap(IGMap<T> map);
+
+   /// <summary>
+   /// Validate conditions, orderings, mappings
+   /// make sure to use ir after your configurations and before the Build methods
+   /// </summary>
+   /// <returns>boolean true/false</returns>
+   bool IsValid();
+
    Expression<Func<T, bool>> BuildFilteringExpression();
 
    /// <summary>

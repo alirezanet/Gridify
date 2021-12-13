@@ -204,7 +204,66 @@ public static partial class GridifyExtensions
       var exp = mapper.GetExpression(props);
       var result = query.Select(exp);
 
+
       return result;
+   }
+
+   /// <summary>
+   /// Validates Filter and/or OrderBy with Mappings
+   /// </summary>
+   /// <param name="gridifyQuery">gridify query with (Filter or OrderBy) </param>
+   /// <param name="mapper">the gridify mapper that you want to use with, this is optional</param>
+   /// <typeparam name="T"></typeparam>
+   /// <returns></returns>
+   public static bool IsValid<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T>? mapper = null)
+   {
+      return  ((IGridifyFiltering)gridifyQuery).IsValid(mapper) &&
+              ((IGridifyOrdering)gridifyQuery).IsValid(mapper);
+   }
+
+   public static bool IsValid<T>(this IGridifyFiltering filtering, IGridifyMapper<T>? mapper = null)
+   {
+      if (string.IsNullOrWhiteSpace(filtering.Filter)) return true;
+      try
+      {
+         var parser = new Parser(filtering.Filter!);
+         var syntaxTree = parser.Parse();
+         if (syntaxTree.Diagnostics.Any())
+            return false;
+
+         var fieldExpressions = syntaxTree.Root.Descendants()
+            .Where(q=> q.Kind is SyntaxKind.FieldExpression)
+            .Cast<FieldExpressionSyntax>().ToList();
+
+         mapper ??= new GridifyMapper<T>(true);
+
+         if (fieldExpressions.Any(field => !mapper.HasMap(field.FieldToken.Text)))
+            return false;
+      }
+      catch (Exception)
+      {
+         return false;
+      }
+
+      return true;
+   }
+
+   public static bool IsValid<T>(this IGridifyOrdering ordering, IGridifyMapper<T>? mapper = null)
+   {
+      if (string.IsNullOrWhiteSpace(ordering.OrderBy)) return true;
+      try
+      {
+         var orders = ParseOrderings(ordering.OrderBy!).ToList();
+         mapper ??= new GridifyMapper<T>(true);
+         if (orders.Any(order => !mapper.HasMap(order.memberName)))
+            return false;
+      }
+      catch (Exception)
+      {
+         return false;
+      }
+
+      return true;
    }
 
    private static IQueryable<T> ProcessOrdering<T>(IQueryable<T> query, string orderings, bool startWithThenBy, IGridifyMapper<T>? mapper)
@@ -308,6 +367,7 @@ public static partial class GridifyExtensions
    {
       return query.Skip((page - 1) * pageSize).Take(pageSize);
    }
+
    public static IQueryable<T> ApplyPaging<T>(this IQueryable<T> query, IGridifyPagination? gridifyPagination)
    {
       if (gridifyPagination == null) return query;

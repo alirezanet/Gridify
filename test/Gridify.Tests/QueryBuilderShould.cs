@@ -66,7 +66,6 @@ public class QueryBuilderShould
       var compiled = builder.Build();
       var result = compiled(_fakeRepository.AsQueryable());
       Assert.True(result.Any());
-
    }
 
    [Fact]
@@ -82,9 +81,68 @@ public class QueryBuilderShould
       var expectedResult = _fakeRepository.Where(q =>
          q.Id > 2 && q.Name != null && q.Name.Contains("a"));
 
-      var actualResult =  _fakeRepository.AsQueryable().Where(actualExpression);
+      var actualResult = _fakeRepository.AsQueryable().Where(actualExpression);
 
       Assert.Equal(expectedExpressionString, actualExpression.ToString());
       Assert.Equal(expectedResult, actualResult);
    }
+
+   #region Validation
+
+   [Theory]
+   [InlineData(new[] { "notExist=123" }, false)]
+   [InlineData(new[] { "name=ali" }, true)]
+   [InlineData(new[] { "name=ali", "id>24" }, true)]
+   [InlineData(new[] { "name=ali", "id," }, false)]
+   [InlineData(new[] { "name123,123" }, false)]
+   [InlineData(new[] { "!name<23" }, false)]
+   [InlineData(new[] { "(id=2,tag=someTag)" }, true)]
+   [InlineData(new[] { "@name=john" }, false)]
+   //[InlineData("id<nonNumber", false)] // we don't validate runtime values yet.
+   public void IsValid_IGridifyFiltering_ShouldReturnExpectedResult(string[] filters, bool expected)
+   {
+      var qb = new QueryBuilder<TestClass>();
+      var actual = true;
+      foreach (var filter in filters)
+      {
+         qb.AddCondition(filter);
+         // act
+         actual = actual && qb.IsValid();
+      }
+
+      // assert
+      Assert.Equal(expected, actual);
+   }
+
+   [Theory]
+   [InlineData(new[] { "notExist" }, false)]
+   [InlineData(new[] { "name" }, true)]
+   [InlineData(new[] { "name" , "id asc" } , true)]
+   [InlineData(new[] { "name" , "id des" } , false)]
+   [InlineData(new[] { "name" , "dss" } , false)]
+   [InlineData(new[] { "id," , "name" } , false)]
+   [InlineData(new[] { "id" , "name" , "date" } , false)]
+   [InlineData(new[] { "id" , "name" , "date2" } , false)]
+   [InlineData(new[] { "name," }, false)]
+   [InlineData(new[] { "!name" }, false)]
+   [InlineData(new[] { "name des" }, false)]
+   [InlineData(new[] { "id,name" }, true)]
+   [InlineData(new[] { "id asc,name desc" }, true)]
+   [InlineData(new[] { "id asc,name2 desc" }, false)]
+   public void IsValid_IGridifyOrdering_ShouldReturnExpectedResult(string[] orders, bool expected)
+   {
+      var qb = new QueryBuilder<TestClass>();
+      var actual = true;
+      foreach (var order in orders)
+      {
+         qb.AddOrderBy(order);
+         // act
+         actual = actual && qb.IsValid();
+      }
+
+      // assert
+      Assert.Equal(expected, actual);
+   }
+
+   #endregion
 }
