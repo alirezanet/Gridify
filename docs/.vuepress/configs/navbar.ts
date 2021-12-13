@@ -40,8 +40,4 @@ export const navbar: NavbarConfig = [
          },
       ],
    },
-   {
-      text: 'Author',
-      link: 'https://github.com/alirezanet',
-   },
 ]

@@ -1,12 +1,3 @@
-<script>
-   export default {
-      setup() {
-         return {
-            version: '2.4.7'
-         }
-      }
-   }
-</script>
 
 # Getting Started
 
@@ -26,19 +17,19 @@ This package has the same functionality as the `Gridify` package, but it is desi
 
 ### Package Manager
 ``` pm:no-line-numbers:no-v-pre
-Install-Package Gridify -Version {{ version }}
+Install-Package Gridify -Version {{ $version }}
 ```
 
 ``` pm:no-line-numbers:no-v-pre
-Install-Package Gridify.EnitityFramework -Version {{ version }}
+Install-Package Gridify.EnitityFramework -Version {{ $version }}
 ```
 
 ### .NET CLI
 ``` cmd:no-line-numbers:no-v-pre
-dotnet add package Gridify --version {{ version }}
+dotnet add package Gridify --version {{ $version }}
 ```
 ``` cmd:no-line-numbers:no-v-pre
-dotnet add package Gridify.EntityFramework --version {{ version }}
+dotnet add package Gridify.EntityFramework --version {{ $version }}
 ```
 
 ## Namespace
