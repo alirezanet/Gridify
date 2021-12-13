@@ -35,8 +35,14 @@ public class LibraryComparisionFilteringBenchmark
    public void Setup()
    {
       _data = GetSampleData().ToArray();
+
+      // Sieve
       _processor = new SieveProcessor(new OptionsWrapper<SieveOptions>(new SieveOptions()));
+
+      // gridify
       _gm = new GridifyMapper<TestClass>(true);
+
+      // CSharpScripting
       _options = ScriptOptions.Default.AddReferences(typeof(TestClass).Assembly);
    }
 

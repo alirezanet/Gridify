@@ -24,7 +24,7 @@ Filtering is the most expensive feature in gridify. the following benchmark is c
 | DynamicLinq      |     973.8 us |     8.65 us |   1.21 |   19.5313 |    9.7656 |    123 KB |
 | Sieve            |   1,299.7 us |    12.74 us |   1.61 |    7.8125 |    3.9063 |     53 KB |
 | Fop              |   3,498.6 us |    29.45 us |   4.34 |   54.6875 |   27.3438 |    348 KB |
-| CSharp_Scripting | 231,510.6 us | 4,406.95 us | 287.13 | 3000.0000 | 1000.0000 | 24,198 KB |
+| CSharp Scripting | 231,510.6 us | 4,406.95 us | 287.13 | 3000.0000 | 1000.0000 | 24,198 KB |
 
 ::: details
 BenchmarkDotNet=v0.13.1, OS=Windows 10.0.22000
