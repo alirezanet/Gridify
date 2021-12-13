@@ -38,3 +38,10 @@ This Benchmark is available [Here](https://github.com/alirezanet/Gridify/blob/ma
 :::
 
 
+<style scoped>
+   tr:nth-child(2) {
+      color: #42b983;
+   }
+</style>
+
+
