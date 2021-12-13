@@ -39,7 +39,7 @@ var mapper = new GridifyMapper<Person>()
 var gq = new GridifyQuery() { Filter = "name=John" , OrderBy = "Age" };
 
 // false (because Age is not mapped)
-bool isValid = gq.IsValid(personMapper);
+bool isValid = gq.IsValid(mapper);
 ```
 
 ## GetFilteringExpression
