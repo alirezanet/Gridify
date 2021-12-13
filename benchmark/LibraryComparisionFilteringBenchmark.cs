@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Order;
@@ -9,6 +10,8 @@ using Fop;
 using Fop.FopExpression;
 using Gridify;
 using Gridify.Tests;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Options;
 using Sieve.Models;
 using Sieve.Services;
@@ -22,6 +25,9 @@ public class LibraryComparisionFilteringBenchmark
 {
    private static readonly Consumer Consumer = new();
    private TestClass[] _data;
+   private ScriptOptions _options;
+   private SieveProcessor _processor;
+   private GridifyMapper<TestClass> _gm;
 
    private IQueryable<TestClass> Ds => _data.AsQueryable();
 
@@ -29,11 +35,14 @@ public class LibraryComparisionFilteringBenchmark
    public void Setup()
    {
       _data = GetSampleData().ToArray();
+      _processor = new SieveProcessor(new OptionsWrapper<SieveOptions>(new SieveOptions()));
+      _gm = new GridifyMapper<TestClass>(true);
+      _options = ScriptOptions.Default.AddReferences(typeof(TestClass).Assembly);
    }
 
 
    [Benchmark(Baseline = true)]
-   public void NativeLinQ()
+   public void Native_LINQ()
    {
       Ds.Where(q => q.Name.Contains('a')).Consume(Consumer);
       Ds.Where(q => q.Id > 5).Consume(Consumer);
@@ -43,23 +52,22 @@ public class LibraryComparisionFilteringBenchmark
    [Benchmark]
    public void Gridify()
    {
-      var gm = new GridifyMapper<TestClass>().GenerateMappings();
-      Ds.ApplyFiltering("Name=*a", gm).Consume(Consumer);
-      Ds.ApplyFiltering("Id>5", gm).Consume(Consumer);
-      Ds.ApplyFiltering("Name=Ali", gm).Consume(Consumer);
+      Ds.ApplyFiltering("Name=*a", _gm).Consume(Consumer);
+      Ds.ApplyFiltering("Id>5", _gm).Consume(Consumer);
+      Ds.ApplyFiltering("Name=Ali", _gm).Consume(Consumer);
    }
 
    [Benchmark]
    public void Fop()
    {
-      // fop doesn't have filtering only feature
+      // fop doesn't have filtering only feature?
       Ds.ApplyFop(FopExpressionBuilder<TestClass>.Build("Name~=a", "Name", 1, 1000)).Item1.Consume(Consumer);
       Ds.ApplyFop(FopExpressionBuilder<TestClass>.Build("Id>5", "Name", 1, 1000)).Item1.Consume(Consumer);
       Ds.ApplyFop(FopExpressionBuilder<TestClass>.Build("Name==Ali", "Name", 1, 1000)).Item1.Consume(Consumer);
    }
 
    [Benchmark]
-   public void DynamicLinQ()
+   public void DynamicLinq()
    {
       Ds.Where("Name.Contains(@0)", "a").Consume(Consumer);
       Ds.Where("Id > (@0)", "5").Consume(Consumer);
@@ -67,12 +75,25 @@ public class LibraryComparisionFilteringBenchmark
    }
 
    [Benchmark]
+   public void CSharp_Scripting()
+   {
+      // Is there any non-async way to do this?
+      Ds.Where(CSharpScript.EvaluateAsync<Expression<Func<TestClass, bool>>>
+         ("q => q.Name.Contains('a')", _options).Result).Consume(Consumer);
+
+      Ds.Where(CSharpScript.EvaluateAsync<Expression<Func<TestClass, bool>>>
+         ("q => q.Id > 5", _options).Result).Consume(Consumer);
+
+      Ds.Where(CSharpScript.EvaluateAsync<Expression<Func<TestClass, bool>>>
+         ("q => q.Name == \"Ali\"", _options).Result).Consume(Consumer);
+   }
+
+   [Benchmark]
    public void Sieve()
    {
-      var processor = new SieveProcessor(new OptionsWrapper<SieveOptions>(new SieveOptions()));
-      processor.Apply(new SieveModel { Filters = "Name@=a" }, Ds, applySorting: false, applyPagination: false).Consume(Consumer);
-      processor.Apply(new SieveModel { Filters = "Id>5" }, Ds, applySorting: false, applyPagination: false).Consume(Consumer);
-      processor.Apply(new SieveModel { Filters = "Name==Ali" }, Ds, applySorting: false, applyPagination: false).Consume(Consumer);
+      _processor.Apply(new SieveModel { Filters = "Name@=a" }, Ds, applySorting: false, applyPagination: false).Consume(Consumer);
+      _processor.Apply(new SieveModel { Filters = "Id>5" }, Ds, applySorting: false, applyPagination: false).Consume(Consumer);
+      _processor.Apply(new SieveModel { Filters = "Name==Ali" }, Ds, applySorting: false, applyPagination: false).Consume(Consumer);
    }
 
 
@@ -115,10 +136,11 @@ public class LibraryComparisionFilteringBenchmark
 // DefaultJob : .NET 6.0.0 (6.0.21.52210), X64 RyuJIT
 //
 //
-//    |      Method |       Mean |    Error |   StdDev | Ratio | RatioSD |   Gen 0 |   Gen 1 | Allocated |
-//    |------------ |-----------:|---------:|---------:|------:|--------:|--------:|--------:|----------:|
-//    |  NativeLinQ |   823.8 us | 11.18 us |  9.91 us |  1.00 |    0.00 |  4.8828 |  1.9531 |     35 KB |
-//    |     Gridify |   853.1 us | 13.88 us | 12.98 us |  1.03 |    0.02 |  6.8359 |  2.9297 |     43 KB |
-//    | DynamicLinQ |   967.3 us |  6.65 us |  5.55 us |  1.17 |    0.01 | 19.5313 |  9.7656 |    123 KB |
-//    |       Sieve | 1,275.2 us |  5.62 us |  4.70 us |  1.55 |    0.02 |  7.8125 |  3.9063 |     55 KB |
-//    |         Fop | 3,480.2 us | 55.81 us | 52.21 us |  4.23 |    0.06 | 54.6875 | 27.3438 |    343 KB |
+//    |           Method |         Mean |       Error |      StdDev |  Ratio | RatioSD |     Gen 0 |     Gen 1 | Allocated |
+//    |----------------- |-------------:|------------:|------------:|-------:|--------:|----------:|----------:|----------:|
+//    |      Native_LINQ |     806.3 us |     4.89 us |     4.57 us |   1.00 |    0.00 |    4.8828 |    1.9531 |     35 KB |
+//    |          Gridify |     839.6 us |     5.69 us |     4.75 us |   1.04 |    0.01 |    5.8594 |    2.9297 |     39 KB |
+//    |      DynamicLinq |     973.8 us |     8.65 us |     6.75 us |   1.21 |    0.01 |   19.5313 |    9.7656 |    123 KB |
+//    |            Sieve |   1,299.7 us |    12.74 us |    11.29 us |   1.61 |    0.02 |    7.8125 |    3.9063 |     53 KB |
+//    |              Fop |   3,498.6 us |    29.45 us |    26.11 us |   4.34 |    0.03 |   54.6875 |   27.3438 |    348 KB |
+//    | CSharp_Scripting | 231,510.6 us | 4,406.95 us | 4,122.26 us | 287.13 |    5.12 | 3000.0000 | 1000.0000 | 24,198 KB |
