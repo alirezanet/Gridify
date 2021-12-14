@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Gridify
+namespace Gridify;
+
+public class GridifyFilteringException : Exception
 {
-   public class GridifyFilteringException : Exception
+   public GridifyFilteringException(string message) : base(message)
    {
-      public GridifyFilteringException(string message) : base(message)
-      {
-      }
    }
 }

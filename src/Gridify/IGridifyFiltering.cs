@@ -1,7 +1,6 @@
-namespace Gridify
+namespace Gridify;
+
+public interface IGridifyFiltering
 {
-   public interface IGridifyFiltering
-   {
-      string? Filter { get; set; }
-   }
+   string? Filter { get; set; }
 }

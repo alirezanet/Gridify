@@ -1,8 +1,7 @@
-namespace Gridify
+namespace Gridify;
+
+public interface IGridifyPagination
 {
-   public interface IGridifyPagination
-   {
-      int Page { get; set; }
-      int PageSize { get; set; }   
-   }
+   int Page { get; set; }
+   int PageSize { get; set; }   
 }

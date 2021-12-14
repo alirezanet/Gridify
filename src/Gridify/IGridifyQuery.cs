@@ -1,6 +1,5 @@
-namespace Gridify
+namespace Gridify;
+
+public interface IGridifyQuery : IGridifyPagination, IGridifyFiltering, IGridifyOrdering
 {
-   public interface IGridifyQuery : IGridifyPagination, IGridifyFiltering, IGridifyOrdering
-   {
-   }
 }

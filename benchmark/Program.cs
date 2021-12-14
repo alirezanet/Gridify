@@ -1,17 +1,16 @@
 ﻿using System;
 using BenchmarkDotNet.Running;
 
-namespace Benchmarks
+namespace Benchmarks;
+
+public class Program
 {
-   public class Program
+   private static void Main()
    {
-      private static void Main()
-      {
-         BenchmarkRunner.Run<LibraryComparisionFilteringBenchmark>();
-         // BenchmarkRunner.Run<GridifyMapperUsages>();
-         // BenchmarkRunner.Run<QueryBuilderBuildBenchmark>();
-         // BenchmarkRunner.Run<QueryBuilderEvaluatorBenchmark>();
-         Console.Read();
-      }
+      BenchmarkRunner.Run<LibraryComparisionFilteringBenchmark>();
+      // BenchmarkRunner.Run<GridifyMapperUsages>();
+      // BenchmarkRunner.Run<QueryBuilderBuildBenchmark>();
+      // BenchmarkRunner.Run<QueryBuilderEvaluatorBenchmark>();
+      Console.Read();
    }
 }

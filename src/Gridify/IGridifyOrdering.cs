@@ -1,7 +1,6 @@
-namespace Gridify
+namespace Gridify;
+
+public interface IGridifyOrdering
 {
-   public interface IGridifyOrdering
-   {
-      string? OrderBy { get; set; }
-   }
+   string? OrderBy { get; set; }
 }

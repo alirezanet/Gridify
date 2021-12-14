@@ -13,6 +13,7 @@ The QueryBuilder class is really useful if you want to manually build your query
 | AddMap                       | Add a single Map to existing mapper    |
 | RemoveMap                    | Remove a single Map from existing mapper    |
 | ConfigureDefaultMapper       | Configuring default mapper when we didn't use AddMapper method   |
+| IsValid                      | Validates Condition, OrderBy, Query , Mapper and returns a bool  |
 | Build                        | Applies filtering ordering and paging to a queryable context             |
 | BuildCompiled                | Compiles the expressions and returns a delegate for applying filtering ordering and paging to a enumerable collection    |
 | BuildFilteringExpression     | Returns filtering expression that can be compiled for later use for enumerable collections  |

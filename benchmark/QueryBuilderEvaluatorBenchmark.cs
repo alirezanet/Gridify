@@ -7,43 +7,42 @@ using BenchmarkDotNet.Order;
 using Gridify;
 using Gridify.Tests;
 
-namespace Benchmarks
+namespace Benchmarks;
+
+[MemoryDiagnoser]
+[RPlotExporter]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+public class QueryBuilderEvaluatorBenchmark
 {
-   [MemoryDiagnoser]
-   [RPlotExporter]
-   [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-   public class QueryBuilderEvaluatorBenchmark
+   private readonly IEnumerable<TestClass> _data;
+   // private static readonly Consumer Consumer = new();
+   private readonly Func<IQueryable<TestClass>,bool> BuildEvaluatorFunc;
+   private readonly  Func<IEnumerable<TestClass>,bool> BuildCompiledEvaluatorFunc;
+
+   public QueryBuilderEvaluatorBenchmark()
    {
-      private readonly IEnumerable<TestClass> _data;
-      // private static readonly Consumer Consumer = new();
-      private readonly Func<IQueryable<TestClass>,bool> BuildEvaluatorFunc;
-      private readonly  Func<IEnumerable<TestClass>,bool> BuildCompiledEvaluatorFunc;
+      _data = LibraryComparisionFilteringBenchmark.GetSampleData().ToArray();
 
-      public QueryBuilderEvaluatorBenchmark()
-      {
-         _data = LibraryComparisionFilteringBenchmark.GetSampleData().ToArray();
+      var builder = new QueryBuilder<TestClass>()
+         .AddCondition("id>2")
+         .AddCondition("name=*a");
 
-         var builder = new QueryBuilder<TestClass>()
-            .AddCondition("id>2")
-            .AddCondition("name=*a");
-
-         BuildEvaluatorFunc = builder.BuildEvaluator();
-         BuildCompiledEvaluatorFunc = builder.BuildCompiledEvaluator();
-     }
-
-      [Benchmark]
-      public void BuildEvaluator()
-      {
-         BuildEvaluatorFunc(_data.AsQueryable());
-      }
-
-      [Benchmark]
-      public void BuildCompiledEvaluator()
-      {
-         BuildCompiledEvaluatorFunc(_data);
-      }
-
+      BuildEvaluatorFunc = builder.BuildEvaluator();
+      BuildCompiledEvaluatorFunc = builder.BuildCompiledEvaluator();
    }
+
+   [Benchmark]
+   public void BuildEvaluator()
+   {
+      BuildEvaluatorFunc(_data.AsQueryable());
+   }
+
+   [Benchmark]
+   public void BuildCompiledEvaluator()
+   {
+      BuildCompiledEvaluatorFunc(_data);
+   }
+
 }
 
 /* Last Run:

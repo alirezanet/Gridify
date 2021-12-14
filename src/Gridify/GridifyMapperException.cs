@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Gridify
+namespace Gridify;
+
+public class GridifyMapperException : Exception
 {
-      public class GridifyMapperException : Exception
-      {
-         public GridifyMapperException(string message) : base(message)
-         {
-         }
-      }
+   public GridifyMapperException(string message) : base(message)
+   {
+   }
 }
