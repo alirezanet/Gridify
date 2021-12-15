@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Gridify.Syntax;
 
@@ -121,6 +122,11 @@ internal static class ExpressionToQueryConvertor
 
    private static LambdaExpression GetExpressionWithNullCheck(MemberExpression prop, ParameterExpression param, Expression right)
    {
+      // This check is needed for EF6 - It doesn't support NullChecking for Collections (issue #58)
+      if (GridifyExtensions.EntityFrameworkCompatibilityLayer &&
+          RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework"))
+         return Expression.Lambda(right, param);
+
       var nullChecker = Expression.NotEqual(prop, Expression.Constant(null));
       var exp = Expression.AndAlso(nullChecker, right);
       return Expression.Lambda(exp, param);
