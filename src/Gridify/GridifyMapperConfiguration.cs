@@ -6,7 +6,7 @@ public record GridifyMapperConfiguration
    /// Make Mappings case Sensitive
    /// Default is false
    /// </summary>
-   public bool CaseSensitive { get; set; } = GridifyGlobalConfiguration.CaseSensitiveMappings;
+   public bool CaseSensitive { get; set; } = GridifyGlobalConfiguration.CaseSensitiveMapper;
 
    /// <summary>
    /// This option enables the 'null' keyword in filtering operations

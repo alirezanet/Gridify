@@ -1,10 +1,10 @@
 namespace Gridify
 {
-   public static class GridifyGlobalConfiguration
+ public static class GridifyGlobalConfiguration
    {
       /// <summary>
       /// It makes the generated expressions compatible
-      /// whit entity framework.
+      /// whit the entity framework.
       /// Default is false.
       /// </summary>
       public static bool EntityFrameworkCompatibilityLayer { get; set; }
@@ -19,7 +19,7 @@ namespace Gridify
       /// Make Mappings case Sensitive
       /// Default is false
       /// </summary>
-      public static bool CaseSensitiveMappings { get; set; }
+      public static bool CaseSensitiveMapper { get; set; }
 
       /// <summary>
       /// This option enables the 'null' keyword in filtering operations
