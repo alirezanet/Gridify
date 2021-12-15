@@ -11,9 +11,6 @@ namespace Gridify;
 
 public static partial class GridifyExtensions
 {
-   internal static bool EntityFrameworkCompatibilityLayer { get; set; }
-   public static int DefaultPageSize { get; set; } = 20;
-
    #region "Private"
 
    /// <summary>
@@ -29,7 +26,7 @@ public static partial class GridifyExtensions
 
       // set default for PageSize
       if (gridifyPagination.PageSize <= 0)
-         gridifyPagination.PageSize = DefaultPageSize;
+         gridifyPagination.PageSize = GridifyGlobalConfiguration.DefaultPageSize;
 
       return gridifyPagination;
    }

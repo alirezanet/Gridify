@@ -123,7 +123,7 @@ internal static class ExpressionToQueryConvertor
    private static LambdaExpression GetExpressionWithNullCheck(MemberExpression prop, ParameterExpression param, Expression right)
    {
       // This check is needed for EF6 - It doesn't support NullChecking for Collections (issue #58)
-      if (GridifyExtensions.EntityFrameworkCompatibilityLayer &&
+      if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer &&
           RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework"))
          return Expression.Lambda(right, param);
 
@@ -299,7 +299,7 @@ internal static class ExpressionToQueryConvertor
 
    private static Expression GetValueExpression(Type type, object? value)
    {
-      if (!GridifyExtensions.EntityFrameworkCompatibilityLayer)
+      if (!GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
          return Expression.Constant(value, type);
 
       // active parameterized query for EF
@@ -310,7 +310,7 @@ internal static class ExpressionToQueryConvertor
 
    private static BinaryExpression GetLessThanOrEqualExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (GridifyExtensions.EntityFrameworkCompatibilityLayer)
+      if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
          return Expression.LessThanOrEqual(Expression.Call(null, GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
@@ -321,7 +321,7 @@ internal static class ExpressionToQueryConvertor
 
    private static BinaryExpression GetGreaterThanOrEqualExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (GridifyExtensions.EntityFrameworkCompatibilityLayer)
+      if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
          return Expression.GreaterThanOrEqual(Expression.Call(null, GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
@@ -332,7 +332,7 @@ internal static class ExpressionToQueryConvertor
 
    private static BinaryExpression GetLessThanExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (GridifyExtensions.EntityFrameworkCompatibilityLayer)
+      if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
          return Expression.LessThan(Expression.Call(null, GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
@@ -343,7 +343,7 @@ internal static class ExpressionToQueryConvertor
 
    private static BinaryExpression GetGreaterThanExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (GridifyExtensions.EntityFrameworkCompatibilityLayer)
+      if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
          return Expression.GreaterThan(Expression.Call(null, GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 

@@ -59,7 +59,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
       if (!string.IsNullOrEmpty(gridifyQuery.OrderBy))
          AddOrderBy(gridifyQuery.OrderBy!);
 
-      if (gridifyQuery.PageSize == 0) gridifyQuery.PageSize = GridifyExtensions.DefaultPageSize;
+      if (gridifyQuery.PageSize == 0) gridifyQuery.PageSize = GridifyGlobalConfiguration.DefaultPageSize;
       ConfigurePaging(gridifyQuery.Page, gridifyQuery.PageSize);
 
       return this;

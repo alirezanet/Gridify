@@ -261,7 +261,7 @@ public class GridifyExtensionsShould
          .ApplyFilteringOrderingPaging(gq)
          .ToList();
 
-      var expected = _fakeRepository.Skip(0).Take(GridifyExtensions.DefaultPageSize).ToList();
+      var expected = _fakeRepository.Skip(0).Take(GridifyGlobalConfiguration.DefaultPageSize).ToList();
 
       Assert.Equal(expected.Count, actual.Count);
       Assert.Equal(expected, actual);
@@ -728,7 +728,7 @@ public class GridifyExtensionsShould
          .ToList();
 
       // just returning first page with default size
-      var expected = _fakeRepository.Take(GridifyExtensions.DefaultPageSize).ToList();
+      var expected = _fakeRepository.Take(GridifyGlobalConfiguration.DefaultPageSize).ToList();
 
       Assert.Equal(expected.Count, actual.Count);
       Assert.Equal(expected, actual);
