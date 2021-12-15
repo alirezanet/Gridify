@@ -1,9 +1,12 @@
 # Entity Framework
 
+## Gridify.EntityFramework Package
+
 The `Gridify.EntityFramework` package has two additional `GridifyAsync()` and `GridifyQueryableAsync()` methods.
 
-## Enableing compatibility layer
-If you want to use gridify with Entity Framework, you should enable the compatibility layer.
+## Compatibility layer
+
+If you want to use gridify with Entity Framework, you should enable the compatibility layer:
 
 ``` csharp
 GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
@@ -11,9 +14,11 @@ GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
 
 Enabling the compatibility layer provides the following features:
 
-- EF ServiceProviderCaching support
+- It tweaks the internal expression builder to make it compatible with Entity Framework.
 - EF query optimization
+- EF ServiceProviderCaching support
 - Creates parameterized queries
+
 ``` sql
 DECLARE @__Value_0 nvarchar(4000) = N'vahid';
 

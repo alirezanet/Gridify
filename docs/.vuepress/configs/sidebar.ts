@@ -16,6 +16,7 @@ export const sidebar: SidebarConfig = {
          children: [
             '/guide/gridifyQuery.md',
             '/guide/gridifyMapper.md',
+            '/guide/gridifyGlobalConfiguration.md',
          ]
       },
       {
