@@ -1,7 +1,11 @@
 :root {
-  scroll-behavior: smooth;
+   scroll-behavior: smooth;
 }
 
-.site-name{
+.site-name {
+   display: none;
+}
+
+.home .hero h1#main-title {
    display: none;
 }

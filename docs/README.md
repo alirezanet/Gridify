@@ -1,6 +1,8 @@
 ---
 home: true
 title: Welcome
+heroImage: gridify-light-logo.svg
+heroImageDark: gridify-dark-logo.svg
 tagline: A Modern Dynamic LINQ library for .NET
 actions:
    - text: Get Started
