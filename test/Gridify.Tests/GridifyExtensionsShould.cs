@@ -19,6 +19,21 @@ public class GridifyExtensionsShould
    #region "ApplyFiltering"
 
    [Fact]
+   public void ApplyFiltering_ChildField()
+   {
+      var actual = _fakeRepository.AsQueryable()
+         .ApplyFiltering("ChildClass!=null,ChildClass.Name=John")
+         .ToList();
+     
+      var expected = _fakeRepository
+         .Where(q => q.ChildClass != null && q.ChildClass.Name == "John")
+         .ToList();
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
+
+   [Fact]
    public void ApplyFiltering_SingleField()
    {
       var actual = _fakeRepository.AsQueryable()

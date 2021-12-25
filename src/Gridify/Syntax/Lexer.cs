@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -126,7 +126,7 @@ internal class Lexer
       {
          var start = _position;
 
-         while (char.IsLetterOrDigit(Current) || Current is '_')
+         while (char.IsLetterOrDigit(Current) || Current is '_' || Current is '.')
             Next();
 
          var length = _position - start;
