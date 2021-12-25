@@ -13,7 +13,7 @@ internal class ReplaceExpressionVisitor : ExpressionVisitor
       _newValue = newValue;
    }
 
-   public override Expression Visit(Expression node)
+   public override Expression Visit(Expression? node)
    {
       return node == _oldValue ? _newValue : base.Visit(node)!;
    }

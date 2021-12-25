@@ -2,15 +2,17 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Gridify.EntityFramework
 {
+   // ReSharper disable once PartialTypeWithSinglePart
    public static partial class GridifyExtensions
    {
       #region "EntityFramework Integration"
 
-      public async static Task<QueryablePaging<T>> GridifyQueryableAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery,
-         IGridifyMapper<T> mapper)
+      public static async Task<QueryablePaging<T>> GridifyQueryableAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery,
+         IGridifyMapper<T>? mapper)
       {
          query = query.ApplyFiltering(gridifyQuery, mapper);
          var count = await query.CountAsync();
@@ -19,14 +21,14 @@ namespace Gridify.EntityFramework
          return new QueryablePaging<T>(count, query);
       }
 
-      public static async Task<Paging<T>> GridifyAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T> mapper = null)
+      public static async Task<Paging<T>> GridifyAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, IGridifyMapper<T>? mapper = null)
       {
          var (count, queryable) = await query.GridifyQueryableAsync(gridifyQuery, mapper);
          return new Paging<T>(count, await queryable.ToListAsync());
       }
 
-      public async static Task<QueryablePaging<T>> GridifyQueryableAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery,
-         IGridifyMapper<T> mapper, CancellationToken token)
+      public static async Task<QueryablePaging<T>> GridifyQueryableAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery,
+         IGridifyMapper<T>? mapper, CancellationToken token)
       {
          query = query.ApplyFiltering(gridifyQuery, mapper);
          var count = await query.CountAsync(token);
@@ -36,7 +38,7 @@ namespace Gridify.EntityFramework
       }
 
       public static async Task<Paging<T>> GridifyAsync<T>(this IQueryable<T> query, IGridifyQuery gridifyQuery, CancellationToken token,
-         IGridifyMapper<T> mapper = null)
+         IGridifyMapper<T>? mapper = null)
       {
          var (count, queryable) = await query.GridifyQueryableAsync(gridifyQuery, mapper, token);
          return new Paging<T>(count, await queryable.ToListAsync(token));
