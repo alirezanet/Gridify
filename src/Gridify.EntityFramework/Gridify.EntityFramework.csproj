@@ -17,6 +17,7 @@
       <TargetFrameworks>net5.0;net6.0;netstandard2.0;netstandard2.1</TargetFrameworks>
       <LangVersion>default</LangVersion>
       <Nullable>enable</Nullable>
+      <PackageVersion>2.5.0</PackageVersion>
    </PropertyGroup>
 
    <ItemGroup>
