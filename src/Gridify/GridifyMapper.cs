@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -170,8 +170,12 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    {
       // x =>
       var parameter = Expression.Parameter(typeof(T));
-      // x.Name
-      var mapProperty = Expression.Property(parameter, from);
+      // x.Name,x.yyy.zz.xx
+      Expression mapProperty = parameter;      
+      foreach (var propertyName in from.Split('.'))
+      {
+         mapProperty = Expression.Property(mapProperty, propertyName);
+      }     
       // (object)x.Name
       var convertedExpression = Expression.Convert(mapProperty, typeof(object));
       // x => (object)x.Name
