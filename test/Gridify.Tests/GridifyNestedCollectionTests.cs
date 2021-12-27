@@ -35,6 +35,17 @@ public class GridifyNestedCollectionTests
       Assert.True(actual.Any());
    }
 
+   [Fact] // Not Supported yet, but we should be able to handle it
+   public void Filtering_ChildClass_WithoutMapper_ThrowException()
+   {
+      Assert.Throws<GridifyFilteringException>(() =>
+      {
+         var _ = _fakeRepository3Nesting.AsQueryable()
+            .ApplyFiltering("Level2List[0].Id <= 3")
+            .ToList();
+      });
+   }
+
    [Fact] //https://github.com/alirezanet/Gridify/issues/17 #17
    public void Filtering_OnThirdLevelNestedPropertyWithMultipleChainedConditions()
    {
@@ -143,21 +154,21 @@ public class GridifyNestedCollectionTests
    }
 
 
-   [Fact] // issue #29 https://github.com/alirezanet/Gridify/issues/29 
+   [Fact] // issue #29 https://github.com/alirezanet/Gridify/issues/29
    public void ApplyFiltering_UsingSubCollection_PassIndexes()
    {
       var gm = new GridifyMapper<Level2>()
          .GenerateMappings()
          .AddMap("l3p2", (l1, index) => l1.Level3List[index].Property2);
-         
+
       var expected = _fakeRepository2Nesting.Where(q => q.Level3List[0].Property2 > 50).ToList();
       var actual = _fakeRepository2Nesting.AsQueryable().ApplyFiltering("l3p2[1] > 50", gm).ToList();
-         
+
       Assert.Equal(expected.Count, actual.Count);
       Assert.Equal(expected, actual);
       Assert.True(actual.Any());
    }
-    
+
    #region TestData
 
    private IEnumerable<Level1> GetSampleDataWith3Nesting()

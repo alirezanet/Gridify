@@ -32,6 +32,35 @@ public class QueryBuilderShould
       Assert.Equal(_testRecordsCount, count3);
    }
 
+
+   [Fact]
+   public void AddCondition_ChildClass()
+   {
+      var qb = new QueryBuilder<TestClass>()
+         .AddCondition("ChildClass!=null,ChildClass.Name=John")
+         .Build();
+      var actual = qb(_fakeRepository.AsQueryable()).ToList();
+
+      var expected = _fakeRepository
+         .Where(q => q.ChildClass is { Name: "John" })
+         .ToList();
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
+
+   [Fact]
+   public void AddCondition_ChildClass_WithCustomMapper_ShouldThrowException()
+   {
+      Assert.Throws<GridifyMapperException>(() =>
+      {
+         var _ = new QueryBuilder<TestClass>()
+            .UseCustomMapper(new GridifyMapper<TestClass>())
+            .AddCondition("ChildClass!=null,ChildClass.Name=John")
+            .Build(_fakeRepository);
+      });
+   }
+
    [Fact] // issue #38
    public void Evaluator_Should_Check_All_Conditions_Without_And()
    {
@@ -117,12 +146,12 @@ public class QueryBuilderShould
    [Theory]
    [InlineData(new[] { "notExist" }, false)]
    [InlineData(new[] { "name" }, true)]
-   [InlineData(new[] { "name" , "id asc" } , true)]
-   [InlineData(new[] { "name" , "id des" } , false)]
-   [InlineData(new[] { "name" , "dss" } , false)]
-   [InlineData(new[] { "id," , "name" } , false)]
-   [InlineData(new[] { "id" , "name" , "date" } , false)]
-   [InlineData(new[] { "id" , "name" , "date2" } , false)]
+   [InlineData(new[] { "name", "id asc" }, true)]
+   [InlineData(new[] { "name", "id des" }, false)]
+   [InlineData(new[] { "name", "dss" }, false)]
+   [InlineData(new[] { "id,", "name" }, false)]
+   [InlineData(new[] { "id", "name", "date" }, false)]
+   [InlineData(new[] { "id", "name", "date2" }, false)]
    [InlineData(new[] { "name," }, false)]
    [InlineData(new[] { "!name" }, false)]
    [InlineData(new[] { "name des" }, false)]

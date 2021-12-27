@@ -6,19 +6,7 @@ namespace Gridify.Syntax;
 
 internal static class GridifyTypeBuilder
 {
-   private class FieldDescriptor
-   {
-      public FieldDescriptor(string fieldName, Type fieldType)
-      {
-         FieldName = fieldName;
-         FieldType = fieldType;
-      }
-
-      public string FieldName { get; }
-      public Type FieldType { get; }
-   }
-
-   public static (object Instance, Type type) CreateNewObject(Type type, string fieldName, object? value)
+   public static (object? myObject, Type myType) CreateNewObject(Type type, string fieldName, object? value)
    {
       var myTypeInfo = CompileResultTypeInfo(type, fieldName);
       var myType = myTypeInfo!.AsType();
@@ -29,8 +17,8 @@ internal static class GridifyTypeBuilder
 
    public static TypeInfo? CompileResultTypeInfo(Type type, string name)
    {
-      TypeBuilder tb = GetTypeBuilder();
-      ConstructorBuilder constructor =
+      var tb = GetTypeBuilder();
+      var constructor =
          tb.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
       var field = new FieldDescriptor(name, type);
@@ -45,8 +33,8 @@ internal static class GridifyTypeBuilder
       const string? typeSignature = "GridifyDisplayClass";
       var an = new AssemblyName(typeSignature);
       var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(Guid.NewGuid().ToString()), AssemblyBuilderAccess.Run);
-      ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("RuntimeModule");
-      TypeBuilder tb = moduleBuilder.DefineType(typeSignature,
+      var moduleBuilder = assemblyBuilder.DefineDynamicModule("RuntimeModule");
+      var tb = moduleBuilder.DefineType(typeSignature,
          TypeAttributes.Public |
          TypeAttributes.Class |
          TypeAttributes.AutoClass |
@@ -59,25 +47,25 @@ internal static class GridifyTypeBuilder
 
    private static void CreateProperty(TypeBuilder tb, string propertyName, Type propertyType)
    {
-      FieldBuilder fieldBuilder = tb.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
+      var fieldBuilder = tb.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
 
-      PropertyBuilder propertyBuilder = tb.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
-      MethodBuilder getPropMthdBldr = tb.DefineMethod("get_" + propertyName,
+      var propertyBuilder = tb.DefineProperty(propertyName, PropertyAttributes.HasDefault, propertyType, null);
+      var getPropMthdBldr = tb.DefineMethod("get_" + propertyName,
          MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig, propertyType, Type.EmptyTypes);
-      ILGenerator getIl = getPropMthdBldr.GetILGenerator();
+      var getIl = getPropMthdBldr.GetILGenerator();
 
       getIl.Emit(OpCodes.Ldarg_0);
       getIl.Emit(OpCodes.Ldfld, fieldBuilder);
       getIl.Emit(OpCodes.Ret);
 
-      MethodBuilder setPropMthdBldr =
+      var setPropMthdBldr =
          tb.DefineMethod("set_" + propertyName,
             MethodAttributes.Public |
             MethodAttributes.SpecialName |
             MethodAttributes.HideBySig,
             null, new[] { propertyType });
 
-      ILGenerator setIl = setPropMthdBldr.GetILGenerator();
+      var setIl = setPropMthdBldr.GetILGenerator();
       var modifyProperty = setIl.DefineLabel();
       var exitSet = setIl.DefineLabel();
 
@@ -92,5 +80,17 @@ internal static class GridifyTypeBuilder
 
       propertyBuilder.SetGetMethod(getPropMthdBldr);
       propertyBuilder.SetSetMethod(setPropMthdBldr);
+   }
+
+   private class FieldDescriptor
+   {
+      public FieldDescriptor(string fieldName, Type fieldType)
+      {
+         FieldName = fieldName;
+         FieldType = fieldType;
+      }
+
+      public string FieldName { get; }
+      public Type FieldType { get; }
    }
 }

@@ -90,7 +90,7 @@ internal static class ExpressionToQueryConvertor
          } lambda:
          {
             var newExp = new ReplaceExpressionVisitor(predicate.Parameters[0], lambdaMember).Visit(predicate.Body);
-            var newPredicate = GetExpressionWithNullCheck(lambdaMember, lambda.Parameters[0], newExp!);
+            var newPredicate = GetExpressionWithNullCheck(lambdaMember, lambda.Parameters[0], newExp);
             return ParseMethodCallExpression(subExp, newPredicate);
          }
          default:
@@ -100,13 +100,13 @@ internal static class ExpressionToQueryConvertor
 
    private static ParameterExpression GetParameterExpression(MemberExpression member)
    {
-      return Expression.Parameter(member.Expression.Type, member.Expression.ToString());
+      return Expression.Parameter(member.Expression!.Type, member.Expression.ToString());
    }
 
    private static LambdaExpression GetAnyExpression(MemberExpression member, Expression predicate)
    {
       var param = GetParameterExpression(member);
-      var prop = Expression.PropertyOrField(param!, member.Member.Name);
+      var prop = Expression.PropertyOrField(param, member.Member.Name);
 
       var tp = prop.Type.IsGenericType
          ? prop.Type.GenericTypeArguments.First()  // list
@@ -147,10 +147,10 @@ internal static class ExpressionToQueryConvertor
 
       // execute user custom Convertor
       if (convertor != null)
-         value = convertor.Invoke(valueExpression.ValueToken.Text) ?? null;
+         value = convertor.Invoke(valueExpression.ValueToken.Text);
 
       // handle the `null` keyword in value
-      if (allowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value?.ToString() == "null")
+      if (allowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
          value = null;
 
       // type fixer
@@ -159,10 +159,10 @@ internal static class ExpressionToQueryConvertor
          try
          {
             // handle broken guids,  github issue #2
-            if (body.Type == typeof(Guid) && !Guid.TryParse(value!.ToString(), out _)) value = Guid.NewGuid().ToString();
+            if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
 
             var converter = TypeDescriptor.GetConverter(body.Type);
-            value = converter.ConvertFromString(value!.ToString())!;
+            value = converter.ConvertFromString(value.ToString()!);
          }
          catch (FormatException)
          {
@@ -178,7 +178,7 @@ internal static class ExpressionToQueryConvertor
                             && op.Kind is not SyntaxKind.GreaterOrEqualThan
                             && op.Kind is not SyntaxKind.LessOrEqualThan)
       {
-         value = value.ToString().ToLower();
+         value = value.ToString()?.ToLower();
          body = Expression.Call(body, GetToLowerMethod());
       }
 

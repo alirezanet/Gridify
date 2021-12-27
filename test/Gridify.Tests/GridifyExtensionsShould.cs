@@ -15,8 +15,76 @@ public class GridifyExtensionsShould
       _fakeRepository = new List<TestClass>(GetSampleData());
    }
 
+   #region "Data"
+
+   public static IEnumerable<TestClass> GetSampleData()
+   {
+      var lst = new List<TestClass>();
+      lst.Add(new TestClass(1, "John", null, Guid.NewGuid(), DateTime.Now));
+      lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid(), DateTime.UtcNow));
+      lst.Add(new TestClass(3, "Jack", (TestClass)lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2)));
+      lst.Add(new TestClass(4, "Rose", null, Guid.Parse("e2cec5dd-208d-4bb5-a852-50008f8ba366")));
+      lst.Add(new TestClass(5, "Ali", null, tag: "123"));
+      lst.Add(new TestClass(6, "Hamid", (TestClass)lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
+      lst.Add(new TestClass(7, "Hasan", (TestClass)lst[1].Clone()));
+      lst.Add(new TestClass(8, "Farhad", (TestClass)lst[2].Clone(), Guid.Empty));
+      lst.Add(new TestClass(9, "Sara", null));
+      lst.Add(new TestClass(10, "Jorge", null));
+      lst.Add(new TestClass(11, "joe", null));
+      lst.Add(new TestClass(12, "jimmy", (TestClass)lst[0].Clone()));
+      lst.Add(new TestClass(13, "Nazanin", null, tag: "test0"));
+      lst.Add(new TestClass(14, "Reza", null, tag: "test1"));
+      lst.Add(new TestClass(15, "Korosh", (TestClass)lst[0].Clone()));
+      lst.Add(new TestClass(16, "Kamran", (TestClass)lst[1].Clone()));
+      lst.Add(new TestClass(17, "Saeid", (TestClass)lst[2].Clone()));
+      lst.Add(new TestClass(18, "jessi=ca", null));
+      lst.Add(new TestClass(19, "Ped=ram", null, tag: "test3"));
+      lst.Add(new TestClass(20, "Peyman!", null));
+      lst.Add(new TestClass(21, "Fereshte", null, tag: null));
+      lst.Add(new TestClass(22, "LIAM", null));
+      lst.Add(new TestClass(22, @"\Liam", null, tag: null));
+      lst.Add(new TestClass(23, "LI | AM", null));
+      lst.Add(new TestClass(24, "(LI,AM)", null, tag: string.Empty));
+      lst.Add(new TestClass(25, "Case/i", null, tag: string.Empty));
+      lst.Add(new TestClass(26, "/iCase", null));
+      lst.Add(new TestClass(27, "ali reza", null));
+
+      return lst;
+   }
+
+   #endregion
+
 
    #region "ApplyFiltering"
+
+   [Fact]
+   public void ApplyFiltering_ChildField()
+   {
+      var actual = _fakeRepository.AsQueryable()
+         .ApplyFiltering("ChildClass!=null,ChildClass.Name=John")
+         .ToList();
+
+      var expected = _fakeRepository
+         .Where(q => q.ChildClass is { Name: "John" })
+         .ToList();
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
+
+   [Fact]
+   public void ApplyFiltering_WithCustomMapper_ChildField_ShowThrowException()
+   {
+      var gm = new GridifyMapper<TestClass>()
+         .AddMap("subId", q => q.ChildClass!.Id);
+
+      Assert.Throws<GridifyMapperException>(() =>
+      {
+         var _ = _fakeRepository.AsQueryable()
+            .ApplyFiltering("ChildClass.Name=John", gm)
+            .ToList();
+      });
+   }
 
    [Fact]
    public void ApplyFiltering_SingleField()
@@ -557,7 +625,7 @@ public class GridifyExtensionsShould
    public void ApplyFiltering_WithSpaces()
    {
       var actual = _fakeRepository.AsQueryable().ApplyFiltering("name =ali reza").ToList();
-      var expected = _fakeRepository.Where(q => q.Name == "ali reza" ).ToList();
+      var expected = _fakeRepository.Where(q => q.Name == "ali reza").ToList();
 
       Assert.Equal(expected.Count, actual.Count);
       Assert.Equal(expected, actual);
@@ -572,7 +640,7 @@ public class GridifyExtensionsShould
          .AddMap("Id", q => q.Id);
 
       var exp = Assert.Throws<GridifyMapperException>(() => _fakeRepository.AsQueryable().ApplyFiltering("name=John,id>0", gm).ToList());
-      Assert.Equal("Mapping 'name' not found",exp.Message);
+      Assert.Equal("Mapping 'name' not found", exp.Message);
    }
 
    [Fact] // issue #34
@@ -697,7 +765,7 @@ public class GridifyExtensionsShould
          .AddMap("Id", q => q.Id);
 
       var exp = Assert.Throws<GridifyMapperException>(() => _fakeRepository.AsQueryable().ApplyOrdering("name,id", gm).ToList());
-      Assert.Equal("Mapping 'name' not found",exp.Message);
+      Assert.Equal("Mapping 'name' not found", exp.Message);
    }
 
    [Fact] // issue #34
@@ -708,7 +776,7 @@ public class GridifyExtensionsShould
 
       // name orderBy should be ignored
       var actual = _fakeRepository.AsQueryable().ApplyOrdering("name,id", gm).ToList();
-      var expected = _fakeRepository.OrderBy(q => q.Id ).ToList();
+      var expected = _fakeRepository.OrderBy(q => q.Id).ToList();
 
       Assert.Equal(expected.Count, actual.Count);
       Assert.Equal(expected, actual);
@@ -776,7 +844,7 @@ public class GridifyExtensionsShould
       var query = _fakeRepository.AsQueryable().Where(q => q.Name == "John").OrderByDescending(q => q.Name);
       var totalItems = query.Count();
       var items = query.Skip(-2).Take(15).ToList();
-      var expected = new Paging<TestClass>() { Data = items, Count = totalItems };
+      var expected = new Paging<TestClass> { Data = items, Count = totalItems };
 
       Assert.Equal(expected.Count, actual.Count);
       Assert.Equal(expected.Data.Count(), actual.Data.Count());
@@ -827,9 +895,9 @@ public class GridifyExtensionsShould
    [InlineData("(id=2,tag=someTag)", true)]
    [InlineData("@name=john", false)]
    //[InlineData("id<nonNumber", false)] // we don't validate runtime values yet.
-   public void IsValid_IGridifyFiltering_ShouldReturnExpectedResult( string filter, bool expected)
+   public void IsValid_IGridifyFiltering_ShouldReturnExpectedResult(string filter, bool expected)
    {
-      var gq = new GridifyQuery() { Filter = filter };
+      var gq = new GridifyQuery { Filter = filter };
       var actual = gq.IsValid<TestClass>();
       Assert.Equal(expected, actual);
    }
@@ -845,49 +913,9 @@ public class GridifyExtensionsShould
    [InlineData("id asc,name2 desc", false)]
    public void IsValid_IGridifyOrdering_ShouldReturnExpectedResult(string order, bool expected)
    {
-      var gq = new GridifyQuery() { OrderBy = order };
+      var gq = new GridifyQuery { OrderBy = order };
       var actual = gq.IsValid<TestClass>();
       Assert.Equal(expected, actual);
-   }
-
-
-   #endregion
-
-   #region "Data"
-
-   public static IEnumerable<TestClass> GetSampleData()
-   {
-      var lst = new List<TestClass>();
-      lst.Add(new TestClass(1, "John", null, Guid.NewGuid(), DateTime.Now));
-      lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid(), DateTime.UtcNow));
-      lst.Add(new TestClass(3, "Jack", (TestClass)lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2)));
-      lst.Add(new TestClass(4, "Rose", null, Guid.Parse("e2cec5dd-208d-4bb5-a852-50008f8ba366")));
-      lst.Add(new TestClass(5, "Ali", null, tag: "123"));
-      lst.Add(new TestClass(6, "Hamid", (TestClass)lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
-      lst.Add(new TestClass(7, "Hasan", (TestClass)lst[1].Clone()));
-      lst.Add(new TestClass(8, "Farhad", (TestClass)lst[2].Clone(), Guid.Empty));
-      lst.Add(new TestClass(9, "Sara", null));
-      lst.Add(new TestClass(10, "Jorge", null));
-      lst.Add(new TestClass(11, "joe", null));
-      lst.Add(new TestClass(12, "jimmy", (TestClass)lst[0].Clone()));
-      lst.Add(new TestClass(13, "Nazanin", null, tag: "test0"));
-      lst.Add(new TestClass(14, "Reza", null, tag: "test1"));
-      lst.Add(new TestClass(15, "Korosh", (TestClass)lst[0].Clone()));
-      lst.Add(new TestClass(16, "Kamran", (TestClass)lst[1].Clone()));
-      lst.Add(new TestClass(17, "Saeid", (TestClass)lst[2].Clone()));
-      lst.Add(new TestClass(18, "jessi=ca", null));
-      lst.Add(new TestClass(19, "Ped=ram", null, tag: "test3"));
-      lst.Add(new TestClass(20, "Peyman!", null));
-      lst.Add(new TestClass(21, "Fereshte", null, tag: null));
-      lst.Add(new TestClass(22, "LIAM", null));
-      lst.Add(new TestClass(22, @"\Liam", null, tag: null));
-      lst.Add(new TestClass(23, "LI | AM", null));
-      lst.Add(new TestClass(24, "(LI,AM)", null, tag: string.Empty));
-      lst.Add(new TestClass(25, "Case/i", null, tag: string.Empty));
-      lst.Add(new TestClass(26, "/iCase", null));
-      lst.Add(new TestClass(27, "ali reza", null));
-
-      return lst;
    }
 
    #endregion

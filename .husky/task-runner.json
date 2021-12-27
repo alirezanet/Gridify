@@ -1,0 +1,30 @@
+{
+   "tasks": [
+      {
+         "command": "dotnet-format",
+         "args": [
+            "--include",
+            "${staged}"
+         ],
+         "include": [
+            "**/*.cs",
+            "**/*.vb"
+         ]
+      },
+      {
+         "name": "Welcome",
+         "command": "bash",
+         "args": [
+            "-c",
+            "echo Great work! 🥂"
+         ],
+         "windows": {
+            "command": "cmd",
+            "args": [
+               "/c",
+               "echo Great work! 🥂"
+            ]
+         }
+      }
+   ]
+}

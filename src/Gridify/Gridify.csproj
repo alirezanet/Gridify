@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
    <PropertyGroup>
-      <TargetFramework>netstandard2.0</TargetFramework>
       <PackageId>Gridify</PackageId>
       <Version>2.4.8</Version>
       <Authors>Alireza Sabouri</Authors>
@@ -19,17 +18,24 @@
       <SymbolPackageFormat>snupkg</SymbolPackageFormat>
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
       <PackageReadmeFile>README.md</PackageReadmeFile>
+      <TargetFrameworks>net5.0;net6.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+      <PackageVersion>2.5.0</PackageVersion>
 
    </PropertyGroup>
 
    <ItemGroup>
-      <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+      <None Include="..\..\README.md" Pack="true" PackagePath="\" />
    </ItemGroup>
 
    <ItemGroup>
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
-      <PackageReference Include="System.Reflection.Emit" Version="4.7.0"/>
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+      <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
    </ItemGroup>
 
+   <Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'">
+      <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
+      <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High"
+            WorkingDirectory="../../" />  <!--Update this to the releative path to your project root dir -->
+   </Target>
 
 </Project>

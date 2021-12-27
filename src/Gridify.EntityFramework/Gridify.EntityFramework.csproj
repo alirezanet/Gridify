@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
    <PropertyGroup>
-      <TargetFramework>netstandard2.0</TargetFramework>
       <PackageId>Gridify.EntityFramework</PackageId>
       <Version>2.4.8</Version>
       <Authors>Alireza Sabouri</Authors>
@@ -15,6 +14,10 @@
       <IncludeSymbols>true</IncludeSymbols>
       <SymbolPackageFormat>snupkg</SymbolPackageFormat>
       <PackageReadmeFile>README.md</PackageReadmeFile>
+      <TargetFrameworks>net5.0;net6.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+      <LangVersion>default</LangVersion>
+      <Nullable>enable</Nullable>
+      <PackageVersion>2.5.0</PackageVersion>
    </PropertyGroup>
 
    <ItemGroup>
@@ -24,6 +27,15 @@
 
    <ItemGroup>
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.3" />
+   </ItemGroup>
+
+   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.*" />
+   </ItemGroup>
+   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1' Or '$(TargetFramework)' == 'net5.0'">
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.*" />
+   </ItemGroup>
+   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.*" />
    </ItemGroup>
 </Project>
