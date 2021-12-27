@@ -21,5 +21,6 @@ public record GridifyMapperConfiguration
    /// Default is false
    /// </summary>
    public bool IgnoreNotMappedFields { get; set; } = GridifyGlobalConfiguration.IgnoreNotMappedFields;
+
 }
 
