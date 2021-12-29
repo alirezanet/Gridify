@@ -134,21 +134,39 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          : _mappings.FirstOrDefault(q => from.Equals(q.From, StringComparison.InvariantCultureIgnoreCase));
    }
 
-   public LambdaExpression GetLambdaExpression(string key)
+   public LambdaExpression GetLambdaExpression(string key, StringComparison? comparison = null)
    {
-      var expression = Configuration.CaseSensitive
-         ? _mappings.FirstOrDefault(q => key.Equals(q.From))?.To
-         : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
+      LambdaExpression? expression = null;
+      if (comparison != null)
+      {
+         expression = _mappings.FirstOrDefault(q => key.Equals(q.From, comparison.Value))?.To;
+      }
+      else
+      {
+         expression = Configuration.CaseSensitive
+                  ? _mappings.FirstOrDefault(q => key.Equals(q.From))?.To
+                  : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
+      }
+
       if (expression == null)
          throw new GridifyMapperException($"Mapping Key `{key}` not found.");
       return expression!;
    }
 
-   public Expression<Func<T, object>> GetExpression(string key)
+   public Expression<Func<T, object>> GetExpression(string key, StringComparison? comparison = null)
    {
-      var expression = Configuration.CaseSensitive
-         ? _mappings.FirstOrDefault(q => key.Equals(q.From))?.To
-         : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
+      LambdaExpression? expression = null;
+      if (comparison != null)
+      {
+         expression = _mappings.FirstOrDefault(q => key.Equals(q.From, comparison.Value))?.To;
+      }
+      else
+      {
+         expression = Configuration.CaseSensitive
+                 ? _mappings.FirstOrDefault(q => key.Equals(q.From))?.To
+                 : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
+      }
+     
       if (expression == null)
          throw new GridifyMapperException($"Mapping Key `{key}` not found.");
       return expression as Expression<Func<T, object>> ?? throw new GridifyMapperException($"Expression fir the `{key}` not found.");
@@ -171,14 +189,29 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       // x =>
       var parameter = Expression.Parameter(typeof(T));
       // x.Name,x.yyy.zz.xx
-      Expression mapProperty = parameter;      
+      Expression mapProperty = parameter;
       foreach (var propertyName in from.Split('.'))
       {
          mapProperty = Expression.Property(mapProperty, propertyName);
-      }     
+      }
       // (object)x.Name
       var convertedExpression = Expression.Convert(mapProperty, typeof(object));
       // x => (object)x.Name
       return Expression.Lambda<Func<T, object>>(convertedExpression, parameter);
+   }
+   internal static LambdaExpression CreateLambdaExpression(string from)
+   {
+      // x =>
+      var parameter = Expression.Parameter(typeof(T));
+      // x.Name,x.yyy.zz.xx
+      Expression mapProperty = parameter;
+      foreach (var propertyName in from.Split('.'))
+      {
+         mapProperty = Expression.Property(mapProperty, propertyName);
+      }
+      // (object)x.Name
+      var convertedExpression = Expression.Convert(mapProperty, typeof(object));
+      // x => (object)x.Name
+      return Expression.Lambda(convertedExpression, parameter);
    }
 }

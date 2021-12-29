@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Gridify.Syntax;
 
@@ -43,44 +44,132 @@ public static partial class GridifyExtensions
       if (syntaxTree.Diagnostics.Any())
          throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
 
+      if (mapper is null)
+         mapper = new GridifyMapper<T>(true);
+
       mapper = mapper.FixMapper(syntaxTree);
       var (queryExpression, _) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
       if (queryExpression == null) throw new GridifyQueryException("Can not create expression with current data");
       return queryExpression;
    }
 
-   public static IEnumerable<Expression<Func<T, object>>> GetOrderingExpressions<T>(this IGridifyOrdering gridifyOrdering,
+   public static IEnumerable<(LambdaExpression, bool, bool)> GetOrderingExpressions<T>(this IGridifyOrdering gridifyOrdering,
       IGridifyMapper<T>? mapper = null)
    {
       if (string.IsNullOrWhiteSpace(gridifyOrdering.OrderBy))
          throw new GridifyQueryException("OrderBy is not defined or not Found");
 
+      var isFirst = true;
+      var orders = ParseOrderings(gridifyOrdering.OrderBy!);
 
-      var members = ParseOrderings(gridifyOrdering.OrderBy!).Select(q => q.memberName).ToList();
       if (mapper is null)
       {
-         foreach (var member in members)
+         foreach (var (member, isAscending) in orders)
          {
-            Expression<Func<T, object>>? exp = null;
+            LambdaExpression? exp = null;
             try
             {
-               exp = GridifyMapper<T>.CreateExpression(member);
+               exp = GridifyMapper<T>.CreateLambdaExpression(member);
             }
             catch (Exception)
             {
                // skip if there is no mappings available
             }
 
-            if (exp != null) yield return exp;
+            if (exp != null)
+            {
+               if (isFirst)
+               {
+                  isFirst = false;
+                  yield return (exp, isAscending, true);
+               }
+               else
+               {
+                  yield return (exp, isAscending, false);
+               }
+            }
+         }
+      }
+      else
+      {
+         foreach (var (member, isAscending) in orders.Where(m => mapper.HasMap(m.memberName)))
+         {
+            if (!mapper.HasMap(member))
+            {
+               // skip if there is no mappings available
+               if (mapper.Configuration.IgnoreNotMappedFields)
+                  continue;
+
+               throw new GridifyMapperException($"Mapping '{member}' not found");
+            }
+            if (isFirst)
+            {
+               isFirst = false;
+               yield return (mapper.GetLambdaExpression(member)!, isAscending, true);
+            }
+            else
+            {
+               yield return (mapper.GetLambdaExpression(member)!, isAscending, false);
+            }
+         }
+      }
+   }
+
+   public static LambdaExpression GetSelectingExpression<T>(this IGridifySelecting gridifySelecting, IGridifyMapper<T>? mapper = null)
+   {
+      if (string.IsNullOrWhiteSpace(gridifySelecting.Select))
+         throw new GridifyQueryException("Select is not defined");
+
+      if (mapper is null)
+         mapper = new GridifyMapper<T>(true);
+
+      var members = ParseSelectings(gridifySelecting.Select!).ToList();
+
+      List<Expression>? exp = new List<Expression>();
+      List<DynamicProperty> ldps = new();
+
+      var Tmembers = typeof(T).GetProperties();
+
+      var paramexp = Expression.Parameter(typeof(T));
+
+      if (mapper is null)
+      {
+         foreach (var member in members)
+         {
+            Expression<Func<T, object>>? mexp = null;
+            try
+            {
+               mexp = GridifyMapper<T>.CreateExpression(member);
+            }
+            catch (Exception)
+            {
+               // skip if there is no mappings available
+            }
+
+            if (mexp != null)
+            {
+               ldps.Add(new DynamicProperty(member, mexp.Type));
+               //exp.Add(expm);
+            }
+
          }
       }
       else
       {
          foreach (var member in members.Where(mapper.HasMap))
          {
-            yield return mapper.GetExpression(member)!;
+            var tm = mapper.Configuration.CaseSensitive ? Tmembers.FirstOrDefault(m => m.Name.Equals(member)) : Tmembers.FirstOrDefault(m => m.Name.Equals(member, StringComparison.InvariantCultureIgnoreCase));
+
+            var mexp = Expression.MakeMemberAccess(paramexp, tm!);
+            ldps.Add(new DynamicProperty(mexp!.Member.Name, mexp!.Type));
+            exp.Add(mexp);
          }
       }
+
+      var newexp = CreateNewExpression(ldps, exp, null);
+
+      var lambda = Expression.Lambda(newexp, paramexp);
+      return lambda;
    }
 
    #region "Public"
@@ -190,19 +279,30 @@ public static partial class GridifyExtensions
          : ProcessOrdering(query, orderBy, startWithThenBy, mapper);
    }
 
-   public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, string props, IGridifyMapper<T>? mapper = null)
+   public static IQueryable ApplySelect<T>(this IQueryable<T> query, IGridifySelecting? gridifySelecting, IGridifyMapper<T>? mapper = null)
    {
-      if (string.IsNullOrWhiteSpace(props))
+      if (gridifySelecting==null || string.IsNullOrWhiteSpace(gridifySelecting!.Select))
          return (IQueryable<object>)query;
 
       if (mapper is null)
          mapper = new GridifyMapper<T>(true);
 
-      var exp = mapper.GetExpression(props);
-      var result = query.Select(exp);
+      var lambda = gridifySelecting.GetSelectingExpression(mapper);
 
+      var callTypes = new[] { query.ElementType, lambda.Body.Type };
+      var argument_exps = new Expression[] { query.Expression, Expression.Quote(lambda) };
 
-      return result;
+      var selectMethodInfo = typeof(Queryable).GetMethods().First(n => n.Name == nameof(Queryable.Select));
+
+      var argLenght = selectMethodInfo.GetGenericArguments().Length;
+
+      selectMethodInfo =
+         argLenght == 2
+         ? selectMethodInfo.MakeGenericMethod(query.ElementType, lambda.Body.Type)
+         : selectMethodInfo.MakeGenericMethod(lambda.Body.Type);
+
+      var resultExpression = Expression.Call(null, selectMethodInfo, argument_exps);
+      return query.Provider.CreateQuery(resultExpression);
    }
 
    /// <summary>
@@ -215,7 +315,9 @@ public static partial class GridifyExtensions
    public static bool IsValid<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T>? mapper = null)
    {
       return  ((IGridifyFiltering)gridifyQuery).IsValid(mapper) &&
-              ((IGridifyOrdering)gridifyQuery).IsValid(mapper);
+              ((IGridifyOrdering)gridifyQuery).IsValid(mapper) &&
+              ((IGridifySelecting)gridifyQuery).IsValid(mapper)
+              ;
    }
 
    public static bool IsValid<T>(this IGridifyFiltering filtering, IGridifyMapper<T>? mapper = null)
@@ -253,6 +355,24 @@ public static partial class GridifyExtensions
          var orders = ParseOrderings(ordering.OrderBy!).ToList();
          mapper ??= new GridifyMapper<T>(true);
          if (orders.Any(order => !mapper.HasMap(order.memberName)))
+            return false;
+      }
+      catch (Exception)
+      {
+         return false;
+      }
+
+      return true;
+   }
+
+   public static bool IsValid<T>(this IGridifySelecting selecting, IGridifyMapper<T>? mapper = null)
+   {
+      if (string.IsNullOrWhiteSpace(selecting.Select)) return true;
+      try
+      {
+         var selects = ParseSelectings(selecting.Select!).ToList();
+         mapper ??= new GridifyMapper<T>(true);
+         if (selects.Any(order => !mapper.HasMap(order)))
             return false;
       }
       catch (Exception)
@@ -329,6 +449,98 @@ public static partial class GridifyExtensions
          else
             yield return (orderingExp, true);
       }
+   }
+
+   private static IEnumerable<string> ParseSelectings(string selects)
+   {
+      foreach (var field in selects.Split(','))
+      {
+         var selectingExp = field.Trim();
+
+         var spliced = selectingExp.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+         yield return spliced.First();
+      }
+   }
+
+   //This original fork from https://github.com/zzzprojects/System.Linq.Dynamic.Core\src\System.Linq.Dynamic.Core\Parser\ExpressionParser.cs
+   public static Expression CreateNewExpression(IEnumerable<DynamicProperty> properties, IEnumerable<Expression> expressions, Type newType, bool _createParameterCtor = false)
+   {
+      // http://solutionizing.net/category/linq/
+      Type? type = newType;
+
+      if (type == null)
+      {
+         type = DynamicClassFactory.CreateType(properties, _createParameterCtor);
+      }
+
+      IEnumerable<PropertyInfo> propertyInfos = type.GetProperties();
+      if (type.GetTypeInfo().BaseType == typeof(DynamicClass))
+      {
+         propertyInfos = propertyInfos.Where(x => x.Name != "Item").ToList();
+      }
+
+      Type[] propertyTypes = propertyInfos.Select(p => p.PropertyType).ToArray();
+      ConstructorInfo ctor = type.GetConstructor(propertyTypes)!;
+      if (ctor != null && ctor.GetParameters().Length == expressions.Count())
+      {
+         var expressionsPromoted = new List<Expression>();
+
+         // Loop all expressions and promote if needed
+         for (int i = 0; i < propertyTypes.Length; i++)
+         {
+            Type propertyType = propertyTypes[i];
+
+            // Promote from Type to Nullable Type if needed
+            if (expressions.ElementAt(i).NodeType != ExpressionType.MemberAccess)
+            {
+               expressionsPromoted.Add(Expression.MakeMemberAccess(expressions.ElementAt(i), propertyType.GetTypeInfo())!);
+            }
+            else
+            {
+               expressionsPromoted.Add(expressions.ElementAt(i));
+            }
+         }
+         var ntc = Expression.New(ctor, expressionsPromoted, propertyInfos);
+         return ntc;
+      }
+
+      MemberBinding[] bindings = new MemberBinding[properties.Count()];
+      for (int i = 0; i < bindings.Length; i++)
+      {
+         string propertyOrFieldName = properties.ElementAt(i).Name;
+         Type propertyOrFieldType;
+         MemberInfo memberInfo;
+         PropertyInfo propertyInfo = type.GetProperty(propertyOrFieldName)!;
+         if (propertyInfo != null)
+         {
+            memberInfo = propertyInfo;
+            propertyOrFieldType = propertyInfo.PropertyType;
+         }
+         else
+         {
+            FieldInfo fieldInfo = type.GetField(propertyOrFieldName)!;
+            if (fieldInfo == null)
+            {
+               throw new Exception(string.Format("No property or field '{0}' exists in type '{1}'", propertyOrFieldName, type.GetTypeInfo().Name));
+            }
+
+            memberInfo = fieldInfo;
+            propertyOrFieldType = fieldInfo.FieldType;
+         }
+
+         // Promote from Type to Nullable Type if needed
+         if (expressions.ElementAt(i).NodeType != ExpressionType.MemberAccess)
+         {
+            bindings[i] = Expression.Bind(memberInfo, Expression.MakeMemberAccess(expressions.ElementAt(i), propertyOrFieldType.GetTypeInfo())!);
+         }
+         else
+         {
+            bindings[i] = Expression.Bind(memberInfo, expressions.ElementAt(i));
+         }
+      }
+
+      return Expression.MemberInit(Expression.New(type), bindings); ;
    }
 
    /// <summary>
