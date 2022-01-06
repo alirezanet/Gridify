@@ -9,9 +9,9 @@ it also provides an easy way to apply Filtering, Sorting, and pagination using t
 - Supports filtering, sorting, and pagination
 - Supports `string` to LINQ conversion
 - Supports nested queries and sub-collections
-- Supports Indexes
 - Supports `string` to `object` mapping
-- Supports compiled queries
+- Supports query compilation
+- Supports collection indexes
 - Compatible with ORMs specially Entity Framework
 - Can be used on every collection that LINQ supports
 - Compatible with Object-mappers like AutoMapper
