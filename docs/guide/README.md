@@ -7,8 +7,8 @@ it also provides an easy way to apply Filtering, Sorting, and pagination using t
 
 - It's Fast and easy to use
 - Supports filtering, sorting, and pagination
-- Supports string to LINQ conversion
-- Supports nested queries
+- Supports `string` to LINQ conversion
+- Supports nested queries and sub-collections
 - Supports Indexes
 - Supports `string` to `object` mapping
 - Supports compiled queries
