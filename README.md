@@ -8,6 +8,19 @@
 
 Gridify is a dynamic LINQ library that converts your strings to a LINQ query in the easiest way possible with excellent performance. it also, introduces an easy way to apply Filtering, Sorting and pagination using text-based data.
 
+## Features
+
+- It's Fast and easy to use
+- Supports filtering, sorting, and pagination
+- Supports string to LINQ conversion
+- Supports nested queries
+- Supports Indexes
+- Supports `string` to `object` mapping
+- Supports compiled queries
+- Compatible with ORMs specially Entity Framework
+- Can be used on every collection that LINQ supports
+- Compatible with Object-mappers like AutoMapper
+
 ## Documentation
 
 Check out our docs at [https://alirezanet.github.io/Gridify/](https://alirezanet.github.io/Gridify/).
