@@ -9,7 +9,7 @@ using Gridify.Syntax;
 
 namespace Gridify;
 
-public static partial class GridifyExtensions
+public static class GridifyExtensions
 {
    #region "Private"
 
@@ -38,7 +38,7 @@ public static partial class GridifyExtensions
       if (string.IsNullOrWhiteSpace(gridifyFiltering.Filter))
          throw new GridifyQueryException("Filter is not defined");
 
-      var syntaxTree = SyntaxTree.Parse(gridifyFiltering.Filter!);
+      var syntaxTree = SyntaxTree.Parse(gridifyFiltering.Filter!, GridifyGlobalConfiguration.CustomOperators.Operators);
 
       if (syntaxTree.Diagnostics.Any())
          throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
@@ -58,7 +58,6 @@ public static partial class GridifyExtensions
 
       var members = ParseOrderings(gridifyOrdering.OrderBy!).Select(q => q.memberName).ToList();
       if (mapper is null)
-      {
          foreach (var member in members)
          {
             Expression<Func<T, object>>? exp = null;
@@ -73,14 +72,91 @@ public static partial class GridifyExtensions
 
             if (exp != null) yield return exp;
          }
-      }
       else
-      {
          foreach (var member in members.Where(mapper.HasMap))
-         {
             yield return mapper.GetExpression(member)!;
-         }
-      }
+   }
+
+   /// <summary>
+   /// Supports sorting of a given member as an expression when type is not known. It solves problem with LINQ to Entities
+   /// unable to
+   /// cast different types as 'System.DateTime', 'System.DateTime?' to type 'System.Object'.
+   /// LINQ to Entities only supports casting Entity Data Model primitive types.
+   /// </summary>
+   /// <typeparam name="T">entity type</typeparam>
+   /// <param name="query">query to apply sorting on.</param>
+   /// <param name="expression">the member expression to apply</param>
+   /// <param name="isSortAsc">the sort order to apply</param>
+   /// <returns>Query with sorting applied as IOrderedQueryable of type T</returns>
+   private static IOrderedQueryable<T> OrderByMember<T>(
+      this IQueryable<T> query,
+      Expression<Func<T, object>> expression,
+      bool isSortAsc)
+   {
+      if (expression.Body is not UnaryExpression body) return isSortAsc ? query.OrderBy(expression) : query.OrderByDescending(expression);
+
+      if (body.Operand is MemberExpression memberExpression)
+         return
+            (IOrderedQueryable<T>)
+            query.Provider.CreateQuery(
+               Expression.Call(
+                  typeof(Queryable),
+                  isSortAsc ? "OrderBy" : "OrderByDescending",
+                  new[] { typeof(T), memberExpression.Type },
+                  query.Expression,
+                  Expression.Lambda(memberExpression, expression.Parameters)));
+
+      return isSortAsc ? query.OrderBy(expression) : query.OrderByDescending(expression);
+   }
+
+   /// <summary>
+   /// Supports sorting of a given member as an expression when type is not known. It solves problem with LINQ to Entities
+   /// unable to
+   /// cast different types as 'System.DateTime', 'System.DateTime?' to type 'System.Object'.
+   /// LINQ to Entities only supports casting Entity Data Model primitive types.
+   /// </summary>
+   /// <typeparam name="T">entity type</typeparam>
+   /// <param name="query">query to apply sorting on.</param>
+   /// <param name="expression">the member expression to apply</param>
+   /// <param name="isSortAsc">the sort order to apply</param>
+   /// <returns>Query with sorting applied as IOrderedQueryable of type T</returns>
+   public static IOrderedQueryable<T> ThenByMember<T>(
+      this IQueryable<T> query,
+      Expression<Func<T, object>> expression,
+      bool isSortAsc)
+   {
+      return ((IOrderedQueryable<T>)query).ThenByMember(expression, isSortAsc);
+   }
+
+   /// <summary>
+   /// Supports sorting of a given member as an expression when type is not known. It solves problem with LINQ to Entities
+   /// unable to
+   /// cast different types as 'System.DateTime', 'System.DateTime?' to type 'System.Object'.
+   /// LINQ to Entities only supports casting Entity Data Model primitive types.
+   /// </summary>
+   /// <typeparam name="T">entity type</typeparam>
+   /// <param name="query">query to apply sorting on.</param>
+   /// <param name="expression">the member expression to apply</param>
+   /// <param name="isSortAsc">the sort order to apply</param>
+   /// <returns>Query with sorting applied as IOrderedQueryable of type T</returns>
+   private static IOrderedQueryable<T> ThenByMember<T>(
+      this IOrderedQueryable<T> query,
+      Expression<Func<T, object>> expression,
+      bool isSortAsc)
+   {
+      if (expression.Body is not UnaryExpression body) return isSortAsc ? query.ThenBy(expression) : query.ThenByDescending(expression);
+      if (body.Operand is MemberExpression memberExpression)
+         return
+            (IOrderedQueryable<T>)
+            query.Provider.CreateQuery(
+               Expression.Call(
+                  typeof(Queryable),
+                  isSortAsc ? "ThenBy" : "ThenByDescending",
+                  new[] { typeof(T), memberExpression.Type },
+                  query.Expression,
+                  Expression.Lambda(memberExpression, expression.Parameters)));
+
+      return isSortAsc ? query.ThenBy(expression) : query.ThenByDescending(expression);
    }
 
    #region "Public"
@@ -110,7 +186,6 @@ public static partial class GridifyExtensions
       foreach (var field in syntaxTree.Root.Descendants()
                   .Where(q => q.Kind == SyntaxKind.FieldExpression)
                   .Cast<FieldExpressionSyntax>())
-      {
          try
          {
             mapper.AddMap(field.FieldToken.Text);
@@ -120,7 +195,6 @@ public static partial class GridifyExtensions
             if (!mapper.Configuration.IgnoreNotMappedFields)
                throw new GridifyMapperException($"Property '{field.FieldToken.Text}' not found.");
          }
-      }
 
       return mapper;
    }
@@ -130,7 +204,7 @@ public static partial class GridifyExtensions
       var nodes = new Stack<SyntaxNode>(new[] { root });
       while (nodes.Any())
       {
-         SyntaxNode node = nodes.Pop();
+         var node = nodes.Pop();
          yield return node;
          foreach (var n in node.GetChildren()) nodes.Push(n);
       }
@@ -161,7 +235,10 @@ public static partial class GridifyExtensions
    /// <param name="query">the original(target) queryable object</param>
    /// <param name="gridifyOrdering">the configuration to apply ordering</param>
    /// <param name="mapper">this is an optional parameter to apply ordering using a custom mapping configuration</param>
-   /// <param name="startWithThenBy">if you already have an ordering with start with ThenBy, new orderings will add on top of your orders</param>
+   /// <param name="startWithThenBy">
+   /// if you already have an ordering with start with ThenBy, new orderings will add on top of
+   /// your orders
+   /// </param>
    /// <typeparam name="T">type of target entity</typeparam>
    /// <returns>returns user query after applying Ordering </returns>
    public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> query, IGridifyOrdering? gridifyOrdering, IGridifyMapper<T>? mapper = null,
@@ -179,7 +256,10 @@ public static partial class GridifyExtensions
    /// <param name="query">the original(target) queryable object</param>
    /// <param name="orderBy">the ordering fields</param>
    /// <param name="mapper">this is an optional parameter to apply ordering using a custom mapping configuration</param>
-   /// <param name="startWithThenBy">if you already have an ordering with start with ThenBy, new orderings will add on top of your orders</param>
+   /// <param name="startWithThenBy">
+   /// if you already have an ordering with start with ThenBy, new orderings will add on top of
+   /// your orders
+   /// </param>
    /// <typeparam name="T">type of target entity</typeparam>
    /// <returns>returns user query after applying Ordering </returns>
    public static IQueryable<T> ApplyOrdering<T>(this IQueryable<T> query, string orderBy, IGridifyMapper<T>? mapper = null,
@@ -214,8 +294,8 @@ public static partial class GridifyExtensions
    /// <returns></returns>
    public static bool IsValid<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T>? mapper = null)
    {
-      return  ((IGridifyFiltering)gridifyQuery).IsValid(mapper) &&
-              ((IGridifyOrdering)gridifyQuery).IsValid(mapper);
+      return ((IGridifyFiltering)gridifyQuery).IsValid(mapper) &&
+             ((IGridifyOrdering)gridifyQuery).IsValid(mapper);
    }
 
    public static bool IsValid<T>(this IGridifyFiltering filtering, IGridifyMapper<T>? mapper = null)
@@ -223,13 +303,13 @@ public static partial class GridifyExtensions
       if (string.IsNullOrWhiteSpace(filtering.Filter)) return true;
       try
       {
-         var parser = new Parser(filtering.Filter!);
+         var parser = new Parser(filtering.Filter!, GridifyGlobalConfiguration.CustomOperators.Operators);
          var syntaxTree = parser.Parse();
          if (syntaxTree.Diagnostics.Any())
             return false;
 
          var fieldExpressions = syntaxTree.Root.Descendants()
-            .Where(q=> q.Kind is SyntaxKind.FieldExpression)
+            .Where(q => q.Kind is SyntaxKind.FieldExpression)
             .Cast<FieldExpressionSyntax>().ToList();
 
          mapper ??= new GridifyMapper<T>(true);
@@ -274,7 +354,6 @@ public static partial class GridifyExtensions
       {
          mapper = new GridifyMapper<T>();
          foreach (var (member, _) in orders)
-         {
             try
             {
                mapper.AddMap(member);
@@ -284,7 +363,6 @@ public static partial class GridifyExtensions
                if (!mapper.Configuration.IgnoreNotMappedFields)
                   throw new GridifyMapperException($"Mapping '{member}' not found");
             }
-         }
       }
 
       foreach (var (member, isAscending) in orders)
@@ -304,7 +382,9 @@ public static partial class GridifyExtensions
             isFirst = false;
          }
          else
+         {
             query = query.ThenByMember(mapper.GetExpression(member), isAscending);
+         }
       }
 
       return query;
@@ -327,7 +407,9 @@ public static partial class GridifyExtensions
             yield return (spliced.First(), isAsc);
          }
          else
+         {
             yield return (orderingExp, true);
+         }
       }
    }
 
@@ -390,10 +472,10 @@ public static partial class GridifyExtensions
       if (string.IsNullOrWhiteSpace(filter))
          return query;
 
-      var syntaxTree = SyntaxTree.Parse(filter!);
+      var syntaxTree = SyntaxTree.Parse(filter!, GridifyGlobalConfiguration.CustomOperators.Operators);
 
       if (syntaxTree.Diagnostics.Any())
-         throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
+         throw new GridifyFilteringException(syntaxTree.Diagnostics.Last());
 
       mapper = mapper.FixMapper(syntaxTree);
 
@@ -438,7 +520,7 @@ public static partial class GridifyExtensions
    /// <param name="gridifyQuery">the configuration to apply paging, filtering and ordering</param>
    /// <param name="mapper">this is an optional parameter to apply filtering and ordering using a custom mapping configuration</param>
    /// <typeparam name="T">type of target entity</typeparam>
-   /// <returns>returns a <c>QueryablePaging<T><c /> after applying filtering, ordering and paging</returns>
+   /// <returns>returns a <c>QueryablePaging<T><c/> after applying filtering, ordering and paging</returns>
    public static QueryablePaging<T> GridifyQueryable<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
    {
       query = query.ApplyFiltering(gridifyQuery, mapper);
@@ -487,87 +569,4 @@ public static partial class GridifyExtensions
    }
 
    #endregion
-
-   /// <summary>
-   ///     Supports sorting of a given member as an expression when type is not known. It solves problem with LINQ to Entities unable to
-   ///     cast different types as 'System.DateTime', 'System.DateTime?' to type 'System.Object'.
-   ///     LINQ to Entities only supports casting Entity Data Model primitive types.
-   /// </summary>
-   /// <typeparam name="T">entity type</typeparam>
-   /// <param name="query">query to apply sorting on.</param>
-   /// <param name="expression">the member expression to apply</param>
-   /// <param name="isSortAsc">the sort order to apply</param>
-   /// <returns>Query with sorting applied as IOrderedQueryable of type T</returns>
-   private static IOrderedQueryable<T> OrderByMember<T>(
-      this IQueryable<T> query,
-      Expression<Func<T, object>> expression,
-      bool isSortAsc)
-   {
-      if (expression.Body is not UnaryExpression body) return isSortAsc ? query.OrderBy(expression) : query.OrderByDescending(expression);
-
-      if (body.Operand is MemberExpression memberExpression)
-      {
-         return
-            (IOrderedQueryable<T>)
-            query.Provider.CreateQuery(
-               Expression.Call(
-                  typeof(Queryable),
-                  isSortAsc ? "OrderBy" : "OrderByDescending",
-                  new[] { typeof(T), memberExpression.Type },
-                  query.Expression,
-                  Expression.Lambda(memberExpression, expression.Parameters)));
-      }
-
-      return isSortAsc ? query.OrderBy(expression) : query.OrderByDescending(expression);
-   }
-
-   /// <summary>
-   ///     Supports sorting of a given member as an expression when type is not known. It solves problem with LINQ to Entities unable to
-   ///     cast different types as 'System.DateTime', 'System.DateTime?' to type 'System.Object'.
-   ///     LINQ to Entities only supports casting Entity Data Model primitive types.
-   /// </summary>
-   /// <typeparam name="T">entity type</typeparam>
-   /// <param name="query">query to apply sorting on.</param>
-   /// <param name="expression">the member expression to apply</param>
-   /// <param name="isSortAsc">the sort order to apply</param>
-   /// <returns>Query with sorting applied as IOrderedQueryable of type T</returns>
-   public static IOrderedQueryable<T> ThenByMember<T>(
-      this IQueryable<T> query,
-      Expression<Func<T, object>> expression,
-      bool isSortAsc)
-   {
-      return ((IOrderedQueryable<T>)query).ThenByMember(expression, isSortAsc);
-   }
-
-   /// <summary>
-   ///     Supports sorting of a given member as an expression when type is not known. It solves problem with LINQ to Entities unable to
-   ///     cast different types as 'System.DateTime', 'System.DateTime?' to type 'System.Object'.
-   ///     LINQ to Entities only supports casting Entity Data Model primitive types.
-   /// </summary>
-   /// <typeparam name="T">entity type</typeparam>
-   /// <param name="query">query to apply sorting on.</param>
-   /// <param name="expression">the member expression to apply</param>
-   /// <param name="isSortAsc">the sort order to apply</param>
-   /// <returns>Query with sorting applied as IOrderedQueryable of type T</returns>
-   private static IOrderedQueryable<T> ThenByMember<T>(
-      this IOrderedQueryable<T> query,
-      Expression<Func<T, object>> expression,
-      bool isSortAsc)
-   {
-      if (expression.Body is not UnaryExpression body) return isSortAsc ? query.ThenBy(expression) : query.ThenByDescending(expression);
-      if (body.Operand is MemberExpression memberExpression)
-      {
-         return
-            (IOrderedQueryable<T>)
-            query.Provider.CreateQuery(
-               Expression.Call(
-                  typeof(Queryable),
-                  isSortAsc ? "ThenBy" : "ThenByDescending",
-                  new[] { typeof(T), memberExpression.Type },
-                  query.Expression,
-                  Expression.Lambda(memberExpression, expression.Parameters)));
-      }
-
-      return isSortAsc ? query.ThenBy(expression) : query.ThenByDescending(expression);
-   }
 }

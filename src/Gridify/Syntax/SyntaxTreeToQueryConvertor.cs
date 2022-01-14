@@ -290,6 +290,13 @@ internal static class ExpressionToQueryConvertor
                be = Expression.Not(Expression.Call(body, GetEndsWithMethod(), GetValueExpression(body.Type, value)));
 
             break;
+         case SyntaxKind.CustomOperator:
+            var token = op as SyntaxToken;
+            var customOperator = GridifyGlobalConfiguration.CustomOperators.Operators.First(q => q.GetOperator() == token!.Text);
+            var customExp = customOperator.OperatorHandler();
+            be = new ReplaceExpressionVisitor(customExp.Parameters[0], body).Visit(customExp.Body);
+            be = new ReplaceExpressionVisitor(customExp.Parameters[1], Expression.Constant(value, body.Type)).Visit(be);
+            break;
          default:
             return null;
       }

@@ -1,4 +1,4 @@
-﻿namespace Gridify.Syntax;
+namespace Gridify.Syntax;
 
 public enum SyntaxKind
 {
@@ -22,6 +22,7 @@ public enum SyntaxKind
    GreaterOrEqualThan,
    StartsWith,
    EndsWith,
+   CustomOperator,
 
    // expressions
    FieldExpression,
@@ -32,5 +33,5 @@ public enum SyntaxKind
    NotStartsWith,
    NotEndsWith,
    CaseInsensitive,
-   FieldIndexToken
+   FieldIndexToken,
 }

@@ -8,12 +8,14 @@ internal class Lexer
 {
    private readonly List<string> _diagnostics = new();
    private readonly string _text;
+   private readonly IEnumerable<IGridifyOperator> _customOperators;
    private int _position;
    private bool _waitingForValue;
 
-   public Lexer(string text)
+   public Lexer(string text, IEnumerable<IGridifyOperator> customOperators)
    {
       _text = text;
+      _customOperators = customOperators;
    }
 
    public IEnumerable<string> Diagnostics => _diagnostics;
@@ -73,7 +75,7 @@ internal class Lexer
          case '=':
          {
             _waitingForValue = true;
-            return new SyntaxToken(SyntaxKind.Equal, _position ++ , "=");
+            return new SyntaxToken(SyntaxKind.Equal, _position++, "=");
          }
          case '!' when peek == '=':
          {
@@ -90,14 +92,29 @@ internal class Lexer
          case '<':
          {
             _waitingForValue = true;
-            return peek == '=' ? new SyntaxToken(SyntaxKind.LessOrEqualThan, _position += 2, "<=") :
-               new SyntaxToken(SyntaxKind.LessThan, _position++, "<");
+            return peek == '='
+               ? new SyntaxToken(SyntaxKind.LessOrEqualThan, _position += 2, "<=")
+               : new SyntaxToken(SyntaxKind.LessThan, _position++, "<");
          }
          case '>':
          {
             _waitingForValue = true;
-            return peek == '=' ? new SyntaxToken(SyntaxKind.GreaterOrEqualThan, _position += 2, ">=") :
-               new SyntaxToken(SyntaxKind.GreaterThan, _position++, ">");
+            return peek == '='
+               ? new SyntaxToken(SyntaxKind.GreaterOrEqualThan, _position += 2, ">=")
+               : new SyntaxToken(SyntaxKind.GreaterThan, _position++, ">");
+         }
+         case '#' when _customOperators.Any(): // Custom Operators
+         {
+            foreach (var cOp in _customOperators)
+            {
+               var op = cOp.GetOperator();
+               if (op != _text.Substring(_position, op.Length)) continue;
+               var start = _position;
+               _position += op.Length;
+               _waitingForValue = true;
+               return new SyntaxToken(SyntaxKind.CustomOperator, start, op);
+            }
+            break;
          }
       }
 
@@ -119,7 +136,6 @@ internal class Lexer
 
          _diagnostics.Add($"bad character input: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
          return new SyntaxToken(SyntaxKind.BadToken, _position, Current.ToString());
-
       }
 
       if (char.IsLetter(Current) && !_waitingForValue)
@@ -154,7 +170,7 @@ internal class Lexer
       {
          var start = _position;
 
-         var exitCharacters = new[] {'(', ')', ',', '|'};
+         var exitCharacters = new[] { '(', ')', ',', '|' };
          var lastChar = '\0';
          while ((!exitCharacters.Contains(Current) || exitCharacters.Contains(Current) && lastChar == '\\') &&
                 _position < _text.Length &&

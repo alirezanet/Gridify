@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Gridify.Syntax;
@@ -9,10 +9,10 @@ internal class Parser
    private readonly SyntaxToken[] _tokens;
    private int _position;
 
-   public Parser(string text)
+   public Parser(string text, IEnumerable<IGridifyOperator> customOperators)
    {
       var tokens = new List<SyntaxToken>();
-      var lexer = new Lexer(text);
+      var lexer = new Lexer(text, customOperators);
       SyntaxToken token;
       do
       {
@@ -74,7 +74,8 @@ internal class Parser
          SyntaxKind.StartsWith,
          SyntaxKind.EndsWith,
          SyntaxKind.NotStartsWith,
-         SyntaxKind.NotEndsWith
+         SyntaxKind.NotEndsWith,
+         SyntaxKind.CustomOperator
       };
 
       while (binaryKinds.Contains(Current.Kind))

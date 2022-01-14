@@ -149,6 +149,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
       {
          return false;
       }
+
       return isValid;
    }
 
@@ -185,7 +186,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
       {
          return length == 0 ||
                 compiledCond.Aggregate(true, (current, expression)
-                   => current && collection.Any(expression!));
+                   => current && collection.Any(expression));
       };
    }
 
@@ -325,10 +326,10 @@ public class QueryBuilder<T> : IQueryBuilder<T>
 
    private Expression<Func<T, bool>> ConvertConditionToExpression(string condition)
    {
-      var syntaxTree = SyntaxTree.Parse(condition);
+      var syntaxTree = SyntaxTree.Parse(condition, GridifyGlobalConfiguration.CustomOperators.Operators);
 
       if (syntaxTree.Diagnostics.Any())
-         throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
+         throw new GridifyFilteringException(syntaxTree.Diagnostics.Last());
 
       return syntaxTree.CreateQuery(_mapper);
    }
