@@ -9,7 +9,6 @@ start contributing to the project by submitting pull requests
 - :zap: Improve the documentation site
 - :zap: Improve code documentation (summary)
 - :zap: Add project Security Policy
-- :zap: Add Support EF.Function.FreeText [#42](https://github.com/alirezanet/Gridify/issues/42)
 
 ## Documentation
 
