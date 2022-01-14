@@ -31,7 +31,7 @@ this is equivalent to the bellow LINQ query:
 ``` csharp
 var x = personsRepo.Where(p =>
              p.Name is null ||
-             p.Name == string.Empty() );
+             p.Name == string.Empty );
 ```
 
 :::
