@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using Gridify.Syntax;
 using Xunit;
 
 namespace Gridify.Tests;
@@ -56,6 +58,7 @@ public class GridifyExtensionsShould
 
 
    #region "ApplyFiltering"
+
 
    [Fact]
    public void ApplyFiltering_ChildField()
@@ -653,6 +656,42 @@ public class GridifyExtensionsShould
       var actual = _fakeRepository.AsQueryable().ApplyFiltering("name=*a, id>15", gm).ToList();
       var expected = _fakeRepository.Where(q => q.Id > 15).ToList();
 
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
+
+   #endregion
+
+
+   #region CustomOperator
+
+   internal class UpperCaseEqual : IGridifyOperator
+   {
+      public string GetOperator()
+      {
+         return "#=";
+      }
+
+      public Expression<OperatorParameter> OperatorHandler()
+      {
+         return (prop, value) => prop.Equals(value.ToString()!.ToUpper());
+      }
+   }
+
+   [Fact]
+   public void ApplyFiltering_CustomOperator()
+   {
+      GridifyGlobalConfiguration.CustomOperators.Register(new UpperCaseEqual());
+      // Arrange
+      var expected = _fakeRepository
+         .Where(q => q.Name == "liam".ToUpper())
+         .ToList();
+
+      // Act
+      var actual = _fakeRepository.AsQueryable().ApplyFiltering("name#=liam").ToList();
+
+      // Assert
       Assert.Equal(expected.Count, actual.Count);
       Assert.Equal(expected, actual);
       Assert.True(actual.Any());

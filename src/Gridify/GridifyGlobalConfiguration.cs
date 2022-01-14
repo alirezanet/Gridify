@@ -1,6 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
+using Gridify.Syntax;
+
 namespace Gridify
 {
- public static class GridifyGlobalConfiguration
+   public static class GridifyGlobalConfiguration
    {
       /// <summary>
       /// It makes the generated expressions compatible
@@ -34,6 +38,14 @@ namespace Gridify
       /// Default is false
       /// </summary>
       public static bool IgnoreNotMappedFields { get; set; }
+
+      /// <summary>
+      /// You can extend the gridify supported operators by adding
+      /// your own operators to OperatorManager.
+      /// Custom operators must implement the IGridifyOperator interface
+      /// and must start with '#' character.
+      /// </summary>
+      public static OperatorManager CustomOperators { get; } = new();
 
       /// <summary>
       /// It Enables the EntityFramework Compatibility layer to
