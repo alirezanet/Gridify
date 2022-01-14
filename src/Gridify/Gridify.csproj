@@ -31,10 +31,10 @@
       <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
    </ItemGroup>
 
-   <Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'">
+   <Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true'">
       <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
       <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High"
-            WorkingDirectory="../../" />  <!--Update this to the releative path to your project root dir -->
+            WorkingDirectory="../../" />  <!--Update this to the relative path to your project root dir -->
    </Target>
 
 </Project>
