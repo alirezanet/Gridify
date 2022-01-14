@@ -38,30 +38,13 @@ If true, in filtering and ordering operations, gridify doesn't return any except
 
 ## CustomOperators
 
-Sometimes the default [Gridify operators](./filtering.md#conditional-operators) are not enough, For example, when you are using the EntityFramework, you may want to use `EF.Functions.FreeText` rather than a LIKE with wildcards. In this case, you can register your own custom operator through this property.
+Using the `Register` method of this property you can add your own custom operators.
 
-To define a custom operator, you need to create a class that implements the `IGridifyOperator` interface.
-
-```csharp
-class FreeTextOperator : IGridifyOperator
-{
-   public string GetOperator() => "#=*";
-   public Expression<OperatorParameter> OperatorHandler()
-   {
-      return (prop, value) => EF.Functions.FreeText(prop, value.ToString());
-   }
-}
+``` csharp
+ GridifyGlobalConfiguration.CustomOperators.Register(new MyCustomOperator());
 ```
 
-Then register it through CustomOperators property.
-
-```csharp
- GridifyGlobalConfiguration.CustomOperators.Register(new FreeTextOperator());
-```
-
-::: warning
-The custom operator must be started with a `#` character.
-:::
+To learn more about custom operators, see [Custom operator](./filtering.md#custom-operators)
 
 ## EntityFramework
 
