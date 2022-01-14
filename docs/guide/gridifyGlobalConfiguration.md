@@ -2,7 +2,7 @@
 
 Using this class you can change the default behavior and configuration of the gridify library.
 
-## Properties
+## General configurations
 
 ### DefaultPageSize
 
@@ -36,6 +36,35 @@ If true, in filtering and ordering operations, gridify doesn't return any except
 - default: `false`
 - related to: [GridifyMapper - IgnoreNotMappedFields](./gridifyMapper.md#ignorenotmappedfields)
 
+## CustomOperators
+
+Sometimes the default [Gridify operators](./filtering.md#conditional-operators) are not enough, For example, when you are using the EntityFramework, you may want to use `EF.Functions.FreeText` rather than a LIKE with wildcards. In this case, you can register your own custom operator through this property.
+
+To define a custom operator, you need to create a class that implements the `IGridifyOperator` interface.
+
+```csharp
+class FreeTextOperator : IGridifyOperator
+{
+   public string GetOperator() => "#=*";
+   public Expression<OperatorParameter> OperatorHandler()
+   {
+      return (prop, value) => EF.Functions.FreeText(prop, value.ToString());
+   }
+}
+```
+
+Then register it through CustomOperators property.
+
+```csharp
+ GridifyGlobalConfiguration.CustomOperators.Register(new FreeTextOperator());
+```
+
+::: warning
+The custom operator must be started with a `#` character.
+:::
+
+## EntityFramework
+
 ### EntityFrameworkCompatibilityLayer
 
 Setting this property to `true` Enables the EntityFramework Compatibility layer to make the generated expressions compatible whit entity framework.
@@ -47,8 +76,6 @@ Setting this property to `true` Enables the EntityFramework Compatibility layer 
 Lean more about the [compatibility layer](./entity-framework.md#compatibility-layer)
 :::
 
-## Methods
-
 ### EnableEntityFrameworkCompatibilityLayer()
 
 Simply sets the [EntityFrameworkCompatibilityLayer](#entityframeworkcompatibilitylayer) property to `true`.
@@ -56,3 +83,4 @@ Simply sets the [EntityFrameworkCompatibilityLayer](#entityframeworkcompatibilit
 ### DisableEntityFrameworkCompatibilityLayer()
 
 Simply sets the [EntityFrameworkCompatibilityLayer](#entityframeworkcompatibilitylayer) property to `false`.
+

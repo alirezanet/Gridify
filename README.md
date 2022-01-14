@@ -17,6 +17,7 @@ Gridify is a dynamic LINQ library that converts your strings to a LINQ query in 
 - Supports `string` to `object` mapping
 - Supports query compilation
 - Supports collection indexes
+- Custom Operators
 - Compatible with ORMs specially Entity Framework
 - Can be used on every collection that LINQ supports
 - Compatible with Object-mappers like AutoMapper

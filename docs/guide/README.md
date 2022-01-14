@@ -12,6 +12,7 @@ it also provides an easy way to apply Filtering, Sorting, and pagination using t
 - Supports `string` to `object` mapping
 - Supports query compilation
 - Supports collection indexes
+- Custom Operators
 - Compatible with ORMs specially Entity Framework
 - Can be used on every collection that LINQ supports
 - Compatible with Object-mappers like AutoMapper
