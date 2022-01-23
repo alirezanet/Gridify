@@ -14,22 +14,6 @@
          ]
       },
       {
-         "name": "welcome",
-         "group": "pre-commit",
-         "command": "bash",
-         "args": [
-            "-c",
-            "echo Great work! 🥂"
-         ],
-         "windows": {
-            "command": "cmd",
-            "args": [
-               "/c",
-               "echo Great work! 🥂"
-            ]
-         }
-      },
-      {
          "name": "commit-message-linter",
          "command": "dotnet",
          "args": ["husky", "exec", ".husky/csx/commit-lint.csx", "--args" , "${args}"]
