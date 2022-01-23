@@ -2,8 +2,8 @@ import type { HeadConfig } from 'vuepress-vite';
 
 export const head: HeadConfig[] = [
    // favicon
-   ['link', { rel: 'icon', href: 'favicon.ico', type: "image/x-icon" }],
-   ['link', { rel: 'shortcut icon', href: 'favicon.ico', type: "image/x-icon" }],
+   ['link', { rel: 'icon', href: '/favicon.ico', type: "image/x-icon" }],
+   ['link', { rel: 'shortcut icon', href: '/favicon.ico', type: "image/x-icon" }],
 
    // social media image
    ['meta', { property: 'og:image', content: 'https://alirezanet.github.io/Gridify/social-logo.png' }],
