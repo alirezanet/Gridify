@@ -171,11 +171,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       // x =>
       var parameter = Expression.Parameter(typeof(T));
       // x.Name,x.yyy.zz.xx
-      Expression mapProperty = parameter;      
-      foreach (var propertyName in from.Split('.'))
-      {
-         mapProperty = Expression.Property(mapProperty, propertyName);
-      }     
+      var mapProperty = from.Split('.').Aggregate<string, Expression>(parameter, Expression.Property);
       // (object)x.Name
       var convertedExpression = Expression.Convert(mapProperty, typeof(object));
       // x => (object)x.Name
