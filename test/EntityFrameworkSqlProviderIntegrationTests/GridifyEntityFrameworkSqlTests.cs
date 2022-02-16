@@ -56,7 +56,7 @@ public class GridifyEntityFrameworkTests
       GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
       var sb = new StringBuilder();
       sb.AppendLine("DECLARE @__Value_0 nvarchar(4000) = N'h';");
-      sb.AppendLine("SELECT [u].[Id], [u].[CreateDate], [u].[FkGuid], [u].[Name]");
+      sb.AppendLine("SELECT [u].[Id], [u].[CreateDate], [u].[FkGuid], [u].[Name], [u].[shadow1]");
       sb.AppendLine("FROM [Users] AS [u]");
       sb.AppendLine("WHERE [u].[Name] > @__Value_0");
 
