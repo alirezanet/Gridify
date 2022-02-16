@@ -104,4 +104,16 @@ public class GridifyEntityFrameworkTests
          return (prop, value) => EF.Functions.FreeText(prop, value.ToString());
       }
    }
+
+   [Fact]
+   public void ApplyFiltering_ShadowProperty()
+   {
+      var gm = new GridifyMapper<User>()
+         .AddMap("x", (User q) => EF.Property<string>(q, "shadow1"));
+
+      var expected = _dbContext.Users.Where(q => EF.Property<string>(q, "shadow1") == "test").ToQueryString();
+      var actual = _dbContext.Users.ApplyFiltering("x = test", gm).ToQueryString();
+
+      Assert.Equal(expected, actual);
+   }
 }
