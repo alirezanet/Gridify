@@ -41,3 +41,31 @@ builder.AddOrderBy("Id desc, FirstName asc, LastName");
 ```
 :::
 ::::
+
+## Order By Nullable types
+
+Sometimes we need to order by nullable types, for example:
+
+``` csharp
+personsRepo.OrderBy(p => p.BirthDate.HasValue)
+```
+
+to support this behavior, you can use Gridify special characters (`?` or `!`) after the property name.
+
+e.g:
+
+To achieve the `personsRepo.OrderBy(p => p.BirthDate.HasValue)` query, you can use `?`:
+
+``` csharp
+var x = personsRepo.ApplyOrdering("BirthDate?");
+```
+
+and for `personsRepo.OrderBy(p => !p.BirthDate.HasValue)`, you can use `!`:
+
+``` csharp
+var x = personsRepo.ApplyOrdering("BirthDate!");
+```
+
+::: warning
+These nullable characters only work on nullable types.
+:::
