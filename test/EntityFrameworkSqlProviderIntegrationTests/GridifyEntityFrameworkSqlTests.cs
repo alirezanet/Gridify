@@ -116,4 +116,32 @@ public class GridifyEntityFrameworkTests
 
       Assert.Equal(expected, actual);
    }
+
+   [Fact] // issue #69
+   public void ApplyOrdering_IsNotNull()
+   {
+      // Arrange
+      var expected = _dbContext.Users.OrderByDescending(q => q.CreateDate.HasValue).ThenBy(w => w.CreateDate).ToQueryString();
+      var gq = new GridifyQuery() { OrderBy = "CreateDate? desc, CreateDate" };
+
+      // Act
+      var actual = _dbContext.Users.ApplyOrdering(gq).ToQueryString();
+
+      // Assert
+      Assert.Equal(expected, actual);
+   }
+
+   [Fact] // issue #69
+   public void ApplyOrdering_IsNull()
+   {
+      // Arrange
+      var expected = _dbContext.Users.OrderBy(q => !q.CreateDate.HasValue).ToQueryString();
+      var gq = new GridifyQuery() { OrderBy = "CreateDate!" };
+
+      // Act
+      var actual = _dbContext.Users.ApplyOrdering(gq).ToQueryString();
+
+      // Assert
+      Assert.Equal(expected, actual);
+   }
 }

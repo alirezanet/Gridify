@@ -822,6 +822,28 @@ public class GridifyExtensionsShould
       Assert.True(actual.Any());
    }
 
+   [Fact] // issue #69
+   public void ApplyOrdering_NullableTypes_IsNotNull()
+   {
+      var actual = _fakeRepository.AsQueryable().ApplyOrdering("MyDateTime?").ToList();
+      var expected = _fakeRepository.OrderBy(q => q.MyDateTime.HasValue).ToList();
+
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
+
+   [Fact] // issue #69
+   public void ApplyOrdering_NullableTypes_IsNull()
+   {
+      var actual = _fakeRepository.AsQueryable().ApplyOrdering("MyDateTime!").ToList();
+      var expected = _fakeRepository.OrderBy(q => !q.MyDateTime.HasValue).ToList();
+
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
+
    #endregion
 
    #region "ApplyPaging"

@@ -9,7 +9,7 @@ using Gridify.Syntax;
 
 namespace Gridify;
 
-public static class GridifyExtensions
+public static partial class GridifyExtensions
 {
    #region "Private"
 
@@ -56,7 +56,7 @@ public static class GridifyExtensions
          throw new GridifyQueryException("OrderBy is not defined or not Found");
 
 
-      var members = ParseOrderings(gridifyOrdering.OrderBy!).Select(q => q.memberName).ToList();
+      var members = ParseOrderings(gridifyOrdering.OrderBy!).Select(q => q.MemberName).ToList();
       if (mapper is null)
          foreach (var member in members)
          {
@@ -332,7 +332,7 @@ public static class GridifyExtensions
       {
          var orders = ParseOrderings(ordering.OrderBy!).ToList();
          mapper ??= new GridifyMapper<T>(true);
-         if (orders.Any(order => !mapper.HasMap(order.memberName)))
+         if (orders.Any(order => !mapper.HasMap(order.MemberName)))
             return false;
       }
       catch (Exception)
@@ -343,7 +343,7 @@ public static class GridifyExtensions
       return true;
    }
 
-   private static IQueryable<T> ProcessOrdering<T>(IQueryable<T> query, string orderings, bool startWithThenBy, IGridifyMapper<T>? mapper)
+   internal static IQueryable<T> ProcessOrdering<T>(IQueryable<T> query, string orderings, bool startWithThenBy, IGridifyMapper<T>? mapper)
    {
       var isFirst = !startWithThenBy;
 
@@ -353,45 +353,94 @@ public static class GridifyExtensions
       if (mapper is null)
       {
          mapper = new GridifyMapper<T>();
-         foreach (var (member, _) in orders)
+         foreach (var order in orders)
             try
             {
-               mapper.AddMap(member);
+               mapper.AddMap(order.MemberName);
             }
             catch (Exception)
             {
                if (!mapper.Configuration.IgnoreNotMappedFields)
-                  throw new GridifyMapperException($"Mapping '{member}' not found");
+                  throw new GridifyMapperException($"Mapping '{order.MemberName}' not found");
             }
       }
 
-      foreach (var (member, isAscending) in orders)
+      foreach (var order in orders)
       {
-         if (!mapper.HasMap(member))
+         if (!mapper.HasMap(order.MemberName))
          {
             // skip if there is no mappings available
             if (mapper.Configuration.IgnoreNotMappedFields)
                continue;
 
-            throw new GridifyMapperException($"Mapping '{member}' not found");
+            throw new GridifyMapperException($"Mapping '{order.MemberName}' not found");
          }
 
          if (isFirst)
          {
-            query = query.OrderByMember(mapper.GetExpression(member), isAscending);
+            query = query.OrderByMember(GetOrderExpression(order, mapper), order.IsAscending);
             isFirst = false;
          }
          else
          {
-            query = query.ThenByMember(mapper.GetExpression(member), isAscending);
+            query = query.ThenByMember(GetOrderExpression(order, mapper), order.IsAscending);
          }
       }
 
       return query;
    }
 
-   private static IEnumerable<(string memberName, bool isAsc)> ParseOrderings(string orderings)
+   internal static Expression<Func<T, object>> GetOrderExpression<T>(ParsedOrdering order, IGridifyMapper<T> mapper)
    {
+      var exp = mapper.GetExpression(order.MemberName);
+      switch (order.OrderingType)
+      {
+         case OrderingType.Normal:
+            return exp;
+         case OrderingType.NullCheck:
+         case OrderingType.NotNullCheck:
+         default:
+         {
+            // member should be nullable
+            if (exp.Body is not UnaryExpression unary || Nullable.GetUnderlyingType(unary.Operand.Type) == null)
+            {
+               throw new GridifyOrderingException($"'{order.MemberName}' is not nullable type");
+            }
+
+            var prop = Expression.Property(exp.Parameters[0], order.MemberName);
+            var hasValue = Expression.PropertyOrField(prop, "HasValue");
+
+            switch (order.OrderingType)
+            {
+               case OrderingType.NullCheck:
+               {
+                  var boxedExpression = Expression.Convert(hasValue, typeof(object));
+                  return Expression.Lambda<Func<T, object>>(boxedExpression, exp.Parameters);
+               }
+               case OrderingType.NotNullCheck:
+               {
+                  var notHasValue = Expression.Not(hasValue);
+                  var boxedExpression = Expression.Convert(notHasValue, typeof(object));
+                  return Expression.Lambda<Func<T, object>>(boxedExpression, exp.Parameters);
+               }
+               // should never reach here
+               case OrderingType.Normal:
+                  return exp;
+               default:
+                  throw new ArgumentOutOfRangeException();
+            }
+         }
+      }
+   }
+
+   internal static string ReplaceAll(this string seed, IEnumerable<char> chars, char replacementCharacter)
+   {
+      return chars.Aggregate(seed, (str, cItem) => str.Replace(cItem, replacementCharacter));
+   }
+
+   private static IEnumerable<ParsedOrdering> ParseOrderings(string orderings)
+   {
+      var nullableChars = new[] { '?', '!' };
       foreach (var field in orderings.Split(','))
       {
          var orderingExp = field.Trim();
@@ -404,11 +453,26 @@ public static class GridifyExtensions
                "asc" => true,
                _ => throw new GridifyOrderingException("Invalid keyword. expected 'desc' or 'asc'")
             };
-            yield return (spliced.First(), isAsc);
+            var member = spliced.First();
+            yield return new ParsedOrdering()
+            {
+               MemberName = member.ReplaceAll(nullableChars, ' ').TrimEnd(),
+               IsAscending = isAsc,
+               OrderingType = member.EndsWith("?") ? OrderingType.NullCheck
+                    : member.EndsWith("!") ? OrderingType.NotNullCheck
+                    : OrderingType.Normal
+            };
          }
          else
          {
-            yield return (orderingExp, true);
+            yield return new ParsedOrdering()
+            {
+               MemberName = orderingExp.ReplaceAll(nullableChars, ' ').TrimEnd(),
+               IsAscending = true,
+               OrderingType = orderingExp.EndsWith("?") ? OrderingType.NullCheck
+                  : orderingExp.EndsWith("!") ? OrderingType.NotNullCheck
+                  : OrderingType.Normal
+            };
          }
       }
    }
