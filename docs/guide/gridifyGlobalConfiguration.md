@@ -36,6 +36,17 @@ If true, in filtering and ordering operations, gridify doesn't return any except
 - default: `false`
 - related to: [GridifyMapper - IgnoreNotMappedFields](./gridifyMapper.md#ignorenotmappedfields)
 
+### DisableNullChecks
+
+On nested collections by default gridify adds a null checking condition to prevent the null reference exceptions
+
+e.g `() => field != null && field....`
+
+some ORMs like NHibernate don't support this. you can disable this behavior by setting this option to true.
+
+- type: `bool`
+- default: `false`
+
 ## CustomOperators
 
 Using the `Register` method of this property you can add your own custom operators.

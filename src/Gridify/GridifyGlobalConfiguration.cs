@@ -40,6 +40,15 @@ namespace Gridify
       public static bool IgnoreNotMappedFields { get; set; }
 
       /// <summary>
+      /// On nested collections by default gridify adds null check condition
+      /// to prevent null reference exceptions, e.g () => field != null && field....
+      /// some ORMs like NHibernate don't support this.
+      /// you can disable this behavior by setting this option to true
+      /// Default is false
+      /// </summary>
+      public static bool DisableNullChecks { get; set; } = false;
+
+      /// <summary>
       /// You can extend the gridify supported operators by adding
       /// your own operators to OperatorManager.
       /// Custom operators must implement the IGridifyOperator interface

@@ -123,7 +123,9 @@ internal static class ExpressionToQueryConvertor
    private static LambdaExpression GetExpressionWithNullCheck(MemberExpression prop, ParameterExpression param, Expression right)
    {
       // This check is needed for EF6 - It doesn't support NullChecking for Collections (issue #58)
-      if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer &&
+      // also issue #70 for NHibernate
+      if (GridifyGlobalConfiguration.DisableNullChecks ||
+          GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer &&
           RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework"))
          return Expression.Lambda(right, param);
 
