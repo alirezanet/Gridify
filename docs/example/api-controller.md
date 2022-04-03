@@ -68,7 +68,7 @@ http://exampleDomain.com/api/GetUsers?
 ```
 Also, we can totally ignore GridifyQuery, and just use pagination default values which is `pageSize=20` and `page=1`
 ```
-http://exampleDomain.com/api/GetPersons
+http://exampleDomain.com/api/GetUsers
 ```
 
 ### More Information
