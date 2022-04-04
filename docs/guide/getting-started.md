@@ -21,7 +21,7 @@ Install-Package Gridify -Version {{ $version }}
 ```
 
 ``` pm:no-line-numbers:no-v-pre
-Install-Package Gridify.EnitityFramework -Version {{ $version }}
+Install-Package Gridify.EntityFramework -Version {{ $version }}
 ```
 
 ### .NET CLI
