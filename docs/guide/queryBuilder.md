@@ -1,6 +1,6 @@
 # QueryBuilder
 
-The QueryBuilder class is really useful if you want to manually build your query, also when you don't want to use the extension methods.
+The QueryBuilder class is really useful if you want to manually build your query Or when you don't want to use the extension methods.
 
 | Method                       | Description                                                                                                                   |
 | ------------------------     | ----------------------------------------------------------------------------------------------------------------------------- |
