@@ -65,7 +65,16 @@ internal static class ExpressionToQueryConvertor
 
          if (conditionExp == null) return null;
 
-         return ParseMethodCallExpression(selectExp, conditionExp) as Expression<Func<T, bool>>;
+         var parsedExpression = ParseMethodCallExpression(selectExp, conditionExp);
+
+         // handling not nested member access
+         if (parsedExpression.Parameters[0].Type == gMap.To.Parameters[0].Type)
+            return parsedExpression as Expression<Func<T, bool>>;
+
+         // nested member access
+         var newBody = new ReplaceExpressionVisitor(gMap.To.Body, parsedExpression.Body).Visit(gMap.To.Body);
+         return Expression.Lambda<Func<T, bool>>(newBody, gMap.To.Parameters);
+
       }
 
       // this should never happening
