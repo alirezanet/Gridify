@@ -164,6 +164,8 @@ internal static class ExpressionToQueryConvertor
       if (allowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
          value = null;
 
+      var isConvertable = true;
+
       // type fixer
       if (value is not null && body.Type != value.GetType())
       {
@@ -173,10 +175,13 @@ internal static class ExpressionToQueryConvertor
             if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
 
             var converter = TypeDescriptor.GetConverter(body.Type);
-            value = converter.ConvertFromString(value.ToString()!);
+            isConvertable = converter.CanConvertFrom(typeof(string));
+            if (isConvertable)
+               value = converter.ConvertFromString(value.ToString()!);
          }
          catch (FormatException)
          {
+            // this code should never run
             // return no records in case of any exception in formatting
             return Expression.Lambda(Expression.Constant(false), parameter); // q => false
          }
@@ -306,7 +311,11 @@ internal static class ExpressionToQueryConvertor
             var customOperator = GridifyGlobalConfiguration.CustomOperators.Operators.First(q => q.GetOperator() == token!.Text);
             var customExp = customOperator.OperatorHandler();
             be = new ReplaceExpressionVisitor(customExp.Parameters[0], body).Visit(customExp.Body);
-            be = new ReplaceExpressionVisitor(customExp.Parameters[1], Expression.Constant(value, body.Type)).Visit(be);
+            if (isConvertable)
+               be = new ReplaceExpressionVisitor(customExp.Parameters[1], Expression.Constant(value, body.Type)).Visit(be);
+
+            be = new ReplaceExpressionVisitor(customExp.Parameters[1], Expression.Constant(value, typeof(string))).Visit(be);
+
             break;
          default:
             return null;
