@@ -65,16 +65,7 @@ internal static class ExpressionToQueryConvertor
 
          if (conditionExp == null) return null;
 
-         var parsedExpression = ParseMethodCallExpression(selectExp, conditionExp);
-
-         // handling not nested member access
-         if (parsedExpression.Parameters[0].Type == gMap.To.Parameters[0].Type)
-            return parsedExpression as Expression<Func<T, bool>>;
-
-         // nested member access
-         var newBody = new ReplaceExpressionVisitor(gMap.To.Body, parsedExpression.Body).Visit(gMap.To.Body);
-         return Expression.Lambda<Func<T, bool>>(newBody, gMap.To.Parameters);
-
+         return ParseMethodCallExpression(selectExp, conditionExp) as Expression<Func<T, bool>>;
       }
 
       // this should never happening
@@ -109,17 +100,32 @@ internal static class ExpressionToQueryConvertor
 
    private static ParameterExpression GetParameterExpression(MemberExpression member)
    {
-      return Expression.Parameter(member.Expression!.Type, member.Expression.ToString());
+      return member.Expression switch
+      {
+         ParameterExpression => Expression.Parameter(member.Expression!.Type, member.Expression.ToString()),
+         MemberExpression subExp => GetParameterExpression(subExp),
+         _ => throw new InvalidOperationException($"Invalid expression '{member.Expression}'")
+      };
+   }
+
+   private static MemberExpression GetPropertyOrField(MemberExpression member, ParameterExpression param)
+   {
+      return member.Expression switch
+      {
+         ParameterExpression => Expression.PropertyOrField(param, member.Member.Name),
+         MemberExpression subExp => Expression.PropertyOrField(GetPropertyOrField(subExp, param), member.Member.Name),
+         _ => throw new InvalidOperationException($"Invalid expression '{member.Expression}'")
+      };
    }
 
    private static LambdaExpression GetAnyExpression(MemberExpression member, Expression predicate)
    {
       var param = GetParameterExpression(member);
-      var prop = Expression.PropertyOrField(param, member.Member.Name);
+      var prop = GetPropertyOrField(member, param);
 
       var tp = prop.Type.IsGenericType
-         ? prop.Type.GenericTypeArguments.First()  // list
-         : prop.Type.GetElementType();             // array
+         ? prop.Type.GenericTypeArguments.First() // list
+         : prop.Type.GetElementType(); // array
 
       if (tp == null) throw new GridifyFilteringException($"Can not detect the '{member.Member.Name}' property type.");
 

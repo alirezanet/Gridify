@@ -30,7 +30,7 @@ public class Issue75Tests
    {
       // Arrange
       var mapping = new GridifyMapper<Root>()
-          .AddMap("x1", x => x.Child1.Child2List.Select(c => c.Name));
+         .AddMap("x1", x => x.Child1.Child2List.Select(c => c.Name));
 
       // ReSharper disable once ConditionIsAlwaysTrueOrFalse
       Expression<Func<Root, bool>> expectedExpression = x => (x.Child1.Child2List != null) && (x.Child1.Child2List.Any(c => c.Name == "name"));
@@ -42,12 +42,62 @@ public class Issue75Tests
       // Assert
       // "x => ((x.Child1.Child2List != null) AndAlso x.Child1.Child2List.Any(c => (c.Name == \"name\")))";
       Assert.Equal(expected, actual);
-
    }
 
+
+   [Fact]
+   public void NestedFiltering_OnChildElement_ShouldWorkOnExecution()
+   {
+      // Arrange
+      var testList = new List<Root>()
+      {
+         new() { Child1 = new Child1 { Child2List = new List<Child2>() { new() { Name = "name" } } } },
+         new() { Child1 = new Child1 { Child2List = new List<Child2>() { new() { Name = "name2" } } } },
+      };
+      ;
+
+      var mapping = new GridifyMapper<Root>()
+         .AddMap("x1", x => x.Child1.Child2List.Select(c => c.Name));
+
+      // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+      Expression<Func<Root, bool>> expectedExpression = x => (x.Child1.Child2List != null) && (x.Child1.Child2List.Any(c => c.Name == "name"));
+      var expected = testList.AsQueryable().Where(expectedExpression).ToList();
+
+      // Act
+      var actual = testList.AsQueryable().ApplyFiltering("x1=name", mapping).ToList();
+
+      // Assert
+      Assert.Equal(expected, actual);
+      Assert.NotEmpty(actual);
+   }
+
+   [Fact]
+   public void NestedFiltering_OnThirdLevelChildElement_ShouldWorkOnExecution()
+   {
+      // Arrange
+      var testList = new List<Root>()
+      {
+         new() { Child1 = new Child1 { Child2 = new Child2() { Child3List = new List<Child3>() { new() { Name = "name" } } } } },
+         new() { Child1 = new Child1 { Child2 = new Child2() { Child3List = new List<Child3>() { new() { Name = "name2" } } } } }
+      };
+
+
+      var mapping = new GridifyMapper<Root>()
+         .AddMap("x1", x => x.Child1.Child2.Child3List.Select(c => c.Name));
+
+      // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+      Expression<Func<Root, bool>> expectedExpression =
+         x => (x.Child1.Child2.Child3List != null) && (x.Child1.Child2.Child3List.Any(c => c.Name == "name"));
+      var expected = testList.AsQueryable().Where(expectedExpression).ToList();
+
+      // Act
+      var actual = testList.AsQueryable().ApplyFiltering("x1=name", mapping).ToList();
+
+      // Assert
+      Assert.Equal(expected, actual);
+      Assert.NotEmpty(actual);
+   }
 }
-
-
 
 public class Root
 {
@@ -57,10 +107,17 @@ public class Root
 
 public class Child1
 {
+   public Child2 Child2 { get; set; }
    public IEnumerable<Child2> Child2List { get; set; }
 }
 
 public class Child2
+{
+   public string Name { get; set; }
+   public IEnumerable<Child3> Child3List { get; set; }
+}
+
+public class Child3
 {
    public string Name { get; set; }
 }
