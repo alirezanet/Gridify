@@ -22,9 +22,9 @@ public class GridifyExtensionsShould
    public static IEnumerable<TestClass> GetSampleData()
    {
       var lst = new List<TestClass>();
-      lst.Add(new TestClass(1, "John", null, Guid.NewGuid(), DateTime.Now));
-      lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid(), DateTime.UtcNow));
-      lst.Add(new TestClass(3, "Jack", (TestClass)lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2)));
+      lst.Add(new TestClass(1, "John", null, Guid.NewGuid(), DateTime.Now, isActive: true));
+      lst.Add(new TestClass(2, "Bob", null, Guid.NewGuid(), DateTime.UtcNow, isActive: true));
+      lst.Add(new TestClass(3, "Jack", (TestClass)lst[0].Clone(), Guid.Empty, DateTime.Now.AddDays(2), isActive: true));
       lst.Add(new TestClass(4, "Rose", null, Guid.Parse("e2cec5dd-208d-4bb5-a852-50008f8ba366")));
       lst.Add(new TestClass(5, "Ali", null, tag: "123"));
       lst.Add(new TestClass(6, "Hamid", (TestClass)lst[0].Clone(), Guid.Parse("de12bae1-93fa-40e4-92d1-2e60f95b468c")));
@@ -44,7 +44,7 @@ public class GridifyExtensionsShould
       lst.Add(new TestClass(20, "Peyman!", null));
       lst.Add(new TestClass(21, "Fereshte", null, tag: null));
       lst.Add(new TestClass(22, "LIAM", null));
-      lst.Add(new TestClass(22, @"\Liam", null, tag: null));
+      lst.Add(new TestClass(22, @"\Liam", null, tag: null, isActive: true));
       lst.Add(new TestClass(23, "LI | AM", null));
       lst.Add(new TestClass(24, "(LI,AM)", null, tag: string.Empty));
       lst.Add(new TestClass(25, "Case/i", null, tag: string.Empty));
@@ -58,7 +58,6 @@ public class GridifyExtensionsShould
 
 
    #region "ApplyFiltering"
-
 
    [Fact]
    public void ApplyFiltering_ChildField()
@@ -690,6 +689,21 @@ public class GridifyExtensionsShould
 
       // Act
       var actual = _fakeRepository.AsQueryable().ApplyFiltering("name#=liam").ToList();
+
+      // Assert
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
+
+   [Fact] // issue #71
+   public void ApplyFiltering_BooleanValues_ShouldBeParsedWithZeroAndOne()
+   {
+      // Arrange
+      var expected = _fakeRepository.Where(q => q.IsActive).ToList();
+
+      // Act
+      var actual = _fakeRepository.AsQueryable().ApplyFiltering("isActive=1").ToList();
 
       // Assert
       Assert.Equal(expected.Count, actual.Count);

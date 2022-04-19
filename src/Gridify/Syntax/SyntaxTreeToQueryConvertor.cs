@@ -177,8 +177,11 @@ internal static class ExpressionToQueryConvertor
       {
          try
          {
+            // handle bool, github issue #71
+            if (body.Type == typeof(bool) && value is "true" or "false" or "1" or "0")
+               value = (((string)value).ToLower() is "1" or "true");
             // handle broken guids,  github issue #2
-            if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
+            else if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
 
             var converter = TypeDescriptor.GetConverter(body.Type);
             isConvertable = converter.CanConvertFrom(typeof(string));

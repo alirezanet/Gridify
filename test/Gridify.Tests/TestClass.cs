@@ -8,7 +8,8 @@ public class TestClass : ICloneable
    {
    }
 
-   public TestClass(int id, string name, TestClass? classProp, Guid myGuid = default, DateTime? date = default, string? tag = "")
+   public TestClass(int id, string name, TestClass? classProp, Guid myGuid = default, DateTime? date = default, string? tag = "",
+      bool isActive = false)
    {
       Id = id;
       Name = name;
@@ -16,6 +17,7 @@ public class TestClass : ICloneable
       MyGuid = myGuid;
       MyDateTime = date;
       Tag = tag;
+      IsActive = isActive;
    }
 
    public int Id { get; set; }
@@ -25,6 +27,7 @@ public class TestClass : ICloneable
    public Guid MyGuid { get; set; }
    public string? Tag { get; set; }
 
+   public bool IsActive { get; set; }
 
    public object Clone()
    {
@@ -34,7 +37,9 @@ public class TestClass : ICloneable
          Name = Name,
          ChildClass = (TestClass)ChildClass?.Clone()!,
          MyGuid = MyGuid,
-         Tag = Tag
+         Tag = Tag,
+         MyDateTime = MyDateTime,
+         IsActive = IsActive
       };
    }
 }
