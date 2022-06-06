@@ -168,13 +168,13 @@ public class GridifyMapper<T> : IGridifyMapper<T>
 
    internal static Expression<Func<T, object>> CreateExpression(string from)
    {
-      // x =>
-      var parameter = Expression.Parameter(typeof(T));
-      // x.Name,x.yyy.zz.xx
+      // Param_x =>
+      var parameter = Expression.Parameter(typeof(T), "__" + typeof(T).Name);
+      // Param_x.Name, Param_x.yyy.zz.xx
       var mapProperty = from.Split('.').Aggregate<string, Expression>(parameter, Expression.Property);
-      // (object)x.Name
+      // (object)Param_x.Name
       var convertedExpression = Expression.Convert(mapProperty, typeof(object));
-      // x => (object)x.Name
+      // Param_x => (object)Param_x.Name
       return Expression.Lambda<Func<T, object>>(convertedExpression, parameter);
    }
 }

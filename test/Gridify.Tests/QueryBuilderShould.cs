@@ -116,6 +116,23 @@ public class QueryBuilderShould
       Assert.Equal(expectedResult, actualResult);
    }
 
+
+   [Fact] // issue #80 (mongodb provider support)
+   public void BuildFilteringExpression_ParameterName_ShouldHaveValidName()
+   {
+      // Arrange
+      var builder = new QueryBuilder<TestClass>()
+         .AddCondition("name=a");
+      var expression = builder.BuildFilteringExpression();
+
+      // Act
+      const string expected = "__TestClass";
+
+      // Assert
+      Assert.Equal(expected, expression.Parameters.First().Name);
+   }
+
+
    #region Validation
 
    [Theory]

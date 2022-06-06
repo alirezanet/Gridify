@@ -6,9 +6,9 @@ namespace Gridify;
 
 public static partial class PredicateBuilder
 {
-   public static Expression<Func<T, bool>> Or<T> (this Expression<Func<T, bool>> expr1, Expression<Func<T, bool>> expr2)
+   public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> expr1, Expression<Func<T, bool>> expr2)
    {
-      var parameter = Expression.Parameter(typeof (T));
+      var parameter = Expression.Parameter(typeof(T), "__" + typeof(T).Name);
 
       var leftVisitor = new ReplaceExpressionVisitor(expr1.Parameters[0], parameter);
       var left = leftVisitor.Visit(expr1.Body);
@@ -19,9 +19,9 @@ public static partial class PredicateBuilder
       return Expression.Lambda<Func<T, bool>>(Expression.OrElse(left!, right!), parameter);
    }
 
-   public static Expression<Func<T, bool>> And<T> (this Expression<Func<T, bool>> expr1, Expression<Func<T, bool>> expr2)
+   public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>> expr1, Expression<Func<T, bool>> expr2)
    {
-      var parameter = Expression.Parameter(typeof (T));
+      var parameter = Expression.Parameter(typeof(T), "__" + typeof(T).Name);
 
       var leftVisitor = new ReplaceExpressionVisitor(expr1.Parameters[0], parameter);
       var left = leftVisitor.Visit(expr1.Body);
@@ -32,9 +32,9 @@ public static partial class PredicateBuilder
       return Expression.Lambda<Func<T, bool>>(Expression.AndAlso(left!, right!), parameter);
    }
 
-   public static LambdaExpression And (this LambdaExpression expr1, LambdaExpression expr2)
+   public static LambdaExpression And(this LambdaExpression expr1, LambdaExpression expr2)
    {
-      var parameter = Expression.Parameter(expr1.Parameters[0].Type);
+      var parameter = Expression.Parameter(expr1.Parameters[0].Type, expr1.Parameters[0].Name);
 
       var leftVisitor = new ReplaceExpressionVisitor(expr1.Parameters[0], parameter);
       var left = leftVisitor.Visit(expr1.Body);
@@ -45,9 +45,9 @@ public static partial class PredicateBuilder
       return Expression.Lambda(Expression.AndAlso(left!, right!), parameter);
    }
 
-   public static LambdaExpression Or  (this LambdaExpression expr1, LambdaExpression expr2)
+   public static LambdaExpression Or(this LambdaExpression expr1, LambdaExpression expr2)
    {
-      var parameter = Expression.Parameter(expr1.Parameters[0].Type);
+      var parameter = Expression.Parameter(expr1.Parameters[0].Type, expr1.Parameters[0].Name);
 
       var leftVisitor = new ReplaceExpressionVisitor(expr1.Parameters[0], parameter);
       var left = leftVisitor.Visit(expr1.Body);
