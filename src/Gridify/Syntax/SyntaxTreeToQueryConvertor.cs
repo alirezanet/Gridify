@@ -31,7 +31,7 @@ internal static class ExpressionToQueryConvertor
       var isNested = ((GMap<T>)gMap).IsNestedCollection();
       if (isNested)
       {
-         var result = GenerateNestedExpression(mapper, gMap, right, op);
+         var result = GenerateNestedExpression(gMap.To.Body, mapper, gMap, right, op);
          if (result == null) return null;
          return (result, isNested);
       }
@@ -49,28 +49,49 @@ internal static class ExpressionToQueryConvertor
       return Expression.Lambda(body, exp.Parameters);
    }
 
-   private static Expression<Func<T, bool>>? GenerateNestedExpression<T>(
-      IGridifyMapper<T> mapper,
-      IGMap<T> gMap,
-      ValueExpressionSyntax value,
-      SyntaxNode op)
+   private static Expression<Func<T, bool>>? GenerateNestedExpression<T>(Expression body, IGridifyMapper<T> mapper, IGMap<T> gMap,
+      ValueExpressionSyntax value, SyntaxNode op)
    {
-      var body = gMap.To.Body;
-
-      if (body is MethodCallExpression selectExp && selectExp.Method.Name == "Select")
+      while (true)
       {
-         var targetExp = selectExp.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
-         var conditionExp = GenerateExpression(targetExp!.Body, targetExp.Parameters[0], value, op, mapper.Configuration.AllowNullSearch,
-            gMap.Convertor);
+         switch (body)
+         {
+            case MethodCallExpression selectExp when selectExp.Method.Name == "Select":
+            {
+               var targetExp = selectExp.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
+               var conditionExp = GenerateExpression(targetExp!.Body, targetExp.Parameters[0], value, op, mapper.Configuration.AllowNullSearch,
+                  gMap.Convertor);
 
-         if (conditionExp == null) return null;
+               if (conditionExp == null) return null;
 
-         return ParseMethodCallExpression(selectExp, conditionExp) as Expression<Func<T, bool>>;
+               return ParseMethodCallExpression(selectExp, conditionExp) as Expression<Func<T, bool>>;
+            }
+            case ConditionalExpression cExp:
+            {
+               var ifTrue = GenerateNestedExpression(cExp.IfTrue, mapper, gMap, value, op);
+               ifTrue = new ReplaceExpressionVisitor(ifTrue!.Parameters[0], gMap.To.Parameters[0]).Visit(ifTrue) as Expression<Func<T, bool>>;
+               var ifFalse = GenerateNestedExpression(cExp.IfFalse, mapper, gMap, value, op);
+               ifFalse = new ReplaceExpressionVisitor(ifFalse!.Parameters[0], gMap.To.Parameters[0]).Visit(ifFalse) as Expression<Func<T, bool>>;
+
+               var newExp = Expression.Condition(cExp.Test, ifTrue!.Body, ifFalse!.Body);
+               return Expression.Lambda<Func<T, bool>>(newExp, gMap.To.Parameters[0]);
+            }
+            case ConstantExpression constantExpression:
+            {
+               return Expression.Lambda<Func<T, bool>>(constantExpression, gMap.To.Parameters[0]);
+            }
+            case UnaryExpression uExp:
+            {
+               body = uExp.Operand;
+               continue;
+            }
+            default:
+               // this should never happening
+               throw new GridifyFilteringException($"The 'Select' method on '{gMap.From}' for type {body.Type} not found");
+         }
       }
-
-      // this should never happening
-      throw new GridifyFilteringException($"The 'Select' method on '{gMap.From}' not found");
    }
+
 
    private static LambdaExpression ParseMethodCallExpression(MethodCallExpression exp, LambdaExpression predicate)
    {
