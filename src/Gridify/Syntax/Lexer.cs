@@ -40,13 +40,25 @@ internal class Lexer
       switch (Current)
       {
          case '(':
+         {
+            _waitingForValue = false;
             return new SyntaxToken(SyntaxKind.OpenParenthesisToken, _position++, "(");
+         }
          case ')':
+         {
+            _waitingForValue = false;
             return new SyntaxToken(SyntaxKind.CloseParenthesis, _position++, ")");
+         }
          case ',':
+         {
+            _waitingForValue = false;
             return new SyntaxToken(SyntaxKind.And, _position++, ",");
+         }
          case '|':
+         {
+            _waitingForValue = false;
             return new SyntaxToken(SyntaxKind.Or, _position++, "|");
+         }
          case '^':
          {
             _waitingForValue = true;
