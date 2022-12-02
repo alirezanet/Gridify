@@ -8,6 +8,8 @@ on:
 jobs:
    build:
       runs-on: ubuntu-latest
+      env:
+         HUSKY: 0
       steps:
          - uses: actions/checkout@v2
          - name: Setup .NET
