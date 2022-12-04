@@ -56,7 +56,7 @@ You can use this method if you want to apply **ordering** and **paging** on an `
 You can use this method if you want to apply  **filtering** and **ordering** and **paging** on a `IQueryable` collection or `DbSet`. this method accepts `IGridifyQuery`.
 
 ## GridifyQueryable
-Like [ApplyFilteringOrderingPaging](#ApplyFilteringOrderingPaging) but it returns a `QuaryablePaging<T>` that have an extra `int Count` value that can be used for pagination.
+Like [ApplyFilteringOrderingPaging](#ApplyFilteringOrderingPaging) but it returns a `QueryablePaging<T>` that have an extra `int Count` value that can be used for pagination.
 
 ## Gridify
 This is an ALL-IN-ONE package, it accepts `IGridifyQuery`, applies filtering, ordering, and paging, and returns a `Paging<T>` object.
