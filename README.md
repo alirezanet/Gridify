@@ -28,6 +28,7 @@ Gridify is a dynamic LINQ library that converts your string to a LINQ query in t
 Check out our docs at [https://alirezanet.github.io/Gridify/](https://alirezanet.github.io/Gridify/).
 
 ## Articles / Examples
+- [using Gridify in api controllers](https://alirezanet.github.io/Gridify/example/api-controller.html#using-gridify-in-api-controllers)
 - [Trabajando con filtros dinámicos usando Gridify en .NET](https://henriquemauri.net/trabalhando-com-filtros-dinamicos-utilizando-o-gridify-no-net/) (Spanish)
 - [<span dir="rtl" align="right">آشنایی با Gridify</span>](https://www.dntips.ir/post/3345/%d8%a2%d8%b4%d9%86%d8%a7%db%8c%db%8c-%d8%a8%d8%a7-gridify) (Persian)
 - Comming soon
