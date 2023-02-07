@@ -29,7 +29,7 @@ Check out our docs at [https://alirezanet.github.io/Gridify/](https://alirezanet
 
 ## Articles / Examples
 - [Trabajando con filtros dinámicos usando Gridify en .NET](https://henriquemauri.net/trabalhando-com-filtros-dinamicos-utilizando-o-gridify-no-net/) (Spanish)
-- [آشنایی با Gridify](https://www.dntips.ir/post/3345/%d8%a2%d8%b4%d9%86%d8%a7%db%8c%db%8c-%d8%a8%d8%a7-gridify) (Persian)
+- [<span dir="rtl" align="right">آشنایی با Gridify</span>](https://www.dntips.ir/post/3345/%d8%a2%d8%b4%d9%86%d8%a7%db%8c%db%8c-%d8%a8%d8%a7-gridify) (Persian)
 - Comming soon
 
 ## Want to support us?
