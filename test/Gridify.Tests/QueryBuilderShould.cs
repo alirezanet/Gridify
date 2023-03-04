@@ -139,9 +139,17 @@ public class QueryBuilderShould
          .UseCustomMapper(new GridifyMapper<TestClass>())
          .AddOrderBy("name");
 
-      var buildAction = () => builder.Build(_fakeRepository);
+      var buildIEnumerableAction = () => builder.Build(_fakeRepository);
+      var buildIQueryableAction = () => builder.Build(_fakeRepository.AsQueryable());
+      var buildWithQueryablePagingAction = () => builder.BuildWithQueryablePaging(_fakeRepository.AsQueryable());
+      var buildCompiledAction = () => builder.BuildCompiled()(_fakeRepository);
+      var BuildWithPagingCompiledAction = () => builder.BuildWithPagingCompiled()(_fakeRepository);
 
-      Assert.Throws<GridifyMapperException>(buildAction);
+      Assert.Throws<GridifyMapperException>(buildIEnumerableAction);
+      Assert.Throws<GridifyMapperException>(buildIQueryableAction);
+      Assert.Throws<GridifyMapperException>(buildWithQueryablePagingAction);
+      Assert.Throws<GridifyMapperException>(buildCompiledAction);
+      Assert.Throws<GridifyMapperException>(BuildWithPagingCompiledAction);
    }
 
    #region Validation

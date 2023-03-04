@@ -211,7 +211,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
          query = query.Where(BuildFilteringExpression());
 
       if (!string.IsNullOrEmpty(_orderBy))
-         query = query.ApplyOrdering(_orderBy);
+         query = query.ApplyOrdering(_orderBy, _mapper);
 
       if (_paging.HasValue)
          query = query.Skip(_paging.Value.page * _paging.Value.pageSize).Take(_paging.Value.pageSize);
@@ -235,7 +235,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
             collection = collection.Where(compiled);
 
          if (!string.IsNullOrEmpty(_orderBy)) // TODO: this also should be compiled
-            collection = collection.AsQueryable().ApplyOrdering(_orderBy);
+            collection = collection.AsQueryable().ApplyOrdering(_orderBy, _mapper);
 
          if (_paging.HasValue)
             collection = collection.Skip(_paging.Value.page * _paging.Value.pageSize).Take(_paging.Value.pageSize);
@@ -294,7 +294,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
             collection = collection.Where(compiled);
 
          if (!string.IsNullOrEmpty(_orderBy)) // TODO: this also should be compiled
-            collection = collection.AsQueryable().ApplyOrdering(_orderBy);
+            collection = collection.AsQueryable().ApplyOrdering(_orderBy, _mapper);
 
          var result = collection.ToList();
          var count = result.Count();
@@ -314,7 +314,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
          query = query.Where(BuildFilteringExpression());
 
       if (!string.IsNullOrEmpty(_orderBy))
-         query = query.ApplyOrdering(_orderBy);
+         query = query.ApplyOrdering(_orderBy, _mapper);
 
       var count = query.Count();
 
