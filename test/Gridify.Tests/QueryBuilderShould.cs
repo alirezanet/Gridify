@@ -132,6 +132,25 @@ public class QueryBuilderShould
       Assert.Equal(expected, expression.Parameters.First().Name);
    }
 
+   [Fact]
+   public void AddOrderBy_NotMappedColumn_WithCustomMapper_ShouldThrowException()
+   {
+      var builder = new QueryBuilder<TestClass>()
+         .UseCustomMapper(new GridifyMapper<TestClass>())
+         .AddOrderBy("name");
+
+      var buildIEnumerableAction = () => builder.Build(_fakeRepository);
+      var buildIQueryableAction = () => builder.Build(_fakeRepository.AsQueryable());
+      var buildWithQueryablePagingAction = () => builder.BuildWithQueryablePaging(_fakeRepository.AsQueryable());
+      var buildCompiledAction = () => builder.BuildCompiled()(_fakeRepository);
+      var BuildWithPagingCompiledAction = () => builder.BuildWithPagingCompiled()(_fakeRepository);
+
+      Assert.Throws<GridifyMapperException>(buildIEnumerableAction);
+      Assert.Throws<GridifyMapperException>(buildIQueryableAction);
+      Assert.Throws<GridifyMapperException>(buildWithQueryablePagingAction);
+      Assert.Throws<GridifyMapperException>(buildCompiledAction);
+      Assert.Throws<GridifyMapperException>(BuildWithPagingCompiledAction);
+   }
 
    #region Validation
 
