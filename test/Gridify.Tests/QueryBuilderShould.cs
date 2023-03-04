@@ -132,6 +132,17 @@ public class QueryBuilderShould
       Assert.Equal(expected, expression.Parameters.First().Name);
    }
 
+   [Fact]
+   public void AddOrderBy_NotMappedColumn_WithCustomMapper_ShouldThrowException()
+   {
+      var builder = new QueryBuilder<TestClass>()
+         .UseCustomMapper(new GridifyMapper<TestClass>())
+         .AddOrderBy("name");
+
+      var buildAction = () => builder.Build(_fakeRepository);
+
+      Assert.Throws<GridifyMapperException>(buildAction);
+   }
 
    #region Validation
 

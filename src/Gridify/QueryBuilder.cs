@@ -251,7 +251,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
          collection = collection.Where(BuildFilteringExpression().Compile());
 
       if (!string.IsNullOrEmpty(_orderBy))
-         collection = collection.AsQueryable().ApplyOrdering(_orderBy);
+         collection = collection.AsQueryable().ApplyOrdering(_orderBy, _mapper);
 
       if (_paging.HasValue)
          collection = collection.Skip(_paging.Value.page * _paging.Value.pageSize).Take(_paging.Value.pageSize);
