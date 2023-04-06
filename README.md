@@ -6,12 +6,11 @@
 [![Gridify](https://alirezanet.github.io/Gridify/gridify-readme-logo.svg)](https://alirezanet.github.io/Gridify/)
 
 ## Introduction
-
-Gridify is a dynamic LINQ library that converts your string to a LINQ query in the easiest way possible with excellent performance. it also, introduces an easy way to apply Filtering, Sorting and Pagination using text-based data.
+Gridify is a dynamic LINQ library that simplifies the process of converting strings to LINQ queries. With exceptional performance and ease-of-use, Gridify makes it effortless to apply filtering, sorting, and pagination using text-based data.
 
 ## Features
 
-- It's Fast and easy to use
+- Fast and easy to use
 - Supports filtering, sorting, and pagination
 - Supports `string` to LINQ conversion
 - Supports nested queries and sub-collections
@@ -19,9 +18,9 @@ Gridify is a dynamic LINQ library that converts your string to a LINQ query in t
 - Supports query compilation
 - Supports collection indexes
 - Custom Operators
-- Compatible with ORMs specially Entity Framework
+- Compatible with ORMs, especially Entity Framework
 - Can be used on every collection that LINQ supports
-- Compatible with Object-mappers like AutoMapper
+- Compatible with object-mappers like AutoMapper
 
 ## Documentation
 
@@ -35,17 +34,15 @@ Check out our docs at [https://alirezanet.github.io/Gridify/](https://alirezanet
 
 ## Want to support us?
 
--  Don't forget to give a ⭐ to this repo on GitHub!
--  Share your feedback and ideas to improve the library!
--  Share the library on your favorite social media and your friends!
--  Help us to improve the documentation!
+- Don't forget to give a ⭐ to this repo on GitHub!
+- Share your feedback and ideas to improve the library!
+- Share the library on your favorite social media and with your friends!
+- Help us to improve the documentation!
 
 ## Contribution
 
-Feel free to send us a pull request!
-
-Check out the [Contribution Page](https://alirezanet.github.io/Gridify/contribution)
+We welcome contributions! Feel free to send us a pull request. Check out our [Contribution Page](https://alirezanet.github.io/Gridify/contribution) for more information.
 
 ## License
 
-[MIT](https://github.com/alirezanet/gridify/blob/master/LICENSE)
+This project is licensed under the [MIT License](https://github.com/alirezanet/gridify/blob/master/LICENSE).
