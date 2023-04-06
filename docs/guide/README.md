@@ -1,11 +1,10 @@
-# Introduction
+## Introduction
 
-Gridify is a dynamic LINQ library that converts your *string* to a LINQ query in the easiest way possible with excellent performance.
-it also provides an easy way to apply Filtering, Sorting, and Pagination using text-based data.
+Gridify is a dynamic LINQ library that simplifies the process of converting strings to LINQ queries. With exceptional performance and ease-of-use, Gridify makes it effortless to apply filtering, sorting, and pagination using text-based data.
 
 ## Features
 
-- It's Fast and easy to use
+- Fast and easy to use
 - Supports filtering, sorting, and pagination
 - Supports `string` to LINQ conversion
 - Supports nested queries and sub-collections
@@ -13,22 +12,23 @@ it also provides an easy way to apply Filtering, Sorting, and Pagination using t
 - Supports query compilation
 - Supports collection indexes
 - Custom Operators
-- Compatible with ORMs specially Entity Framework
+- Compatible with ORMs, especially Entity Framework
 - Can be used on every collection that LINQ supports
-- Compatible with Object-mappers like AutoMapper
+- Compatible with object-mappers like AutoMapper
+
 
 ## Examples
 
-To better illustrate how Gridify works, I have prepared a few examples.
-
-Be sure to check out these examples
+To better illustrate how Gridify works, we've prepared a few examples:
 
 - [Using Gridify in API Controllers](../example/api-controller.md)
 - Coming soon ...
 
+
 ## Performance
 
-Filtering is the most expensive feature in gridify. the following benchmark is comparing filtering in the most known dynamic LINQ libraries. As you can see, gridify has the closest result to the native LINQ.
+Filtering can be the most expensive feature in Gridify. The following benchmark compares filtering in the most well-known dynamic LINQ libraries. As you can see, Gridify has the closest result to native LINQ:
+
 
 | Method           |         Mean |       Error |  Ratio |     Gen 0 |     Gen 1 | Allocated |
 |------------------|-------------:|------------:|-------:|----------:|----------:|----------:|
@@ -55,5 +55,3 @@ This Benchmark is available [Here](https://github.com/alirezanet/Gridify/blob/ma
       color: #42b983;
    }
 </style>
-
-
