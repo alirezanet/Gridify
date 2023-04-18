@@ -126,6 +126,7 @@ internal class Lexer
                _waitingForValue = true;
                return new SyntaxToken(SyntaxKind.CustomOperator, start, op);
             }
+
             break;
          }
       }
@@ -183,26 +184,50 @@ internal class Lexer
          var start = _position;
 
          var exitCharacters = new[] { '(', ')', ',', '|' };
-         var lastChar = '\0';
-         while ((!exitCharacters.Contains(Current) || exitCharacters.Contains(Current) && lastChar == '\\') &&
-                _position < _text.Length &&
-                (!(Current == '/' && Peek(1) == 'i') || (Current == '/' && Peek(1) == 'i') && lastChar == '\\')) // exit on case-insensitive operator
+
+         var isPreviousEscapeChar = false;
+         while (_position < _text.Length &&
+                (!(Current == '/' && Peek(1) == 'i') ||
+                 (Current == '/' && Peek(1) == 'i') && isPreviousEscapeChar)) // exit on case-insensitive operator
          {
-            lastChar = Current;
+            if (isPreviousEscapeChar)
+            {
+               isPreviousEscapeChar = false;
+            }
+            else if (Current == '\\')
+            {
+               isPreviousEscapeChar = true;
+            }
+            else if (exitCharacters.Contains(Current))
+            {
+               break;
+            }
+
             Next();
          }
 
          var text = new StringBuilder();
+         isPreviousEscapeChar = false;
+
          for (var i = start; i < _position; i++)
          {
             var current = _text[i];
 
-            if (current != '\\') // ignore escape character
+            if (isPreviousEscapeChar)
+            {
                text.Append(current);
-            else if (current == '\\' && i > 0) // escape escape character
-               if (_text[i - 1] == '\\')
-                  text.Append(current);
+               isPreviousEscapeChar = false;
+            }
+            else if (current == '\\')
+            {
+               isPreviousEscapeChar = true;
+            }
+            else
+            {
+               text.Append(current);
+            }
          }
+
 
          _waitingForValue = false;
          return new SyntaxToken(SyntaxKind.ValueToken, start, text.ToString());
