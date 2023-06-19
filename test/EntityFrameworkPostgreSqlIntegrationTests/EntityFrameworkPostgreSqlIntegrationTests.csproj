@@ -6,20 +6,20 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
    <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.0" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
+      
+      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.7" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.2" />
        <PackageReference Include="xunit" Version="2.4.2" />
       <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+      <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1"></DotNetCliToolReference>
    </ItemGroup>
 
    <ItemGroup>
       <ProjectReference Include="..\..\src\Gridify.EntityFramework\Gridify.EntityFramework.csproj" />
-      <ProjectReference Include="..\..\src\Gridify\Gridify.csproj" />
+      
    </ItemGroup>
 </Project>
