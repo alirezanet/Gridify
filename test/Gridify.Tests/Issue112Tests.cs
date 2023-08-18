@@ -21,12 +21,14 @@ public class Issue112Tests
          new() {Prop = ComponentOperationFlags.Opt2 },
          new() {Prop = ComponentOperationFlags.Opt1 | ComponentOperationFlags.Opt2 }
       };
+      var expected = lst.Where(l => ((uint)l.Prop & 1) != 0);
 
       // act
-      var result = lst.AsQueryable().ApplyFiltering("Prop #* 1");
+      var actual = lst.AsQueryable().ApplyFiltering("Prop #* 1");
 
       // assert
-      Assert.NotEmpty(result);
+      Assert.NotEmpty(actual);
+      Assert.Equal(expected, actual);
    }
 
    public class AbilityComponents
