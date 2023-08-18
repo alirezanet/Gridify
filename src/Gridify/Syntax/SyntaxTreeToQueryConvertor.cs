@@ -341,10 +341,9 @@ internal static class ExpressionToQueryConvertor
             var customOperator = GridifyGlobalConfiguration.CustomOperators.Operators.First(q => q.GetOperator() == token!.Text);
             var customExp = customOperator.OperatorHandler();
             be = new ReplaceExpressionVisitor(customExp.Parameters[0], body).Visit(customExp.Body);
-            if (isConvertable)
-               be = new ReplaceExpressionVisitor(customExp.Parameters[1], Expression.Constant(value, body.Type)).Visit(be);
-
-            be = new ReplaceExpressionVisitor(customExp.Parameters[1], Expression.Constant(value, typeof(string))).Visit(be);
+            be = isConvertable
+               ? new ReplaceExpressionVisitor(customExp.Parameters[1], Expression.Constant(value, body.Type)).Visit(be)
+               : new ReplaceExpressionVisitor(customExp.Parameters[1], Expression.Constant(value, typeof(string))).Visit(be);
 
             break;
          default:
