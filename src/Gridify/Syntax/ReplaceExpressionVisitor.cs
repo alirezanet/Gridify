@@ -17,4 +17,13 @@ internal class ReplaceExpressionVisitor : ExpressionVisitor
    {
       return node == _oldValue ? _newValue : base.Visit(node)!;
    }
+
+   protected override Expression VisitUnary(UnaryExpression node)
+   {
+      if (node.Operand.Type == typeof(object) && node.Operand == _oldValue)
+      {
+         return Expression.MakeUnary(node.NodeType, _newValue, node.Type);
+      }
+      return base.VisitUnary(node);
+   }
 }
