@@ -63,19 +63,19 @@ this query matches with JOHN - john - John - jOHn ...
 
 ## Escaping
 
-Gridify have five special operators  `, | ( ) /i` to handle complex queries and case-insensitive searches. If you want to use these characters in your query values (after conditional operator), you should add a backslash <code>\ </code> before them. having this regex could be helpfull `([(),|]|\/i)`.
+Gridify have six special operators  `, | ( ) [ /i` to handle complex queries and case-insensitive searches. If you want to use these characters in your query values (after conditional operator), you should add a backslash <code>\ </code> before them. having this regex could be helpfull `([(),|]|\[|\/i)`.
 
 JavaScript escape example:
 
 ``` javascript
-let esc = (v) => v.replace(/([(),|]|\/i)/g, '\\$1')
+let esc = (v) => v.replace(/[(),|]|\[|\/i)/g, '\\$1')
 ```
 
 Csharp escape example:
 
 ``` csharp
 var value = "(test,test2)";
-var esc = Regex.Replace(value, "([(),|]|\/i)", "\\$1" );
+var esc = Regex.Replace(value, "([(),|]|\[|\/i)", "\\$1" );
 // esc = \(test\,test2\)
 ```
 
