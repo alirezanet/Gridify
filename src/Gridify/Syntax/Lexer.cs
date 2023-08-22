@@ -131,6 +131,22 @@ internal class Lexer
          }
       }
 
+      if (char.IsWhiteSpace(Current))
+      {
+         var start = _position;
+
+         // skipper
+         while (char.IsWhiteSpace(Current))
+            Next();
+
+         var length = _position - start;
+         var text = _text.Substring(start, length);
+
+         return new SyntaxToken(SyntaxKind.WhiteSpace, start, text);
+      }
+
+      if (TryToReadTheValue(out var valueToken)) return valueToken!;
+
       if (Current == '[')
       {
          Next();
@@ -164,21 +180,12 @@ internal class Lexer
          return new SyntaxToken(SyntaxKind.FieldToken, start, text);
       }
 
+      _diagnostics.Add($"bad character input: '{Current.ToString()}' at {_position.ToString()}");
+      return new SyntaxToken(SyntaxKind.BadToken, _position++, string.Empty);
+   }
 
-      if (char.IsWhiteSpace(Current))
-      {
-         var start = _position;
-
-         // skipper
-         while (char.IsWhiteSpace(Current))
-            Next();
-
-         var length = _position - start;
-         var text = _text.Substring(start, length);
-
-         return new SyntaxToken(SyntaxKind.WhiteSpace, start, text);
-      }
-
+   private bool TryToReadTheValue(out SyntaxToken? valueToken)
+   {
       if (_waitingForValue)
       {
          var start = _position;
@@ -230,10 +237,13 @@ internal class Lexer
 
 
          _waitingForValue = false;
-         return new SyntaxToken(SyntaxKind.ValueToken, start, text.ToString());
+         {
+            valueToken = new SyntaxToken(SyntaxKind.ValueToken, start, text.ToString());
+            return true;
+         }
       }
 
-      _diagnostics.Add($"bad character input: '{Current.ToString()}' at {_position.ToString()}");
-      return new SyntaxToken(SyntaxKind.BadToken, _position++, string.Empty);
+      valueToken = null;
+      return false;
    }
 }

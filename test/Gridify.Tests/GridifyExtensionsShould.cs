@@ -50,6 +50,7 @@ public class GridifyExtensionsShould
       lst.Add(new TestClass(25, "Case/i", null, tag: string.Empty));
       lst.Add(new TestClass(26, "/iCase", null));
       lst.Add(new TestClass(27, "ali reza", null));
+      lst.Add(new TestClass(27, "[ali]", null));
 
       return lst;
    }
@@ -689,6 +690,23 @@ public class GridifyExtensionsShould
 
       // Act
       var actual = _fakeRepository.AsQueryable().ApplyFiltering("name#=liam").ToList();
+
+      // Assert
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
+
+   [Fact] // PR #114
+   public void ApplyFiltering_WhenPassingBracketsInTheValue_ShouldWorkCorrectly()
+   {
+      // Arrange
+      var expected = _fakeRepository
+         .Where(q => q.Name == "[ali]")
+         .ToList();
+
+      // Act
+      var actual = _fakeRepository.AsQueryable().ApplyFiltering("name=[ali]").ToList();
 
       // Assert
       Assert.Equal(expected.Count, actual.Count);
