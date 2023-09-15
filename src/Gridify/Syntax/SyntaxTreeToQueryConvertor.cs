@@ -196,24 +196,28 @@ internal static class ExpressionToQueryConvertor
       // type fixer
       if (value is not null && body.Type != value.GetType())
       {
-         try
-         {
-            // handle bool, github issue #71
-            if (body.Type == typeof(bool) && value is "true" or "false" or "1" or "0")
-               value = (((string)value).ToLower() is "1" or "true");
-            // handle broken guids,  github issue #2
-            else if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
+         // handle bool, github issue #71
+         if (body.Type == typeof(bool) && value is "true" or "false" or "1" or "0")
+            value = ((string)value).ToLower() is "1" or "true";
+         // handle broken guids,  github issue #2
+         else if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
 
-            var converter = TypeDescriptor.GetConverter(body.Type);
-            isConvertable = converter.CanConvertFrom(typeof(string));
-            if (isConvertable)
-               value = converter.ConvertFromString(value.ToString()!);
-         }
-         catch (FormatException)
+         var converter = TypeDescriptor.GetConverter(body.Type);
+         isConvertable = converter.CanConvertFrom(typeof(string));
+         if (isConvertable)
          {
-            // this code should never run
-            // return no records in case of any exception in formatting
-            return Expression.Lambda(Expression.Constant(false), parameter); // q => false
+            try
+            {
+               value = converter.ConvertFromString(value.ToString()!);
+            }
+            catch (ArgumentException)
+            {
+               isConvertable = false;
+            }
+            catch (FormatException)
+            {
+               return Expression.Lambda(Expression.Constant(false), parameter); // q => false
+            }
          }
       }
 
