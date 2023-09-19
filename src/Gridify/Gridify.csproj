@@ -26,6 +26,30 @@
       <None Include="..\..\README.md" Pack="true" PackagePath="\" />
    </ItemGroup>
 
+   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[8.0.0,9.0.0)" />
+   </ItemGroup>
+
+   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[7.0.0,8.0.0)" />
+   </ItemGroup>
+
+   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[6.0.0,7.0.0)" />
+   </ItemGroup>
+
+   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[5.0.0,6.0.0)" />
+   </ItemGroup>
+
+   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[2.1.0,3.0.0)" />
+   </ItemGroup>
+
+   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[2.0.0,3.0.0)" />
+   </ItemGroup>
+
    <ItemGroup>
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
       <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
