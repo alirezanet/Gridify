@@ -8,7 +8,7 @@ namespace Gridify;
 
 public class GridifyMapper<T> : IGridifyMapper<T>
 {
-   public GridifyMapperConfiguration Configuration { get; }
+   public GridifyMapperConfiguration Configuration { get; protected set; }
    private readonly List<IGMap<T>> _mappings;
 
    public GridifyMapper(bool autoGenerateMappings = false)
