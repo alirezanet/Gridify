@@ -5,7 +5,7 @@
 ![Nuget](https://img.shields.io/nuget/v/gridify?label=stable)
 ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/gridify?label=latest)
 [![NuGet version (Gridify)](https://img.shields.io/nuget/v/Gridify.svg?style=flat-square)](https://www.nuget.org/packages/Gridify/)
-[![Static Badge](https://img.shields.io/badge/API%20Doc-f88445?logo=readme&logoColor=white)](https://www.robiniadocs.com/d/gridify/api/Gridify.GridifyExtensions.html)
+[![Static Badge](https://img.shields.io/badge/fuget-f88445?logo=readme&logoColor=white)](https://www.fuget.org/packages/Gridify)
 [![Static Badge](https://img.shields.io/badge/Documentation-42bc00?logo=readme&logoColor=white)](https://alirezanet.github.io/Gridify/)
 
 
