@@ -7,7 +7,7 @@ by default, if you don't add these keywords, gridify assumes you need Ascending 
 ascending and descending
 
 :::: code-group
-::: code-group-item Extentions
+::: code-group-item Extensions
 ``` csharp
 // asc - desc
 var x = personsRepo.ApplyOrdering("Id"); // default ascending its equal to "Id asc"
