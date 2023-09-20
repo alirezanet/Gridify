@@ -22,7 +22,7 @@ You can change this behavior by setting this property to `true`.
 
 ### AllowNullSearch
 
-This option enables the 'null' keyword in filtering operations, for example, `name=null` searches for all records with a null value for the `name` field not the string `"null"`. if you need to search for the string `"null"` you can
+This option enables the 'null' keyword in filtering operations, for example, `name=null` searches for all records with a null value for the `name` field not the string `"null"`. if you need to search for the string `"null"` you can disable this option.
 
 - type: `bool`
 - default: `true`
