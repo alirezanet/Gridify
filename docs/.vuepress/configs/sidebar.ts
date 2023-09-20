@@ -29,6 +29,7 @@ export const sidebar: SidebarConfig = {
       {
          text: 'Advanced',
          children: [
+            '/guide/dependency-injection.md',
             '/guide/compile.md',
             '/guide/entity-framework.md',
             '/guide/autoMapper.md',
