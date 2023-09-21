@@ -5,8 +5,10 @@
 ![Nuget](https://img.shields.io/nuget/v/gridify?label=stable)
 ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/gridify?label=latest)
 [![NuGet version (Gridify)](https://img.shields.io/nuget/v/Gridify.svg?style=flat-square)](https://www.nuget.org/packages/Gridify/)
+![CodeQL](https://github.com/alirezanet/Gridify/actions/workflows/codeql.yml/badge.svg)
 [![Static Badge](https://img.shields.io/badge/fuget-f88445?logo=readme&logoColor=white)](https://www.fuget.org/packages/Gridify)
 [![Static Badge](https://img.shields.io/badge/Documentation-42bc00?logo=readme&logoColor=white)](https://alirezanet.github.io/Gridify/)
+
 
 
 [![Gridify](https://alirezanet.github.io/Gridify/gridify-readme-logo.svg)](https://alirezanet.github.io/Gridify/)
