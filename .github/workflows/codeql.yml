@@ -68,6 +68,8 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Build
+      env:
+        HUSKY: 0
       run: dotnet build --configuration Release
     # uses: github/codeql-action/autobuild@v2
 
