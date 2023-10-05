@@ -11,7 +11,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    public GridifyMapperConfiguration Configuration { get; protected set; }
    private readonly List<IGMap<T>> _mappings;
 
-   public GridifyMapper(bool autoGenerateMappings = false)
+   public GridifyMapper(bool autoGenerateMappings = false, ushort maxNestingDepth = 0)
    {
       Configuration = new GridifyMapperConfiguration();
       _mappings = new List<IGMap<T>>();
@@ -61,17 +61,37 @@ public class GridifyMapper<T> : IGridifyMapper<T>
 
    public IGridifyMapper<T> GenerateMappings()
    {
-      foreach (var item in typeof(T).GetProperties())
-      {
-         // skip classes
-         if (item.PropertyType.IsClass && item.PropertyType != typeof(string))
-            continue;
-
-         var name = char.ToLowerInvariant(item.Name[0]) + item.Name.Substring(1); // camel-case name
-         _mappings.Add(new GMap<T>(name, CreateExpression(item.Name)!));
-      }
-
+      GenerateMappingsRecursive(typeof(T), "", 0, 0);
       return this;
+   }
+
+   public IGridifyMapper<T> GenerateMappings(ushort maxNestingDepth)
+   {
+      GenerateMappingsRecursive(typeof(T), "", maxNestingDepth, 0);
+      return this;
+   }
+
+   private void GenerateMappingsRecursive(Type type, string prefix, ushort maxNestingDepth, ushort currentDepth)
+   {
+      foreach (var item in type.GetProperties())
+      {
+         // Skip classes if nestingLevel is exceeded
+         if (currentDepth >= maxNestingDepth && (item.PropertyType.IsClass && item.PropertyType != typeof(string)))
+         {
+            continue;
+         }
+
+         var propertyName = char.ToLowerInvariant(item.Name[0]) + item.Name.Substring(1); // camel-case name
+         var fullName = string.IsNullOrEmpty(prefix) ? propertyName : $"{prefix}.{propertyName}";
+
+         _mappings.Add(new GMap<T>(fullName, CreateExpression(item.Name)!));
+
+         // If nestingLevel is not exceeded and the property is a class, recursively generate mappings
+         if (currentDepth < maxNestingDepth && item.PropertyType.IsClass && item.PropertyType != typeof(string))
+         {
+            GenerateMappingsRecursive(item.PropertyType, fullName, maxNestingDepth, (ushort)(currentDepth + 1));
+         }
+      }
    }
 
    public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null!,
