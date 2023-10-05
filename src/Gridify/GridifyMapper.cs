@@ -59,12 +59,14 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       return this;
    }
 
+   /// <inheritdoc />
    public IGridifyMapper<T> GenerateMappings()
    {
       GenerateMappingsRecursive(typeof(T), "", 0, 0);
       return this;
    }
 
+   /// <inheritdoc />
    public IGridifyMapper<T> GenerateMappings(ushort maxNestingDepth)
    {
       GenerateMappingsRecursive(typeof(T), "", maxNestingDepth, 0);
