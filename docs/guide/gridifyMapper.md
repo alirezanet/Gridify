@@ -52,7 +52,6 @@ This method generates mappings for the properties of the entity, including top-l
 ```csharp
 var mapper = new GridifyMapper<Person>()
                .GenerateMappings();
-
 ```
 
 - To generate mappings with **control over nesting depth**, you can specify the maxNestingDepth parameter. This parameter limits how deep the mappings will be generated for nested classes. Set it to 0 for no nesting or a positive value to control the depth `(added in v2.11.0)`:
