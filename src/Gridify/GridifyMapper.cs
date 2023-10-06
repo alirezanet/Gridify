@@ -77,22 +77,22 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    {
       foreach (var item in type.GetProperties())
       {
-         // Skip classes if nestingLevel is exceeded
-         if (currentDepth >= maxNestingDepth && (item.PropertyType.IsClass && item.PropertyType != typeof(string)))
-         {
-            continue;
-         }
-
          var propertyName = char.ToLowerInvariant(item.Name[0]) + item.Name.Substring(1); // camel-case name
          var fullName = string.IsNullOrEmpty(prefix) ? propertyName : $"{prefix}.{propertyName}";
 
-         _mappings.Add(new GMap<T>(fullName, CreateExpression(item.Name)!));
-
-         // If nestingLevel is not exceeded and the property is a class, recursively generate mappings
-         if (currentDepth < maxNestingDepth && item.PropertyType.IsClass && item.PropertyType != typeof(string))
+         // Skip classes if nestingLevel is exceeded
+         if (item.PropertyType.IsClass && item.PropertyType != typeof(string))
          {
+            if (currentDepth >= maxNestingDepth)
+            {
+               continue;
+            }
+            // If nestingLevel is not exceeded and the property is a class, recursively generate mappings
             GenerateMappingsRecursive(item.PropertyType, fullName, maxNestingDepth, (ushort)(currentDepth + 1));
+            continue;
          }
+
+         _mappings.Add(new GMap<T>(fullName, CreateExpression(fullName)!));
       }
    }
 
@@ -199,4 +199,5 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       // Param_x => (object)Param_x.Name
       return Expression.Lambda<Func<T, object>>(convertedExpression, parameter);
    }
+
 }
