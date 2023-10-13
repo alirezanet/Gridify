@@ -390,7 +390,7 @@ public static partial class GridifyExtensions
       return query;
    }
 
-   internal static Expression<Func<T, object>> GetOrderExpression<T>(ParsedOrdering order, IGridifyMapper<T> mapper)
+   internal static Expression<Func<T, object>> GetOrderExpression<T>(this ParsedOrdering order, IGridifyMapper<T> mapper)
    {
       var exp = mapper.GetExpression(order.MemberName);
       switch (order.OrderingType)
@@ -438,7 +438,7 @@ public static partial class GridifyExtensions
       return chars.Aggregate(seed, (str, cItem) => str.Replace(cItem, replacementCharacter));
    }
 
-   private static IEnumerable<ParsedOrdering> ParseOrderings(string orderings)
+   internal static IEnumerable<ParsedOrdering> ParseOrderings(this string orderings)
    {
       var nullableChars = new[] { '?', '!' };
       foreach (var field in orderings.Split(','))
