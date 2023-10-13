@@ -1,4 +1,5 @@
-﻿using Elastic.Clients.Elasticsearch;
+﻿using System;
+using Elastic.Clients.Elasticsearch;
 using Elastic.Transport.Extensions;
 using Xunit;
 
@@ -7,6 +8,12 @@ namespace Gridify.Elasticsearch.Tests;
 public class GridifyExtensionsTests
 {
    private readonly ElasticsearchClient _client = new();
+
+   public GridifyExtensionsTests()
+   {
+      // Disable Elasticsearch naming policy and use property names as they are
+      GridifyGlobalConfiguration.CustomElasticsearchNamingAction = p => p;
+   }
 
    [Theory]
    // byte equals
@@ -25,9 +32,9 @@ public class GridifyExtensionsTests
    [InlineData("MyByte=null", """{"bool":{"must_not":{"exists":{"field":"MyByte"}}}}""")]
    // byte is not null
    [InlineData("MyByte!=null", """{"exists":{"field":"MyByte"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithByteValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithByteValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -47,9 +54,9 @@ public class GridifyExtensionsTests
    [InlineData("MySByte=null", """{"bool":{"must_not":{"exists":{"field":"MySByte"}}}}""")]
    // sbyte is not null
    [InlineData("MySByte!=null", """{"exists":{"field":"MySByte"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithSByteValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithSByteValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -69,9 +76,9 @@ public class GridifyExtensionsTests
    [InlineData("MyShort=null", """{"bool":{"must_not":{"exists":{"field":"MyShort"}}}}""")]
    // short is not null
    [InlineData("MyShort!=null", """{"exists":{"field":"MyShort"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithShortValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithShortValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -91,9 +98,9 @@ public class GridifyExtensionsTests
    [InlineData("MyUShort=null", """{"bool":{"must_not":{"exists":{"field":"MyUShort"}}}}""")]
    // ushort is not null
    [InlineData("MyUShort!=null", """{"exists":{"field":"MyUShort"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithUShortValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithUShortValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -113,9 +120,9 @@ public class GridifyExtensionsTests
    [InlineData("Id=null", """{"bool":{"must_not":{"exists":{"field":"Id"}}}}""")]
    // int is not null
    [InlineData("Id!=null", """{"exists":{"field":"Id"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithNumber_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithNumber_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -135,9 +142,9 @@ public class GridifyExtensionsTests
    [InlineData("MyUInt=null", """{"bool":{"must_not":{"exists":{"field":"MyUInt"}}}}""")]
    // uint is not null
    [InlineData("MyUInt!=null", """{"exists":{"field":"MyUInt"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithUIntValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithUIntValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -157,9 +164,9 @@ public class GridifyExtensionsTests
    [InlineData("MyLong=null", """{"bool":{"must_not":{"exists":{"field":"MyLong"}}}}""")]
    // long is not null
    [InlineData("MyLong!=null", """{"exists":{"field":"MyLong"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithLongValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithLongValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -179,9 +186,9 @@ public class GridifyExtensionsTests
    [InlineData("MyULong=null", """{"bool":{"must_not":{"exists":{"field":"MyULong"}}}}""")]
    // ulong is not null
    [InlineData("MyULong!=null", """{"exists":{"field":"MyULong"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithULongValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithULongValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -201,9 +208,9 @@ public class GridifyExtensionsTests
    [InlineData("MyFloat=null", """{"bool":{"must_not":{"exists":{"field":"MyFloat"}}}}""")]
    // float is not null
    [InlineData("MyFloat!=null", """{"exists":{"field":"MyFloat"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithFloatValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithFloatValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -223,9 +230,9 @@ public class GridifyExtensionsTests
    [InlineData("MyDouble=null", """{"bool":{"must_not":{"exists":{"field":"MyDouble"}}}}""")]
    // double is not null
    [InlineData("MyDouble!=null", """{"exists":{"field":"MyDouble"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithDoubleValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithDoubleValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -245,9 +252,9 @@ public class GridifyExtensionsTests
    [InlineData("MyDecimal=null", """{"bool":{"must_not":{"exists":{"field":"MyDecimal"}}}}""")]
    // decimal is not null
    [InlineData("MyDecimal!=null", """{"exists":{"field":"MyDecimal"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithDecimalValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithDecimalValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -279,9 +286,9 @@ public class GridifyExtensionsTests
    [InlineData("Name=null|Name=", """{"bool":{"should":[{"bool":{"must_not":{"exists":{"field":"Name"}}}},{"term":{"Name.keyword":{"value":""}}}]}}""")]
    // string is not empty and not null
    [InlineData("Name!=null,Name!=", """{"bool":{"must":{"exists":{"field":"Name"}},"must_not":{"term":{"Name.keyword":{"value":""}}}}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithStringValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithStringValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -303,9 +310,9 @@ public class GridifyExtensionsTests
    [InlineData("MyDateTime<2021-09-01", """{"range":{"MyDateTime":{"lt":"2021-09-01T00:00:00"}}}""")]
    // date less than or equal
    [InlineData("MyDateTime<=2021-09-01", """{"range":{"MyDateTime":{"lte":"2021-09-01T00:00:00"}}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithDateTimeValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithDateTimeValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -323,9 +330,9 @@ public class GridifyExtensionsTests
    [InlineData("MyDateOnly<2021-09-01", """{"range":{"MyDateOnly":{"lt":"2021-09-01"}}}""")]
    // date only less than or equal
    [InlineData("MyDateOnly<=2021-09-01", """{"range":{"MyDateOnly":{"lte":"2021-09-01"}}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithDateOnlyValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithDateOnlyValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -337,9 +344,9 @@ public class GridifyExtensionsTests
    [InlineData("IsActive=null", """{"bool":{"must_not":{"exists":{"field":"IsActive"}}}}""")]
    // bool is not null
    [InlineData("IsActive!=null", """{"exists":{"field":"IsActive"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithBoolValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithBoolValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -349,9 +356,9 @@ public class GridifyExtensionsTests
    [InlineData("MyGuid=null", """{"bool":{"must_not":{"exists":{"field":"MyGuid"}}}}""")]
    // guid is not null
    [InlineData("MyGuid!=null", """{"exists":{"field":"MyGuid"}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithGuidValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithGuidValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -381,9 +388,9 @@ public class GridifyExtensionsTests
    [InlineData("(Name=Dzmitry|Name=John),(Id=1|Id=2)", """{"bool":{"must":[{"bool":{"should":[{"term":{"Name.keyword":{"value":"Dzmitry"}}},{"term":{"Name.keyword":{"value":"John"}}}]}},{"bool":{"should":[{"term":{"Id":{"value":1}}},{"term":{"Id":{"value":2}}}]}}]}}""")]
    // , ( , | ) | ) operators
    [InlineData("Id=1,(Name=Dzmitry,(Id=1|Id=2)|Id=3)", """{"bool":{"must":[{"term":{"Id":{"value":1}}},{"bool":{"should":[{"bool":{"must":[{"term":{"Name.keyword":{"value":"Dzmitry"}}},{"bool":{"should":[{"term":{"Id":{"value":1}}},{"term":{"Id":{"value":2}}}]}}]}},{"term":{"Id":{"value":3}}}]}}]}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithDifferentOperators_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithDifferentOperators_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -391,9 +398,9 @@ public class GridifyExtensionsTests
    [InlineData("Name=Dzmitry,ChildClass.Name=Kiryl", """{"bool":{"must":[{"term":{"Name.keyword":{"value":"Dzmitry"}}},{"term":{"ChildClass.Name.keyword":{"value":"Kiryl"}}}]}}""")]
    // Double nested class
    [InlineData("Name=Sergey,ChildClass.Name=Dzmitry,ChildClass.ChildClass.Name=Kiryl", """{"bool":{"must":[{"term":{"Name.keyword":{"value":"Sergey"}}},{"term":{"ChildClass.Name.keyword":{"value":"Dzmitry"}}},{"term":{"ChildClass.ChildClass.Name.keyword":{"value":"Kiryl"}}}]}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithNestedClass_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithNestedClass_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
@@ -407,21 +414,87 @@ public class GridifyExtensionsTests
    [InlineData("Name!^", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":"*"}}}}}""")]
    // string does not end with empty
    [InlineData("Name!$", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":"*"}}}}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithEmptyValue_ReturnsElasticsearchQuery(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithEmptyValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
-      AssertQuery(query, expected);
+      AssertFilter(filter, expected);
    }
 
    [Theory]
    [InlineData("name=Dzmitry,childname=Kiryl", """{"bool":{"must":[{"term":{"Name.keyword":{"value":"Dzmitry"}}},{"term":{"ChildClass.Name.keyword":{"value":"Kiryl"}}}]}}""")]
-   public void ToElasticsearchQuery_WhenCalledWithCustomMapper_ShouldUseCorrectFieldNames(string query, string expected)
+   public void ToElasticsearchQuery_WhenCalledWithCustomMapper_ShouldUseCorrectFieldNames(string filter, string expected)
    {
       var mapper = new GridifyMapper<TestClass>()
          .GenerateMappings()
          .AddMap("name", x => x.Name)
          .AddMap("childname", x => x.ChildClass.Name);
 
-      AssertQuery(query, expected, mapper);
+      AssertFilter(filter, expected, mapper);
+   }
+
+   [Theory]
+   [InlineData("tag=Dzmitry", true, "")]
+   [InlineData("tag=Dzmitry", false, """{"term":{"Tag.keyword":{"value":"Dzmitry"}}}""")]
+   public void ToElasticsearchQuery_WhenCalledWithCaseSensitiveMapperSetting_ShouldApplyTheSetting(string filter, bool caseSensitive, string expected)
+   {
+      var mapper = new GridifyMapper<TestClass> { Configuration = { CaseSensitive = caseSensitive } }
+         .AddMap("Tag", x => x.Tag);
+
+      if (caseSensitive)
+      {
+         var ex = Assert.Throws<GridifyMapperException>(() => filter.ToElasticsearchQuery(mapper));
+         Assert.Equal("Mapping 'tag' not found", ex.Message);
+         return;
+      }
+
+      AssertFilter(filter, expected, mapper);
+   }
+
+   [Theory]
+   [InlineData("Tag=null", true, """{"bool":{"must_not":{"exists":{"field":"Tag"}}}}""")]
+   [InlineData("Tag=null", false, """{"term":{"Tag.keyword":{"value":"null"}}}""")]
+   public void ToElasticsearchQuery_WhenCalledWithAllowNullSearchSetting_ShouldApplyTheSetting(string filter, bool allowNullSearch, string expected)
+   {
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true) { Configuration = { AllowNullSearch = allowNullSearch } };
+
+      AssertFilter(filter, expected, mapper);
+   }
+
+   [Theory]
+   [InlineData("NotMappedField=Dzmitry", true, """{"bool":{}}"""/* equivalent of """{"match_all":{}}"""*/)]
+   [InlineData("NotMappedField=Homer,MappedField=Dzmitry", true, """{"bool":{"must":{"term":{"Name.keyword":{"value":"Dzmitry"}}}}}"""/* equivalent of """{"term":{"Name.keyword":{"value":"Dzmitry"}}}"""*/)]
+   [InlineData("NotMappedField=Dzmitry", false, "")]
+   [InlineData("NotMappedField=Homer,MappedField=Dzmitry", false, "")]
+   public void ToElasticsearchQuery_WhenCalledWithIgnoreNotMappedFieldsSetting_ShouldApplyTheSetting(string filter, bool ignoreNotMappedFields, string expected)
+   {
+      var mapper = new GridifyMapper<TestClass> { Configuration = { IgnoreNotMappedFields = ignoreNotMappedFields }}
+         .AddMap("MappedField", x => x.Name);
+
+      if (!ignoreNotMappedFields)
+      {
+         var ex = Assert.Throws<GridifyMapperException>(() => filter.ToElasticsearchQuery(mapper));
+         Assert.Equal("Mapping 'NotMappedField' not found", ex.Message);
+         return;
+      }
+
+      AssertFilter(filter, expected, mapper);
+   }
+
+   [Theory]
+   [InlineData("Name=Bart", true, """{"term":{"_Name_.keyword":{"value":"Bart"}}}""")]
+   [InlineData("Name=Bart", false, """{"term":{"name.keyword":{"value":"Bart"}}}""")]
+   [InlineData("Name=Homer,childName=Lisa", true, """{"bool":{"must":[{"term":{"_Name_.keyword":{"value":"Homer"}}},{"term":{"_ChildClass_._Name_.keyword":{"value":"Lisa"}}}]}}""")]
+   [InlineData("Name=Homer,childName=Lisa", false, """{"bool":{"must":[{"term":{"name.keyword":{"value":"Homer"}}},{"term":{"childClass.name.keyword":{"value":"Lisa"}}}]}}""")]
+   public void ToElasticsearchQuery_WhenCalledWithCustomElasticsearchNamingActionSetting_ShouldApplyTheSetting(
+      string filter, bool ignoreElasticsearchPropertyNamingPolicy, string expected)
+   {
+      Func<string, string>? namingAction = ignoreElasticsearchPropertyNamingPolicy ? p => $"_{p}_" : null;
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true)
+      {
+         Configuration = { CustomElasticsearchNamingAction = namingAction }
+      };
+      mapper.AddMap("childName", x => x.ChildClass.Name);
+
+      AssertFilter(filter, expected, mapper);
    }
 
    [Theory]
@@ -431,14 +504,14 @@ public class GridifyExtensionsTests
    [InlineData("Id asc, Name desc, MyDateTime", """[{"Id":{"order":"asc"}},{"Name.keyword":{"order":"desc"}},{"MyDateTime":{"order":"asc"}}]""")]
    [InlineData("ChildClass.Name desc", """[{"ChildClass.Name.keyword":{"order":"desc"}}]""")]
    [InlineData("", "[]")]
-   public void ToSortOptions_WhenCalledWithOrdering_ReturnsElasticsearchSortOptions(string ordering, string expected)
+   public void ToElasticsearchSortOptions_WhenCalledWithOrdering_ReturnsElasticsearchSortOptions(string ordering, string expected)
    {
       AssertOrdering(ordering, expected);
    }
 
    [Theory]
    [InlineData("name asc,childname desc", """[{"Name.keyword":{"order":"asc"}},{"ChildClass.Name.keyword":{"order":"desc"}}]""")]
-   public void ToSortOptions_WhenCalledWithCustomMapper_ShouldUseCorrectFieldNames(string ordering, string expected)
+   public void ToElasticsearchSortOptions_WhenCalledWithCustomMapper_ShouldUseCorrectFieldNames(string ordering, string expected)
    {
       var mapper = new GridifyMapper<TestClass>()
          .GenerateMappings()
@@ -448,9 +521,67 @@ public class GridifyExtensionsTests
       AssertOrdering(ordering, expected, mapper);
    }
 
-   private void AssertQuery(string query, string expected, IGridifyMapper<TestClass>? mapper = null)
+   [Theory]
+   [InlineData("tag asc", true, "")]
+   [InlineData("tag asc", false, """[{"Tag.keyword":{"order":"asc"}}]""")]
+   public void ToElasticsearchSortOptions_WhenCalledWithCaseSensitiveMapperSetting_ShouldApplyTheSetting(
+      string ordering, bool caseSensitive, string expected)
    {
-      var result = query.ToElasticsearchQuery(mapper);
+      var mapper = new GridifyMapper<TestClass> { Configuration = { CaseSensitive = caseSensitive } }
+         .AddMap("Tag", x => x.Tag);
+
+      if (caseSensitive)
+      {
+         var ex = Assert.Throws<GridifyMapperException>(() => ordering.ToElasticsearchSortOptions(mapper));
+         Assert.Equal("Mapping 'tag' not found", ex.Message);
+         return;
+      }
+
+      AssertOrdering(ordering, expected, mapper);
+   }
+
+   [Theory]
+   [InlineData("NotMappedField asc", true, "[]")]
+   [InlineData("NotMappedField asc,MappedField desc", true, """[{"Name.keyword":{"order":"desc"}}]""")]
+   [InlineData("NotMappedField asc", false, "")]
+   [InlineData("NotMappedField asc,MappedField desc", false, "")]
+   public void ToElasticsearchSortOptions_WhenCalledWithIgnoreNotMappedFieldsSetting_ShouldApplyTheSetting(
+      string ordering, bool ignoreNotMappedFields, string expected)
+   {
+      var mapper = new GridifyMapper<TestClass> { Configuration = { IgnoreNotMappedFields = ignoreNotMappedFields }}
+         .AddMap("MappedField", x => x.Name);
+
+      if (!ignoreNotMappedFields)
+      {
+         var ex = Assert.Throws<GridifyMapperException>(() => ordering.ToElasticsearchSortOptions(mapper));
+         Assert.Equal("Mapping 'NotMappedField' not found", ex.Message);
+         return;
+      }
+
+      AssertOrdering(ordering, expected, mapper);
+   }
+
+   [Theory]
+   [InlineData("Name asc", true, """[{"_Name_.keyword":{"order":"asc"}}]""")]
+   [InlineData("Name asc", false, """[{"name.keyword":{"order":"asc"}}]""")]
+   [InlineData("Name asc,childName desc", true, """[{"_Name_.keyword":{"order":"asc"}},{"_ChildClass_._Name_.keyword":{"order":"desc"}}]""")]
+   [InlineData("Name asc,childName desc", false, """[{"name.keyword":{"order":"asc"}},{"childClass.name.keyword":{"order":"desc"}}]""")]
+   public void ToElasticsearchSortOptions_WhenCalledWithIgnoreElasticsearchPropertyNamingPolicySetting_ShouldApplyTheSetting(
+      string ordering, bool ignoreElasticsearchPropertyNamingPolicy, string expected)
+   {
+      Func<string, string>? namingAction = ignoreElasticsearchPropertyNamingPolicy ? p => $"_{p}_" : null;
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true)
+      {
+         Configuration = { CustomElasticsearchNamingAction = namingAction }
+      };
+      mapper.AddMap("childName", x => x.ChildClass.Name);
+
+      AssertOrdering(ordering, expected, mapper);
+   }
+
+   private void AssertFilter(string filter, string expected, IGridifyMapper<TestClass>? mapper = null)
+   {
+      var result = filter.ToElasticsearchQuery(mapper);
 
       var jsonQuery = _client.RequestResponseSerializer.SerializeToString(result);
       Assert.Equal(expected, jsonQuery);

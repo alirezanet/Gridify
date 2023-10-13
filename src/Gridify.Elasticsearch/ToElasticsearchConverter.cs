@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using Gridify.Syntax;
 
 namespace Gridify.Elasticsearch;
 
-internal static class ExpressionToQueryConvertor
+internal static class ToElasticsearchConverter
 {
-   internal static (Query Expression, bool IsNested)
-      GenerateQuery<T>(ExpressionSyntax expression, IGridifyMapper<T> mapper)
+   internal static Query GenerateQuery<T>(ExpressionSyntax expression, IGridifyMapper<T> mapper)
    {
       while (true)
          switch (expression.Kind)
@@ -30,14 +31,14 @@ internal static class ExpressionToQueryConvertor
                   catch (GridifyMapperException)
                   {
                      if (mapper.Configuration.IgnoreNotMappedFields)
-                        return (new BoolQuery(), false);
+                        return new BoolQuery();
 
                      throw;
                   }
                }
 
-               (Query exp, bool isNested) leftQuery;
-               (Query exp, bool isNested) rightQuery;
+               Query leftQuery;
+               Query rightQuery;
 
                if (bExp.Left is ParenthesizedExpressionSyntax lpExp)
                   leftQuery = GenerateQuery(lpExp.Expression, mapper);
@@ -51,11 +52,11 @@ internal static class ExpressionToQueryConvertor
 
                var result = bExp.OperatorToken.Kind switch
                {
-                  SyntaxKind.And => leftQuery.exp & rightQuery.exp,
-                  SyntaxKind.Or => leftQuery.exp | rightQuery.exp,
+                  SyntaxKind.And => leftQuery & rightQuery,
+                  SyntaxKind.Or => leftQuery | rightQuery,
                   _ => throw new GridifyFilteringException($"Invalid expression Operator '{bExp.OperatorToken.Kind}'")
                };
-               return (result, false);
+               return (result);
             }
             case SyntaxKind.ParenthesizedExpression: // first entrypoint only
             {
@@ -67,8 +68,35 @@ internal static class ExpressionToQueryConvertor
          }
    }
 
-   private static (Query Query, bool IsNested)? ConvertBinaryExpressionSyntaxToQuery<T>(
-      BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)
+   internal static ICollection<SortOptions> GenerateSortOptions<T>(List<ParsedOrdering> orderings, IGridifyMapper<T> mapper)
+   {
+      var sortOptions = new List<SortOptions>();
+      foreach (var order in orderings)
+      {
+         if (!mapper.HasMap(order.MemberName))
+         {
+            // skip if there is no mappings available
+            if (mapper.Configuration.IgnoreNotMappedFields)
+               continue;
+
+            throw new GridifyMapperException($"Mapping '{order.MemberName}' not found");
+         }
+
+         var propExpression = mapper.GetExpression(order.MemberName);
+         var isStringValue = propExpression.GetRealType() == typeof(string);
+         var fieldName = BuildFieldName(propExpression.Body, mapper.Configuration, isStringValue);
+
+         var sortOption = SortOptions.Field(
+            fieldName,
+            new FieldSort { Order = order.IsAscending ? SortOrder.Asc : SortOrder.Desc });
+
+         sortOptions.Add(sortOption);
+      }
+
+      return sortOptions;
+   }
+
+   private static Query? ConvertBinaryExpressionSyntaxToQuery<T>(BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)
    {
       var fieldExpression = binarySyntax.Left as FieldExpressionSyntax;
 
@@ -79,7 +107,6 @@ internal static class ExpressionToQueryConvertor
       if (left == null || right == null) return null;
 
       var gMap = mapper.GetGMap(left);
-
       if (gMap == null) throw new GridifyMapperException($"Mapping '{left}' not found");
 
       if (fieldExpression!.IsCollection)
@@ -95,22 +122,20 @@ internal static class ExpressionToQueryConvertor
          gMap.To.Body,
          right,
          op,
-         mapper.Configuration.AllowNullSearch,
          gMap.Convertor,
-         left,
-         right.ValueToken.Text);
+         right.ValueToken.Text,
+         mapper.Configuration);
 
-      return (result, false);
+      return result;
    }
 
    private static Query GenerateQuery(
       Expression body,
       ValueExpressionSyntax valueExpression,
       SyntaxNode op,
-      bool allowNullSearch,
       Func<string, object>? convertor,
-      string left,
-      string right)
+      string right,
+      GridifyMapperConfiguration mapperConfiguration)
    {
       // Remove the boxing for value types
       if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression)body).Operand;
@@ -122,7 +147,7 @@ internal static class ExpressionToQueryConvertor
          value = convertor.Invoke(valueExpression.ValueToken.Text);
 
       // handle the `null` keyword in value
-      if (allowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
+      if (mapperConfiguration.AllowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
          value = null;
 
       // type fixer
@@ -159,11 +184,8 @@ internal static class ExpressionToQueryConvertor
          isNumberExceptDecimalValue = true;
       }
 
-      var propertyPath = body.ToPropertyPath();
-
-      var field = isStringValue
-         ? new Field($"{propertyPath}.keyword")
-         : new Field(propertyPath);
+      var fieldName = BuildFieldName(body, mapperConfiguration, isStringValue);
+      var field = new Field(fieldName);
 
       Query query;
       switch (op.Kind)
@@ -272,6 +294,17 @@ internal static class ExpressionToQueryConvertor
       }
 
       return query;
+   }
+
+   private static string BuildFieldName(
+      Expression expression, GridifyMapperConfiguration mapperConfiguration, bool isStringValue)
+   {
+      var propertyPath = expression.ToPropertyPath();
+      var propertyPathParts = propertyPath.Split('.');
+      propertyPath = string.Join(".", propertyPathParts.Select(
+         mapperConfiguration.CustomElasticsearchNamingAction ?? JsonNamingPolicy.CamelCase.ConvertName));
+
+      return isStringValue ? $"{propertyPath}.keyword" : propertyPath;
    }
 
    private static bool IsString(object? value)

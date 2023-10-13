@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using Gridify.Syntax;
 
 namespace Gridify
@@ -47,6 +46,16 @@ namespace Gridify
       /// Default is false
       /// </summary>
       public static bool DisableNullChecks { get; set; } = false;
+
+      /// <summary>
+      /// Specifies how field names are inferred from CLR property names.
+      /// By default, Elastic.Clients.Elasticsearch uses camel-case property names.
+      /// </summary>
+      /// <example>
+      /// If false CLR property EmailAddress will be inferred as "emailAddress" Elasticsearch document field name
+      /// If true, the CLR property EmailAddress will be inferred as "EmailAddress" Elasticsearch document field name
+      /// </example>
+      public static Func<string, string>? CustomElasticsearchNamingAction { get; set; }
 
       /// <summary>
       /// You can extend the gridify supported operators by adding

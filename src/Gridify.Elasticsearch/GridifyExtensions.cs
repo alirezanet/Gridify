@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using Gridify.Syntax;
@@ -20,7 +21,7 @@ public static class GridifyExtensions
 
       mapper ??= BuildMapperWithNestedProperties<T>(syntaxTree);
 
-      var (queryExpression, _) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
+      var queryExpression = ToElasticsearchConverter.GenerateQuery(syntaxTree.Root, mapper);
       return queryExpression;
    }
 
@@ -29,7 +30,11 @@ public static class GridifyExtensions
       if (string.IsNullOrWhiteSpace(ordering))
          return new List<SortOptions>();
 
-      var sortOptions = ProcessOrdering(ordering, mapper);
+      var orderings = ordering.ParseOrderings().ToList();
+
+      mapper ??= BuildMapperForSorting<T>(orderings);
+
+      var sortOptions = ToElasticsearchConverter.GenerateSortOptions(orderings, mapper);
       return sortOptions;
    }
 
@@ -63,49 +68,22 @@ public static class GridifyExtensions
       }
    }
 
-   private static ICollection<SortOptions> ProcessOrdering<T>(string orderings, IGridifyMapper<T>? mapper)
+   private static GridifyMapper<T> BuildMapperForSorting<T>(List<ParsedOrdering> orderings)
    {
-      var orders = orderings.ParseOrderings().ToList();
-
-      if (mapper is null)
+      var mapper = new GridifyMapper<T>();
+      foreach (var order in orderings)
       {
-         mapper = new GridifyMapper<T>();
-         foreach (var order in orders)
-            try
-            {
-               mapper.AddMap(order.MemberName);
-            }
-            catch (Exception)
-            {
-               if (!mapper.Configuration.IgnoreNotMappedFields)
-                  throw new GridifyMapperException($"Mapping '{order.MemberName}' not found");
-            }
-      }
-
-      var sortOptions = new List<SortOptions>();
-      foreach (var order in orders)
-      {
-         if (!mapper.HasMap(order.MemberName))
+         try
          {
-            // skip if there is no mappings available
-            if (mapper.Configuration.IgnoreNotMappedFields)
-               continue;
-
-            throw new GridifyMapperException($"Mapping '{order.MemberName}' not found");
+            mapper.AddMap(order.MemberName);
          }
-
-         var field = mapper.GetExpression(order.MemberName).Body.ToPropertyPath();
-         field = mapper.GetExpression(order.MemberName).GetRealType() == typeof(string)
-            ? $"{field}.keyword"
-            : field;
-
-         var sortOption = SortOptions.Field(
-            field,
-            new FieldSort { Order = order.IsAscending ? SortOrder.Asc : SortOrder.Desc });
-
-         sortOptions.Add(sortOption);
+         catch (Exception)
+         {
+            if (!mapper.Configuration.IgnoreNotMappedFields)
+               throw new GridifyMapperException($"Mapping '{order.MemberName}' not found");
+         }
       }
 
-      return sortOptions;
+      return mapper;
    }
 }
