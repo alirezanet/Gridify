@@ -44,22 +44,41 @@ In the following, we will become more familiar with the above methods
 
 
 ## GenerateMappings
-This method generates all the mappings for **top level public properties** of the entity.
-we can use this method to generate the default mappings.
+
+This method generates mappings for the properties of the entity, including top-level public properties and properties of nested classes up to the specified nesting depth.
+
+- To generate mappings for **top-level public properties** only, you can call this method without passing any arguments:
+
+```csharp
+var mapper = new GridifyMapper<Person>()
+               .GenerateMappings();
+```
+
+- To generate mappings with **control over nesting depth**, you can specify the maxNestingDepth parameter. This parameter limits how deep the mappings will be generated for nested classes. Set it to 0 for no nesting or a positive value to control the depth `(added in v2.11.0)`:
+
+```csharp
+var mapper = new GridifyMapper<Person>()
+      // Generates mappings for top-level properties and properties of nested classes up to 2 levels deep.
+     .GenerateMappings(2);
+```
+
 ::: tip
-Another alternative to generate the default mappings is passing `true` to the GridifyMapper constructor.
+Another alternative to generate default mappings for top-level public properties is by passing true to the GridifyMapper constructor. This generates mappings without considering nesting depth.
+
 ``` csharp
 var mapper = new GridifyMapper<Person>(true);
 ```
+
 :::
 
 ## RemoveMap
+
 This method removes mapping from the mapper. Usually you will use this method after you have generated the mappings to ignore some properties that you don't want to be supported by gridify filtering or ordering actions.
 
 ## AddMap
 This method adds a mapping to the mapper.
 - the first parameter is the name of the field you want to use in the string query.
-- the second parameter is a propery selector expression.
+- the second parameter is a property selector expression.
 - the third parameter is an optional [value convertor](#value-convertor) expression that you can use to convert user inputs to anything you want.
 
 ### Value convertor

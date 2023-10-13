@@ -4,6 +4,15 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+/*
+Usage example:
+  husky run -n update-version -a build
+  husky run -n update-version -a minor
+  husky run -n update-version -a major
+  husky run -n update-version -a MinorPreview
+  husky run -n update-version -a 3.5.1
+*/
+
 var paths = new[] {
     @"src\Gridify\Gridify.csproj",
     @"src\Gridify.EntityFramework\Gridify.EntityFramework.csproj",
