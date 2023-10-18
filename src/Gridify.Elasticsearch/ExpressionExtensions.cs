@@ -1,20 +1,14 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.Json;
 
 namespace Gridify.Elasticsearch;
 
 internal static class ExpressionExtensions
 {
-   internal static string ToPropertyPath(this Expression expression)
-   {
-      var memberAccessList = new StringBuilder();
-      VisitMemberAccessChain(expression, memberAccessList);
-
-      return memberAccessList.ToString();
-   }
-
-   public static Type GetRealType<T>(this Expression<Func<T, object>> expression)
+   internal static Type GetRealType<T>(this Expression<Func<T, object>> expression)
    {
       if (expression.Body is MemberExpression memberExpression)
          return memberExpression.Type;
@@ -25,7 +19,25 @@ internal static class ExpressionExtensions
       throw new InvalidOperationException("Unsupported expression type.");
    }
 
-   private static void VisitMemberAccessChain(Expression expression, StringBuilder result)
+   internal static string BuildFieldName<T>(this Expression expression, bool isStringValue, IGridifyMapper<T> mapper)
+   {
+      var propertyPath = expression.ToPropertyPath();
+      var propertyPathParts = propertyPath.Split('.');
+      propertyPath = string.Join(".", propertyPathParts.Select(
+         mapper.Configuration.CustomElasticsearchNamingAction ?? JsonNamingPolicy.CamelCase.ConvertName));
+
+      return isStringValue ? $"{propertyPath}.keyword" : propertyPath;
+   }
+
+   private static string ToPropertyPath(this Expression expression)
+   {
+      var memberAccessList = new StringBuilder();
+      VisitMemberAccessChain(expression, memberAccessList);
+
+      return memberAccessList.ToString();
+   }
+
+   private static void VisitMemberAccessChain(Expression? expression, StringBuilder result)
    {
       if (expression is MemberExpression memberExpression)
       {

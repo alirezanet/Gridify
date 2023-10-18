@@ -1,179 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text.Json;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
+using Gridify.QueryBuilders;
 using Gridify.Syntax;
 
 namespace Gridify.Elasticsearch;
 
-internal static class ToElasticsearchConverter
+internal class ElasticsearchQueryBuilder<T> : BaseQueryBuilder<Query, T>
 {
-   internal static Query GenerateQuery<T>(ExpressionSyntax expression, IGridifyMapper<T> mapper)
+   public ElasticsearchQueryBuilder(IGridifyMapper<T> mapper) : base(mapper)
    {
-      while (true)
-         switch (expression.Kind)
-         {
-            case SyntaxKind.BinaryExpression:
-            {
-               var bExp = expression as BinaryExpressionSyntax;
-
-               if (bExp!.Left is FieldExpressionSyntax && bExp.Right is ValueExpressionSyntax)
-               {
-                  try
-                  {
-                     return ConvertBinaryExpressionSyntaxToQuery(bExp, mapper)
-                            ?? throw new GridifyFilteringException("Invalid expression");
-                  }
-                  catch (GridifyMapperException)
-                  {
-                     if (mapper.Configuration.IgnoreNotMappedFields)
-                        return new BoolQuery();
-
-                     throw;
-                  }
-               }
-
-               Query leftQuery;
-               Query rightQuery;
-
-               if (bExp.Left is ParenthesizedExpressionSyntax lpExp)
-                  leftQuery = GenerateQuery(lpExp.Expression, mapper);
-               else
-                  leftQuery = GenerateQuery(bExp.Left, mapper);
-
-               if (bExp.Right is ParenthesizedExpressionSyntax rpExp)
-                  rightQuery = GenerateQuery(rpExp.Expression, mapper);
-               else
-                  rightQuery = GenerateQuery(bExp.Right, mapper);
-
-               var result = bExp.OperatorToken.Kind switch
-               {
-                  SyntaxKind.And => leftQuery & rightQuery,
-                  SyntaxKind.Or => leftQuery | rightQuery,
-                  _ => throw new GridifyFilteringException($"Invalid expression Operator '{bExp.OperatorToken.Kind}'")
-               };
-               return (result);
-            }
-            case SyntaxKind.ParenthesizedExpression: // first entrypoint only
-            {
-               var pExp = expression as ParenthesizedExpressionSyntax;
-               return GenerateQuery(pExp!.Expression, mapper);
-            }
-            default:
-               throw new GridifyFilteringException($"Invalid expression format '{expression.Kind}'.");
-         }
    }
 
-   internal static ICollection<SortOptions> GenerateSortOptions<T>(List<ParsedOrdering> orderings, IGridifyMapper<T> mapper)
+   protected override Query BuildNestedQuery(
+      Expression body, IGMap<T> gMap, ValueExpressionSyntax value, SyntaxNode op)
    {
-      var sortOptions = new List<SortOptions>();
-      foreach (var order in orderings)
-      {
-         if (!mapper.HasMap(order.MemberName))
-         {
-            // skip if there is no mappings available
-            if (mapper.Configuration.IgnoreNotMappedFields)
-               continue;
-
-            throw new GridifyMapperException($"Mapping '{order.MemberName}' not found");
-         }
-
-         var propExpression = mapper.GetExpression(order.MemberName);
-         var isStringValue = propExpression.GetRealType() == typeof(string);
-         var fieldName = BuildFieldName(propExpression.Body, mapper.Configuration, isStringValue);
-
-         var sortOption = SortOptions.Field(
-            fieldName,
-            new FieldSort { Order = order.IsAscending ? SortOrder.Asc : SortOrder.Desc });
-
-         sortOptions.Add(sortOption);
-      }
-
-      return sortOptions;
+      throw new NotSupportedException();
    }
 
-   private static Query? ConvertBinaryExpressionSyntaxToQuery<T>(BinaryExpressionSyntax binarySyntax, IGridifyMapper<T> mapper)
+   protected override Query BuildAlwaysTrueQuery()
    {
-      var fieldExpression = binarySyntax.Left as FieldExpressionSyntax;
-
-      var left = fieldExpression?.FieldToken.Text.Trim();
-      var right = binarySyntax.Right as ValueExpressionSyntax;
-      var op = binarySyntax.OperatorToken;
-
-      if (left == null || right == null) return null;
-
-      var gMap = mapper.GetGMap(left);
-      if (gMap == null) throw new GridifyMapperException($"Mapping '{left}' not found");
-
-      if (fieldExpression!.IsCollection)
-         throw new NotSupportedException();
-
-      var isNested = ((GMap<T>)gMap).IsNestedCollection();
-      if (isNested)
-      {
-         throw new NotSupportedException();
-      }
-
-      var result = GenerateQuery(
-         gMap.To.Body,
-         right,
-         op,
-         gMap.Convertor,
-         right.ValueToken.Text,
-         mapper.Configuration);
-
-      return result;
+      return new BoolQuery();
    }
 
-   private static Query GenerateQuery(
+   protected override Query BuildAlwaysFalseQuery(ParameterExpression parameter)
+   {
+      return new BoolQuery { MustNot = new List<Query> { new MatchAllQuery() } };
+   }
+
+   protected override Query? CheckIfCanMergeQueries(
+      (Query query, bool isNested) leftQuery,
+      (Query query, bool isNested) rightQuery,
+      SyntaxKind op)
+   {
+      return null;
+   }
+
+   protected override object BuildQueryAccordingToValueType(
       Expression body,
-      ValueExpressionSyntax valueExpression,
+      ParameterExpression parameter,
+      object? value,
       SyntaxNode op,
-      Func<string, object>? convertor,
-      string right,
-      GridifyMapperConfiguration mapperConfiguration)
+      ValueExpressionSyntax valueExpression,
+      bool isConvertable)
    {
-      // Remove the boxing for value types
-      if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression)body).Operand;
-
-      object? value = valueExpression.ValueToken.Text;
-
-      // execute user custom Convertor
-      if (convertor != null)
-         value = convertor.Invoke(valueExpression.ValueToken.Text);
-
-      // handle the `null` keyword in value
-      if (mapperConfiguration.AllowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
-         value = null;
-
-      // type fixer
-      if (value is not null && body.Type != value.GetType())
-      {
-         try
-         {
-            // handle bool, github issue #71
-            if (body.Type == typeof(bool) && value is "true" or "false" or "1" or "0")
-               value = (((string)value).ToLower() is "1" or "true");
-            // handle broken guids, github issue #2
-            else if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
-
-            var converter = TypeDescriptor.GetConverter(body.Type);
-            var isConvertable = converter.CanConvertFrom(typeof(string));
-            if (isConvertable)
-               value = converter.ConvertFromString(value.ToString()!);
-         }
-         catch (FormatException)
-         {
-            // this code should never run
-            // return no records in case of any exception in formatting
-            return new BoolQuery { MustNot = new List<Query> { new MatchAllQuery() } };
-         }
-      }
-
       bool isStringValue = false, isNumberExceptDecimalValue = false;
       if (IsString(value))
       {
@@ -184,8 +56,9 @@ internal static class ToElasticsearchConverter
          isNumberExceptDecimalValue = true;
       }
 
-      var fieldName = BuildFieldName(body, mapperConfiguration, isStringValue);
+      var fieldName = body.BuildFieldName(isStringValue, mapper);
       var field = new Field(fieldName);
+      var right = valueExpression.ValueToken.Text;
 
       Query query;
       switch (op.Kind)
@@ -290,21 +163,20 @@ internal static class ToElasticsearchConverter
          case SyntaxKind.CustomOperator:
             throw new NotImplementedException();
          default:
-            throw new GridifyFilteringException("Invalid expression");;
+            throw new GridifyFilteringException("Invalid expression");
       }
 
       return query;
    }
 
-   private static string BuildFieldName(
-      Expression expression, GridifyMapperConfiguration mapperConfiguration, bool isStringValue)
+   protected override Query CombineWithAndOperator(Query left, Query right)
    {
-      var propertyPath = expression.ToPropertyPath();
-      var propertyPathParts = propertyPath.Split('.');
-      propertyPath = string.Join(".", propertyPathParts.Select(
-         mapperConfiguration.CustomElasticsearchNamingAction ?? JsonNamingPolicy.CamelCase.ConvertName));
+      return left & right;
+   }
 
-      return isStringValue ? $"{propertyPath}.keyword" : propertyPath;
+   protected override Query CombineWithOrOperator(Query left, Query right)
+   {
+      return left | right;
    }
 
    private static bool IsString(object? value)
