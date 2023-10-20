@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport.Extensions;
 using Xunit;
@@ -13,6 +14,10 @@ public class GridifyExtensionsTests
    {
       // Disable Elasticsearch naming policy and use property names as they are
       GridifyGlobalConfiguration.CustomElasticsearchNamingAction = p => p;
+
+      // Make the tests work on any culture
+      // TODO: Add CultureInfo support to Gridify
+      CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
    }
 
    [Theory]
@@ -579,6 +584,185 @@ public class GridifyExtensionsTests
       AssertOrdering(ordering, expected, mapper);
    }
 
+   [Fact]
+   public void ApplyFiltering_WhenCalledWithStringFilter_ShouldBuildCorrectQuery()
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      const string filter = "Id=1";
+      const string expected = """{"query":{"term":{"Id":{"value":1}}}}""";
+
+      descriptor.ApplyFiltering(filter);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Fact]
+   public void ApplyFiltering_WhenCalledWithGridifyQuery_ShouldBuildCorrectQuery()
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      var gridifyQuery = new GridifyQuery { Filter = "Id=1" };
+      const string expected = """{"query":{"term":{"Id":{"value":1}}}}""";
+
+      descriptor.ApplyFiltering(gridifyQuery);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Fact]
+   public void ApplyOrdering_WhenCalledWithStringOrdering_ShouldBuildCorrectQuery()
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      const string ordering = "Id asc";
+      const string expected = """{"sort":{"Id":{"order":"asc"}}}""";
+
+      descriptor.ApplyOrdering(ordering);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Fact]
+   public void ApplyOrdering_WhenCalledWithGridifyQuery_ShouldBuildCorrectQuery()
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      var gridifyQuery = new GridifyQuery { OrderBy = "Id asc" };
+      const string expected = """{"sort":{"Id":{"order":"asc"}}}""";
+
+      descriptor.ApplyOrdering(gridifyQuery);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Theory]
+   [InlineData(1, 10, """{"from":0,"size":10}""")]
+   [InlineData(2, 10, """{"from":10,"size":10}""")]
+   [InlineData(3, 10, """{"from":20,"size":10}""")]
+   [InlineData(0, 10, """{"from":0,"size":10}""")]
+   [InlineData(-1, 10, """{"from":0,"size":10}""")]
+   [InlineData(1, 0, """{"from":0,"size":20}""")]
+   [InlineData(1, -1, """{"from":0,"size":20}""")]
+   public void ApplyPaging_WhenCalledWithPageAndPageSize_ShouldBuildCorrectQuery(int page, int pageSize, string expected)
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+
+      descriptor.ApplyPaging(page, pageSize);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Theory]
+   [InlineData(1, 10, """{"from":0,"size":10}""")]
+   [InlineData(2, 10, """{"from":10,"size":10}""")]
+   [InlineData(3, 10, """{"from":20,"size":10}""")]
+   [InlineData(0, 10, """{"from":0,"size":10}""")]
+   [InlineData(-1, 10, """{"from":0,"size":10}""")]
+   [InlineData(1, 0, """{"from":0,"size":20}""")]
+   [InlineData(1, -1, """{"from":0,"size":20}""")]
+   public void ApplyPaging_WhenCalledWithGridifyQuery_ShouldBuildCorrectQuery(int page, int pageSize, string expected)
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      var gridifyQuery = new GridifyQuery { Page = page, PageSize = pageSize };
+
+      descriptor.ApplyPaging(gridifyQuery);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Theory]
+   [InlineData(1, 10, """{"from":0,"size":10}""")]
+   [InlineData(2, 10, """{"from":10,"size":10}""")]
+   [InlineData(3, 10, """{"from":20,"size":10}""")]
+   [InlineData(0, 10, """{"from":0,"size":10}""")]
+   [InlineData(-1, 10, """{"from":0,"size":10}""")]
+   [InlineData(1, 0, """{"from":0,"size":20}""")]
+   [InlineData(1, -1, """{"from":0,"size":20}""")]
+   public void ApplyPaging_WhenCalledWithGridifyPagination_ShouldBuildCorrectQuery(int page, int pageSize, string expected)
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      var gridifyPagination = (IGridifyPagination)new GridifyQuery { Page = page, PageSize = pageSize };
+
+      descriptor.ApplyPaging(gridifyPagination);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Fact]
+   public void ApplyFilteringAndOrdering_WhenCalledWithStringFilterAndOrdering_ShouldBuildCorrectQuery()
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      const string filter = "Id=1";
+      const string ordering = "Id asc";
+      const string expected = """{"query":{"term":{"Id":{"value":1}}},"sort":{"Id":{"order":"asc"}}}""";
+
+      descriptor.ApplyFilteringAndOrdering(filter, ordering);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Fact]
+   public void ApplyFilteringAndOrdering_WhenCalledWithGridifyQuery_ShouldBuildCorrectQuery()
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      var gridifyQuery = new GridifyQuery { Filter = "Id=1", OrderBy = "Id asc" };
+      const string expected = """{"query":{"term":{"Id":{"value":1}}},"sort":{"Id":{"order":"asc"}}}""";
+
+      descriptor.ApplyFilteringAndOrdering(gridifyQuery);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Fact]
+   public void ApplyFilteringOrderingPaging_WhenCalledWithStringFilterOrderingPageAndPageSize_ShouldBuildCorrectQuery()
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      const string filter = "Id=1";
+      const string ordering = "Id asc";
+      const int page = 1;
+      const int pageSize = 10;
+      const string expected = """{"query":{"term":{"Id":{"value":1}}},"sort":{"Id":{"order":"asc"}},"from":0,"size":10}""";
+
+      descriptor.ApplyFilteringOrderingPaging(filter, ordering, page, pageSize);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Fact]
+   public void ApplyFilteringOrderingPaging_WhenCalledWithGridifyQuery_ShouldBuildCorrectQuery()
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      var gridifyQuery = new GridifyQuery { Filter = "Id=1", OrderBy = "Id asc", Page = 1, PageSize = 10 };
+      const string expected = """{"query":{"term":{"Id":{"value":1}}},"sort":{"Id":{"order":"asc"}},"from":0,"size":10}""";
+
+      descriptor.ApplyFilteringOrderingPaging(gridifyQuery);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Fact]
+   public void ApplyOrderingAndPaging_WhenCalledWithStringOrderingPageAndPageSize_ShouldBuildCorrectQuery()
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      const string ordering = "Id asc";
+      const int page = 1;
+      const int pageSize = 10;
+      const string expected = """{"sort":{"Id":{"order":"asc"}},"from":0,"size":10}""";
+
+      descriptor.ApplyOrderingAndPaging(ordering, page, pageSize);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
+   [Fact]
+   public void ApplyOrderingAndPaging_WhenCalledWithGridifyQuery_ShouldBuildCorrectQuery()
+   {
+      var descriptor = new SearchRequestDescriptor<TestClass>();
+      var gridifyQuery = new GridifyQuery { OrderBy = "Id asc", Page = 1, PageSize = 10 };
+      const string expected = """{"sort":{"Id":{"order":"asc"}},"from":0,"size":10}""";
+
+      descriptor.ApplyOrderingAndPaging(gridifyQuery);
+
+      AssertDescriptor(descriptor, expected);
+   }
+
    private void AssertFilter(string filter, string expected, IGridifyMapper<TestClass>? mapper = null)
    {
       var result = filter.ToElasticsearchQuery(mapper);
@@ -592,6 +776,12 @@ public class GridifyExtensionsTests
       var result = ordering.ToElasticsearchSortOptions(mapper);
 
       var jsonQuery = _client.RequestResponseSerializer.SerializeToString(result);
+      Assert.Equal(expected, jsonQuery);
+   }
+
+   private void AssertDescriptor<T>(SearchRequestDescriptor<T> descriptor, string expected)
+   {
+      var jsonQuery = _client.RequestResponseSerializer.SerializeToString(descriptor);
       Assert.Equal(expected, jsonQuery);
    }
 }

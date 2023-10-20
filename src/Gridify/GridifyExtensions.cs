@@ -9,14 +9,12 @@ namespace Gridify;
 
 public static partial class GridifyExtensions
 {
-   #region "Private"
-
    /// <summary>
    /// Set default <c>Page<c /> number and <c>PageSize<c /> if its not already set in gridifyQuery
    /// </summary>
    /// <param name="gridifyPagination">query and paging configuration</param>
    /// <returns>returns a IGridifyPagination with valid PageSize and Page</returns>
-   private static IGridifyPagination FixPagingData(this IGridifyPagination gridifyPagination)
+   internal static IGridifyPagination FixPagingData(this IGridifyPagination gridifyPagination)
    {
       // set default for page number
       if (gridifyPagination.Page <= 0)
@@ -28,8 +26,6 @@ public static partial class GridifyExtensions
 
       return gridifyPagination;
    }
-
-   #endregion
 
    public static Expression<Func<T, bool>> GetFilteringExpression<T>(this IGridifyFiltering gridifyFiltering, IGridifyMapper<T>? mapper = null)
    {
