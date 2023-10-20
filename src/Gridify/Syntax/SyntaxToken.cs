@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Gridify.Syntax;
@@ -6,6 +6,7 @@ namespace Gridify.Syntax;
 public class SyntaxToken : SyntaxNode
 {
    public override SyntaxKind Kind { get; }
+   public int Position { get; }
    public string Text { get; }
 
    public override IEnumerable<SyntaxNode> GetChildren()
@@ -13,10 +14,10 @@ public class SyntaxToken : SyntaxNode
       return Enumerable.Empty<SyntaxNode>();
    }
 
-   // we don't need position yet ( we can use the second argument later when we had a analyzer or debugger )
-   public SyntaxToken(SyntaxKind kind, int _ ,  string text)
+   public SyntaxToken(SyntaxKind kind, int position, string text)
    {
       Kind = kind;
+      Position = position;
       Text = text;
    }
 

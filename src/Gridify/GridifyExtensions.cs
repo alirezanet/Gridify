@@ -539,7 +539,7 @@ public static partial class GridifyExtensions
       var syntaxTree = SyntaxTree.Parse(filter!, GridifyGlobalConfiguration.CustomOperators.Operators);
 
       if (syntaxTree.Diagnostics.Any())
-         throw new GridifyFilteringException(syntaxTree.Diagnostics.Last());
+         throw new GridifyFilteringException(syntaxTree.Diagnostics[0]);
 
       mapper = mapper.FixMapper(syntaxTree);
 

@@ -123,7 +123,7 @@ internal class Parser
       if (Current.Kind == kind)
          return NextToken();
 
-      _diagnostics.Add($"Unexpected token <{Current.Kind}>, expected <{kind}>");
+      _diagnostics.Add($"Unexpected token <{Current.Kind}> at index { Current.Position }, expected <{kind}>");
       return new SyntaxToken(kind, 0, string.Empty);
    }
 

@@ -180,7 +180,7 @@ internal class Lexer
          return new SyntaxToken(SyntaxKind.FieldToken, start, text);
       }
 
-      _diagnostics.Add($"bad character input: '{Current.ToString()}' at {_position.ToString()}");
+      _diagnostics.Add($"bad character input: '{Current.ToString()}', at index {_position.ToString()}");
       return new SyntaxToken(SyntaxKind.BadToken, _position++, string.Empty);
    }
 
