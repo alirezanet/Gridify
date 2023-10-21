@@ -6,10 +6,13 @@
          "args": [
             "dotnet-format",
             "--include",
-            "${staged}"
+            "${staged}",
+            "--exclude",
+            "**/*.Tests/**/*.cs"
          ],
          "include": [
             "**/*.cs",
+            "!**/*.Tests/**/*.cs",
             "**/*.vb"
          ]
       },
