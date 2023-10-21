@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport.Extensions;
@@ -268,17 +268,17 @@ public class GridifyExtensionsTests
    // string does not equal
    [InlineData("Name!=Dzmitry", """{"bool":{"must_not":{"term":{"Name.keyword":{"value":"Dzmitry"}}}}}""")]
    // string contains
-   [InlineData("Name=*itr", """{"wildcard":{"Name.keyword":{"value":"*itr*"}}}""")]
+   [InlineData("Name=*itr", """{"wildcard":{"Name.keyword":{"value":" * itr * "}}}""")]
    // string does not contain
-   [InlineData("Name!*itr", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":"*itr*"}}}}}""")]
+   [InlineData("Name!*itr", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":" * itr * "}}}}}""")]
    // string starts with
-   [InlineData("Name^Dzm", """{"wildcard":{"Name.keyword":{"value":"Dzm*"}}}""")]
+   [InlineData("Name^Dzm", """{"wildcard":{"Name.keyword":{"value":"Dzm * "}}}""")]
    // string does not start with
-   [InlineData("Name!^Dzm", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":"Dzm*"}}}}}""")]
+   [InlineData("Name!^Dzm", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":"Dzm * "}}}}}""")]
    // string ends with
-   [InlineData("Name$try", """{"wildcard":{"Name.keyword":{"value":"*try"}}}""")]
+   [InlineData("Name$try", """{"wildcard":{"Name.keyword":{"value":" *try"}}}""")]
    // string does not end with
-   [InlineData("Name!$try", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":"*try"}}}}}""")]
+   [InlineData("Name!$try", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":" *try"}}}}}""")]
    // string is null
    [InlineData("Name=null", """{"bool":{"must_not":{"exists":{"field":"Name"}}}}""")]
    // string is not null
@@ -298,23 +298,23 @@ public class GridifyExtensionsTests
 
    [Theory]
    // date equals
-   [InlineData("MyDateTime=2021-09-01", """{"term":{"MyDateTime":{"value":"2021-09-01T00:00:00"}}}""")]
+   [InlineData("MyDateTime=2021-09-01", """{"term":{"MyDateTime":{"value":"2021 - 09 - 01T00: 00:00"}}}""")]
    // date and time equals
-   [InlineData("MyDateTime=2021-09-01T00:00:00", """{"term":{"MyDateTime":{"value":"2021-09-01T00:00:00"}}}""")]
-   [InlineData("MyDateTime=2021-09-01 00:00:00", """{"term":{"MyDateTime":{"value":"2021-09-01T00:00:00"}}}""")]
-   [InlineData("MyDateTime=2021-09-01 23:15:11", """{"term":{"MyDateTime":{"value":"2021-09-01T23:15:11"}}}""")]
+   [InlineData("MyDateTime=2021-09-01T00:00:00", """{"term":{"MyDateTime":{"value":"2021 - 09 - 01T00: 00:00"}}}""")]
+   [InlineData("MyDateTime=2021-09-01 00:00:00", """{"term":{"MyDateTime":{"value":"2021 - 09 - 01T00: 00:00"}}}""")]
+   [InlineData("MyDateTime=2021-09-01 23:15:11", """{"term":{"MyDateTime":{"value":"2021 - 09 - 01T23: 15:11"}}}""")]
    // date is null
    [InlineData("MyDateTime=null", """{"bool":{"must_not":{"exists":{"field":"MyDateTime"}}}}""")]
    // date is not null
    [InlineData("MyDateTime!=null", """{"exists":{"field":"MyDateTime"}}""")]
    // date greater than
-   [InlineData("MyDateTime>2021-09-01", """{"range":{"MyDateTime":{"gt":"2021-09-01T00:00:00"}}}""")]
+   [InlineData("MyDateTime>2021-09-01", """{"range":{"MyDateTime":{"gt":"2021 - 09 - 01T00: 00:00"}}}""")]
    // date greater than or equal
-   [InlineData("MyDateTime>=2021-09-01", """{"range":{"MyDateTime":{"gte":"2021-09-01T00:00:00"}}}""")]
+   [InlineData("MyDateTime>=2021-09-01", """{"range":{"MyDateTime":{"gte":"2021 - 09 - 01T00: 00:00"}}}""")]
    // date less than
-   [InlineData("MyDateTime<2021-09-01", """{"range":{"MyDateTime":{"lt":"2021-09-01T00:00:00"}}}""")]
+   [InlineData("MyDateTime<2021-09-01", """{"range":{"MyDateTime":{"lt":"2021 - 09 - 01T00: 00:00"}}}""")]
    // date less than or equal
-   [InlineData("MyDateTime<=2021-09-01", """{"range":{"MyDateTime":{"lte":"2021-09-01T00:00:00"}}}""")]
+   [InlineData("MyDateTime<=2021-09-01", """{"range":{"MyDateTime":{"lte":"2021 - 09 - 01T00: 00:00"}}}""")]
    public void ToElasticsearchQuery_WhenCalledWithDateTimeValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
       AssertFilter(filter, expected);
@@ -322,19 +322,19 @@ public class GridifyExtensionsTests
 
    [Theory]
    // date only equals
-   [InlineData("MyDateOnly=2021-09-01", """{"term":{"MyDateOnly":{"value":"2021-09-01"}}}""")]
+   [InlineData("MyDateOnly=2021-09-01", """{"term":{"MyDateOnly":{"value":"2021 - 09 - 01"}}}""")]
    // date only is null
    [InlineData("MyDateOnly=null", """{"bool":{"must_not":{"exists":{"field":"MyDateOnly"}}}}""")]
    // date only is not null
    [InlineData("MyDateOnly!=null", """{"exists":{"field":"MyDateOnly"}}""")]
    // date only greater than
-   [InlineData("MyDateOnly>2021-09-01", """{"range":{"MyDateOnly":{"gt":"2021-09-01"}}}""")]
+   [InlineData("MyDateOnly>2021-09-01", """{"range":{"MyDateOnly":{"gt":"2021 - 09 - 01"}}}""")]
    // date only greater than or equal
-   [InlineData("MyDateOnly>=2021-09-01", """{"range":{"MyDateOnly":{"gte":"2021-09-01"}}}""")]
+   [InlineData("MyDateOnly>=2021-09-01", """{"range":{"MyDateOnly":{"gte":"2021 - 09 - 01"}}}""")]
    // date only less than
-   [InlineData("MyDateOnly<2021-09-01", """{"range":{"MyDateOnly":{"lt":"2021-09-01"}}}""")]
+   [InlineData("MyDateOnly<2021-09-01", """{"range":{"MyDateOnly":{"lt":"2021 - 09 - 01"}}}""")]
    // date only less than or equal
-   [InlineData("MyDateOnly<=2021-09-01", """{"range":{"MyDateOnly":{"lte":"2021-09-01"}}}""")]
+   [InlineData("MyDateOnly<=2021-09-01", """{"range":{"MyDateOnly":{"lte":"2021 - 09 - 01"}}}""")]
    public void ToElasticsearchQuery_WhenCalledWithDateOnlyValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
       AssertFilter(filter, expected);
@@ -356,7 +356,7 @@ public class GridifyExtensionsTests
 
    [Theory]
    // guid equals
-   [InlineData("MyGuid=69C3BB3A-3A85-4750-BA03-1F916FA5C0B1", """{"term":{"MyGuid.keyword":{"value":"69C3BB3A-3A85-4750-BA03-1F916FA5C0B1"}}}""")]
+   [InlineData("MyGuid=69C3BB3A-3A85-4750-BA03-1F916FA5C0B1", """{"term":{"MyGuid.keyword":{"value":"69C3BB3A - 3A85 - 4750 - BA03 - 1F916FA5C0B1"}}}""")]
    // guid is null
    [InlineData("MyGuid=null", """{"bool":{"must_not":{"exists":{"field":"MyGuid"}}}}""")]
    // guid is not null
@@ -376,7 +376,7 @@ public class GridifyExtensionsTests
    // , | operators
    [InlineData("Id=1,Name=Dzmitry|Name=John", """{"bool":{"should":[{"bool":{"must":[{"term":{"Id":{"value":1}}},{"term":{"Name.keyword":{"value":"Dzmitry"}}}]}},{"term":{"Name.keyword":{"value":"John"}}}]}}""")]
    // , , , operators
-   [InlineData("Id=1,Name=Dzmitry,MyDateTime=2021-09-01", """{"bool":{"must":[{"term":{"Id":{"value":1}}},{"term":{"Name.keyword":{"value":"Dzmitry"}}},{"term":{"MyDateTime":{"value":"2021-09-01T00:00:00"}}}]}}""")]
+   [InlineData("Id=1,Name=Dzmitry,MyDateTime=2021-09-01", """{"bool":{"must":[{"term":{"Id":{"value":1}}},{"term":{"Name.keyword":{"value":"Dzmitry"}}},{"term":{"MyDateTime":{"value":"2021 - 09 - 01T00: 00:00"}}}]}}""")]
    // | | | operators
    [InlineData("Id=1|Id=2|Id=3", """{"bool":{"should":[{"term":{"Id":{"value":1}}},{"term":{"Id":{"value":2}}},{"term":{"Id":{"value":3}}}]}}""")]
    // ( | ) operators
@@ -412,13 +412,13 @@ public class GridifyExtensionsTests
    // empty query
    [InlineData("", """{"match_all":{}}""")]
    // string starts with empty
-   [InlineData("Name^", """{"wildcard":{"Name.keyword":{"value":"*"}}}""")]
+   [InlineData("Name^", """{"wildcard":{"Name.keyword":{"value":" * "}}}""")]
    // string ends with empty
-   [InlineData("Name$", """{"wildcard":{"Name.keyword":{"value":"*"}}}""")]
+   [InlineData("Name$", """{"wildcard":{"Name.keyword":{"value":" * "}}}""")]
    // string does not start with empty
-   [InlineData("Name!^", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":"*"}}}}}""")]
+   [InlineData("Name!^", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":" * "}}}}}""")]
    // string does not end with empty
-   [InlineData("Name!$", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":"*"}}}}}""")]
+   [InlineData("Name!$", """{"bool":{"must_not":{"wildcard":{"Name.keyword":{"value":" * "}}}}}""")]
    public void ToElasticsearchQuery_WhenCalledWithEmptyValue_ReturnsElasticsearchQuery(string filter, string expected)
    {
       AssertFilter(filter, expected);
@@ -471,7 +471,7 @@ public class GridifyExtensionsTests
    [InlineData("NotMappedField=Homer,MappedField=Dzmitry", false, "")]
    public void ToElasticsearchQuery_WhenCalledWithIgnoreNotMappedFieldsSetting_ShouldApplyTheSetting(string filter, bool ignoreNotMappedFields, string expected)
    {
-      var mapper = new GridifyMapper<TestClass> { Configuration = { IgnoreNotMappedFields = ignoreNotMappedFields }}
+      var mapper = new GridifyMapper<TestClass> { Configuration = { IgnoreNotMappedFields = ignoreNotMappedFields } }
          .AddMap("MappedField", x => x.Name);
 
       if (!ignoreNotMappedFields)
@@ -500,6 +500,15 @@ public class GridifyExtensionsTests
       mapper.AddMap("childName", x => x.ChildClass.Name);
 
       AssertFilter(filter, expected, mapper);
+   }
+
+   [Fact]
+   public void ToElasticsearchQuery_WhenCalledWithCaseInsensitiveOperator_ThrowsNotSupportedException()
+   {
+      const string filter = "Name=John/i";
+
+      var ex = Assert.Throws<NotSupportedException>(() => filter.ToElasticsearchQuery<TestClass>());
+      Assert.Equal("Case insensitive filtering is not supported by Gridify.Elasticsearch", ex.Message);
    }
 
    [Theory]
@@ -553,7 +562,7 @@ public class GridifyExtensionsTests
    public void ToElasticsearchSortOptions_WhenCalledWithIgnoreNotMappedFieldsSetting_ShouldApplyTheSetting(
       string ordering, bool ignoreNotMappedFields, string expected)
    {
-      var mapper = new GridifyMapper<TestClass> { Configuration = { IgnoreNotMappedFields = ignoreNotMappedFields }}
+      var mapper = new GridifyMapper<TestClass> { Configuration = { IgnoreNotMappedFields = ignoreNotMappedFields } }
          .AddMap("MappedField", x => x.Name);
 
       if (!ignoreNotMappedFields)
@@ -582,6 +591,15 @@ public class GridifyExtensionsTests
       mapper.AddMap("childName", x => x.ChildClass.Name);
 
       AssertOrdering(ordering, expected, mapper);
+   }
+
+   [Theory]
+   [InlineData("Tag?", "NullCheck")]
+   [InlineData("Tag!", "NotNullCheck")]
+   public void ToElasticsearchSortOptions_WhenCalledWithNullableTypesOperator(string ordering, string orderingType)
+   {
+      var ex = Assert.Throws<NotSupportedException>(() => ordering.ToElasticsearchSortOptions<TestClass>());
+      Assert.Equal($"Gridify.Elasticsearch does not support '{orderingType}' ordering", ex.Message);
    }
 
    [Fact]

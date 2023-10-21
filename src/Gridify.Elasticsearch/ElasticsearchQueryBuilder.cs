@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Elastic.Clients.Elasticsearch;
@@ -46,6 +46,11 @@ internal class ElasticsearchQueryBuilder<T> : BaseQueryBuilder<Query, T>
       ValueExpressionSyntax valueExpression,
       bool isConvertable)
    {
+      if (valueExpression.IsCaseInsensitive)
+      {
+         throw new NotSupportedException("Case insensitive filtering is not supported by Gridify.Elasticsearch");
+      }
+
       bool isStringValue = false, isNumberExceptDecimalValue = false;
       if (IsString(value))
       {
