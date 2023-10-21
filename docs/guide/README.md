@@ -1,6 +1,10 @@
 # Introduction
 
-Gridify is a dynamic LINQ library that simplifies the process of converting strings to LINQ queries. With exceptional performance and ease-of-use, Gridify makes it effortless to apply filtering, sorting, and pagination using text-based data.
+Gridify is a dynamic LINQ library that simplifies the process of converting strings to LINQ queries. With exceptional
+performance and ease-of-use, Gridify makes it effortless to apply filtering, sorting, and pagination using text-based
+data.
+
+Gridify.Elasticsearch is an extension of Gridify, that provides an ability to generate Elasticsearch DSL queries.
 
 ## Features
 
@@ -13,9 +17,11 @@ Gridify is a dynamic LINQ library that simplifies the process of converting stri
 - Supports collection indexes
 - Custom Operators
 - Compatible with ORMs, especially Entity Framework
+- Compatible with
+  Elasticsearch ([Elastic.Clients.Elasticsearch 8.*](https://www.nuget.org/packages/Elastic.Clients.Elasticsearch) is a
+  dependency)
 - Can be used on every collection that LINQ supports
 - Compatible with object-mappers like AutoMapper
-
 
 ## Examples
 
@@ -24,13 +30,18 @@ To better illustrate how Gridify works, we've prepared a few examples:
 - [Using Gridify in API Controllers](../example/api-controller.md)
 - Coming soon ...
 
-
 ## Performance
 
-Filtering can be the most expensive feature in Gridify. The following benchmark compares filtering in the most well-known dynamic LINQ libraries. As you can see, Gridify has the closest result to native LINQ:
+::: warning
+For now, there are no benchmarks for Gridify.Elasticsearch because it builds non-LINQ query. But it uses Gridify lib as
+a basis.
+:::
 
-| Method           | Mean         | Error       | StdDev      | RatioSD | Allocated   | Alloc Ratio |
-|----------------- |-------------:|------------:|------------:|--------:|------------:|------------:|
+Filtering can be the most expensive feature in Gridify. The following benchmark compares filtering in the most
+well-known dynamic LINQ libraries. As you can see, Gridify has the closest result to native LINQ:
+
+| Method           |         Mean |       Error |      StdDev | RatioSD |   Allocated | Alloc Ratio |
+|------------------|-------------:|------------:|------------:|--------:|------------:|------------:|
 | Native LINQ      |     651.2 us |     6.89 us |     6.45 us |    0.00 |    32.74 KB |        1.00 |
 | Gridify          |     689.1 us |    10.70 us |    11.45 us |    0.02 |    36.85 KB |        1.13 |
 | DynamicLinq      |     829.3 us |    10.98 us |     9.17 us |    0.01 |   119.29 KB |        3.64 |
@@ -42,10 +53,11 @@ Filtering can be the most expensive feature in Gridify. The following benchmark 
 BenchmarkDotNet v0.13.8, Windows 11 (10.0.22621.2283/22H2/2022Update/SunValley2)
 12th Gen Intel Core i7-12800H, 1 CPU, 20 logical and 14 physical cores
 .NET SDK 8.0.100-preview.1.23115.2
-  [Host]     : .NET 7.0.11 (7.0.1123.42427), X64 RyuJIT AVX2
-  DefaultJob : .NET 7.0.11 (7.0.1123.42427), X64 RyuJIT AVX2
+[Host]     : .NET 7.0.11 (7.0.1123.42427), X64 RyuJIT AVX2
+DefaultJob : .NET 7.0.11 (7.0.1123.42427), X64 RyuJIT AVX2
 
-This Benchmark is available [Here](https://github.com/alirezanet/Gridify/blob/master/benchmark/LibraryComparisionFilteringBenchmark.cs)
+This Benchmark is
+available [Here](https://github.com/alirezanet/Gridify/blob/master/benchmark/LibraryComparisionFilteringBenchmark.cs)
 :::
 
 

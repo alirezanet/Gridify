@@ -32,6 +32,7 @@ export const sidebar: SidebarConfig = {
             '/guide/dependency-injection.md',
             '/guide/compile.md',
             '/guide/entity-framework.md',
+            '/guide/elasticsearch.md',
             '/guide/autoMapper.md',
          ]
       }

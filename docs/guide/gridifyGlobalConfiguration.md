@@ -1,6 +1,10 @@
 # GridifyGlobalConfiguration
 
-Using this class you can change the default behavior and configuration of the gridify library.
+::: warning
+Not all features described here are implemented in Gridify.Elasticsearch.
+:::
+
+Using this class you can change the default behavior and configuration of the Gridify library.
 
 ## General configurations
 
@@ -13,7 +17,7 @@ The default page size for the paging methods when no page size is specified.
 
 ### CaseSensitiveMapper
 
-By default mappings are case insensitive. for example, `name=John` and `Name=John` are considered equal.
+By default mappings are case insensitive. For example, `name=John` and `Name=John` are considered equal.
 You can change this behavior by setting this property to `true`.
 
 - type: `bool`
@@ -22,7 +26,7 @@ You can change this behavior by setting this property to `true`.
 
 ### AllowNullSearch
 
-This option enables the 'null' keyword in filtering operations, for example, `name=null` searches for all records with a null value for the `name` field not the string `"null"`. if you need to search for the string `"null"` you can disable this option.
+This option enables the `null` keyword in filtering operations, for example, `name=null` searches for all records with a null value for the `name` field not the string `"null"`. if you need to search for the string `"null"` you can disable this option.
 
 - type: `bool`
 - default: `true`
@@ -48,6 +52,10 @@ some ORMs like NHibernate don't support this. you can disable this behavior by s
 - default: `false`
 
 ## CustomOperators
+
+::: warning
+CustomOperators feature is not implemented in Gridify.Elasticsearch yet.
+:::
 
 Using the `Register` method of this property you can add your own custom operators.
 
@@ -78,3 +86,12 @@ Simply sets the [EntityFrameworkCompatibilityLayer](#entityframeworkcompatibilit
 
 Simply sets the [EntityFrameworkCompatibilityLayer](#entityframeworkcompatibilitylayer) property to `false`.
 
+## Elasticsearch
+
+### CustomElasticsearchNamingAction
+
+Specifies how field names are inferred from CLR property names. By default, **Elastic.Clients.Elasticsearch** uses camel-case property names.
+
+::: tip
+Learn more in the [Elasticsearch section](./elasticsearch.md#customelasticsearchnamingaction) of the documentation.
+:::

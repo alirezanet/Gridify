@@ -10,7 +10,7 @@ namespace Gridify;
 public static partial class GridifyExtensions
 {
    /// <summary>
-   /// Set default <c>Page<c /> number and <c>PageSize<c /> if its not already set in gridifyQuery
+   /// Sets default <c>Page</c> number and <c>PageSize</c> if its not already set in gridifyQuery
    /// </summary>
    /// <param name="gridifyPagination">query and paging configuration</param>
    /// <returns>returns a IGridifyPagination with valid PageSize and Page</returns>
@@ -168,7 +168,7 @@ public static partial class GridifyExtensions
    /// <summary>
    /// if given mapper was null this function creates default generated mapper
    /// </summary>
-   /// <param name="mapper">a <c>GridifyMapper<c /> that can be null</param>
+   /// <param name="mapper">a <c>GridifyMapper</c> that can be null</param>
    /// <param name="syntaxTree">optional syntaxTree to Lazy mapping generation</param>
    /// <typeparam name="T">type to set mappings</typeparam>
    /// <returns>return back mapper or new generated mapper if it was null</returns>
@@ -205,7 +205,7 @@ public static partial class GridifyExtensions
    }
 
    /// <summary>
-   /// adds Filtering,Ordering And Paging to the query
+   /// Adds Filtering, Ordering And Paging to the query
    /// </summary>
    /// <param name="query">the original(target) queryable object</param>
    /// <param name="gridifyQuery">the configuration to apply paging, filtering and ordering</param>
@@ -358,7 +358,7 @@ public static partial class GridifyExtensions
                _ => throw new GridifyOrderingException("Invalid keyword. expected 'desc' or 'asc'")
             };
             var member = spliced.First();
-            yield return new ParsedOrdering()
+            yield return new ParsedOrdering
             {
                MemberName = member.ReplaceAll(nullableChars, ' ').TrimEnd(),
                IsAscending = isAsc,
@@ -369,7 +369,7 @@ public static partial class GridifyExtensions
          }
          else
          {
-            yield return new ParsedOrdering()
+            yield return new ParsedOrdering
             {
                MemberName = orderingExp.ReplaceAll(nullableChars, ' ').TrimEnd(),
                IsAscending = true,

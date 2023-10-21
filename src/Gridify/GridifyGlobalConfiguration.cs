@@ -52,8 +52,8 @@ namespace Gridify
       /// By default, Elastic.Clients.Elasticsearch uses camel-case property names.
       /// </summary>
       /// <example>
-      /// If false CLR property EmailAddress will be inferred as "emailAddress" Elasticsearch document field name
-      /// If true, the CLR property EmailAddress will be inferred as "EmailAddress" Elasticsearch document field name
+      /// If null (default behavior) CLR property EmailAddress will be inferred as "emailAddress" Elasticsearch document field name.
+      /// If, e.g., <c>p => p</c>, the CLR property EmailAddress will be inferred as "EmailAddress" Elasticsearch document field name.
       /// </example>
       public static Func<string, string>? CustomElasticsearchNamingAction { get; set; }
 

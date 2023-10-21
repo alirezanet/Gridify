@@ -1,6 +1,6 @@
 # GridifyQuery
 
-GridifyQuery is a simple class for configuring Filtering, Ordering and Paging.
+`GridifyQuery` is a simple class for configuring Filtering, Ordering and Paging.
 
 ``` csharp
 var gq = new GridifyQuery()
@@ -17,7 +17,7 @@ Paging<Person> result = personsRepo.Gridify(gq);
 
 ## IsValid
 
-This extension method, checks if the GridifyQuery (Filter, OrderBy) is valid to use with a custom mapper or the auto generated mapper and returns true or false.
+This extension method, checks if the `GridifyQuery` (`Filter`, `OrderBy`) is valid to use with a custom mapper or the auto generated mapper and returns true or false.
 
 ``` csharp
 var gq = new GridifyQuery() { Filter = "name=John" , OrderBy = "Age" };
@@ -37,7 +37,7 @@ var gq = new GridifyQuery() { Filter = "@name=!" , OrderBy = "Age" };
 bool isValid = gq.IsValid<Person>();
 ```
 
-Optionally you can pass a custom mapper to check if the GridifyQuery is valid for that mapper.
+Optionally you can pass a custom mapper to check if the `GridifyQuery` is valid for that mapper.
 
 ``` csharp
 var mapper = new GridifyMapper<Person>()
@@ -57,5 +57,3 @@ var gq = new GridifyQuery() { Filter = "name=John" };
 Expression<Func<T, bool>> expression = gq.GetFilteringExpression<Person>();
 var result = personsRepo.Where(expression);
 ```
-
-
