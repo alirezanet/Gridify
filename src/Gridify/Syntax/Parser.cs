@@ -9,6 +9,23 @@ internal class Parser
    private readonly SyntaxToken[] _tokens;
    private int _position;
 
+   private readonly SyntaxKind[] _operators =
+   {
+      SyntaxKind.Equal,
+      SyntaxKind.Like,
+      SyntaxKind.NotEqual,
+      SyntaxKind.NotLike,
+      SyntaxKind.GreaterThan,
+      SyntaxKind.LessThan,
+      SyntaxKind.GreaterOrEqualThan,
+      SyntaxKind.LessOrEqualThan,
+      SyntaxKind.StartsWith,
+      SyntaxKind.EndsWith,
+      SyntaxKind.NotStartsWith,
+      SyntaxKind.NotEndsWith,
+      SyntaxKind.CustomOperator
+   };
+
    public Parser(string text, IEnumerable<IGridifyOperator> customOperators)
    {
       var tokens = new List<SyntaxToken>();
@@ -17,7 +34,7 @@ internal class Parser
       do
       {
          token = lexer.NextToken();
-         if (token.Kind != SyntaxKind.BadToken && token.Kind != SyntaxKind.WhiteSpace) tokens.Add(token);
+         if (token.Kind != SyntaxKind.WhiteSpace) tokens.Add(token);
       } while (token.Kind != SyntaxKind.End);
 
       _tokens = tokens.ToArray();
@@ -35,8 +52,28 @@ internal class Parser
    public SyntaxTree Parse()
    {
       var expression = ParseTerm();
-      var end = Match(SyntaxKind.End);
+      var end = Match(SyntaxKind.End, GetExpectation(expression.Kind));
       return new SyntaxTree(_diagnostics, expression, end);
+   }
+
+   private SyntaxKind GetExpectation(SyntaxKind kind)
+   {
+      switch (kind)
+      {
+         case SyntaxKind.FieldExpression or SyntaxKind.FieldToken:
+            return SyntaxKind.Operator;
+         case SyntaxKind.ValueExpression or SyntaxKind.ValueToken:
+            return SyntaxKind.End;
+         case SyntaxKind.And or SyntaxKind.Or:
+            return SyntaxKind.FieldToken;
+         default:
+         {
+            if (_operators.Contains(kind) || kind == SyntaxKind.BinaryExpression)
+               return SyntaxKind.ValueToken;
+
+            return SyntaxKind.End;
+         }
+      }
    }
 
    private ExpressionSyntax ParseTerm()
@@ -61,24 +98,9 @@ internal class Parser
    private ExpressionSyntax ParseFactor()
    {
       var left = ParsePrimaryExpression();
-      var binaryKinds = new[]
-      {
-         SyntaxKind.Equal,
-         SyntaxKind.Like,
-         SyntaxKind.NotEqual,
-         SyntaxKind.NotLike,
-         SyntaxKind.GreaterThan,
-         SyntaxKind.LessThan,
-         SyntaxKind.GreaterOrEqualThan,
-         SyntaxKind.LessOrEqualThan,
-         SyntaxKind.StartsWith,
-         SyntaxKind.EndsWith,
-         SyntaxKind.NotStartsWith,
-         SyntaxKind.NotEndsWith,
-         SyntaxKind.CustomOperator
-      };
 
-      while (binaryKinds.Contains(Current.Kind))
+
+      while (_operators.Contains(Current.Kind))
       {
          var operatorToken = NextToken();
          var right = ParseValueExpression();
@@ -95,7 +117,7 @@ internal class Parser
          return new ValueExpressionSyntax(new SyntaxToken(), false, true);
 
       var valueToken = Match(SyntaxKind.ValueToken);
-      var isCaseInsensitive = IsMatch(SyntaxKind.CaseInsensitive, out _);
+      var isCaseInsensitive = TryMatch(SyntaxKind.CaseInsensitive, out _);
       return new ValueExpressionSyntax(valueToken, isCaseInsensitive, false);
    }
 
@@ -106,7 +128,7 @@ internal class Parser
       return current;
    }
 
-   private bool IsMatch(SyntaxKind kind, out SyntaxToken token)
+   private bool TryMatch(SyntaxKind kind, out SyntaxToken token)
    {
       if (Current.Kind != kind)
       {
@@ -118,13 +140,17 @@ internal class Parser
       return true;
    }
 
-   private SyntaxToken Match(SyntaxKind kind)
+   private SyntaxToken Match(SyntaxKind kind, SyntaxKind? expectation = null)
    {
       if (Current.Kind == kind)
          return NextToken();
 
-      _diagnostics.Add($"Unexpected token <{Current.Kind}> at index { Current.Position }, expected <{kind}>");
-      return new SyntaxToken(kind, 0, string.Empty);
+      expectation ??= kind;
+
+      if (!_diagnostics.Any(q => q.StartsWith("Unexpected token")))
+         _diagnostics.Add($"Unexpected token <{Current.Kind}> at index {Current.Position}, expected <{expectation}>");
+
+      return new SyntaxToken(kind, Current.Position, Current.Text);
    }
 
    private ExpressionSyntax ParsePrimaryExpression()
@@ -141,7 +167,7 @@ internal class Parser
    {
       var fieldToken = Match(SyntaxKind.FieldToken);
 
-      return IsMatch(SyntaxKind.FieldIndexToken, out var fieldSyntaxToken)
+      return TryMatch(SyntaxKind.FieldIndexToken, out var fieldSyntaxToken)
          ? new FieldExpressionSyntax(fieldToken, int.Parse(fieldSyntaxToken.Text))
          : new FieldExpressionSyntax(fieldToken);
    }

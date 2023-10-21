@@ -6,6 +6,7 @@ public enum SyntaxKind
    End,
    BadToken,
    WhiteSpace,
+   Operator,
 
    FieldToken,
    OpenParenthesisToken,

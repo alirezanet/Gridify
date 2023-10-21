@@ -459,8 +459,8 @@ public static partial class GridifyExtensions
                MemberName = member.ReplaceAll(nullableChars, ' ').TrimEnd(),
                IsAscending = isAsc,
                OrderingType = member.EndsWith("?") ? OrderingType.NullCheck
-                    : member.EndsWith("!") ? OrderingType.NotNullCheck
-                    : OrderingType.Normal
+                  : member.EndsWith("!") ? OrderingType.NotNullCheck
+                  : OrderingType.Normal
             };
          }
          else
@@ -539,7 +539,7 @@ public static partial class GridifyExtensions
       var syntaxTree = SyntaxTree.Parse(filter!, GridifyGlobalConfiguration.CustomOperators.Operators);
 
       if (syntaxTree.Diagnostics.Any())
-         throw new GridifyFilteringException(syntaxTree.Diagnostics[0]);
+         throw new GridifyFilteringException(string.Join("\n", syntaxTree.Diagnostics.Reverse()));
 
       mapper = mapper.FixMapper(syntaxTree);
 
