@@ -14,23 +14,64 @@ public class OperatorManager
    {
       Validate(gridifyOperator.GetOperator());
 
-      _operators.TryAdd(gridifyOperator.GetOperator(), gridifyOperator);
+      _operators.Add(gridifyOperator);
    }
 
-   public void Register(string name, Expression<OperatorParameter> handler)
+   public void Register(string @operator, Expression<OperatorParameter> handler)
    {
-      Validate(name);
+      Validate(@operator);
 
-      var customOperator = new GridifyOperator(name, handler);
-      _operators.TryAdd(customOperator.GetOperator(), customOperator);
+      var customOperator = new GridifyOperator(@operator, handler);
+      _operators.Add(customOperator);
    }
 
-   public bool Remove(string operatorSymbol)
-      => _operators.TryRemove(operatorSymbol, out _);
+   public void Remove(string @operator) => _operators.Remove(@operator);
 
-   private static void Validate(string operatorName)
+   private static void Validate(string @operator)
    {
-      if (!operatorName.StartsWith("#"))
+      if (!@operator.StartsWith("#"))
          throw new ArgumentException("Custom operator must start with '#'");
+   }
+}
+
+/// <summary>
+/// Retry if for some reason we couldn't add/remove the operator
+/// </summary>
+internal static class OperatorManagerExtensions
+{
+   internal static void Add(this ConcurrentDictionary<string, IGridifyOperator> operators, IGridifyOperator gridifyOperator)
+   {
+      var retry = 0;
+      while (true)
+      {
+         if (operators.TryAdd(gridifyOperator.GetOperator(), gridifyOperator))
+         {
+            return;
+         }
+
+         if (retry >= 3)
+         {
+            throw new Exception("Unexpected error! Can not add GridifyOperator");
+         }
+         retry++;
+      }
+   }
+
+   internal static void Remove(this ConcurrentDictionary<string, IGridifyOperator> operators, string @operator)
+   {
+      var retry = 0;
+      while (true)
+      {
+         if (operators.TryRemove(@operator, out _))
+         {
+            return;
+         }
+
+         if (retry >= 3)
+         {
+            throw new Exception("Unexpected error! Can not remove GridifyOperator");
+         }
+         retry++;
+      }
    }
 }
