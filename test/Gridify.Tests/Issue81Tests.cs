@@ -108,6 +108,7 @@ public class Issue81Tests
    }
 }
 
+#nullable disable
 public class RootClass
 {
    public int Id { get; set; }

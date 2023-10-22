@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
+
 namespace Gridify.Tests;
 
 public class Issue124Tests
@@ -59,7 +60,7 @@ public class Issue124Tests
       Assert.True(result.First().FirstName == "B");
    }
 
-
+#nullable disable
    public class Person
    {
       public string UserName { get; set; }
