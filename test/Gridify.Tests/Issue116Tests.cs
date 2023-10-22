@@ -13,7 +13,8 @@ public class Issue116Tests
    public void CustomOperator_WhenCastingTypes_ShouldNotThrowException()
    {
       // arrange
-      GridifyGlobalConfiguration.CustomOperators.Register(new InOperator());
+      var op = new InOperator();
+      GridifyGlobalConfiguration.CustomOperators.Register(op);
       var fakeList = AutoFaker.Generate<TestClass>(10);
       fakeList.Add(new TestClass() { Id = 2 });
 
@@ -22,6 +23,9 @@ public class Issue116Tests
 
       // assert
       Assert.Single(result);
+
+      // Cleanup
+      GridifyGlobalConfiguration.CustomOperators.Remove(op.GetOperator());
    }
 
    private class InOperator : IGridifyOperator

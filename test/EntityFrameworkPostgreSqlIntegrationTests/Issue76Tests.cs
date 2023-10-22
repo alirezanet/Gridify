@@ -21,7 +21,8 @@ public class Issue76Tests
    public void CustomOperator_EFJsonContains_ShouldGenerateCorrectExpression()
    {
       // Arrange
-      GridifyGlobalConfiguration.CustomOperators.Register(new JsonContainsOperator());
+      var op = new JsonContainsOperator();
+      GridifyGlobalConfiguration.CustomOperators.Register(op);
 
       var gm = new GridifyMapper<Products>()
          .AddMap("u", q => q.Users);
@@ -32,6 +33,9 @@ public class Issue76Tests
 
       // Assert
       Assert.Equal(expected, actual);
+
+      // Cleanup
+      GridifyGlobalConfiguration.CustomOperators.Remove(op.GetOperator());
    }
 
 }

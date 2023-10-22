@@ -13,7 +13,8 @@ public class Issue112Tests
    public void ApplyFiltering_OnFlagsUsingCustomOperator_ShouldParseTheExpressionWithoutError()
    {
       // arrange
-      GridifyGlobalConfiguration.CustomOperators.Register(new BitwiseAndOperator());
+      var op = new BitwiseAndOperator();
+      GridifyGlobalConfiguration.CustomOperators.Register(op);
 
       var lst = new List<AbilityComponents>()
       {
@@ -29,6 +30,9 @@ public class Issue112Tests
       // assert
       Assert.NotEmpty(actual);
       Assert.Equal(expected, actual);
+
+      // Cleanup
+      GridifyGlobalConfiguration.CustomOperators.Remove(op.GetOperator());
    }
 
    public class AbilityComponents

@@ -83,7 +83,8 @@ public class GridifyEntityFrameworkTests
    [Fact]
    public void ApplyFiltering_EFFunction_FreeTextOperator()
    {
-      GridifyGlobalConfiguration.CustomOperators.Register(new FreeTextOperator());
+      var op = new FreeTextOperator();
+      GridifyGlobalConfiguration.CustomOperators.Register(op);
 
       // Arrange
       var expected = _dbContext.Users.Where(q => EF.Functions.FreeText(q.Name, "test")).ToQueryString();
@@ -93,6 +94,9 @@ public class GridifyEntityFrameworkTests
 
       // Assert
       Assert.Equal(expected, actual);
+
+      // Cleanup
+      GridifyGlobalConfiguration.CustomOperators.Remove(op.GetOperator());
    }
 
    internal class FreeTextOperator : IGridifyOperator

@@ -682,7 +682,8 @@ public class GridifyExtensionsShould
    [Fact]
    public void ApplyFiltering_CustomOperator()
    {
-      GridifyGlobalConfiguration.CustomOperators.Register(new UpperCaseEqual());
+      var op = new UpperCaseEqual();
+      GridifyGlobalConfiguration.CustomOperators.Register(op);
       // Arrange
       var expected = _fakeRepository
          .Where(q => q.Name == "liam".ToUpper())
@@ -695,6 +696,9 @@ public class GridifyExtensionsShould
       Assert.Equal(expected.Count, actual.Count);
       Assert.Equal(expected, actual);
       Assert.True(actual.Any());
+
+      // Cleanup
+      GridifyGlobalConfiguration.CustomOperators.Remove(op.GetOperator());
    }
 
    [Fact] // PR #114
