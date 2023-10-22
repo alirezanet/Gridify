@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -6,13 +7,14 @@ namespace Gridify.Syntax;
 
 public class OperatorManager
 {
-   internal readonly List<IGridifyOperator> Operators = new();
+   private readonly ConcurrentDictionary<string, IGridifyOperator> _operators = new();
+   internal IEnumerable<IGridifyOperator> Operators => _operators.Values;
 
    public void Register(IGridifyOperator gridifyOperator)
    {
       Validate(gridifyOperator.GetOperator());
 
-      Operators.Add(gridifyOperator);
+      _operators.TryAdd(gridifyOperator.GetOperator(), gridifyOperator);
    }
 
    public void Register(string name, Expression<OperatorParameter> handler)
@@ -20,8 +22,11 @@ public class OperatorManager
       Validate(name);
 
       var customOperator = new GridifyOperator(name, handler);
-      Operators.Add(customOperator);
+      _operators.TryAdd(customOperator.GetOperator(), customOperator);
    }
+
+   public bool Remove(string operatorSymbol)
+      => _operators.TryRemove(operatorSymbol, out _);
 
    private static void Validate(string operatorName)
    {
