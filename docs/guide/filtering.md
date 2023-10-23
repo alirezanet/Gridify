@@ -1,9 +1,5 @@
 # Filtering
 
-::: warning
-Not all features described here are supported by Gridify.Elasticsearch.
-:::
-
 Gridify supports the following filtering operators:
 
 ## Conditional Operators
@@ -40,11 +36,6 @@ var x = personsRepo.Where(p =>
 
 :::
 
-::: warning
-For now, it works a bit differently in Gridify.Elasticsearch compared to Gridify. It will be fixed in the future to be
-consistent.
-:::
-
 ## Special Operators
 
 ### Logical Operators
@@ -58,10 +49,6 @@ Using logical operators we easily can create complex queries.
 | Parenthesis | `()`                | <code>"(FirstName=*Jo,Age<30)&#124;(FirstName!=Hn,Age>30)"</code> |
 
 ### Case Insensitive Operator - /i
-
-::: warning
-Is not supported by Gridify.Elasticsearch.
-:::
 
 The **'/i'** operator can be use after string values for case insensitive searches.
 You should only use this operator after the search value.
@@ -96,10 +83,6 @@ var esc = Regex.Replace(value, "([(),|]|\/i)", "\\$1" );
 
 ## Passing Indexes
 
-::: warning
-Is not supported by Gridify.Elasticsearch.
-:::
-
 Since version `v2.3.0`, Gridify support passing indexes to the sub collections. We can pass the index using the `[ ]`
 brackets.
 In the bellow example we want to filter data using `8th` index of our SubCollection.
@@ -117,10 +100,6 @@ var gq = new GridifyQuery
 Checkout [Use Indexes on Sub-Collections](./gridifyMapper.md#use-indexes-on-sub-collections) for more information.
 
 ## Custom Operators
-
-::: warning
-Is not supported by Gridify.Elasticsearch.
-:::
 
 Sometimes the default Gridify operators are not enough, For example, if you need an operator for regex matching or when
 you are using the EntityFramework, you may want to use `EF.Functions.FreeText` rather than a LIKE with wildcards. In

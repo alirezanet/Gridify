@@ -2,6 +2,7 @@ import { defineUserConfig } from 'vuepress-vite'
 import type { DefaultThemeOptions } from 'vuepress-vite'
 import type { ViteBundlerOptions } from '@vuepress/bundler-vite'
 import { plugin, themeConfig, head } from './configs'
+import markdownItInclude from 'markdown-it-include'
 
 export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    lang: 'en-US',
@@ -13,4 +14,7 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    port: 3000,
    base: '/Gridify/',
    head: head,
+   extendsMarkdown: (md) => {
+      md.use(markdownItInclude);
+   }
 })

@@ -36,18 +36,7 @@ var result = func(persons);
 
 ```
 
-::: tip
-You can use a similar approach with Gridify.Elasticsearch.
-Using [`ToElasticsearchQuery`](./extensions.md/#ToElasticsearchQuery)
-and [`ToElasticsearchSortOptions`](./extensions.md/#ToElasticsearchSortOptions)
-:::
-
 ## Performance
-
-::: warning
-For now, there are no benchmarks for Gridify.Elasticsearch because it builds non-LINQ query. But it uses Gridify lib as
-a basis.
-:::
 
 This is the performance improvement example when you use a compiled expression.
 

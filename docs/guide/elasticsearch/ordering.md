@@ -7,15 +7,21 @@ By default, if you don't add these keywords, Gridify assumes you need Ascending 
 ascending and descending
 
 :::: code-group
-::: code-group-item Extensions
+::: code-group-item Elasticsearch Extensions
 
 ``` csharp
 // asc - desc
-var x = personsRepo.ApplyOrdering("Id"); // default ascending its equal to "Id asc"
-var x = personsRepo.ApplyOrdering("Id desc"); // use descending ordering
+var response = await client.SearchAsync<User>(s => s
+    .Index("users")
+    .ApplyOrdering("Id")); // default ascending its equal to "Id asc"
+var response = await client.SearchAsync<User>(s => s
+    .Index("users")
+    .ApplyOrdering("Id desc")); // use descending ordering
 
 // multiple orderings example
-var x = personsRepo.ApplyOrdering("Id desc, FirstName asc, LastName");
+var response = await client.SearchAsync<User>(s => s
+    .Index("users")
+    .ApplyOrdering("Id desc, FirstName asc, LastName"));
 ```
 
 :::
@@ -47,31 +53,3 @@ builder.AddOrderBy("Id desc, FirstName asc, LastName");
 
 :::
 ::::
-
-## Order By Nullable types
-
-Sometimes we need to order by nullable types, for example:
-
-``` csharp
-personsRepo.OrderBy(p => p.BirthDate.HasValue)
-```
-
-to support this behavior, you can use Gridify special characters (`?` or `!`) after the property name.
-
-e.g:
-
-To achieve the `personsRepo.OrderBy(p => p.BirthDate.HasValue)` query, you can use `?`:
-
-``` csharp
-var x = personsRepo.ApplyOrdering("BirthDate?");
-```
-
-and for `personsRepo.OrderBy(p => !p.BirthDate.HasValue)`, you can use `!`:
-
-``` csharp
-var x = personsRepo.ApplyOrdering("BirthDate!");
-```
-
-::: warning
-These nullable characters only work on nullable types.
-:::

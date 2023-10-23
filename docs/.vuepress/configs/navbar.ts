@@ -7,7 +7,18 @@ export const navbar: NavbarConfig = [
    },
    {
       text: 'Guide',
-      link: '/guide/',
+      children: [
+         {
+            text: 'LINQ / Entity Framework',
+            link: '/guide/',
+            activeMatch: '^((?!\/guide\/elasticsearch).)*$',
+         },
+         {
+            text: 'Elasticsearch',
+            link: '/guide/elasticsearch/',
+            activeMatch: '^\/guide\/elasticsearch\/*.*$',
+         }
+      ],
    },
    {
       text: 'Examples',

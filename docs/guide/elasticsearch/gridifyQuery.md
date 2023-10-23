@@ -12,7 +12,9 @@ var gq = new GridifyQuery()
 };
 
 // Apply Filter, Sort and Paging
-Paging<Person> result = personsRepo.Gridify(gq);
+await client.SearchAsync<User>(s => s
+    .Index("users")
+    .ApplyFilteringOrderingPaging(gq));
 ```
 
 ## IsValid
@@ -46,14 +48,4 @@ var gq = new GridifyQuery() { Filter = "name=John" , OrderBy = "Age" };
 
 // false (Age is not mapped)
 bool isValid = gq.IsValid(mapper);
-```
-
-## GetFilteringExpression
-
-This extension method, creates a lambda expression using the `GridifyQuery.Filter` property that you can use it in the LINQ `Where` method to filter the data.
-
-``` csharp{2}
-var gq = new GridifyQuery() { Filter = "name=John" };
-Expression<Func<T, bool>> expression = gq.GetFilteringExpression<Person>();
-var result = personsRepo.Where(expression);
 ```

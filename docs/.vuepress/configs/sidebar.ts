@@ -32,8 +32,40 @@ export const sidebar: SidebarConfig = {
             '/guide/dependency-injection.md',
             '/guide/compile.md',
             '/guide/entity-framework.md',
-            '/guide/elasticsearch.md',
             '/guide/autoMapper.md',
+         ]
+      }
+   ],
+   '/guide/elasticsearch/': [
+      {
+         text: 'Introduction',
+         children: [
+            '/guide/elasticsearch/README.md',
+            '/guide/elasticsearch/getting-started.md',
+            '/guide/elasticsearch/extensions.md',
+            '/guide/elasticsearch/queryBuilder.md',
+         ],
+      },
+      {
+         text: 'Configuration',
+         children: [
+            '/guide/elasticsearch/gridifyQuery.md',
+            '/guide/elasticsearch/gridifyMapper.md',
+            '/guide/elasticsearch/gridifyGlobalConfiguration.md',
+         ]
+      },
+      {
+         text: 'Syntax',
+         children: [
+            '/guide/elasticsearch/filtering.md',
+            '/guide/elasticsearch/ordering.md',
+         ]
+      },
+      {
+         text: 'Advanced',
+         children: [
+            '/guide/elasticsearch/dependency-injection.md',
+            '/guide/elasticsearch/elasticsearch.md',
          ]
       }
    ],

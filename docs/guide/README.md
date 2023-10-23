@@ -4,7 +4,7 @@ Gridify is a dynamic LINQ library that simplifies the process of converting stri
 performance and ease-of-use, Gridify makes it effortless to apply filtering, sorting, and pagination using text-based
 data.
 
-Gridify.Elasticsearch is an extension of Gridify, that provides an ability to generate Elasticsearch DSL queries.
+Gridify.Elasticsearch is an extension of Gridify, that provides an ability to generate Elasticsearch DSL queries. Read more about Gridify.Elasticsearch in [a separate thread of the documentation](./elasticsearch/).
 
 ## Features
 
@@ -17,9 +17,6 @@ Gridify.Elasticsearch is an extension of Gridify, that provides an ability to ge
 - Supports collection indexes
 - Custom Operators
 - Compatible with ORMs, especially Entity Framework
-- Compatible with
-  Elasticsearch ([Elastic.Clients.Elasticsearch 8.*](https://www.nuget.org/packages/Elastic.Clients.Elasticsearch) is a
-  dependency)
 - Can be used on every collection that LINQ supports
 - Compatible with object-mappers like AutoMapper
 
@@ -31,11 +28,6 @@ To better illustrate how Gridify works, we've prepared a few examples:
 - Coming soon ...
 
 ## Performance
-
-::: warning
-For now, there are no benchmarks for Gridify.Elasticsearch because it builds non-LINQ query. But it uses Gridify lib as
-a basis.
-:::
 
 Filtering can be the most expensive feature in Gridify. The following benchmark compares filtering in the most
 well-known dynamic LINQ libraries. As you can see, Gridify has the closest result to native LINQ:
@@ -59,7 +51,6 @@ DefaultJob : .NET 7.0.11 (7.0.1123.42427), X64 RyuJIT AVX2
 This Benchmark is
 available [Here](https://github.com/alirezanet/Gridify/blob/master/benchmark/LibraryComparisionFilteringBenchmark.cs)
 :::
-
 
 <style scoped>
    tr:nth-child(2) {

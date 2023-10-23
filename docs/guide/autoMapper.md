@@ -1,9 +1,5 @@
 # AutoMapper
 
-::: warning
-Is not supported by Gridify.Elasticsearch.
-:::
-
 Gridify is completely compatible with AutoMapper. Also, these two packages can help each other nicely. We can use Gridify for filtering, sorting, and paging and AutoMapper for the projection.
 
 ``` csharp
