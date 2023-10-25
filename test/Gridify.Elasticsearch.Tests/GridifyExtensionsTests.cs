@@ -446,7 +446,8 @@ public class GridifyExtensionsTests
 
       if (caseSensitive)
       {
-         var ex = Assert.Throws<GridifyMapperException>(() => filter.ToElasticsearchQuery(mapper));
+         var gq = new GridifyQuery { Filter = filter };
+         var ex = Assert.Throws<GridifyMapperException>(() => gq.ToElasticsearchQuery(mapper));
          Assert.Equal("Mapping 'tag' not found", ex.Message);
          return;
       }
@@ -476,7 +477,8 @@ public class GridifyExtensionsTests
 
       if (!ignoreNotMappedFields)
       {
-         var ex = Assert.Throws<GridifyMapperException>(() => filter.ToElasticsearchQuery(mapper));
+         var gq = new GridifyQuery { Filter = filter };
+         var ex = Assert.Throws<GridifyMapperException>(() => gq.ToElasticsearchQuery(mapper));
          Assert.Equal("Mapping 'NotMappedField' not found", ex.Message);
          return;
       }
@@ -507,7 +509,8 @@ public class GridifyExtensionsTests
    {
       const string filter = "Name=John/i";
 
-      var ex = Assert.Throws<NotSupportedException>(() => filter.ToElasticsearchQuery<TestClass>());
+      var gq = new GridifyQuery { Filter = filter };
+      var ex = Assert.Throws<NotSupportedException>(() => gq.ToElasticsearchQuery<TestClass>());
       Assert.Equal("Case insensitive filtering is not supported by Gridify.Elasticsearch", ex.Message);
    }
 
@@ -546,7 +549,8 @@ public class GridifyExtensionsTests
 
       if (caseSensitive)
       {
-         var ex = Assert.Throws<GridifyMapperException>(() => ordering.ToElasticsearchSortOptions(mapper));
+         var gq = new GridifyQuery { OrderBy = ordering };
+         var ex = Assert.Throws<GridifyMapperException>(() => gq.ToElasticsearchSortOptions(mapper));
          Assert.Equal("Mapping 'tag' not found", ex.Message);
          return;
       }
@@ -567,7 +571,8 @@ public class GridifyExtensionsTests
 
       if (!ignoreNotMappedFields)
       {
-         var ex = Assert.Throws<GridifyMapperException>(() => ordering.ToElasticsearchSortOptions(mapper));
+         var gq = new GridifyQuery { OrderBy = ordering };
+         var ex = Assert.Throws<GridifyMapperException>(() => gq.ToElasticsearchSortOptions(mapper));
          Assert.Equal("Mapping 'NotMappedField' not found", ex.Message);
          return;
       }
@@ -598,7 +603,8 @@ public class GridifyExtensionsTests
    [InlineData("Tag!", "NotNullCheck")]
    public void ToElasticsearchSortOptions_WhenCalledWithNullableTypesOperator(string ordering, string orderingType)
    {
-      var ex = Assert.Throws<NotSupportedException>(() => ordering.ToElasticsearchSortOptions<TestClass>());
+      var gq = new GridifyQuery { OrderBy = ordering };
+      var ex = Assert.Throws<NotSupportedException>(() => gq.ToElasticsearchSortOptions<TestClass>());
       Assert.Equal($"Gridify.Elasticsearch does not support '{orderingType}' ordering", ex.Message);
    }
 
@@ -783,7 +789,8 @@ public class GridifyExtensionsTests
 
    private void AssertFilter(string filter, string expected, IGridifyMapper<TestClass>? mapper = null)
    {
-      var result = filter.ToElasticsearchQuery(mapper);
+      var gridifyQuery = new GridifyQuery { Filter = filter };
+      var result = gridifyQuery.ToElasticsearchQuery(mapper);
 
       var jsonQuery = _client.RequestResponseSerializer.SerializeToString(result);
       Assert.Equal(expected, jsonQuery);
@@ -791,7 +798,8 @@ public class GridifyExtensionsTests
 
    private void AssertOrdering(string ordering, string expected, IGridifyMapper<TestClass>? mapper = null)
    {
-      var result = ordering.ToElasticsearchSortOptions(mapper);
+      var gridifyQuery = new GridifyQuery { OrderBy = ordering };
+      var result = gridifyQuery.ToElasticsearchSortOptions(mapper);
 
       var jsonQuery = _client.RequestResponseSerializer.SerializeToString(result);
       Assert.Equal(expected, jsonQuery);

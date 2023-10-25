@@ -11,40 +11,26 @@ public static class GridifyExtensions
    /// <summary>
    /// Converts a Gridify filter string to an Elasticsearch DSL <see cref="Query"/> object.
    /// </summary>
-   /// <param name="filter">Gridify filter string</param>
+   /// <param name="filtering">Gridify filter</param>
    /// <param name="mapper">Gridify mapper</param>
    /// <typeparam name="T">Entity type</typeparam>
    /// <returns>Elasticsearch DSL <see cref="Query"/> object</returns>
    /// <exception cref="GridifyFilteringException">Throws when the filter string is invalid</exception>
-   public static Query ToElasticsearchQuery<T>(this string? filter, IGridifyMapper<T>? mapper = null)
+   public static Query ToElasticsearchQuery<T>(this IGridifyFiltering? filtering, IGridifyMapper<T>? mapper = null)
    {
-      if (string.IsNullOrWhiteSpace(filter))
-         return new MatchAllQuery();
-
-      var syntaxTree = SyntaxTree.Parse(filter!, GridifyGlobalConfiguration.CustomOperators.Operators);
-      if (syntaxTree.Diagnostics.Any())
-         throw new GridifyFilteringException(syntaxTree.Diagnostics.Last());
-
-      mapper ??= mapper.FixMapper(syntaxTree);
-
-      var queryExpression = new ElasticsearchQueryBuilder<T>(mapper).Build(syntaxTree.Root);
-      return queryExpression;
+      return ToElasticsearchQuery(filtering?.Filter, mapper);
    }
 
    /// <summary>
-   /// Converts a Gridify filter string to an Elasticsearch <see cref="ICollection&lt;SortOptions&gt;"/> sort options.
+   /// Converts a Gridify sorting string to an Elasticsearch <see cref="ICollection&lt;SortOptions&gt;"/> sort options.
    /// </summary>
    /// <param name="ordering">Gridify ordering string</param>
    /// <param name="mapper">Gridify mapper</param>
    /// <typeparam name="T">Entity type</typeparam>
    /// <returns>Elasticsearch <see cref="ICollection&lt;SortOptions&gt;"/> sort options</returns>
-   public static ICollection<SortOptions> ToElasticsearchSortOptions<T>(this string? ordering, IGridifyMapper<T>? mapper = null)
+   public static ICollection<SortOptions> ToElasticsearchSortOptions<T>(this IGridifyOrdering? ordering, IGridifyMapper<T>? mapper = null)
    {
-      if (string.IsNullOrWhiteSpace(ordering))
-         return new List<SortOptions>();
-
-      var sortOptions = new ElasticsearchSortOptionsBuilder<T>(mapper).Build(ordering!);
-      return sortOptions;
+      return ToElasticsearchSortOptions(ordering?.OrderBy, mapper);
    }
 
    /// <summary>
@@ -252,5 +238,29 @@ public static class GridifyExtensions
       return descriptor
          .ApplyOrdering(gridifyQuery.OrderBy, mapper)
          .ApplyPaging(gridifyQuery.Page, gridifyQuery.PageSize);
+   }
+
+   private static Query ToElasticsearchQuery<T>(this string? filter, IGridifyMapper<T>? mapper = null)
+   {
+      if (string.IsNullOrWhiteSpace(filter))
+         return new MatchAllQuery();
+
+      var syntaxTree = SyntaxTree.Parse(filter!, GridifyGlobalConfiguration.CustomOperators.Operators);
+      if (syntaxTree.Diagnostics.Any())
+         throw new GridifyFilteringException(syntaxTree.Diagnostics.Last());
+
+      mapper ??= mapper.FixMapper(syntaxTree);
+
+      var queryExpression = new ElasticsearchQueryBuilder<T>(mapper).Build(syntaxTree.Root);
+      return queryExpression;
+   }
+
+   private static ICollection<SortOptions> ToElasticsearchSortOptions<T>(this string? ordering, IGridifyMapper<T>? mapper = null)
+   {
+      if (string.IsNullOrWhiteSpace(ordering))
+         return new List<SortOptions>();
+
+      var sortOptions = new ElasticsearchSortOptionsBuilder<T>(mapper).Build(ordering);
+      return sortOptions;
    }
 }

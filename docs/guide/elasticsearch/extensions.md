@@ -236,7 +236,8 @@ This extension can be useful if you need to apply additional filters to the quer
 ::: code-group-item C#
 
 ``` csharp
-var query = "name = John".ToElasticsearchQuery<User>();
+var gq = new GridifyQuery { Filter = "name = John" };
+var query = gq.ToElasticsearchQuery<User>();
 
 await client.SearchAsync<User>(s => s
     .Index("users")
@@ -269,7 +270,8 @@ The ability to build `Query` object can be useful, if you need to apply addition
 ::: code-group-item C#
 
 ``` csharp
-var query = "name = John".ToElasticsearchQuery<User>();
+var gq = new GridifyQuery { Filter = "name = John" };
+var query = gq.ToElasticsearchQuery<User>();
 query &= new TermQuery("organizationId") { Value = 123 };
 
 await client.SearchAsync<User>(s => s
@@ -318,7 +320,8 @@ This extension can be useful if you need to apply additional sorting to the quer
 ::: code-group-item C#
 
 ``` csharp
-var sort = "name, age desc".ToElasticsearchSortOptions<User>();
+var gq = new GridifyQuery { OrderBy = ordering };
+var sort = gq.ToElasticsearchSortOptions<User>();
 
 await client.SearchAsync<User>(s => s
     .Index("users")

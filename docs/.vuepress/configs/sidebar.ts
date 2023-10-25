@@ -43,7 +43,6 @@ export const sidebar: SidebarConfig = {
             '/guide/elasticsearch/README.md',
             '/guide/elasticsearch/getting-started.md',
             '/guide/elasticsearch/extensions.md',
-            '/guide/elasticsearch/queryBuilder.md',
          ],
       },
       {
