@@ -2,23 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
+using Gridify.QueryBuilders;
 using Gridify.Syntax;
-
-[assembly: InternalsVisibleTo("Gridify.EntityFramework")]
 
 namespace Gridify;
 
 public static partial class GridifyExtensions
 {
-   #region "Private"
-
    /// <summary>
-   /// Set default <c>Page<c /> number and <c>PageSize<c /> if its not already set in gridifyQuery
+   /// Sets default <c>Page</c> number and <c>PageSize</c> if its not already set in gridifyQuery
    /// </summary>
    /// <param name="gridifyPagination">query and paging configuration</param>
    /// <returns>returns a IGridifyPagination with valid PageSize and Page</returns>
-   private static IGridifyPagination FixPagingData(this IGridifyPagination gridifyPagination)
+   internal static IGridifyPagination FixPagingData(this IGridifyPagination gridifyPagination)
    {
       // set default for page number
       if (gridifyPagination.Page <= 0)
@@ -31,8 +27,6 @@ public static partial class GridifyExtensions
       return gridifyPagination;
    }
 
-   #endregion
-
    public static Expression<Func<T, bool>> GetFilteringExpression<T>(this IGridifyFiltering gridifyFiltering, IGridifyMapper<T>? mapper = null)
    {
       if (string.IsNullOrWhiteSpace(gridifyFiltering.Filter))
@@ -44,7 +38,7 @@ public static partial class GridifyExtensions
          throw new GridifyFilteringException(syntaxTree.Diagnostics.Last()!);
 
       mapper = mapper.FixMapper(syntaxTree);
-      var (queryExpression, _) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
+      var queryExpression = new LinqQueryBuilder<T>(mapper).Build(syntaxTree.Root);
       if (queryExpression == null) throw new GridifyQueryException("Can not create expression with current data");
       return queryExpression;
    }
@@ -88,7 +82,7 @@ public static partial class GridifyExtensions
    /// <param name="expression">the member expression to apply</param>
    /// <param name="isSortAsc">the sort order to apply</param>
    /// <returns>Query with sorting applied as IOrderedQueryable of type T</returns>
-   private static IOrderedQueryable<T> OrderByMember<T>(
+   internal static IOrderedQueryable<T> OrderByMember<T>(
       this IQueryable<T> query,
       Expression<Func<T, object>> expression,
       bool isSortAsc)
@@ -174,11 +168,11 @@ public static partial class GridifyExtensions
    /// <summary>
    /// if given mapper was null this function creates default generated mapper
    /// </summary>
-   /// <param name="mapper">a <c>GridifyMapper<c /> that can be null</param>
+   /// <param name="mapper">a <c>GridifyMapper</c> that can be null</param>
    /// <param name="syntaxTree">optional syntaxTree to Lazy mapping generation</param>
    /// <typeparam name="T">type to set mappings</typeparam>
    /// <returns>return back mapper or new generated mapper if it was null</returns>
-   private static IGridifyMapper<T> FixMapper<T>(this IGridifyMapper<T>? mapper, SyntaxTree syntaxTree)
+   internal static IGridifyMapper<T> FixMapper<T>(this IGridifyMapper<T>? mapper, SyntaxTree syntaxTree)
    {
       if (mapper != null) return mapper;
 
@@ -211,7 +205,7 @@ public static partial class GridifyExtensions
    }
 
    /// <summary>
-   /// adds Filtering,Ordering And Paging to the query
+   /// Adds Filtering, Ordering And Paging to the query
    /// </summary>
    /// <param name="query">the original(target) queryable object</param>
    /// <param name="gridifyQuery">the configuration to apply paging, filtering and ordering</param>
@@ -247,7 +241,7 @@ public static partial class GridifyExtensions
       if (gridifyOrdering == null) return query;
       return string.IsNullOrWhiteSpace(gridifyOrdering.OrderBy)
          ? query
-         : ProcessOrdering(query, gridifyOrdering.OrderBy!, startWithThenBy, mapper);
+         : new LinqSortingQueryBuilder<T>(mapper).ProcessOrdering(query, gridifyOrdering.OrderBy!, startWithThenBy);
    }
 
    /// <summary>
@@ -267,7 +261,7 @@ public static partial class GridifyExtensions
    {
       return string.IsNullOrWhiteSpace(orderBy)
          ? query
-         : ProcessOrdering(query, orderBy, startWithThenBy, mapper);
+         : new LinqSortingQueryBuilder<T>(mapper).ProcessOrdering(query, orderBy, startWithThenBy);
    }
 
    public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, string props, IGridifyMapper<T>? mapper = null)
@@ -343,102 +337,12 @@ public static partial class GridifyExtensions
       return true;
    }
 
-   internal static IQueryable<T> ProcessOrdering<T>(IQueryable<T> query, string orderings, bool startWithThenBy, IGridifyMapper<T>? mapper)
-   {
-      var isFirst = !startWithThenBy;
-
-      var orders = ParseOrderings(orderings).ToList();
-
-      // build the mapper if it is null
-      if (mapper is null)
-      {
-         mapper = new GridifyMapper<T>();
-         foreach (var order in orders)
-            try
-            {
-               mapper.AddMap(order.MemberName);
-            }
-            catch (Exception)
-            {
-               if (!mapper.Configuration.IgnoreNotMappedFields)
-                  throw new GridifyMapperException($"Mapping '{order.MemberName}' not found");
-            }
-      }
-
-      foreach (var order in orders)
-      {
-         if (!mapper.HasMap(order.MemberName))
-         {
-            // skip if there is no mappings available
-            if (mapper.Configuration.IgnoreNotMappedFields)
-               continue;
-
-            throw new GridifyMapperException($"Mapping '{order.MemberName}' not found");
-         }
-
-         if (isFirst)
-         {
-            query = query.OrderByMember(GetOrderExpression(order, mapper), order.IsAscending);
-            isFirst = false;
-         }
-         else
-         {
-            query = query.ThenByMember(GetOrderExpression(order, mapper), order.IsAscending);
-         }
-      }
-
-      return query;
-   }
-
-   internal static Expression<Func<T, object>> GetOrderExpression<T>(ParsedOrdering order, IGridifyMapper<T> mapper)
-   {
-      var exp = mapper.GetExpression(order.MemberName);
-      switch (order.OrderingType)
-      {
-         case OrderingType.Normal:
-            return exp;
-         case OrderingType.NullCheck:
-         case OrderingType.NotNullCheck:
-         default:
-         {
-            // member should be nullable
-            if (exp.Body is not UnaryExpression unary || Nullable.GetUnderlyingType(unary.Operand.Type) == null)
-            {
-               throw new GridifyOrderingException($"'{order.MemberName}' is not nullable type");
-            }
-
-            var prop = Expression.Property(exp.Parameters[0], order.MemberName);
-            var hasValue = Expression.PropertyOrField(prop, "HasValue");
-
-            switch (order.OrderingType)
-            {
-               case OrderingType.NullCheck:
-               {
-                  var boxedExpression = Expression.Convert(hasValue, typeof(object));
-                  return Expression.Lambda<Func<T, object>>(boxedExpression, exp.Parameters);
-               }
-               case OrderingType.NotNullCheck:
-               {
-                  var notHasValue = Expression.Not(hasValue);
-                  var boxedExpression = Expression.Convert(notHasValue, typeof(object));
-                  return Expression.Lambda<Func<T, object>>(boxedExpression, exp.Parameters);
-               }
-               // should never reach here
-               case OrderingType.Normal:
-                  return exp;
-               default:
-                  throw new ArgumentOutOfRangeException();
-            }
-         }
-      }
-   }
-
    internal static string ReplaceAll(this string seed, IEnumerable<char> chars, char replacementCharacter)
    {
       return chars.Aggregate(seed, (str, cItem) => str.Replace(cItem, replacementCharacter));
    }
 
-   private static IEnumerable<ParsedOrdering> ParseOrderings(string orderings)
+   internal static IEnumerable<ParsedOrdering> ParseOrderings(this string orderings)
    {
       var nullableChars = new[] { '?', '!' };
       foreach (var field in orderings.Split(','))
@@ -454,7 +358,7 @@ public static partial class GridifyExtensions
                _ => throw new GridifyOrderingException("Invalid keyword. expected 'desc' or 'asc'")
             };
             var member = spliced.First();
-            yield return new ParsedOrdering()
+            yield return new ParsedOrdering
             {
                MemberName = member.ReplaceAll(nullableChars, ' ').TrimEnd(),
                IsAscending = isAsc,
@@ -465,7 +369,7 @@ public static partial class GridifyExtensions
          }
          else
          {
-            yield return new ParsedOrdering()
+            yield return new ParsedOrdering
             {
                MemberName = orderingExp.ReplaceAll(nullableChars, ' ').TrimEnd(),
                IsAscending = true,
@@ -502,7 +406,7 @@ public static partial class GridifyExtensions
          ? query.OrderBy(groupOrder)
          : query.OrderByDescending(groupOrder);
 
-      query = ProcessOrdering(query, gridifyOrdering.OrderBy!, true, mapper);
+      query = new LinqSortingQueryBuilder<T>(mapper).ProcessOrdering(query, gridifyOrdering.OrderBy!, true);
       return query;
    }
 
@@ -543,8 +447,7 @@ public static partial class GridifyExtensions
 
       mapper = mapper.FixMapper(syntaxTree);
 
-      var (queryExpression, _) = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper);
-
+      var queryExpression = new LinqQueryBuilder<T>(mapper).Build(syntaxTree.Root);
       query = query.Where(queryExpression);
 
       return query;
@@ -561,7 +464,7 @@ public static partial class GridifyExtensions
    public static Expression<Func<T, bool>> CreateQuery<T>(this SyntaxTree syntaxTree, IGridifyMapper<T>? mapper = null)
    {
       mapper = mapper.FixMapper(syntaxTree);
-      var exp = ExpressionToQueryConvertor.GenerateQuery(syntaxTree.Root, mapper).Expression;
+      var exp = new LinqQueryBuilder<T>(mapper).Build(syntaxTree.Root);
       if (exp == null) throw new GridifyQueryException("Invalid SyntaxTree.");
       return exp;
    }

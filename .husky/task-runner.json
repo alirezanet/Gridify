@@ -4,8 +4,8 @@
          "command": "dotnet",
          "group": "pre-commit",
          "args": [
-            "dotnet-format",
-            "--include",
+            "format",
+            "--include=",
             "${staged}"
          ],
          "include": [

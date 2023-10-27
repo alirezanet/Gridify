@@ -17,6 +17,6 @@ features:
    - title: Exceptional Performance
      details: Gridify has been designed with performance in mind and can outperform other dynamic LINQ libraries.
    - title: Compatibility
-     details: Gridify can be used in any .NET Core or .NET Framework project, making it highly compatible. It can also be used alongside Entity Framework and other ORMs.
+     details: Gridify can be used in any .NET Core or .NET Framework project, making it highly compatible. It can also be used alongside Entity Framework and other ORMs. Gridify.Elasticsearch extension provides and ability to build Elasticsearch DSL queries from Gridify filters.
 footer: MIT Licensed | © 2021-present AliReZa Sabouri
 ---

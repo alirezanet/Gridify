@@ -46,4 +46,5 @@ check out the [github contributing guide](https://git-scm.com/book/en/v2/GitHub-
 - [Alireza Arabshahi](https://github.com/AlirezaArabshahi)
 - [sunyuliang](https://github.com/sunyuliang)
 - [TSrgy](https://github.com/TSrgy)
+- [Dzmitry Koush](https://github.com/ne4ta)
 - Add your name

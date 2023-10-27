@@ -1,3 +1,5 @@
+using System;
+
 namespace Gridify;
 
 public record GridifyMapperConfiguration
@@ -22,5 +24,13 @@ public record GridifyMapperConfiguration
    /// </summary>
    public bool IgnoreNotMappedFields { get; set; } = GridifyGlobalConfiguration.IgnoreNotMappedFields;
 
+   /// <summary>
+   /// Specifies how field names are inferred from CLR property names.
+   /// By default, Elastic.Clients.Elasticsearch uses camel-case property names.
+   /// </summary>
+   /// <example>
+   /// If null (default behavior) CLR property EmailAddress will be inferred as "emailAddress" Elasticsearch document field name.
+   /// If, e.g., <c>p => p</c>, the CLR property EmailAddress will be inferred as "EmailAddress" Elasticsearch document field name.
+   /// </example>
+   public Func<string, string>? CustomElasticsearchNamingAction { get; set; } = GridifyGlobalConfiguration.CustomElasticsearchNamingAction;
 }
-

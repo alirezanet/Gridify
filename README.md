@@ -1,7 +1,7 @@
 # Gridify (A Modern Dynamic LINQ library)
 
-![GitHub](https://img.shields.io/github/license/alirezanet/gridify) 
-![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff) 
+![GitHub](https://img.shields.io/github/license/alirezanet/gridify)
+![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff)
 ![Nuget](https://img.shields.io/nuget/v/gridify?label=stable)
 ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/gridify?label=latest)
 [![NuGet version (Gridify)](https://img.shields.io/nuget/v/Gridify.svg?style=flat-square)](https://www.nuget.org/packages/Gridify/)
@@ -29,6 +29,7 @@ Gridify is a dynamic LINQ library that simplifies the process of converting stri
 - Compatible with ORMs, especially Entity Framework
 - Can be used on every collection that LINQ supports
 - Compatible with object-mappers like AutoMapper
+- Compatible with Elasticsearch
 
 ## Documentation
 

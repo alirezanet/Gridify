@@ -36,6 +36,38 @@ export const sidebar: SidebarConfig = {
          ]
       }
    ],
+   '/guide/elasticsearch/': [
+      {
+         text: 'Introduction',
+         children: [
+            '/guide/elasticsearch/README.md',
+            '/guide/elasticsearch/getting-started.md',
+            '/guide/elasticsearch/extensions.md',
+         ],
+      },
+      {
+         text: 'Configuration',
+         children: [
+            '/guide/elasticsearch/gridifyQuery.md',
+            '/guide/elasticsearch/gridifyMapper.md',
+            '/guide/elasticsearch/gridifyGlobalConfiguration.md',
+         ]
+      },
+      {
+         text: 'Syntax',
+         children: [
+            '/guide/elasticsearch/filtering.md',
+            '/guide/elasticsearch/ordering.md',
+         ]
+      },
+      {
+         text: 'Advanced',
+         children: [
+            '/guide/elasticsearch/dependency-injection.md',
+            '/guide/elasticsearch/elasticsearch.md',
+         ]
+      }
+   ],
    '/contribution/': [
       {
          text: 'Contribution',
