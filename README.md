@@ -29,7 +29,7 @@ Gridify is a dynamic LINQ library that simplifies the process of converting stri
 - Compatible with ORMs, especially Entity Framework
 - Can be used on every collection that LINQ supports
 - Compatible with object-mappers like AutoMapper
-- Compatible with Elasticsearch
+- Compatible with Elasticsearch 🔥🔥
 
 ## Documentation
 
