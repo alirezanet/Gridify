@@ -65,111 +65,54 @@ internal class ElasticsearchQueryBuilder<T> : BaseQueryBuilder<Query, T>
       var field = new Field(fieldName);
       var right = valueExpression.ValueToken.Text;
 
-      Query query;
-      switch (op.Kind)
+      Query query = op.Kind switch
       {
-         case SyntaxKind.Equal when value is null:
-            query = new BoolQuery { MustNot = new List<Query> { new ExistsQuery { Field = field } } };
-            break;
-         case SyntaxKind.Equal when value is DateTime dateTime:
-            query = new TermQuery(field) { Value = ConvertToString(dateTime) };
-            break;
-         case SyntaxKind.Equal when isNumberExceptDecimalValue:
-            query = new TermQuery(field) { Value = Convert.ToDouble(right) };
-            break;
-         case SyntaxKind.Equal when value is decimal decimalValue:
-            query = new TermQuery(field) { Value = ConvertToString(decimalValue) };
-            break;
-         case SyntaxKind.Equal:
-            query = new TermQuery(field) { Value = right };
-            break;
-         case SyntaxKind.NotEqual when value is null:
-            query = new ExistsQuery { Field = field };
-            break;
-         case SyntaxKind.NotEqual when value is DateTime dateTime:
-            query = new BoolQuery { MustNot = new List<Query> { new TermQuery(field) { Value = ConvertToString(dateTime) } } };
-            break;
-         case SyntaxKind.NotEqual when isNumberExceptDecimalValue:
-            query = new BoolQuery { MustNot = new List<Query> { new TermQuery(field) { Value = Convert.ToDouble(right) } } };
-            break;
-         case SyntaxKind.NotEqual when value is decimal decimalValue:
-            query = new BoolQuery { MustNot = new List<Query> { new TermQuery(field) { Value = ConvertToString(decimalValue) } } };
-            break;
-         case SyntaxKind.NotEqual:
-            query = new BoolQuery { MustNot = new List<Query> { new TermQuery(field) { Value = right } } };
-            break;
-         case SyntaxKind.GreaterThan when value is DateTime dateTime:
-            query = new DateRangeQuery(field) { Gt = dateTime };
-            break;
-         case SyntaxKind.GreaterThan when isNumberExceptDecimalValue:
-            query = new NumberRangeQuery(field) { Gt = Convert.ToDouble(right) };
-            break;
-         case SyntaxKind.GreaterThan when value is decimal decimalValue:
+         SyntaxKind.Equal when value is null => new BoolQuery { MustNot = new List<Query> { new ExistsQuery { Field = field } } },
+         SyntaxKind.Equal when value is DateTime dateTime => new TermQuery(field) { Value = ConvertToString(dateTime) },
+         SyntaxKind.Equal when isNumberExceptDecimalValue => new TermQuery(field) { Value = Convert.ToDouble(right) },
+         SyntaxKind.Equal when value is decimal decimalValue => new TermQuery(field) { Value = ConvertToString(decimalValue) },
+         SyntaxKind.Equal => new TermQuery(field) { Value = right },
+         SyntaxKind.NotEqual when value is null => new ExistsQuery { Field = field },
+         SyntaxKind.NotEqual when value is DateTime dateTime => new BoolQuery
+         {
+            MustNot = new List<Query> { new TermQuery(field) { Value = ConvertToString(dateTime) } }
+         },
+         SyntaxKind.NotEqual when isNumberExceptDecimalValue => new BoolQuery
+         {
+            MustNot = new List<Query> { new TermQuery(field) { Value = Convert.ToDouble(right) } }
+         },
+         SyntaxKind.NotEqual when value is decimal decimalValue => new BoolQuery
+         {
+            MustNot = new List<Query> { new TermQuery(field) { Value = ConvertToString(decimalValue) } }
+         },
+         SyntaxKind.NotEqual => new BoolQuery { MustNot = new List<Query> { new TermQuery(field) { Value = right } } },
+         SyntaxKind.GreaterThan when value is DateTime dateTime => new DateRangeQuery(field) { Gt = dateTime },
+         SyntaxKind.GreaterThan when isNumberExceptDecimalValue => new NumberRangeQuery(field) { Gt = Convert.ToDouble(right) },
+         SyntaxKind.GreaterThan when value is decimal decimalValue =>
             // NOTE: RangeQuery doesn't have a public constructor, so we use DateRangeQuery instead, that works correctly.
-            query = new DateRangeQuery(field) { Gt = ConvertToString(decimalValue) };
-            break;
-         case SyntaxKind.GreaterThan:
-            query = new DateRangeQuery(field) { Gt = right };
-            break;
-         case SyntaxKind.LessThan when value is DateTime dateTime:
-            query = new DateRangeQuery(field) { Lt = dateTime };
-            break;
-         case SyntaxKind.LessThan when isNumberExceptDecimalValue:
-            query = new NumberRangeQuery(field) { Lt = Convert.ToDouble(right) };
-            break;
-         case SyntaxKind.LessThan when value is decimal decimalValue:
-            query = new DateRangeQuery(field) { Lt = ConvertToString(decimalValue) };
-            break;
-         case SyntaxKind.LessThan:
-            query = new DateRangeQuery(field) { Lt = right };
-            break;
-         case SyntaxKind.GreaterOrEqualThan when value is DateTime dateTime:
-            query = new DateRangeQuery(field) { Gte = dateTime };
-            break;
-         case SyntaxKind.GreaterOrEqualThan when isNumberExceptDecimalValue:
-            query = new NumberRangeQuery(field) { Gte = Convert.ToDouble(right) };
-            break;
-         case SyntaxKind.GreaterOrEqualThan when value is decimal decimalValue:
-            query = new DateRangeQuery(field) { Gte = ConvertToString(decimalValue) };
-            break;
-         case SyntaxKind.GreaterOrEqualThan:
-            query = new DateRangeQuery(field) { Gte = right };
-            break;
-         case SyntaxKind.LessOrEqualThan when value is DateTime dateTime:
-            query = new DateRangeQuery(field) { Lte = dateTime };
-            break;
-         case SyntaxKind.LessOrEqualThan when isNumberExceptDecimalValue:
-            query = new NumberRangeQuery(field) { Lte = Convert.ToDouble(right) };
-            break;
-         case SyntaxKind.LessOrEqualThan when value is decimal decimalValue:
-            query = new DateRangeQuery(field) { Lte = ConvertToString(decimalValue) };
-            break;
-         case SyntaxKind.LessOrEqualThan:
-            query = new DateRangeQuery(field) { Lte = right };
-            break;
-         case SyntaxKind.Like:
-            query = new WildcardQuery(field) { Value = $"*{right}*" };
-            break;
-         case SyntaxKind.NotLike:
-            query = new BoolQuery { MustNot = new List<Query> { new WildcardQuery(field) { Value = $"*{right}*" } } };
-            break;
-         case SyntaxKind.StartsWith:
-            query = new WildcardQuery(field) { Value = $"{right}*" };
-            break;
-         case SyntaxKind.EndsWith:
-            query = new WildcardQuery(field) { Value = $"*{right}" };
-            break;
-         case SyntaxKind.NotStartsWith:
-            query = new BoolQuery { MustNot = new List<Query> { new WildcardQuery(field) { Value = $"{right}*" } } };
-            break;
-         case SyntaxKind.NotEndsWith:
-            query = new BoolQuery { MustNot = new List<Query> { new WildcardQuery(field) { Value = $"*{right}" } } };
-            break;
-         case SyntaxKind.CustomOperator:
-            throw new NotImplementedException();
-         default:
-            throw new GridifyFilteringException("Invalid expression");
-      }
+            new DateRangeQuery(field) { Gt = ConvertToString(decimalValue) },
+         SyntaxKind.GreaterThan => new DateRangeQuery(field) { Gt = right },
+         SyntaxKind.LessThan when value is DateTime dateTime => new DateRangeQuery(field) { Lt = dateTime },
+         SyntaxKind.LessThan when isNumberExceptDecimalValue => new NumberRangeQuery(field) { Lt = Convert.ToDouble(right) },
+         SyntaxKind.LessThan when value is decimal decimalValue => new DateRangeQuery(field) { Lt = ConvertToString(decimalValue) },
+         SyntaxKind.LessThan => new DateRangeQuery(field) { Lt = right },
+         SyntaxKind.GreaterOrEqualThan when value is DateTime dateTime => new DateRangeQuery(field) { Gte = dateTime },
+         SyntaxKind.GreaterOrEqualThan when isNumberExceptDecimalValue => new NumberRangeQuery(field) { Gte = Convert.ToDouble(right) },
+         SyntaxKind.GreaterOrEqualThan when value is decimal decimalValue => new DateRangeQuery(field) { Gte = ConvertToString(decimalValue) },
+         SyntaxKind.GreaterOrEqualThan => new DateRangeQuery(field) { Gte = right },
+         SyntaxKind.LessOrEqualThan when value is DateTime dateTime => new DateRangeQuery(field) { Lte = dateTime },
+         SyntaxKind.LessOrEqualThan when isNumberExceptDecimalValue => new NumberRangeQuery(field) { Lte = Convert.ToDouble(right) },
+         SyntaxKind.LessOrEqualThan when value is decimal decimalValue => new DateRangeQuery(field) { Lte = ConvertToString(decimalValue) },
+         SyntaxKind.LessOrEqualThan => new DateRangeQuery(field) { Lte = right },
+         SyntaxKind.Like => new WildcardQuery(field) { Value = $"*{right}*" },
+         SyntaxKind.NotLike => new BoolQuery { MustNot = new List<Query> { new WildcardQuery(field) { Value = $"*{right}*" } } },
+         SyntaxKind.StartsWith => new WildcardQuery(field) { Value = $"{right}*" },
+         SyntaxKind.EndsWith => new WildcardQuery(field) { Value = $"*{right}" },
+         SyntaxKind.NotStartsWith => new BoolQuery { MustNot = new List<Query> { new WildcardQuery(field) { Value = $"{right}*" } } },
+         SyntaxKind.NotEndsWith => new BoolQuery { MustNot = new List<Query> { new WildcardQuery(field) { Value = $"*{right}" } } },
+         SyntaxKind.CustomOperator => throw new NotSupportedException("Custom operators are not supported in the Gridify.Elasticsearch extension"),
+         _ => throw new GridifyFilteringException("Invalid expression")
+      };
 
       return query;
    }
