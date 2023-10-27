@@ -34,3 +34,9 @@ jobs:
               PROJECT_FILE_PATH: src/Gridify.EntityFramework/Gridify.EntityFramework.csproj
               INCLUDE_SYMBOLS: true
               NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+         - name: Publish Gridify.Elasticsearch
+           uses: alirezanet/publish-nuget@v3.0.0
+           with:
+              PROJECT_FILE_PATH: src/Gridify.Elasticsearch/Gridify.Elasticsearch.csproj
+              INCLUDE_SYMBOLS: true
+              NUGET_KEY: ${{secrets.NUGET_API_KEY}}
