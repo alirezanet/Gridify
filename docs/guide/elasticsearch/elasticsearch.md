@@ -17,7 +17,7 @@ Specifies how field names are inferred from CLR property names. By default, **El
 ``` csharp
 await client.SearchAsync<User>(s => s
     .Index("users")
-    .ApplyFiltering("emailAddress = John"));
+    .ApplyFiltering("emailAddress = test@test.com"));
 ```
 
 this will make the next Elasticsearch query:
