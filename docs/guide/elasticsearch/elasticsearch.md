@@ -44,7 +44,7 @@ GridifyGlobalConfiguration.CustomElasticsearchNamingAction = p => $"_{p}_";
 
 await client.SearchAsync<User>(s => s
     .Index("users")
-    .ApplyFiltering("emailAddress = John"));
+    .ApplyFiltering("emailAddress = test@test.com"));
 ```
 
 this will make the next Elasticsearch query:
