@@ -14,8 +14,7 @@ Usage example:
 */
 
 var paths = new[] {
-    @"src\Gridify\Gridify.csproj",
-    @"src\Gridify.EntityFramework\Gridify.EntityFramework.csproj",
+    @"root.props",
     @"docs\.vuepress\configs\version.ts"
 };
 
