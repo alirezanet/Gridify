@@ -2,7 +2,7 @@
    <Import Project="..\..\root.props"/>
    <PropertyGroup>
       <PackageId>Gridify.Abstractions</PackageId>
-      <PackageDescription>Gridify (Elasticsearch), Easy way to apply Filtering, Sorting, and Pagination using text-based data.</PackageDescription>
+      <PackageDescription>Gridify.Abstractions, includes a set of interface and classes that act like contract.</PackageDescription>
    </PropertyGroup>
    <ItemGroup>
       <None Include="..\..\README.md" Pack="true" PackagePath="\"/>

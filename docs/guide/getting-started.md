@@ -1,4 +1,3 @@
-
 # Getting Started
 
 There are three packages available for gridify in the nuget repository.
@@ -12,7 +11,10 @@ If you are using the Entity framework in your project, you should install the `G
 
 This package has the same functionality as the `Gridify` package, but it is designed to be more compatible with [Entity Framework](./entity-framework.md).
 
-In order to use Gridify with Elasticsearch it's necessary to install `Gridify.Elasticsearch`. Please read [the separate thread of the documentation](./elasticsearch/getting-started.md).
+In order to use Gridify with Elasticsearch it's necessary to install `Gridify.Elasticsearch`. Please
+read [the separate thread of the documentation](./elasticsearch/getting-started.md).
+
+[Gridify.Abstraction](abstractions.md) includes a set of interface and classes that act like contract with other libraries to use it without referencing gridify package itself.
 :::
 
 ## Installation
