@@ -1,0 +1,25 @@
+﻿<Project>
+   <PropertyGroup>
+      <Version>2.12.0</Version>
+      <Authors>Alireza Sabouri</Authors>
+      <Company>TuxTeam</Company>
+      <RepositoryUrl>https://github.com/alirezanet/Gridify</RepositoryUrl>
+      <PackageLicenseExpression>MIT</PackageLicenseExpression>
+      <LangVersion>latest</LangVersion>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <Nullable>enable</Nullable>
+      <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+      <PublishRepositoryUrl>true</PublishRepositoryUrl>
+      <EmbedUntrackedSources>true</EmbedUntrackedSources>
+      <IncludeSymbols>true</IncludeSymbols>
+      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
+      <TargetFrameworks>net5.0;net6.0;netstandard2.0;netstandard2.1;net7.0;net8.0</TargetFrameworks>
+   </PropertyGroup>
+
+   <PropertyGroup>
+      <EnableNETAnalyzers>true</EnableNETAnalyzers>
+      <AnalysisMode>Recommended</AnalysisMode>
+   </PropertyGroup>
+</Project>
