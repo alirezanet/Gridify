@@ -679,6 +679,28 @@ public class GridifyExtensionsShould
       }
    }
 
+
+
+   /// <summary>
+   /// we need to use this class only once, to avoid concurrency problems
+   /// </summary>
+   private class TestOperator : UpperCaseEqual
+   {
+   };
+
+   [Fact]
+   public void CustomOperator_GenericRegisterAndRemove_ShouldNotThrowAnyException()
+   {
+      GridifyGlobalConfiguration.CustomOperators.Register<TestOperator>();
+
+      Assert.Single(GridifyGlobalConfiguration.CustomOperators.Operators.Where(q => q is TestOperator));
+
+      GridifyGlobalConfiguration.CustomOperators.Remove<TestOperator>();
+
+      Assert.Empty(GridifyGlobalConfiguration.CustomOperators.Operators.Where(q => q is TestOperator));
+   }
+
+
    [Fact]
    public void ApplyFiltering_CustomOperator()
    {
