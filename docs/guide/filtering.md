@@ -141,6 +141,6 @@ class RegexMatchOperator : IGridifyOperator
 Registration Example:
 
 ```csharp
- GridifyGlobalConfiguration.CustomOperators.Register(new FreeTextOperator());
- GridifyGlobalConfiguration.CustomOperators.Register(new RegexMatchOperator());
+ GridifyGlobalConfiguration.CustomOperators.Register<FreeTextOperator>();
+ GridifyGlobalConfiguration.CustomOperators.Register<RegexMatchOperator>();
 ```

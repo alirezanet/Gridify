@@ -5,7 +5,7 @@
 Using the `Register` method of this property you can add your own custom operators.
 
 ``` csharp
- GridifyGlobalConfiguration.CustomOperators.Register(new MyCustomOperator());
+ GridifyGlobalConfiguration.CustomOperators.Register<MyCustomOperator>();
 ```
 
 To learn more about custom operators, see [Custom operator](./filtering.md#custom-operators)
