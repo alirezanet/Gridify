@@ -46,7 +46,9 @@ class GridifyQueryBuilder {
       if (escapeValue && typeof value === "string") {
          filterValue = value.replace(/([(),|]|\/i)/g, "\\$1");
       }
-      filterValue = caseSensitive ? filterValue.toString() : `${filterValue.toString()}/i`;
+      filterValue = caseSensitive
+         ? filterValue.toString()
+         : `${filterValue.toString()}/i`;
 
       var filterExpression = `${field.trim()}${operator}${filterValue}`;
       this.filteringExpressions.push({
@@ -80,18 +82,66 @@ class GridifyQueryBuilder {
    }
 
    build(): IGridifyQuery {
+      let previousType: "filter" | "op" | "startGroup" | "endGroup" | null =
+         null;
+      let groupCounter = 0;
       this.filteringExpressions.forEach((exp) => {
-         // not valid if:
-         // 1- two `filter` in a row (filters should have an operator between them)
-         // 2- total startGroup and endGroup doesn't match
-         // 3- startGroup and endGroup without any filter inside
-         // 4- group started but it is not ended
+         if (exp.type === "startGroup") {
+            groupCounter++;
+         }
+         if (exp.type === "endGroup") {
+            groupCounter--;
+         }
 
-         // we need to support and validate nested groups
-         // we should throw exception if something is not correct
+         //,
+         if (previousType === null && exp.type === "op")
+         {
+            throw new Error("expression cannot start with a logical operator");
+         }
 
+         // filter filter
+         if (previousType === "filter" && exp.type === "filter") {
+            throw new Error(
+               "consecutive conditions are not allowed, consider adding a logical operator"
+            );
+         }
+
+         // ,,
+         if (previousType === "op" && exp.type === "op") {
+            throw new Error(
+               "consecutive operators are not allowed, consider adding a filter"
+            );
+         }
+
+         // (,
+         if (previousType === "startGroup" && exp.type === "op") {
+            throw new Error(
+               "logical operator immediately after startGroup is not allowed"
+            );
+         }
+
+         // )filter
+         if (previousType === "endGroup" && exp.type === "filter") {
+            throw new Error("Missing logical operator after endGroup");
+         }
+
+         // ()
+         if (previousType === "startGroup" && exp.type === "endGroup") {
+            throw new Error("Empty groups are not allowed");
+         }
+
+         // )(
+         if (previousType === "endGroup" && exp.type === "startGroup") {
+            throw new Error("Missing a logical operator between groups");
+         }
+
+         previousType = exp.type;
          this.query.filter += exp.value;
       });
+
+      if (groupCounter != 0) {
+         throw new Error("Group not properly closed");
+      }
 
       return this.query;
    }
