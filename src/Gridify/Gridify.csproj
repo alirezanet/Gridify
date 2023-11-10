@@ -1,28 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
+   <Import Project="..\..\root.props" />
 
    <PropertyGroup>
       <PackageId>Gridify</PackageId>
-      <Version>2.12.0</Version>
-      <Authors>Alireza Sabouri</Authors>
-      <Company>TuxTeam</Company>
       <PackageDescription>Gridify, Easy and optimized way to apply Filtering, Sorting, and Pagination using text-based data.</PackageDescription>
-      <RepositoryUrl>https://github.com/alirezanet/Gridify</RepositoryUrl>
-      <PackageLicenseExpression>MIT</PackageLicenseExpression>
-      <LangVersion>latest</LangVersion>
-      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-      <Nullable>enable</Nullable>
-      <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-      <PublishRepositoryUrl>true</PublishRepositoryUrl>
-      <EmbedUntrackedSources>true</EmbedUntrackedSources>
-      <IncludeSymbols>true</IncludeSymbols>
-      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-      <PackageReadmeFile>README.md</PackageReadmeFile>
-      <TargetFrameworks>net5.0;net6.0;netstandard2.0;netstandard2.1;net7.0</TargetFrameworks>
-
    </PropertyGroup>
 
    <ItemGroup>
+      <ProjectReference Include="..\Gridify.Abstractions\Gridify.Abstractions.csproj" />
       <None Include="..\..\README.md" Pack="true" PackagePath="\" />
    </ItemGroup>
 

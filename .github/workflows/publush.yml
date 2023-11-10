@@ -15,7 +15,7 @@ jobs:
          - name: Setup .NET
            uses: actions/setup-dotnet@v1
            with:
-              dotnet-version: 7.0.x
+              dotnet-version: 8.0.x
          - name: Restore dependencies
            run: dotnet restore
          - name: Build
@@ -26,6 +26,12 @@ jobs:
            uses: alirezanet/publish-nuget@v3.0.0
            with:
               PROJECT_FILE_PATH: src/Gridify/Gridify.csproj
+              INCLUDE_SYMBOLS: true
+              NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+         - name: Publish Gridify.Abstractions
+           uses: alirezanet/publish-nuget@v3.0.0
+           with:
+              PROJECT_FILE_PATH: src/Gridify.Abstractions/Gridify.Abstractions.csproj
               INCLUDE_SYMBOLS: true
               NUGET_KEY: ${{secrets.NUGET_API_KEY}}
          - name: Publish Gridify.EntityFramework
