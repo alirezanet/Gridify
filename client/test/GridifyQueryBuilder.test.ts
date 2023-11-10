@@ -1,5 +1,6 @@
 import GridifyQueryBuilder from "../src/GridifyQueryBuilder";
 import { ConditionalOperator as op } from "../src/GridifyOperator";
+
 describe("GridifyQueryBuilder", () => {
    it("should build a simple query", () => {
       const query = new GridifyQueryBuilder()
@@ -50,4 +51,105 @@ describe("GridifyQueryBuilder", () => {
          })
       );
    });
+});
+
+describe("GridifyQueryBuilder Validation", () => {
+   it("should allow balanced parentheses", () => {
+      const query = new GridifyQueryBuilder()
+         .startGroup()
+         .addCondition("field", op.Equal, "value")
+         .endGroup()
+         .build();
+
+      expect(query.filter).toEqual("(field=value)");
+   });
+
+   it("should allow nested balanced parentheses", () => {
+      const query = new GridifyQueryBuilder()
+         .startGroup()
+            .addCondition("field", op.Equal, "value")
+            .and()
+            .startGroup()
+               .addCondition("field", op.Equal, "value")
+               .or()
+               .addCondition("field", op.Equal, "value")
+            .endGroup()
+         .endGroup()
+         .build();
+
+      expect(query.filter).toEqual("(field=value,(field=value|field=value))");
+   });
+
+   it("should throw an error for unbalanced parentheses", () => {
+      expect(() => {
+         new GridifyQueryBuilder()
+            .startGroup()
+            .addCondition("field", op.Equal, "value")
+            .build();
+      }).toThrow("Group not properly closed");
+   });
+
+   it("should allow and must have logical operators between conditions", () => {
+      const query = new GridifyQueryBuilder()
+         .addCondition("field1", op.Equal, "value1")
+         .and()
+         .addCondition("field2", op.Equal, "value2")
+         .build();
+
+      expect(query.filter).toEqual("field1=value1,field2=value2");
+   });
+
+   it("should throw an error when logical operators are misplaced", () => {
+      expect(() => {
+         new GridifyQueryBuilder()
+            .and()
+            .addCondition("field", op.Equal, "value")
+            .build();
+      }).toThrow("expression cannot start with a logical operator");
+   });
+
+   it("should allow logical operators after a group", () => {
+      const query = new GridifyQueryBuilder()
+         .startGroup()
+         .addCondition("field", op.Equal, "value")
+         .endGroup()
+         .and()
+         .addCondition("anotherField", op.Equal, "anotherValue")
+         .build();
+
+      expect(query.filter).toEqual("(field=value),anotherField=anotherValue");
+   });
+
+   it("should throw an error for logical operators immediately after starting a group", () => {
+      expect(() => {
+         new GridifyQueryBuilder()
+            .startGroup()
+            .or()
+            .addCondition("field", op.Equal, "value")
+            .endGroup()
+            .build();
+      }).toThrow("logical operator immediately after startGroup is not allowed");
+   });
+
+   it("should throw an error for consecutive logical operators", () => {
+      expect(() => {
+         new GridifyQueryBuilder()
+            .addCondition("field1", op.Equal, "value1")
+            .and()
+            .or()
+            .addCondition("field2", op.Equal, "value2")
+            .build();
+      }).toThrow("consecutive operators are not allowed, consider adding a filter");
+   });
+
+   it("should throw an error for consecutive conditions", () => {
+      expect(() => {
+         new GridifyQueryBuilder()
+            .addCondition("field1", op.Equal, "value1")
+            .addCondition("field2", op.Equal, "value2")
+            .build();
+      }).toThrow();
+   });
+
+
 });
