@@ -163,7 +163,9 @@ internal abstract class BaseQueryBuilder<TQuery, T>
       var isConvertable = true;
 
       // type fixer
-      if (value is not null && body.Type != value.GetType())
+      // Check if body.Type is a nullable type and get its underlying type issue #134
+      var underlyingBodyType = Nullable.GetUnderlyingType(body.Type);
+      if (value is not null && (underlyingBodyType ?? body.Type) != value.GetType())
       {
          // handle bool, github issue #71
          if (body.Type == typeof(bool) && value is "true" or "false" or "1" or "0")
