@@ -1,0 +1,41 @@
+name: Publish GridifyClient
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+        registry-url: 'https://registry.npmjs.org/'
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Test
+      run: yarn test
+
+    - name: Build
+      run: yarn build
+
+    - name: Extract Version
+      id: package-version
+      run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+    - name: Publish to npm
+      run: yarn publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+    - name: Create Tag
+      run: |
+        git tag c-v${{ env.VERSION }}
+        git push origin c-v${{ env.VERSION }}
