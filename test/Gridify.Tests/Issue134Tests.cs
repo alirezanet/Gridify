@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Reflection;
 using Xunit;
 
 namespace Gridify.Tests;
@@ -15,13 +16,17 @@ public class Issue134Tests
           .AddMap("dt", q => q.MyDateTime, value => DateTime.Parse(value, null, DateTimeStyles.AdjustToUniversal))
          .AddCondition($"dt={dateTimeStringUtc}");
 
-      var expected = DateTime.Parse(dateTimeStringUtc, null, DateTimeStyles.AdjustToUniversal)
-                        .ToString(CultureInfo.CurrentCulture);
+      var expected = DateTime.Parse(dateTimeStringUtc, null, DateTimeStyles.AdjustToUniversal);
+      var expectedKind = expected.Kind;
 
       // act
-      var actual = qb.BuildFilteringExpression().ToString();
+      var actual = qb.BuildFilteringExpression();
 
       // assert
-      Assert.Contains(expected, actual);
+      var compiled = actual.Compile();
+      var constants = (object[])compiled.Target!.GetType().GetField("Constants")!.GetValue(compiled.Target)!;
+      var actualKind = ((DateTime)constants[0]).Kind;
+      Assert.Equal(expectedKind,actualKind);
+      Assert.Contains(expected.ToString(CultureInfo.CurrentCulture), actual.ToString());
    }
 }
