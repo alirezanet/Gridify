@@ -2,7 +2,7 @@ using System;
 using System.Linq.Expressions;
 using Xunit;
 
-namespace Gridify.Tests;
+namespace Gridify.Tests.IssueTests;
 
 public class Issue101Tests
 {

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Globalization;
-using System.Reflection;
 using Xunit;
 
-namespace Gridify.Tests;
+namespace Gridify.Tests.IssueTests;
 
 public class Issue134Tests
 {

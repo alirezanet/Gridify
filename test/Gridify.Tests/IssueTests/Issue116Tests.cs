@@ -5,7 +5,7 @@ using AutoBogus;
 using Gridify.Syntax;
 using Xunit;
 
-namespace Gridify.Tests;
+namespace Gridify.Tests.IssueTests;
 
 public class Issue116Tests
 {
