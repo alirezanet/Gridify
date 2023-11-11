@@ -1,21 +1,25 @@
 {
-  "name": "gridify-client",
-  "version": "2.0.0-preview",
-  "description": "Client JS library for the dotnet Gridify project",
-  "main": "dist/GridifyQueryBuilder.js",
-  "types": "dist/GridifyQueryBuilder.d.ts",
-  "repository": "https://github.com/alirezanet/Gridify/",
-  "author": "AliReza Sabouri",
-  "license": "MIT",
-  "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "test": "jest"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.5.8",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.2.2"
-  }
+   "name": "gridify-client",
+   "version": "2.0.0-preview",
+   "description": "Client JS library for the dotnet Gridify project",
+   "main": "dist/GridifyQueryBuilder.js",
+   "types": "dist/GridifyQueryBuilder.d.ts",
+   "repository": "https://github.com/alirezanet/Gridify/",
+   "homepage": "https://alirezanet.github.io/Gridify/guide/gridify-client/",
+   "author": "AliReza Sabouri",
+   "license": "MIT",
+   "scripts": {
+      "build": "tsc",
+      "watch": "tsc -w",
+      "test": "jest"
+   },
+   "devDependencies": {
+      "@types/jest": "^29.5.8",
+      "jest": "^29.7.0",
+      "ts-jest": "^29.1.1",
+      "typescript": "^5.2.2"
+   },
+   "files": [
+      "dist/**/*"
+   ]
 }
