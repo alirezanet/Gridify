@@ -1,6 +1,6 @@
 {
    "name": "gridify-client",
-   "version": "2.0.0-preview",
+   "version": "2.0.0-preview-1",
    "description": "Client JS library for the dotnet Gridify project",
    "main": "dist/GridifyQueryBuilder.js",
    "types": "dist/GridifyQueryBuilder.d.ts",
