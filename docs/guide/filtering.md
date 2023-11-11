@@ -68,14 +68,14 @@ Gridify have five special operators  `, | ( ) /i` to handle complex queries and 
 JavaScript escape example:
 
 ``` javascript
-let esc = (v) => v.replace(/([(),|]|\/i)/g, '\\$1')
+let esc = (v) => v.replace(/([(),|\\]|\/i)/g, '\\$1')
 ```
 
 Csharp escape example:
 
 ``` csharp
 var value = "(test,test2)";
-var esc = Regex.Replace(value, "([(),|]|\/i)", "\\$1" );
+var esc = Regex.Replace(value, "([(),|\\]|\/i)", "\\$1" );
 // esc = \(test\,test2\)
 ```
 
