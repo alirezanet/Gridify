@@ -10,3 +10,4 @@ node_modules
 .cache
 docs/.vuepress/dist
 /*.user
+client/dist
