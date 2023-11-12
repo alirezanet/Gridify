@@ -44,6 +44,40 @@ public class Issue135Tests
    }
 
    [Fact]
+   public void CustomOperator_WithGuid_ShouldNotThrowException()
+   {
+      // arrange
+      GridifyGlobalConfiguration.CustomOperators.Register<GuidInOperator>();
+      var targetGuid = Guid.NewGuid();
+
+      var repo = new List<TestTask>()
+      {
+         new() { GuidState = targetGuid },
+         new() { GuidState = Guid.NewGuid() },
+         new() { GuidState = Guid.NewGuid() },
+         new() { GuidState = Guid.NewGuid() },
+      }.AsQueryable();
+
+      var ids = new List<Guid> { Guid.NewGuid(), targetGuid, Guid.NewGuid() };
+      var expected = repo.Where(x => ids.Contains(x.GuidState)).ToList();
+
+      // act
+      var actual = new QueryBuilder<TestTask>()
+         .AddMap("gstate", q => q.GuidState,
+            value => value.Split(";", StringSplitOptions.RemoveEmptyEntries).Select(Guid.Parse).ToList())
+         .AddCondition($"gstate #In {Guid.NewGuid()};{Guid.NewGuid()};{targetGuid}")
+         .Build(repo)
+         .ToList();
+
+      // assert
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected.First().GuidState, actual.First().GuidState);
+
+      // clean-up
+      GridifyGlobalConfiguration.CustomOperators.Remove<GuidInOperator>();
+   }
+
+   [Fact]
    public void CustomOperator_ShouldGenerateExactSameSqlQuery()
    {
       // arrange
@@ -120,7 +154,20 @@ class StringInOperator : IGridifyOperator
    }
 }
 
+class GuidInOperator : IGridifyOperator
+{
+   public string GetOperator()
+   {
+      return "#In";
+   }
+   public Expression<OperatorParameter> OperatorHandler()
+   {
+      return (prop, value) => ((List<Guid>)value).Contains((Guid)prop);
+   }
+}
+
 internal class TestTask
 {
    public int State { get; set; }
+   public Guid GuidState { get; set; }
 }
