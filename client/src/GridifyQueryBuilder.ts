@@ -28,12 +28,11 @@ class GridifyQueryBuilder {
 
    addOrderBy(field: string, descending: boolean = false): GridifyQueryBuilder {
       const orderBy = `${field.trim()} ${descending ? "desc" : ""}`.trim();
-      if (this.query.orderBy) {
-         this.query.orderBy += `, ${orderBy}`;
-      }
-      this.query.orderBy = orderBy;
+      this.query.orderBy = this.query.orderBy
+        ? `${this.query.orderBy}, ${orderBy}`
+        : orderBy;
       return this;
-   }
+    }
 
    addCondition(
       field: string,
@@ -136,7 +135,7 @@ class GridifyQueryBuilder {
          }
 
          previousType = exp.type;
-         this.query.filter += exp.value;
+this.query.filter += exp.value;
       });
 
       if (groupCounter != 0) {
