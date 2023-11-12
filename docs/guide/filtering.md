@@ -136,6 +136,27 @@ class RegexMatchOperator : IGridifyOperator
       return (prop, value) => Regex.IsMatch(prop.ToString(), value.ToString());
    }
 }
+
+```
+- InOperator Example:
+
+```csharp
+class InOperator: IGridifyOperator
+{
+   public string GetOperator()
+   {
+      return "#In";
+   }
+
+   public Expression<OperatorParameter> OperatorHandler()
+   {
+      return (prop, value) => value.ToString()
+         .Split(";",StringSplitOptions.RemoveEmptyEntries)
+         .Contains(prop.ToString());
+   }
+}
+
+// usage: .ApplyFiltering("name #In John;David;Felipe")
 ```
 
 Registration Example:
@@ -143,4 +164,5 @@ Registration Example:
 ```csharp
  GridifyGlobalConfiguration.CustomOperators.Register<FreeTextOperator>();
  GridifyGlobalConfiguration.CustomOperators.Register<RegexMatchOperator>();
+ GridifyGlobalConfiguration.CustomOperators.Register<InOperator>();
 ```
