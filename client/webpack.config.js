@@ -10,7 +10,10 @@ module.exports = [
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: 'index.cjs.js', // Output name for CommonJS
-      libraryTarget: 'commonjs2'
+      library: {
+        name: 'GridifyClient',
+        type: 'commonjs2',
+      },
     },
     module: {
       rules: [
@@ -34,8 +37,8 @@ module.exports = [
       path: path.resolve(__dirname, 'dist'),
       filename: 'index.esm.js', // Output name for ESM
       library: {
-        type: 'module'
-      }
+        type: 'module',
+      },
     },
     experiments: {
       outputModule: true
@@ -62,8 +65,8 @@ module.exports = [
       path: path.resolve(__dirname, 'dist'),
       filename: 'index.umd.js', // Output name for UMD
       library: {
-        name: 'GridifyQueryBuilder',
-        type: 'umd'
+        name: 'GridifyClient',
+        type: 'umd',
       },
       globalObject: 'this'
     },
@@ -78,7 +81,10 @@ module.exports = [
     },
     resolve: {
       extensions: ['.ts', '.js']
+    },
+    optimization: {
+      minimize: true,
+      minimizer: [new TerserPlugin()]
     }
   }
 ];
-
