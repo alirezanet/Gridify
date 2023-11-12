@@ -1,12 +1,7 @@
 import { ConditionalOperator, LogicalOperator } from "./GridifyOperator";
-import IGridifyQuery from "./IGridifyQuery";
+import { IGridifyQuery } from "./IGridifyQuery";
 
-interface IExpression {
-   value: string;
-   type: "filter" | "op" | "startGroup" | "endGroup";
-}
-
-class GridifyQueryBuilder {
+export class GridifyQueryBuilder {
    private query: IGridifyQuery = {
       page: 1,
       pageSize: 20,
@@ -29,10 +24,10 @@ class GridifyQueryBuilder {
    addOrderBy(field: string, descending: boolean = false): GridifyQueryBuilder {
       const orderBy = `${field.trim()} ${descending ? "desc" : ""}`.trim();
       this.query.orderBy = this.query.orderBy
-        ? `${this.query.orderBy}, ${orderBy}`
-        : orderBy;
+         ? `${this.query.orderBy}, ${orderBy}`
+         : orderBy;
       return this;
-    }
+   }
 
    addCondition(
       field: string,
@@ -93,8 +88,7 @@ class GridifyQueryBuilder {
          }
 
          //,
-         if (previousType === null && exp.type === "op")
-         {
+         if (previousType === null && exp.type === "op") {
             throw new Error("expression cannot start with a logical operator");
          }
 
@@ -135,7 +129,7 @@ class GridifyQueryBuilder {
          }
 
          previousType = exp.type;
-this.query.filter += exp.value;
+         this.query.filter += exp.value;
       });
 
       if (groupCounter != 0) {
@@ -146,4 +140,7 @@ this.query.filter += exp.value;
    }
 }
 
-export default GridifyQueryBuilder;
+interface IExpression {
+   value: string;
+   type: "filter" | "op" | "startGroup" | "endGroup";
+}

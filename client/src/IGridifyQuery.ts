@@ -1,4 +1,4 @@
-export default interface IGridifyQuery {
+export interface IGridifyQuery {
    page?: number;
    pageSize?: number;
    orderBy?: string;
