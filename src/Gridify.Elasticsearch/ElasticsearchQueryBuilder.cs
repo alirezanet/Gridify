@@ -43,8 +43,7 @@ internal class ElasticsearchQueryBuilder<T> : BaseQueryBuilder<Query, T>
       ParameterExpression parameter,
       object? value,
       SyntaxNode op,
-      ValueExpressionSyntax valueExpression,
-      bool isConvertable)
+      ValueExpressionSyntax valueExpression)
    {
       if (valueExpression.IsCaseInsensitive)
       {
