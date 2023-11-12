@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -65,6 +66,29 @@ public class Issue135Tests
 
       GridifyGlobalConfiguration.CustomOperators.Remove<TestInOperator>();
    }
+
+   [Fact]
+   public void CustomOperator_WithoutMapperConvertor_ShouldGenerateExactSameSqlQuery()
+   {
+      // arrange
+      GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+      GridifyGlobalConfiguration.CustomOperators.Register<StringInOperator>();
+
+      // ReSharper disable once InconsistentNaming (needed for the test)
+      var Value = new List<string> { "2", "4", "6" };
+      var expected = _dbContext.Users.Where(q => Value.Contains(q.Name)).ToQueryString();
+
+      // act
+      var actual = new QueryBuilder<User>()
+         .AddCondition("name #In2 2;4;6")
+         .Build(_dbContext.Users)
+         .ToQueryString();
+
+      // assert
+      Assert.Equal(expected, actual);
+
+      GridifyGlobalConfiguration.CustomOperators.Remove<StringInOperator>();
+   }
 }
 
 internal class TestInOperator : IGridifyOperator
@@ -77,6 +101,22 @@ internal class TestInOperator : IGridifyOperator
    public Expression<OperatorParameter> OperatorHandler()
    {
       return (prop, value) => ((List<int>)value).Contains((int)prop);
+   }
+}
+
+
+class StringInOperator : IGridifyOperator
+{
+   public string GetOperator()
+   {
+      return "#In";
+   }
+
+   public Expression<OperatorParameter> OperatorHandler()
+   {
+      return (prop, value) => value.ToString()
+         .Split(";", StringSplitOptions.RemoveEmptyEntries)
+         .Contains(prop.ToString());
    }
 }
 
