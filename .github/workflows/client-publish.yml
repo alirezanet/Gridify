@@ -11,6 +11,7 @@ jobs:
         working-directory: client
     steps:
     - uses: actions/checkout@v2
+
     - name: Use Node.js
       uses: actions/setup-node@v2
       with:
@@ -30,16 +31,14 @@ jobs:
       id: package-version
       run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
-    - name: Copy README to client directory
-      run: cp ../README.md .
-      working-directory: client
-
     - name: Publish to npm
-      run: yarn publish --access public
+      run: yarn publish --new-version ${{ env.VERSION }} --access public
       env:
         NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
     - name: Create Tag
       run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git tag c-v${{ env.VERSION }}
         git push origin c-v${{ env.VERSION }}
