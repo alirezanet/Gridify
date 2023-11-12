@@ -1,4 +1,4 @@
-import GridifyQueryBuilder from "../src/GridifyQueryBuilder";
+import { GridifyQueryBuilder } from "../src/GridifyQueryBuilder";
 import { ConditionalOperator as op } from "../src/GridifyOperator";
 
 describe("GridifyQueryBuilder", () => {
