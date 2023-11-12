@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
@@ -115,8 +115,7 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
       ParameterExpression parameter,
       object? value,
       SyntaxNode op,
-      ValueExpressionSyntax valueExpression,
-      bool isConvertable)
+      ValueExpressionSyntax valueExpression)
    {
       Expression be;
 
@@ -234,10 +233,8 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
             // replace prop parameter
             be = new ReplaceExpressionVisitor(customExp.Parameters[0], body).Visit(customExp.Body);
 
-            // replace value parameter
-            be = isConvertable
-               ? new ReplaceExpressionVisitor(customExp.Parameters[1], Expression.Constant(value, body.Type)).Visit(be)
-               : new ReplaceExpressionVisitor(customExp.Parameters[1], Expression.Constant(value, typeof(string))).Visit(be);
+            var valueType = value?.GetType();
+            be = new ReplaceExpressionVisitor(customExp.Parameters[1], GetValueExpression(valueType ?? typeof(object), value)).Visit(be);
 
             break;
          default:
@@ -306,16 +303,16 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
             return GetAnyExpression(member, predicate);
          case MethodCallExpression { Method.Name: "SelectMany" } subExp
             when subExp.Arguments.Last()
-            is LambdaExpression { Body: MemberExpression lambdaMember }:
+               is LambdaExpression { Body: MemberExpression lambdaMember }:
          {
             var newPredicate = GetAnyExpression(lambdaMember, predicate);
             return ParseMethodCallExpression(subExp, newPredicate);
          }
          case MethodCallExpression { Method.Name: "Select" } subExp
             when subExp.Arguments.Last() is LambdaExpression
-         {
-            Body: MemberExpression lambdaMember
-         } lambda:
+            {
+               Body: MemberExpression lambdaMember
+            } lambda:
          {
             var newExp = new ReplaceExpressionVisitor(predicate.Parameters[0], lambdaMember).Visit(predicate.Body);
             var newPredicate = GetExpressionWithNullCheck(lambdaMember, lambda.Parameters[0], newExp);

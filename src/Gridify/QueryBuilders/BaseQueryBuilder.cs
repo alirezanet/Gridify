@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -39,8 +39,7 @@ internal abstract class BaseQueryBuilder<TQuery, T>
       ParameterExpression parameter,
       object? value,
       SyntaxNode op,
-      ValueExpressionSyntax valueExpression,
-      bool isConvertable);
+      ValueExpressionSyntax valueExpression);
 
    protected abstract TQuery CombineWithAndOperator(TQuery left, TQuery right);
 
@@ -160,28 +159,27 @@ internal abstract class BaseQueryBuilder<TQuery, T>
       if (mapper.Configuration.AllowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
          value = null;
 
-      var isConvertable = true;
-
       // type fixer
-      if (value is not null && body.Type != value.GetType())
+      // Check if body.Type is a nullable type and get its underlying type issue #134
+      var underlyingBodyType = Nullable.GetUnderlyingType(body.Type);
+      if (value is string strValue && (underlyingBodyType ?? body.Type) != strValue.GetType())
       {
          // handle bool, github issue #71
-         if (body.Type == typeof(bool) && value is "true" or "false" or "1" or "0")
-            value = ((string)value).ToLower() is "1" or "true";
+         if (body.Type == typeof(bool) && strValue is "true" or "false" or "1" or "0")
+            value = strValue.ToLower() is "1" or "true";
          // handle broken guids,  github issue #2
-         else if (body.Type == typeof(Guid) && !Guid.TryParse(value.ToString(), out _)) value = Guid.NewGuid().ToString();
+         else if (body.Type == typeof(Guid) && !Guid.TryParse(strValue, out _)) value = Guid.NewGuid().ToString();
 
          var converter = TypeDescriptor.GetConverter(body.Type);
-         isConvertable = converter.CanConvertFrom(typeof(string));
-         if (isConvertable)
+         if (converter.CanConvertFrom(typeof(string)))
          {
             try
             {
-               value = converter.ConvertFromString(value.ToString()!);
+               value = converter.ConvertFromString(value.ToString());
             }
             catch (ArgumentException)
             {
-               isConvertable = false;
+               // we can ignore and continue
             }
             catch (FormatException)
             {
@@ -201,7 +199,7 @@ internal abstract class BaseQueryBuilder<TQuery, T>
          body = Expression.Call(body, GetToLowerMethod());
       }
 
-      var query = BuildQueryAccordingToValueType(body, parameter, value, op, valueExpression, isConvertable);
+      var query = BuildQueryAccordingToValueType(body, parameter, value, op, valueExpression);
       return query;
    }
 

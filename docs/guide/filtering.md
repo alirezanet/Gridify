@@ -70,14 +70,14 @@ before them. having this regex could be helpful `([(),|]|\/i)`.
 JavaScript escape example:
 
 ``` javascript
-let esc = (v) => v.replace(/([(),|]|\/i)/g, '\\$1')
+let esc = (v) => v.replace(/([(),|\\]|\/i)/g, '\\$1')
 ```
 
 Csharp escape example:
 
 ``` csharp
 var value = "(test,test2)";
-var esc = Regex.Replace(value, "([(),|]|\/i)", "\\$1" );
+var esc = Regex.Replace(value, "([(),|\\]|\/i)", "\\$1" );
 // esc = \(test\,test2\)
 ```
 
@@ -136,11 +136,33 @@ class RegexMatchOperator : IGridifyOperator
       return (prop, value) => Regex.IsMatch(prop.ToString(), value.ToString());
    }
 }
+
+```
+- InOperator Example:
+
+```csharp
+class InOperator: IGridifyOperator
+{
+   public string GetOperator()
+   {
+      return "#In";
+   }
+
+   public Expression<OperatorParameter> OperatorHandler()
+   {
+      return (prop, value) => value.ToString()
+         .Split(";",StringSplitOptions.RemoveEmptyEntries)
+         .Contains(prop.ToString());
+   }
+}
+
+// usage: .ApplyFiltering("name #In John;David;Felipe")
 ```
 
 Registration Example:
 
 ```csharp
- GridifyGlobalConfiguration.CustomOperators.Register(new FreeTextOperator());
- GridifyGlobalConfiguration.CustomOperators.Register(new RegexMatchOperator());
+ GridifyGlobalConfiguration.CustomOperators.Register<FreeTextOperator>();
+ GridifyGlobalConfiguration.CustomOperators.Register<RegexMatchOperator>();
+ GridifyGlobalConfiguration.CustomOperators.Register<InOperator>();
 ```

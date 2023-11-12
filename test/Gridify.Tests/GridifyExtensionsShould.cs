@@ -1,9 +1,9 @@
 #nullable enable
+using Gridify.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Gridify.Syntax;
 using Xunit;
 
 namespace Gridify.Tests;
@@ -51,6 +51,7 @@ public class GridifyExtensionsShould
       lst.Add(new TestClass(26, "/iCase", null));
       lst.Add(new TestClass(27, "ali reza", null));
       lst.Add(new TestClass(27, "[ali]", null));
+      lst.Add(new TestClass(28, @"Esc/\pe", null));
 
       return lst;
    }
@@ -506,6 +507,19 @@ public class GridifyExtensionsShould
    }
 
    [Fact]
+   public void ApplyFiltering_EscapeEscapeCharacter()
+   {
+      var actual = _fakeRepository.AsQueryable()
+         .ApplyFiltering(@"Name=Esc/\\pe")
+         .ToList();
+
+      var expected = _fakeRepository.Where(q => q.Name == @"Esc/\pe").ToList();
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
+
+   [Fact]
    public void ApplyFiltering_CaseInsensitiveOperatorAtTheBeginningOfValue_ShouldIgnore()
    {
       var actual = _fakeRepository.AsQueryable()
@@ -678,6 +692,28 @@ public class GridifyExtensionsShould
          return (prop, value) => prop.Equals(value.ToString()!.ToUpper());
       }
    }
+
+
+
+   /// <summary>
+   /// we need to use this class only once, to avoid concurrency problems
+   /// </summary>
+   private class TestOperator : UpperCaseEqual
+   {
+   };
+
+   [Fact]
+   public void CustomOperator_GenericRegisterAndRemove_ShouldNotThrowAnyException()
+   {
+      GridifyGlobalConfiguration.CustomOperators.Register<TestOperator>();
+
+      Assert.Single(GridifyGlobalConfiguration.CustomOperators.Operators.Where(q => q is TestOperator));
+
+      GridifyGlobalConfiguration.CustomOperators.Remove<TestOperator>();
+
+      Assert.Empty(GridifyGlobalConfiguration.CustomOperators.Operators.Where(q => q is TestOperator));
+   }
+
 
    [Fact]
    public void ApplyFiltering_CustomOperator()

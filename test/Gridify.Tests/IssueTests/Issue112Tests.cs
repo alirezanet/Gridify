@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using Gridify.Syntax;
 using Xunit;
 
-namespace Gridify.Tests;
+namespace Gridify.Tests.IssueTests;
 
 public class Issue112Tests
 {

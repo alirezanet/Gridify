@@ -4,8 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
 
-
-namespace Gridify.Tests;
+namespace Gridify.Tests.IssueTests;
 
 // Related to Issue #75
 public class Issue75Tests

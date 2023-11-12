@@ -54,6 +54,14 @@ Check out our docs at [https://alirezanet.github.io/Gridify/](https://alirezanet
 
 We welcome contributions! Feel free to send us a pull request. Check out our [Contribution Page](https://alirezanet.github.io/Gridify/contribution) for more information.
 
+## Contributors
+
+Thank you to everyone who has contributed to the Gridify codebase. We appreciate you!
+
+<a href="https://github.com/alirezanet/gridify/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=alirezanet/gridify" />
+</a>
+
 ## License
 
 This project is licensed under the [MIT License](https://github.com/alirezanet/gridify/blob/master/LICENSE).
