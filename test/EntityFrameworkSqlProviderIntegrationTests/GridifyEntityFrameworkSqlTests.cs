@@ -12,12 +12,7 @@ namespace EntityFrameworkIntegrationTests.cs;
 
 public class GridifyEntityFrameworkTests
 {
-   private readonly MyDbContext _dbContext;
-
-   public GridifyEntityFrameworkTests()
-   {
-      _dbContext = new MyDbContext();
-   }
+   private readonly MyDbContext _dbContext = new();
 
    // issue #24,
    // https://github.com/alirezanet/Gridify/issues/24
@@ -83,11 +78,14 @@ public class GridifyEntityFrameworkTests
    [Fact]
    public void ApplyFiltering_EFFunction_FreeTextOperator()
    {
-      var op = new FreeTextOperator();
-      GridifyGlobalConfiguration.CustomOperators.Register(op);
+      GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+      GridifyGlobalConfiguration.CustomOperators.Register<FreeTextOperator>();
 
       // Arrange
-      var expected = _dbContext.Users.Where(q => EF.Functions.FreeText(q.Name, "test")).ToQueryString();
+      // ReSharper disable once InconsistentNaming (needed for the test)
+      // ReSharper disable once ConvertToConstant.Local
+      var ToString = "test";
+      var expected = _dbContext.Users.Where(q => EF.Functions.FreeText(q.Name, ToString)).ToQueryString();
 
       // Act
       var actual = _dbContext.Users.ApplyFiltering("name #=* test").ToQueryString();
@@ -96,7 +94,7 @@ public class GridifyEntityFrameworkTests
       Assert.Equal(expected, actual);
 
       // Cleanup
-      GridifyGlobalConfiguration.CustomOperators.Remove(op.GetOperator());
+      GridifyGlobalConfiguration.CustomOperators.Remove<FreeTextOperator>();
    }
 
    internal class FreeTextOperator : IGridifyOperator
