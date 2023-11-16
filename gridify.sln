@@ -1,33 +1,31 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0FCD2937-1953-465E-8608-42B8EB8757C7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{1BBCBA37-25E5-4BFF-A8E8-7EE582E0317F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFramework6IntegrationTests", "test\EntityFramework6IntegrationTests\EntityFramework6IntegrationTests.csproj", "{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gridify", "src\Gridify\Gridify.csproj", "{833CCD80-4261-405A-8A4A-BD9B3C375496}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gridify", "src\Gridify\Gridify.csproj", "{833CCD80-4261-405A-8A4A-BD9B3C375496}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gridify.EntityFramework", "src\Gridify.EntityFramework\Gridify.EntityFramework.csproj", "{D1296959-F923-44B6-A8F9-967D5FB7C4C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gridify.EntityFramework", "src\Gridify.EntityFramework\Gridify.EntityFramework.csproj", "{D1296959-F923-44B6-A8F9-967D5FB7C4C1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmark", "benchmark", "{41676937-4F05-4794-A2E5-442127927776}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gridify.Tests", "test\Gridify.Tests\Gridify.Tests.csproj", "{6CCEB3F3-2A8A-4790-8DB7-C912509ADFDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gridify.Tests", "test\Gridify.Tests\Gridify.Tests.csproj", "{6CCEB3F3-2A8A-4790-8DB7-C912509ADFDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "benchmark\Benchmark.csproj", "{02F96021-6989-4F09-919D-999F0BE3DEFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark", "benchmark\Benchmark.csproj", "{02F96021-6989-4F09-919D-999F0BE3DEFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkIntegrationTests.cs", "test\EntityFrameworkIntegrationTests\EntityFrameworkIntegrationTests.cs.csproj", "{9A54A635-2B5B-4EDC-98FE-9BF963903BD4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkIntegrationTests.cs", "test\EntityFrameworkIntegrationTests\EntityFrameworkIntegrationTests.cs.csproj", "{9A54A635-2B5B-4EDC-98FE-9BF963903BD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkSqlProviderIntegrationTests", "test\EntityFrameworkSqlProviderIntegrationTests\EntityFrameworkSqlProviderIntegrationTests.csproj", "{3B9A8E46-1D4D-40EE-89C0-C3C376D9320A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkSqlProviderIntegrationTests", "test\EntityFrameworkSqlProviderIntegrationTests\EntityFrameworkSqlProviderIntegrationTests.csproj", "{3B9A8E46-1D4D-40EE-89C0-C3C376D9320A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkPostgreSqlIntegrationTests", "test\EntityFrameworkPostgreSqlIntegrationTests\EntityFrameworkPostgreSqlIntegrationTests.csproj", "{7C6699E7-7B6E-48D4-920F-6DD3568FBFD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityFrameworkPostgreSqlIntegrationTests", "test\EntityFrameworkPostgreSqlIntegrationTests\EntityFrameworkPostgreSqlIntegrationTests.csproj", "{7C6699E7-7B6E-48D4-920F-6DD3568FBFD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gridify.Elasticsearch", "src\Gridify.Elasticsearch\Gridify.Elasticsearch.csproj", "{21A86C33-1E72-4771-9C40-73EF9A21AFD5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gridify.Elasticsearch", "src\Gridify.Elasticsearch\Gridify.Elasticsearch.csproj", "{21A86C33-1E72-4771-9C40-73EF9A21AFD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gridify.Elasticsearch.Tests", "test\Gridify.Elasticsearch.Tests\Gridify.Elasticsearch.Tests.csproj", "{08E66DC6-A741-49D2-978B-E644EF3A5BA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gridify.Elasticsearch.Tests", "test\Gridify.Elasticsearch.Tests\Gridify.Elasticsearch.Tests.csproj", "{08E66DC6-A741-49D2-978B-E644EF3A5BA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,17 +36,7 @@ Global
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Release|x64.ActiveCfg = Release|Any CPU
-		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Release|x86.ActiveCfg = Release|Any CPU
-		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{833CCD80-4261-405A-8A4A-BD9B3C375496}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{833CCD80-4261-405A-8A4A-BD9B3C375496}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{833CCD80-4261-405A-8A4A-BD9B3C375496}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -158,8 +146,10 @@ Global
 		{08E66DC6-A741-49D2-978B-E644EF3A5BA8}.Release|x86.ActiveCfg = Release|Any CPU
 		{08E66DC6-A741-49D2-978B-E644EF3A5BA8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{CDFDBB16-1D9F-40FD-B693-96D1D4FB79EE} = {1BBCBA37-25E5-4BFF-A8E8-7EE582E0317F}
 		{833CCD80-4261-405A-8A4A-BD9B3C375496} = {0FCD2937-1953-465E-8608-42B8EB8757C7}
 		{D1296959-F923-44B6-A8F9-967D5FB7C4C1} = {0FCD2937-1953-465E-8608-42B8EB8757C7}
 		{6CCEB3F3-2A8A-4790-8DB7-C912509ADFDE} = {1BBCBA37-25E5-4BFF-A8E8-7EE582E0317F}
