@@ -18,7 +18,7 @@
       <SymbolPackageFormat>snupkg</SymbolPackageFormat>
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
       <PackageReadmeFile>README.md</PackageReadmeFile>
-      <TargetFrameworks>net5.0;net6.0;netstandard2.0;netstandard2.1;net7.0</TargetFrameworks>
+      <TargetFrameworks>net6.0;netstandard2.0;netstandard2.1;net7.0;net8.0</TargetFrameworks>
 
    </PropertyGroup>
 
@@ -36,10 +36,6 @@
 
    <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[6.0.0,8.0.0)" />
-   </ItemGroup>
-
-   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[5.0.0,6.0.0)" />
    </ItemGroup>
 
    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
