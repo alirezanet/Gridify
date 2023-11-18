@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
    <PropertyGroup>
       <PackageId>Gridify.EntityFramework</PackageId>
-      <Version>2.13.1</Version>
+      <Version>2.14.0</Version>
       <Authors>Alireza Sabouri</Authors>
       <Company>TuxTeam</Company>
       <PackageDescription>Gridify (EntityFramework), Easy and optimized way to apply Filtering, Sorting, and Pagination using text-based data.</PackageDescription>
