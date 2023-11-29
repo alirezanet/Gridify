@@ -56,7 +56,7 @@ available [Here](https://github.com/alirezanet/Gridify/blob/master/benchmark/Lib
 :::
 
 <style scoped>
-   tr:nth-child(2) {
+   tr:nth-child(1) {
       color: #42b983;
    }
 </style>
