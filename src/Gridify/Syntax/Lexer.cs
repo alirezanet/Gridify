@@ -1,20 +1,21 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace Gridify.Syntax;
 
-internal class Lexer
+internal ref struct Lexer
 {
    private readonly List<string> _diagnostics = new();
-   private readonly string _text;
+   private readonly ReadOnlySpan<char> _text;
    private readonly IEnumerable<IGridifyOperator> _customOperators;
    private int _position;
    private bool _waitingForValue;
 
    public Lexer(string text, IEnumerable<IGridifyOperator> customOperators)
    {
-      _text = text;
+      _text = text.AsSpan();
       _customOperators = customOperators;
    }
 
@@ -120,9 +121,11 @@ internal class Lexer
             foreach (var cOp in _customOperators)
             {
                var op = cOp.GetOperator();
-               if (op != _text.Substring(_position, op.Length)) continue;
+               var opSlice = op.AsSpan();
+               if (!opSlice.SequenceEqual(_text.Slice(_position, opSlice.Length))) continue;
+
                var start = _position;
-               _position += op.Length;
+               _position += opSlice.Length;
                _waitingForValue = true;
                return new SyntaxToken(SyntaxKind.CustomOperator, start, op);
             }
@@ -140,9 +143,9 @@ internal class Lexer
             Next();
 
          var length = _position - start;
-         var text = _text.Substring(start, length);
+         var text = _text.Slice(start, length);
 
-         return new SyntaxToken(SyntaxKind.WhiteSpace, start, text);
+         return new SyntaxToken(SyntaxKind.WhiteSpace, start, text.ToString());
       }
 
       if (TryToReadTheValue(out var valueToken)) return valueToken!;
@@ -155,12 +158,12 @@ internal class Lexer
             Next();
 
          var length = _position - start;
-         var text = _text.Substring(start, length);
+         var text = _text.Slice(start, length);
 
          if (Current == ']')
          {
             _position++;
-            return new SyntaxToken(SyntaxKind.FieldIndexToken, start, text);
+            return new SyntaxToken(SyntaxKind.FieldIndexToken, start, text.ToString());
          }
 
          _diagnostics.Add($"bad character input: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
@@ -175,9 +178,9 @@ internal class Lexer
             Next();
 
          var length = _position - start;
-         var text = _text.Substring(start, length);
+         var text = _text.Slice(start, length);
 
-         return new SyntaxToken(SyntaxKind.FieldToken, start, text);
+         return new SyntaxToken(SyntaxKind.FieldToken, start, text.ToString());
       }
 
       _diagnostics.Add($"bad character input: '{Current.ToString()}', at index {_position.ToString()}");
@@ -189,8 +192,6 @@ internal class Lexer
       if (_waitingForValue)
       {
          var start = _position;
-
-         var exitCharacters = new[] { '(', ')', ',', '|' };
 
          var isPreviousEscapeChar = false;
          while (_position < _text.Length &&
@@ -205,7 +206,7 @@ internal class Lexer
             {
                isPreviousEscapeChar = true;
             }
-            else if (exitCharacters.Contains(Current))
+            else if (Current is '(' or ')' or ',' or '|')
             {
                break;
             }

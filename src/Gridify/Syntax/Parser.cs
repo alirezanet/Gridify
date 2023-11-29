@@ -9,22 +9,22 @@ internal class Parser
    private readonly SyntaxToken[] _tokens;
    private int _position;
 
-   private readonly SyntaxKind[] _operators =
+   private static bool IsOperator(SyntaxKind kind)
    {
-      SyntaxKind.Equal,
-      SyntaxKind.Like,
-      SyntaxKind.NotEqual,
-      SyntaxKind.NotLike,
-      SyntaxKind.GreaterThan,
-      SyntaxKind.LessThan,
-      SyntaxKind.GreaterOrEqualThan,
-      SyntaxKind.LessOrEqualThan,
-      SyntaxKind.StartsWith,
-      SyntaxKind.EndsWith,
-      SyntaxKind.NotStartsWith,
-      SyntaxKind.NotEndsWith,
-      SyntaxKind.CustomOperator
-   };
+      return kind is SyntaxKind.Equal or
+         SyntaxKind.Like or
+         SyntaxKind.NotEqual or
+         SyntaxKind.NotLike or
+         SyntaxKind.GreaterThan or
+         SyntaxKind.LessThan or
+         SyntaxKind.GreaterOrEqualThan or
+         SyntaxKind.LessOrEqualThan or
+         SyntaxKind.StartsWith or
+         SyntaxKind.EndsWith or
+         SyntaxKind.NotStartsWith or
+         SyntaxKind.NotEndsWith or
+         SyntaxKind.CustomOperator;
+   }
 
    public Parser(string text, IEnumerable<IGridifyOperator> customOperators)
    {
@@ -68,7 +68,7 @@ internal class Parser
             return SyntaxKind.FieldToken;
          default:
          {
-            if (_operators.Contains(kind) || kind == SyntaxKind.BinaryExpression)
+            if (IsOperator(kind) || kind == SyntaxKind.BinaryExpression)
                return SyntaxKind.ValueToken;
 
             return SyntaxKind.End;
@@ -79,13 +79,8 @@ internal class Parser
    private ExpressionSyntax ParseTerm()
    {
       var left = ParseFactor();
-      var binaryKinds = new[]
-      {
-         SyntaxKind.And,
-         SyntaxKind.Or
-      };
 
-      while (binaryKinds.Contains(Current.Kind))
+      while (Current.Kind is SyntaxKind.And or SyntaxKind.Or)
       {
          var operatorToken = NextToken();
          var right = ParseFactor();
@@ -99,8 +94,7 @@ internal class Parser
    {
       var left = ParsePrimaryExpression();
 
-
-      while (_operators.Contains(Current.Kind))
+      while (IsOperator(Current.Kind))
       {
          var operatorToken = NextToken();
          var right = ParseValueExpression();
