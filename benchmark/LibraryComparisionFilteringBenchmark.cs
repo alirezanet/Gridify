@@ -135,18 +135,18 @@ public class LibraryComparisionFilteringBenchmark
    }
 }
 
-// BenchmarkDotNet=v0.13.1, OS=Windows 10.0.22000
-// 11th Gen Intel Core i5-11400F 2.60GHz, 1 CPU, 12 logical and 6 physical cores
-//    .NET SDK=6.0.100
-//    [Host]     : .NET 6.0.0 (6.0.21.52210), X64 RyuJIT
-// DefaultJob : .NET 6.0.0 (6.0.21.52210), X64 RyuJIT
+// BenchmarkDotNet v0.13.10, Windows 11 (10.0.22621.2715/22H2/2022Update/SunValley2)
+// 12th Gen Intel Core i7-12800H, 1 CPU, 20 logical and 14 physical cores
+//    .NET SDK 8.0.100
+//    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+// DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
 //
 //
-//    |           Method |         Mean |       Error |      StdDev |  Ratio | RatioSD |     Gen 0 |     Gen 1 | Allocated |
-//    |----------------- |-------------:|------------:|------------:|-------:|--------:|----------:|----------:|----------:|
-//    |      Native_LINQ |     806.3 us |     4.89 us |     4.57 us |   1.00 |    0.00 |    4.8828 |    1.9531 |     35 KB |
-//    |          Gridify |     839.6 us |     5.69 us |     4.75 us |   1.04 |    0.01 |    5.8594 |    2.9297 |     39 KB |
-//    |      DynamicLinq |     973.8 us |     8.65 us |     6.75 us |   1.21 |    0.01 |   19.5313 |    9.7656 |    123 KB |
-//    |            Sieve |   1,299.7 us |    12.74 us |    11.29 us |   1.61 |    0.02 |    7.8125 |    3.9063 |     53 KB |
-//    |              Fop |   3,498.6 us |    29.45 us |    26.11 us |   4.34 |    0.03 |   54.6875 |   27.3438 |    348 KB |
-//    | CSharp_Scripting | 231,510.6 us | 4,406.95 us | 4,122.26 us | 287.13 |    5.12 | 3000.0000 | 1000.0000 | 24,198 KB |
+//    | Method           | Mean         | Error       | StdDev      | Ratio  | RatioSD | Gen0      | Gen1     | Allocated   | Alloc Ratio |
+//    |----------------- |-------------:|------------:|------------:|-------:|--------:|----------:|---------:|------------:|------------:|
+//    | Gridify          |     599.8 us |     2.76 us |     2.45 us |   0.92 |    0.01 |    2.9297 |   1.9531 |    36.36 KB |        1.11 |
+//    | Native_LINQ      |     649.9 us |     2.55 us |     2.38 us |   1.00 |    0.00 |    1.9531 |   0.9766 |    32.74 KB |        1.00 |
+//    | DynamicLinq      |     734.8 us |    13.90 us |    13.01 us |   1.13 |    0.02 |    7.8125 |   5.8594 |    119.4 KB |        3.65 |
+//    | Sieve            |   1,190.9 us |     7.41 us |     6.93 us |   1.83 |    0.01 |    3.9063 |   1.9531 |    53.05 KB |        1.62 |
+//    | Fop              |   2,637.6 us |     8.59 us |     7.61 us |   4.06 |    0.02 |   23.4375 |  19.5313 |   321.57 KB |        9.82 |
+//    | CSharp_Scripting | 216,863.8 us | 4,295.66 us | 6,021.92 us | 336.64 |   10.49 | 1500.0000 | 500.0000 | 23660.26 KB |      722.71 |

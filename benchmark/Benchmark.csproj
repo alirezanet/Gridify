@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="AutoBogus" Version="2.13.1" />
       <PackageReference Include="BenchmarkDotNet" Version="0.13.10" />
       <PackageReference Include="Fop" Version="1.0.3" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.7.0" />
