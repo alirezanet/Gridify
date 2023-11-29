@@ -87,23 +87,26 @@ var query = myDbContext.Persons.ApplyFiltering("name == John");
 
 ---
 
-## Performance comparison
+## Performance Comparison
 
-Filtering is the most expensive feature in gridify. the below benchmark is comparing filtering in the most known dynamic linq libraries. as you can see, gridify has the closest result to the native linq.
-also, I Should note other features like Pagination and Sorting has almost zero overhead in Gridify.
+Filtering is the most resource-intensive feature in Gridify.
+The following benchmark compares the filtering in various popular dynamic LINQ libraries.
+Interestingly, Gridify outperforms even Native LINQ in terms of speed.
+It's worth mentioning that other features like Pagination and Sorting in Gridify have minimal impact on performance.
 
-BenchmarkDotNet=v0.13.0, OS=Windows 10.0.19043.1110 (21H1/May2021Update)
-11th Gen Intel Core i5-11400F 2.60GHz, 1 CPU, 12 logical and 6 physical cores
-.NET SDK=5.0.301
-[Host]     : .NET 5.0.7 (5.0.721.25508), X64 RyuJIT
+BenchmarkDotNet v0.13.10, Windows 11 (10.0.22621.2715/22H2/2022Update/SunValley2)
+12th Gen Intel Core i7-12800H, 1 CPU, 20 logical and 14 physical cores
+.NET SDK 8.0.100
+[Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
 
-
-|      Method |       Mean |    Error |   StdDev | Ratio | RatioSD |   Gen 0 |  Gen 1 | Allocated |
-|------------ |-----------:|---------:|---------:|------:|--------:|--------:|-------:|----------:|
-| Native Linq |   869.3 us | 10.54 us |  9.86 us |  1.00 |    0.00 |  5.8594 | 2.9297 |     36 KB |
-|     Gridify |   928.1 us | 13.41 us | 11.89 us |  1.07 |    0.02 |  6.8359 | 2.9297 |     46 KB |
-|Dynamic Linq | 1,068.5 us | 10.66 us |  9.97 us |  1.23 |    0.02 | 19.5313 | 9.7656 |    122 KB |
-|       Sieve | 1,126.8 us | 10.73 us | 10.04 us |  1.30 |    0.02 |  8.7891 | 3.9063 |     54 KB |
+| Method           | Mean         | Error       | StdDev      | Ratio  | Allocated   | Alloc Ratio |
+|----------------- |-------------:|------------:|------------:|-------:|------------:|------------:|
+| Gridify          |     599.8 us |     2.76 us |     2.45 us |   0.92 |    36.36 KB |        1.11 |
+| Native_LINQ      |     649.9 us |     2.55 us |     2.38 us |   1.00 |    32.74 KB |        1.00 |
+| DynamicLinq      |     734.8 us |    13.90 us |    13.01 us |   1.13 |    119.4 KB |        3.65 |
+| Sieve            |   1,190.9 us |     7.41 us |     6.93 us |   1.83 |    53.05 KB |        1.62 |
+| Fop              |   2,637.6 us |     8.59 us |     7.61 us |   4.06 |   321.57 KB |        9.82 |
+| CSharp_Scripting | 216,863.8 us | 4,295.66 us | 6,021.92 us | 336.64 | 23660.26 KB |      722.71 |
 
 ---
 
