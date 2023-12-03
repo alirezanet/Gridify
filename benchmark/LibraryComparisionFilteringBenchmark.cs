@@ -64,6 +64,14 @@ public class LibraryComparisionFilteringBenchmark
    }
 
    [Benchmark]
+   public void Gridify_WithoutMapper()
+   {
+      Ds.ApplyFiltering("Name=*a").Consume(Consumer);
+      Ds.ApplyFiltering("Id>5").Consume(Consumer);
+      Ds.ApplyFiltering("Name=Ali").Consume(Consumer);
+   }
+
+   [Benchmark]
    public void Fop()
    {
       // fop doesn't have filtering only feature?
