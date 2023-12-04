@@ -39,17 +39,17 @@
    </ItemGroup>
 
    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[2.1.0,3.0.0)" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2" />
    </ItemGroup>
 
    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
       <PackageReference Include="System.Memory" Version="4.5.4" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[2.0.0,3.0.0)" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2" />
    </ItemGroup>
 
    <ItemGroup>
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-     
+
       <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
    </ItemGroup>
 
