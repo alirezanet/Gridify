@@ -175,7 +175,7 @@ internal abstract class BaseQueryBuilder<TQuery, T>
          {
             try
             {
-               value = converter.ConvertFromString(value.ToString());
+               value = converter.ConvertFromString(value.ToString()!);
             }
             catch (ArgumentException)
             {

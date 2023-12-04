@@ -30,21 +30,21 @@ public class MyDbContext : DbContext
 public class User
 {
    public int Id { get; set; }
-   public string Name { get; set; }
+   public string Name { get; set; } = string.Empty;
    public DateTime? CreateDate { get; set; }
    public Guid FkGuid { get; set; }
 }
 public class Products
 {
    public int Id { get; set; }
-   public string Name { get; set; }
+   public string Name { get; set; } = string.Empty;
 
    [Column(TypeName = "jsonb")]
-   public IEnumerable<ProductUser> Users { get; set; }
+   public IEnumerable<ProductUser> Users { get; set; } = Enumerable.Empty<ProductUser>();
 }
 
 public class ProductUser
 {
    public int Id { get; set; }
-   public string Name { get; set; }
+   public string Name { get; set; } = string.Empty;
 }

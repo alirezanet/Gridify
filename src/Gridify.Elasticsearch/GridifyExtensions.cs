@@ -260,7 +260,7 @@ public static class GridifyExtensions
       if (string.IsNullOrWhiteSpace(ordering))
          return new List<SortOptions>();
 
-      var sortOptions = new ElasticsearchSortOptionsBuilder<T>(mapper).Build(ordering);
+      var sortOptions = new ElasticsearchSortOptionsBuilder<T>(mapper).Build(ordering!);
       return sortOptions;
    }
 }

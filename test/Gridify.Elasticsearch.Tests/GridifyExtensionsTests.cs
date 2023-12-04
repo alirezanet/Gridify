@@ -431,7 +431,7 @@ public class GridifyExtensionsTests
       var mapper = new GridifyMapper<TestClass>()
          .GenerateMappings()
          .AddMap("name", x => x.Name)
-         .AddMap("childname", x => x.ChildClass.Name);
+         .AddMap("childname", x => x.ChildClass!.Name);
 
       AssertFilter(filter, expected, mapper);
    }
@@ -499,7 +499,7 @@ public class GridifyExtensionsTests
       {
          Configuration = { CustomElasticsearchNamingAction = namingAction }
       };
-      mapper.AddMap("childName", x => x.ChildClass.Name);
+      mapper.AddMap("childName", x => x.ChildClass!.Name);
 
       AssertFilter(filter, expected, mapper);
    }
@@ -533,7 +533,7 @@ public class GridifyExtensionsTests
       var mapper = new GridifyMapper<TestClass>()
          .GenerateMappings()
          .AddMap("name", x => x.Name)
-         .AddMap("childname", x => x.ChildClass.Name);
+         .AddMap("childname", x => x.ChildClass!.Name);
 
       AssertOrdering(ordering, expected, mapper);
    }
@@ -593,7 +593,7 @@ public class GridifyExtensionsTests
       {
          Configuration = { CustomElasticsearchNamingAction = namingAction }
       };
-      mapper.AddMap("childName", x => x.ChildClass.Name);
+      mapper.AddMap("childName", x => x.ChildClass!.Name);
 
       AssertOrdering(ordering, expected, mapper);
    }

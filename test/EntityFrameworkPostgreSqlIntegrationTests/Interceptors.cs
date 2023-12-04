@@ -28,7 +28,7 @@ public class SuppressConnectionInterceptor : DbConnectionInterceptor
 public class EmptyMessageDataReader : DbDataReader
 {
 
-   private readonly List<User> _users = new List<User>();
+   private readonly List<User> _users = new();
 
    public EmptyMessageDataReader()
    {
@@ -67,13 +67,13 @@ public class EmptyMessageDataReader : DbDataReader
    public override byte GetByte(int ordinal)
       => 0;
 
-   public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length)
+   public override long GetBytes(int ordinal, long dataOffset, byte[]? buffer, int bufferOffset, int length)
       => 0;
 
    public override char GetChar(int ordinal)
       => '\0';
 
-   public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length)
+   public override long GetChars(int ordinal, long dataOffset, char[]? buffer, int bufferOffset, int length)
       => 0;
 
    public override string GetDataTypeName(int ordinal)
