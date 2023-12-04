@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
    <PropertyGroup>
       <PackageId>Gridify.Elasticsearch</PackageId>
-      <Version>2.14.0</Version>
+      <Version>2.14.1</Version>
       <Authors>Alireza Sabouri; Dzmitry Koush</Authors>
       <PackageDescription>Gridify (Elasticsearch), Easy way to apply Filtering, Sorting, and Pagination using text-based data.</PackageDescription>
       <RepositoryUrl>https://github.com/alirezanet/Gridify</RepositoryUrl>
