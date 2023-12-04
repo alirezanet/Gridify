@@ -54,9 +54,3 @@ BenchmarkDotNet v0.13.10, Windows 11 (10.0.22621.2715/22H2/2022Update/SunValley2
 This Benchmark is
 available [Here](https://github.com/alirezanet/Gridify/blob/master/benchmark/LibraryComparisionFilteringBenchmark.cs)
 :::
-
-<style scoped>
-   tr:nth-child(1) {
-      color: #42b983;
-   }
-</style>

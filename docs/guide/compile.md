@@ -43,5 +43,5 @@ This is the performance improvement example when you use a compiled expression.
 | Method          |       Mean | Ratio | RatioSD |  Gen 0 |  Gen 1 | Allocated |
 |-----------------|-----------:|------:|--------:|-------:|-------:|----------:|
 | GridifyCompiled |   1.008 us | 0.001 |    0.00 | 0.1564 |      - |     984 B |
-| NativeLINQ      | 724.329 us | 1.000 |    0.00 | 5.8594 | 2.9297 |  37,392 B |
-| Gridify         | 736.854 us | 1.018 |    0.01 | 5.8594 | 2.9297 |  39,924 B |
+| Gridify         | 689.329 us | 1.000 |    0.00 | 5.8594 | 2.9297 |  39,924 B |
+| NativeLINQ      | 736.854 us | 1.019 |    0.01 | 5.8594 | 2.9297 |  37,392 B |
