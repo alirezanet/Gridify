@@ -1,0 +1,1 @@
+const e={key:"v-54ce4204",path:"/guide/elasticsearch/",title:"Introduction",lang:"en-US",frontmatter:{},excerpt:"",headers:[{level:2,title:"Features",slug:"features",children:[]},{level:2,title:"Examples",slug:"examples",children:[]}],git:{updatedTime:1698406141e3},filePathRelative:"guide/elasticsearch/README.md"};export{e as data};

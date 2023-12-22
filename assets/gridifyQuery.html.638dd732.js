@@ -1,0 +1,1 @@
+const e={key:"v-0fd2003b",path:"/guide/gridifyQuery.html",title:"GridifyQuery",lang:"en-US",frontmatter:{},excerpt:"",headers:[{level:2,title:"IsValid",slug:"isvalid",children:[]},{level:2,title:"GetFilteringExpression",slug:"getfilteringexpression",children:[]}],git:{updatedTime:1698406141e3},filePathRelative:"guide/gridifyQuery.md"};export{e as data};
