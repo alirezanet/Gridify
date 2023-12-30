@@ -3,16 +3,23 @@ name: docs
 on:
   # trigger deployment on every push to main branch
   push:
-    branches: [master]
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+
   # trigger deployment manually
   workflow_dispatch:
 
 jobs:
   docs:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           # fetch all commits to get last updated time or other git log info
           fetch-depth: 0
@@ -40,18 +47,18 @@ jobs:
         run: yarn --frozen-lockfile
 
       # run build script
-      - name: Build VuePress site
-        run: yarn docs:build
+      - name: Build documentation site
+        run: yarn build
 
       # please check out the docs of the workflow for more details
       # @see https://github.com/crazy-max/ghaction-github-pages
       - name: Deploy to GitHub Pages
-        uses: crazy-max/ghaction-github-pages@v2
+        uses: crazy-max/ghaction-github-pages@v4
         with:
           # deploy to gh-pages branch
           target_branch: gh-pages
-          # deploy the default output dir of VuePress
-          build_dir: docs/.vuepress/dist
+          # deploy the default output dir of Vitepress
+          build_dir: dist
         env:
           # @see https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
