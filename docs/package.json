@@ -1,0 +1,17 @@
+{
+   "name": "gridify",
+   "version": "2.0.0",
+   "description": "Gridify documentation",
+   "author": "AliReZa Sabouri",
+   "repository": "https://github.com/alirezanet/Gridify.git",
+   "license": "MIT",
+   "devDependencies": {
+      "vitepress": "^1.0.0-rc.26",
+      "vue": "^3.3.8"
+   },
+   "scripts": {
+      "dev": "vitepress dev",
+      "build": "vitepress build",
+      "preview": "vitepress preview"
+   }
+}
