@@ -25,7 +25,7 @@ export const theme: DefaultTheme.Config = {
     { icon: "discord", link: "https://discord.gg/Q6HvFGPm" },
   ],
   editLink: {
-    pattern: 'https://github.com/alirezanet/Gridify/edit/master/docs/:path',
+    pattern: 'https://github.com/alirezanet/Gridify/edit/master/docs/pages/:path',
   },
   // lastUpdated: LastUpdatedOptions
 }
