@@ -56,9 +56,9 @@ jobs:
         uses: crazy-max/ghaction-github-pages@v4
         with:
           # deploy to gh-pages branch
-          target_branch: gh-pages
+          target_branch: gh-pages2
           # deploy the default output dir of Vitepress
-          build_dir: dist
+          build_dir: docs/dist
         env:
           # @see https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
