@@ -16,6 +16,7 @@
 [![Gridify](https://raw.githubusercontent.com/alirezanet/Gridify/master/docs/.vuepress/public/gridify-readme-logo.svg)](https://alirezanet.github.io/Gridify/)
 
 ## Introduction
+
 Gridify is a dynamic LINQ library that simplifies the process of converting strings to LINQ queries. With exceptional performance and ease-of-use, Gridify makes it effortless to apply filtering, sorting, and pagination using text-based data.
 
 ## Features
@@ -32,6 +33,7 @@ Gridify is a dynamic LINQ library that simplifies the process of converting stri
 - Can be used on every collection that LINQ supports
 - Compatible with object-mappers like AutoMapper
 - Compatible with Elasticsearch
+- Javascript/Typescript client
 
 ## Documentation
 

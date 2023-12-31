@@ -31,6 +31,7 @@ export const sidebar: DefaultTheme.Sidebar = {
          items: [
             { text: 'EntityFramework', link: '/guide/extensions/entityframework' },
             { text: 'Elasticsearch', link: '/guide/extensions/elasticsearch' },
+            { text: 'Gridify Client (JS/TS)', link: '/guide/extensions/gridify-client' },
          ]
       },
       {
@@ -41,7 +42,7 @@ export const sidebar: DefaultTheme.Sidebar = {
             { text: 'AutoMapper', link: '/guide/autoMapper' },
          ]
       },
-     
+
    ],
-   
+
 }

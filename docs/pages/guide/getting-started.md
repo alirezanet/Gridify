@@ -5,33 +5,53 @@ There are three packages available for gridify in the nuget repository.
 
 - [Gridify](https://www.nuget.org/packages/Gridify/)
 - [Gridify.EntityFramework](https://www.nuget.org/packages/Gridify.EntityFramework/)
-- [Gridify.Elasticsearch](https://www.nuget.org/packages/Gridify.Elasticsearch/)
 
 ::: tip
 If you are using the Entity framework in your project, you should install the `Gridify.EntityFramework` package instead of `Gridify`.
 
 This package has the same functionality as the `Gridify` package, but it is designed to be more compatible with [Entity Framework](./extensions/entityframework).
-
-In order to use Gridify with Elasticsearch it's necessary to install `Gridify.Elasticsearch`. Please read [the separate thread of the documentation](./extensions/elasticsearch).
 :::
+
+---
+- [Gridify.Elasticsearch](https://www.nuget.org/packages/Gridify.Elasticsearch/)
+
+::: tip
+In order to use Gridify with Elasticsearch it's necessary to install [`Gridify.Elasticsearch`](./extensions/elasticsearch).
+:::
+
+---
+
+If you're developing in a JavaScript or TypeScript environment and need to create dynamic queries on the client side for server-side operations,
+Gridify also offer a lightweight client library. [gridify-client](./extensions/gridify-client)
+
+- [Gridify Client (JS/TS)](https://www.npmjs.com/package/gridify-client)
 
 ## Installation
 
-### Package Manager
+:::: code-group
 
-```shell-vue
-Install-Package Gridify -Version {{ $version }}
-```
-
-### .NET CLI
-
-```shell-vue
+```shell-vue [Gridify]
 dotnet add package Gridify --version {{ $version }}
 ```
+
+```shell-vue [Gridify.EntityFramework]
+dotnet add package Gridify.EntityFramework --version {{ $version }}
+```
+
+```shell-vue [Gridify.Elasticsearch]
+dotnet add package Gridify.Elasticsearch --version {{ $version }}
+```
+
+```shell-vue [Gridify Client (JS/TS)]
+npm i gridify-client
+```
+
+::::
 
 ## Namespace
 
 After installing the package, you can use the `Gridify` namespace to access the package classes and static Extension methods.
+
 
 ``` csharp
 using Gridify;

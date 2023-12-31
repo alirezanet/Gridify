@@ -20,6 +20,7 @@ Here are some notable features of Gridify:
 - Compatible with object-mappers like AutoMapper
 - Compatible with ORMs, particularly [Entity Framework](./extensions/entityframework)
 - Supports [Elasticsearch](./extensions/elasticsearch) DSL query
+- Javascript/Typescript [gridify-client](./extensions/gridify-client)
 
 ## Examples
 
@@ -35,8 +36,8 @@ The following benchmark compares filtering in various popular dynamic LINQ libra
 Interestingly, Gridify outperforms even Native LINQ in terms of speed.
 It's worth mentioning that other features like Pagination and Sorting in Gridify have minimal impact on performance.
 
-| Method           | Mean         | Error       | StdDev      | Ratio  | Allocated   | Alloc Ratio |
-|----------------- |-------------:|------------:|------------:|-------:|------------:|------------:|
+| Method           |         Mean |       Error |      StdDev |  Ratio |   Allocated | Alloc Ratio |
+|------------------|-------------:|------------:|------------:|-------:|------------:|------------:|
 | Gridify          |     599.8 us |     2.76 us |     2.45 us |   0.92 |    36.36 KB |        1.11 |
 | Native_LINQ      |     649.9 us |     2.55 us |     2.38 us |   1.00 |    32.74 KB |        1.00 |
 | DynamicLinq      |     734.8 us |    13.90 us |    13.01 us |   1.13 |    119.4 KB |        3.65 |
