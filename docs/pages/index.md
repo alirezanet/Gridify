@@ -12,7 +12,7 @@ hero:
     - theme: brand
       text: Get Started
       link: /guide/getting-started
-    - theme: alt 
+    - theme: alt
       text: Introduction
       link: /guide/
 
@@ -22,6 +22,5 @@ features:
   - title: Exceptional Performance
     details: Gridify has been designed with performance as a top priority and can outperform other dynamic LINQ libraries.
   - title: Compatibility
-    details: Gridify can be seamlessly integrated into any .NET Core or .NET Framework project, ensuring high compatibility. It can also be used alongside Entity Framework and other ORMs. Gridify.
-
+    details: Gridify can be seamlessly integrated into any .NET Core or .NET Framework project, ensuring high compatibility. It can also be used alongside Entity Framework and other ORMs.
 ---
