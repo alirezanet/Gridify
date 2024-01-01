@@ -13,7 +13,7 @@
 
 
 
-[![Gridify](https://raw.githubusercontent.com/alirezanet/Gridify/master/docs/.vuepress/public/gridify-readme-logo.svg)](https://alirezanet.github.io/Gridify/)
+[![Gridify](https://raw.githubusercontent.com/alirezanet/Gridify/master/docs/pages/public/gridify-readme-logo.svg)](https://alirezanet.github.io/Gridify/)
 
 ## Introduction
 
