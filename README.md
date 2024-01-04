@@ -8,9 +8,6 @@
 ![CodeQL](https://github.com/alirezanet/Gridify/actions/workflows/codeql.yml/badge.svg)
 [![Static Badge](https://img.shields.io/badge/fuget-f88445?logo=readme&logoColor=white)](https://www.fuget.org/packages/Gridify)
 [![Static Badge](https://img.shields.io/badge/Documentation-42bc00?logo=readme&logoColor=white)](https://alirezanet.github.io/Gridify/)
-[![Discord](https://img.shields.io/badge/Discord-Join%20our%20server-blue?style=flat-square&logo=discord)](https://discord.gg/jaSXnDMv)
-
-
 
 
 [![Gridify](https://raw.githubusercontent.com/alirezanet/Gridify/master/docs/pages/public/gridify-readme-logo.svg)](https://alirezanet.github.io/Gridify/)

@@ -22,7 +22,6 @@ export const theme: DefaultTheme.Config = {
   },
   socialLinks: [
     { icon: 'github', link: 'https://github.com/alirezanet/Gridify' },
-    { icon: "discord", link: "https://discord.gg/Q6HvFGPm" },
   ],
   editLink: {
     pattern: 'https://github.com/alirezanet/Gridify/edit/master/docs/pages/:path',
