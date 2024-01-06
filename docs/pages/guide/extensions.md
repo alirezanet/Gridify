@@ -1,9 +1,9 @@
 # Extensions
 
-The Gridify library adds below extension methods to `IQueryable` objects.
+The Gridify library adds the below extension methods to `IQueryable` objects.
 
 All Gridify extension methods can accept [GridifyQuery](./gridifyQuery.md) and [GridifyMapper](./gridifyMapper.md) as a parameter.
-Make sure to checkout the documentation of these classes for more information.
+Make sure to check out the documentation of these classes for more information.
 
 ::: tip
 If you want to use Gridify extension methods on an `IEnumerable` object, use `.AsQueryable()` first.
@@ -11,21 +11,21 @@ If you want to use Gridify extension methods on an `IEnumerable` object, use `.A
 
 ## ApplyFiltering
 
-You can use this method if you want to only apply **filtering** on a `IQueriable` or `DbSet`.
+You can use this method if you want to only apply **filtering** on an `IQueriable` or `DbSet`.
 
 ``` csharp
 var query = personsRepo.ApplyFiltering("name = John");
 ```
 
-this is completely equivalent to the bellow LINQ query:
+this is completely equivalent to the below LINQ query:
 
 ``` csharp
 var query = personsRepo.Where(p => p.Name == "John");
 ```
 
-the main difference is in the first example, we are using a string to filter, that can be dynamicly generated or passed from end-user but in the second example, we should hard code the query for supported fields.
+In the `ApplyFiltering` method, we can use a raw string to filter the data, which can be generated dynamically or passed by the end-user for example through an API client or console input, but using the Linq `Where` method, we always have to hard code the query for the supported fields.
 
-Checkout the [Filtering Operators](./filtering.md) section for more information.
+Check out the [Filtering Operators](./filtering.md) section for more information.
 
 ## ApplyOrdering
 
@@ -35,13 +35,13 @@ You can use this method if you want to only apply **ordering** on an `IQueriable
 var query = personsRepo.ApplyOrdering("name, age desc");
 ```
 
-this is completely equivalent to the bellow LINQ query:
+this is completely equivalent to the below LINQ query:
 
 ``` csharp
 var query = personsRepo.OrderBy(x => x.Name).ThenByDescending(x => x.Age);
 ```
 
-Checkout the [Ordering](./ordering.md) section for more information.
+Check out the [Ordering](./ordering.md) section for more information.
 
 ## ApplyPaging
 
@@ -51,7 +51,7 @@ You can use this method if you want to only apply **paging** on an `IQueryable` 
 var query = personsRepo.ApplyPaging(3, 20);
 ```
 
-this is completely equivalent to the bellow LINQ query:
+this is completely equivalent to the below LINQ query:
 
 ``` csharp
 var query = personsRepo.Skip((3-1) * 20).Take(20);
@@ -67,11 +67,11 @@ You can use this method if you want to apply **ordering** and **paging** on an `
 
 ## ApplyFilteringOrderingPaging
 
-You can use this method if you want to apply  **filtering** and **ordering** and **paging** on a `IQueryable` collection or `DbSet`. This method accepts `IGridifyQuery`.
+You can use this method if you want to apply  **filtering** and **ordering** and **paging** on an `IQueryable` collection or `DbSet`. This method accepts `IGridifyQuery`.
 
 ## GridifyQueryable
 
-Like [ApplyFilteringOrderingPaging](#ApplyFilteringOrderingPaging) but it returns a `QueryablePaging<T>` that have an extra `int Count` value that can be used for pagination.
+Like [ApplyFilteringOrderingPaging](#ApplyFilteringOrderingPaging) but it returns a `QueryablePaging<T>` that has an extra `int Count` value that can be used for pagination.
 
 ## Gridify
 
