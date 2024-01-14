@@ -1,7 +1,7 @@
 # Gridify (A Modern Dynamic LINQ library)
 
-![GitHub](https://img.shields.io/github/license/alirezanet/gridify)
-![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff)
+[![GitHub](https://img.shields.io/github/license/alirezanet/gridify)](https://github.com/alirezanet/Gridify/blob/master/LICENSE)
+[![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff)](https://www.nuget.org/packages/Gridify/)
 [![Static Badge](https://img.shields.io/badge/Documentation-42bc00?logo=readme&logoColor=white)](https://alirezanet.github.io/Gridify/)
 [![Static Badge](https://img.shields.io/badge/fuget-f88445?logo=readme&logoColor=white)](https://www.fuget.org/packages/Gridify)
 [![NuGet version (Gridify)](https://img.shields.io/nuget/v/Gridify.svg?style=flat-square)](https://www.nuget.org/packages/Gridify/)
