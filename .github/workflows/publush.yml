@@ -8,6 +8,8 @@ on:
 jobs:
    build:
       runs-on: ubuntu-latest
+      environment: nuget
+
       env:
          HUSKY: 0
       steps:
