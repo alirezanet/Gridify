@@ -5,7 +5,7 @@ export enum ConditionalOperator {
    GreaterThan = ">",
    GreaterThanOrEqual = ">=",
    LessThanOrEqual = "<=",
-   Contains = "*",
+   Contains = "=*",
    NotContains = "!*",
    StartsWith = "^",
    NotStartsWith = "!^",
