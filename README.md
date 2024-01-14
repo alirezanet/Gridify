@@ -2,13 +2,11 @@
 
 ![GitHub](https://img.shields.io/github/license/alirezanet/gridify)
 ![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff)
-![Nuget](https://img.shields.io/nuget/v/gridify?label=stable)
-![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/gridify?label=latest)
-[![NuGet version (Gridify)](https://img.shields.io/nuget/v/Gridify.svg?style=flat-square)](https://www.nuget.org/packages/Gridify/)
-![CodeQL](https://github.com/alirezanet/Gridify/actions/workflows/codeql.yml/badge.svg)
-[![Static Badge](https://img.shields.io/badge/fuget-f88445?logo=readme&logoColor=white)](https://www.fuget.org/packages/Gridify)
 [![Static Badge](https://img.shields.io/badge/Documentation-42bc00?logo=readme&logoColor=white)](https://alirezanet.github.io/Gridify/)
-
+[![Static Badge](https://img.shields.io/badge/fuget-f88445?logo=readme&logoColor=white)](https://www.fuget.org/packages/Gridify)
+[![NuGet version (Gridify)](https://img.shields.io/nuget/v/Gridify.svg?style=flat-square)](https://www.nuget.org/packages/Gridify/)
+[![NPM Version](https://img.shields.io/npm/v/gridify-client?label=npm&color=darkcyan)](https://www.npmjs.com/package/gridify-client)
+ 
 
 [![Gridify](https://raw.githubusercontent.com/alirezanet/Gridify/master/docs/pages/public/gridify-readme-logo.svg)](https://alirezanet.github.io/Gridify/)
 
