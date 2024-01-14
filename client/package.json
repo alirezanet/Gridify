@@ -1,6 +1,6 @@
 {
    "name": "gridify-client",
-   "version": "2.0.0-preview.4",
+   "version": "2.0.0-preview.5",
    "description": "Client JS library for the dotnet Gridify project",
    "main": "dist/index.cjs.js",
    "module": "dist/index.esm.js",
