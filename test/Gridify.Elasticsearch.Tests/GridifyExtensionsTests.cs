@@ -1,7 +1,10 @@
 using System;
 using System.Globalization;
 using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
 using Elastic.Transport.Extensions;
+using FluentAssertions.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Gridify.Elasticsearch.Tests;
@@ -792,8 +795,8 @@ public class GridifyExtensionsTests
       var gridifyQuery = new GridifyQuery { Filter = filter };
       var result = gridifyQuery.ToElasticsearchQuery(mapper);
 
-      var jsonQuery = _client.RequestResponseSerializer.SerializeToString(result);
-      Assert.Equal(expected, jsonQuery);
+      var jsonQuery = JToken.Parse(_client.RequestResponseSerializer.SerializeToString(result, SerializationFormatting.None));
+      jsonQuery.Should().BeEquivalentTo(JToken.Parse(expected));
    }
 
    private void AssertOrdering(string ordering, string expected, IGridifyMapper<TestClass>? mapper = null)
@@ -801,13 +804,13 @@ public class GridifyExtensionsTests
       var gridifyQuery = new GridifyQuery { OrderBy = ordering };
       var result = gridifyQuery.ToElasticsearchSortOptions(mapper);
 
-      var jsonQuery = _client.RequestResponseSerializer.SerializeToString(result);
-      Assert.Equal(expected, jsonQuery);
+      var jsonQuery = JToken.Parse(_client.RequestResponseSerializer.SerializeToString(result, SerializationFormatting.None));
+      jsonQuery.Should().BeEquivalentTo(JToken.Parse(expected));
    }
 
    private void AssertDescriptor<T>(SearchRequestDescriptor<T> descriptor, string expected)
    {
-      var jsonQuery = _client.RequestResponseSerializer.SerializeToString(descriptor);
-      Assert.Equal(expected, jsonQuery);
+      var jsonQuery = JToken.Parse(_client.RequestResponseSerializer.SerializeToString(descriptor, SerializationFormatting.None));
+      jsonQuery.Should().BeEquivalentTo(JToken.Parse(expected));
    }
 }
