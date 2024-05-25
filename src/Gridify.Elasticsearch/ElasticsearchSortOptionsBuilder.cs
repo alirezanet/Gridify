@@ -28,9 +28,7 @@ internal class ElasticsearchSortOptionsBuilder<T> : BaseSortingQueryBuilder<ICol
       var isStringValue = propExpression.GetRealType() == typeof(string);
       var fieldName = propExpression.Body.BuildFieldName(isStringValue, mapper);
 
-      var sortOption = SortOptions.Field(
-         fieldName,
-         new FieldSort { Order = ordering.IsAscending ? SortOrder.Asc : SortOrder.Desc });
+      var sortOption = SortOptions.Field(fieldName!, new FieldSort { Order = ordering.IsAscending ? SortOrder.Asc : SortOrder.Desc });
 
       sortOptions.Add(sortOption);
       return sortOptions;
