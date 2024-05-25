@@ -177,9 +177,13 @@ public static partial class GridifyExtensions
       if (mapper != null) return mapper;
 
       mapper = new GridifyMapper<T>();
-      foreach (var field in syntaxTree.Root.Descendants()
-                  .Where(q => q.Kind == SyntaxKind.FieldExpression)
-                  .Cast<FieldExpressionSyntax>())
+
+      var fields = syntaxTree.Root.Descendants()
+         .Where(q => q.Kind == SyntaxKind.FieldExpression)
+         .Cast<FieldExpressionSyntax>()
+         .Distinct(new FieldExpressionComparer());
+
+      foreach (var field in fields)
          try
          {
             mapper.AddMap(field.FieldToken.Text);
@@ -269,8 +273,7 @@ public static partial class GridifyExtensions
       if (string.IsNullOrWhiteSpace(props))
          return (IQueryable<object>)query;
 
-      if (mapper is null)
-         mapper = new GridifyMapper<T>(true);
+      mapper ??= new GridifyMapper<T>(true);
 
       var exp = mapper.GetExpression(props);
       var result = query.Select(exp);
