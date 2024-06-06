@@ -15,7 +15,7 @@ public static class DependencyInjectionExtensions
    /// <param name="services">The IServiceCollection to which the mappers should be added.</param>
    /// <param name="assembly">The assembly to scan for GridifyMapper implementations.</param>
    /// <param name="lifetime">The service lifetime for the registered mappers (default is Singleton).</param>
-   public static void AddGridifyMappers(this IServiceCollection services, Assembly assembly,
+   public static IServiceCollection AddGridifyMappers(this IServiceCollection services, Assembly assembly,
       ServiceLifetime lifetime = ServiceLifetime.Singleton)
    {
       var mapperType = typeof(GridifyMapper<>);
@@ -35,5 +35,6 @@ var interfaceType = typeof(IGridifyMapper<>).MakeGenericType(targetType);
 services.Add(new ServiceDescriptor(interfaceType, mapper, lifetime));
          }
       }
+      return services;
    }
 }
