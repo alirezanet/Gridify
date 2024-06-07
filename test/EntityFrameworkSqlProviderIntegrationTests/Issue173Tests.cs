@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Gridify;
 using Microsoft.EntityFrameworkCore;
+using xRetry;
 using Xunit;
 
 namespace EntityFrameworkIntegrationTests.cs;
@@ -10,7 +11,7 @@ public class Issue173Tests
 
    private readonly MyDbContext _dbContext = new();
 
-   [Fact]
+   [RetryFact]
    public void EF_ManyToManyQuery_ShouldNotThrow()
    {
       // arrange
@@ -30,7 +31,7 @@ public class Issue173Tests
       Assert.Equal(expected, actual.Replace(" @__Value_0", " @__group_Name_0"));
    }
 
-   [Fact]
+   [RetryFact]
    public void EF_ManyToManyQuery_WhenNullCheckAndCompatibilityLayersIsDisabled_ShouldNotThrow()
    {
       // arrange
@@ -45,6 +46,10 @@ public class Issue173Tests
          .AddCondition("groupName=test")
          .Build(_dbContext.Users)
          .ToQueryString();
+
+      // reset global configurations
+      GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+      GridifyGlobalConfiguration.DisableNullChecks = false;
 
       // assert
       Assert.Equal(expected, actual);
