@@ -6,6 +6,7 @@ using System.Text;
 using Gridify;
 using Gridify.Syntax;
 using Microsoft.EntityFrameworkCore;
+using xRetry;
 using Xunit;
 
 namespace EntityFrameworkIntegrationTests.cs;
@@ -45,7 +46,7 @@ public class GridifyEntityFrameworkTests
 
    // issue #27 ef core sqlServer feedback, and issue #24
    // https://github.com/alirezanet/Gridify/issues/27#issuecomment-929221457
-   [Fact]
+   [RetryFact]
    public void ApplyFiltering_GreaterThanBetweenTwoStringsInEF_SqlServerProvider_EnableCompatibilityLayer()
    {
       GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();

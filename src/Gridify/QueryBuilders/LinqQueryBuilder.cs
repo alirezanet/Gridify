@@ -362,11 +362,10 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
 
    private LambdaExpression GetExpressionWithNullCheck(MemberExpression prop, ParameterExpression param, Expression right)
    {
-      // This check is needed for EF6 - It doesn't support NullChecking for Collections (issue #58)
-      // also issue #70 for NHibernate
+      // Entityframework doesn't support NullChecking for Collections (issue #58)
+      // also issue #70 for NHibernate - and #173
       if (GridifyGlobalConfiguration.DisableNullChecks ||
-          GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer &&
-          RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework"))
+          GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
          return Expression.Lambda(right, param);
 
       var nullChecker = Expression.NotEqual(prop, Expression.Constant(null));
