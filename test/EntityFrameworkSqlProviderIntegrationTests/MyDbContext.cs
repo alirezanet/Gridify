@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -31,4 +32,13 @@ public class User
    public string Name { get; set; }
    public DateTime? CreateDate { get; set; }
    public Guid FkGuid { get; set; }
+   public List<Group> Groups { get; set; } = [];
 }
+
+public class Group
+{
+   public int Id { get; set; }
+   public string Name { get; set; }
+   public List<User> Users { get; set; } = [];
+}
+
