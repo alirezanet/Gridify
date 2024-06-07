@@ -5,7 +5,7 @@ using Xunit;
 
 namespace EntityFrameworkIntegrationTests.cs;
 
-public class Issue170Tests
+public class Issue173Tests
 {
 
    private readonly MyDbContext _dbContext = new();
