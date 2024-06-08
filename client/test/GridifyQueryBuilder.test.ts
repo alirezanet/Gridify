@@ -152,4 +152,12 @@ describe("GridifyQueryBuilder Validation", () => {
    });
 
 
+   it("should not include case-insensitive operator if there is no value", () => {
+      const query = new GridifyQueryBuilder()
+         .addCondition("name", op.Equal, "", false)
+         .build();
+
+      expect(query.filter).toEqual("name=");
+   });
+
 });
