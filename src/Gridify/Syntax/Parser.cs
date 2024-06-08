@@ -136,7 +136,7 @@ internal class Parser
 
    private SyntaxToken Match(SyntaxKind kind, SyntaxKind? expectation = null)
    {
-      if (Current.Kind == kind)
+      if (Current.Kind == kind || expectation == SyntaxKind.ValueToken && Current.Kind == SyntaxKind.CaseInsensitive)
          return NextToken();
 
       expectation ??= kind;

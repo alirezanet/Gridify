@@ -40,9 +40,10 @@ export class GridifyQueryBuilder {
       if (escapeValue && typeof value === "string") {
          filterValue = value.replace(/([(),|]|\/i)/g, "\\$1");
       }
-      filterValue = caseSensitive
-         ? filterValue.toString()
-         : `${filterValue.toString()}/i`;
+
+      if (!caseSensitive && value) {
+         filterValue = `${filterValue.toString()}/i`;
+      }
 
       var filterExpression = `${field.trim()}${operator}${filterValue}`;
       this.filteringExpressions.push({
