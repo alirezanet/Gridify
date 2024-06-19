@@ -123,8 +123,11 @@ internal abstract class BaseQueryBuilder<TQuery, T>
 
       if (gMap == null) throw new GridifyMapperException($"Mapping '{left}' not found");
 
-      if (fieldExpression!.IsCollection)
-         gMap.To = UpdateExpressionIndex(gMap.To, fieldExpression.Index);
+      if (fieldExpression!.SyntaxType == FieldExpressionSyntaxType.Collection)
+         gMap.To = UpdateExpressionIndex(gMap.To, int.Parse(fieldExpression.SubKey!));
+
+      if (fieldExpression!.SyntaxType == FieldExpressionSyntaxType.Dictionary)
+         gMap.To = UpdateExpressionKey(gMap.To, fieldExpression.SubKey!);
 
       var isNested = ((GMap<T>)gMap).IsNestedCollection();
       if (isNested)
@@ -138,6 +141,8 @@ internal abstract class BaseQueryBuilder<TQuery, T>
       if (query == null) return null;
       return (query, false);
    }
+
+
 
    protected object? BuildQuery(
       Expression body,
@@ -206,6 +211,12 @@ internal abstract class BaseQueryBuilder<TQuery, T>
    private static LambdaExpression UpdateExpressionIndex(LambdaExpression exp, int index)
    {
       var body = new ReplaceExpressionVisitor(exp.Parameters[1], Expression.Constant(index, typeof(int))).Visit(exp.Body);
+      return Expression.Lambda(body, exp.Parameters);
+   }
+
+   private static LambdaExpression UpdateExpressionKey(LambdaExpression exp, string key)
+   {
+      var body = new ReplaceExpressionVisitor(exp.Parameters[1], Expression.Constant(key, exp.Parameters[1].Type)).Visit(exp.Body);
       return Expression.Lambda(body, exp.Parameters);
    }
 

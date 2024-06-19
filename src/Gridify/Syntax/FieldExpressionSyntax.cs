@@ -1,19 +1,14 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Gridify.Syntax;
 
 internal sealed class FieldExpressionSyntax : ExpressionSyntax
 {
-   internal FieldExpressionSyntax(SyntaxToken fieldToken)
+   internal FieldExpressionSyntax(SyntaxToken fieldToken, FieldExpressionSyntaxType syntaxType, string? subKey = default)
    {
       FieldToken = fieldToken;
-   }
-
-   public FieldExpressionSyntax(SyntaxToken fieldToken, int index)
-   {
-      IsCollection = true;
-      Index = index;
-      FieldToken = fieldToken;
+      SyntaxType = syntaxType;
+      SubKey = subKey;
    }
 
    public override SyntaxKind Kind => SyntaxKind.FieldExpression;
@@ -23,7 +18,14 @@ internal sealed class FieldExpressionSyntax : ExpressionSyntax
       yield return FieldToken;
    }
 
-   public bool IsCollection { get; }
-   public int Index { get; }
+   public FieldExpressionSyntaxType SyntaxType { get; }
+   public string? SubKey { get; }
    public SyntaxToken FieldToken { get; }
+}
+
+public enum FieldExpressionSyntaxType
+{
+   Field,
+   Collection,
+   Dictionary
 }
