@@ -119,6 +119,23 @@ public class QueryBuilder<T> : IQueryBuilder<T>
    }
 
    /// <inheritdoc />
+   public IQueryBuilder<T> AddMap(string from, Expression<Func<T, int, object?>> to, Func<string, object>? convertor = null, bool overwrite = true)
+   {
+      _mapper ??= new GridifyMapper<T>(true);
+      _mapper.AddMap(from, to, convertor, overwrite);
+      return this;
+   }
+
+   /// <inheritdoc />
+   public IQueryBuilder<T> AddMap(string from, Expression<Func<T, string, object?>> to, Func<string, object>? convertor = null, bool overwrite = true)
+   {
+      _mapper ??= new GridifyMapper<T>(true);
+      _mapper.AddMap(from, to, convertor, overwrite);
+      return this;
+   }
+
+
+   /// <inheritdoc />
    public IQueryBuilder<T> RemoveMap(IGMap<T> map)
    {
       _mapper ??= new GridifyMapper<T>(true);

@@ -118,6 +118,17 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       return this;
    }
 
+   public IGridifyMapper<T> AddMap(string from, Expression<Func<T, string, object?>> to, Func<string, object>? convertor = null!,
+      bool overrideIfExists = true)
+   {
+      if (!overrideIfExists && HasMap(from))
+         throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
+
+      RemoveMap(from);
+      _mappings.Add(new GMap<T>(from, to, convertor));
+      return this;
+   }
+
    public IGridifyMapper<T> AddMap(IGMap<T> gMap, bool overrideIfExists = true)
    {
       if (!overrideIfExists && HasMap(gMap.From))

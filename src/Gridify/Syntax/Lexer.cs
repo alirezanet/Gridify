@@ -149,26 +149,9 @@ internal ref struct Lexer
       }
 
       if (TryToReadTheValue(out var valueToken)) return valueToken!;
+      if (TryParseCollectionIndexes(peek, out var fieldIndexToken)) return fieldIndexToken;
+      if (TryParseDictionaryKey(peek, out var fieldDictionaryToken)) return fieldDictionaryToken;
 
-      if (Current == '[')
-      {
-         Next();
-         var start = _position;
-         while (char.IsDigit(Current))
-            Next();
-
-         var length = _position - start;
-         var text = _text.Slice(start, length);
-
-         if (Current == ']')
-         {
-            _position++;
-            return new SyntaxToken(SyntaxKind.FieldIndexToken, start, text.ToString());
-         }
-
-         _diagnostics.Add($"bad character input: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
-         return new SyntaxToken(SyntaxKind.BadToken, _position, Current.ToString());
-      }
 
       if (char.IsLetter(Current) && !_waitingForValue)
       {
@@ -185,6 +168,69 @@ internal ref struct Lexer
 
       _diagnostics.Add($"bad character input: '{Current.ToString()}', at index {_position.ToString()}");
       return new SyntaxToken(SyntaxKind.BadToken, _position++, string.Empty);
+   }
+
+   private bool TryParseDictionaryKey(char peek, out SyntaxToken nextToken)
+   {
+      if (Current == '{')
+      {
+         Next();
+         var start = _position;
+         while (char.IsLetterOrDigit(Current))
+            Next();
+
+         var length = _position - start;
+         var text = _text.Slice(start, length);
+
+         if (Current == '}')
+         {
+            _position++;
+            {
+               nextToken = new SyntaxToken(SyntaxKind.FieldDictionaryToken, start, text.ToString());
+               return true;
+            }
+         }
+
+         _diagnostics.Add($"bad character input: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
+         {
+            nextToken = new SyntaxToken(SyntaxKind.BadToken, _position, Current.ToString());
+            return true;
+         }
+      }
+      nextToken = default!;
+      return false;
+   }
+
+
+   private bool TryParseCollectionIndexes(char peek, out SyntaxToken nextToken)
+   {
+      if (Current == '[')
+      {
+         Next();
+         var start = _position;
+         while (char.IsDigit(Current))
+            Next();
+
+         var length = _position - start;
+         var text = _text.Slice(start, length);
+
+         if (Current == ']')
+         {
+            _position++;
+            {
+               nextToken = new SyntaxToken(SyntaxKind.FieldIndexToken, start, text.ToString());
+               return true;
+            }
+         }
+
+         _diagnostics.Add($"bad character input: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
+         {
+            nextToken = new SyntaxToken(SyntaxKind.BadToken, _position, Current.ToString());
+            return true;
+         }
+      }
+      nextToken = default!;
+      return false;
    }
 
    private bool TryToReadTheValue(out SyntaxToken? valueToken)

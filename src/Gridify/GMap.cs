@@ -25,4 +25,11 @@ public class GMap<T> : IGMap<T>
       To = to;
       Convertor = convertor;
    }
+
+   public GMap(string from, Expression<Func<T, string, object?>> to, Func<string, object>? convertor = null)
+   {
+      From = from;
+      To = to;
+      Convertor = convertor;
+   }
 }
