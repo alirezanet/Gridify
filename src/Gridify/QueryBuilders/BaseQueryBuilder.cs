@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Gridify.Syntax;
 
 namespace Gridify.QueryBuilders;
@@ -216,7 +217,12 @@ internal abstract class BaseQueryBuilder<TQuery, T>
 
    private static LambdaExpression UpdateExpressionKey(LambdaExpression exp, string key)
    {
-      var body = new ReplaceExpressionVisitor(exp.Parameters[1], Expression.Constant(key, exp.Parameters[1].Type)).Visit(exp.Body);
+      var type = exp.Parameters[1].Type;
+      var newValue = type == typeof(string)
+         ? Expression.Constant(key, typeof(string))
+         : Expression.Constant(TypeDescriptor.GetConverter(type).ConvertFromString(key), type);
+
+      var body = new ReplaceExpressionVisitor(exp.Parameters[1], newValue).Visit(exp.Body);
       return Expression.Lambda(body, exp.Parameters);
    }
 
