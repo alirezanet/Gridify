@@ -129,6 +129,17 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       return this;
    }
 
+   public IGridifyMapper<T> AddMap<TSubKey>(string from, Expression<Func<T, TSubKey, object?>> to, Func<string, object>? convertor = null!,
+      bool overrideIfExists = true)
+   {
+      if (!overrideIfExists && HasMap(from))
+         throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
+
+      RemoveMap(from);
+      _mappings.Add(new GMap<T>(from, to, convertor)); // how to resolve this error??!
+      return this;
+   }
+
    public IGridifyMapper<T> AddMap(IGMap<T> gMap, bool overrideIfExists = true)
    {
       if (!overrideIfExists && HasMap(gMap.From))

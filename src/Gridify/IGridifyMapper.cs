@@ -12,6 +12,8 @@ public interface IGridifyMapper<T>
       bool overrideIfExists = true);
    IGridifyMapper<T> AddMap(string from, Expression<Func<T, string, object?>> to, Func<string, object>? convertor = null!,
       bool overrideIfExists = true);
+   IGridifyMapper<T> AddMap<TSubKey>(string from, Expression<Func<T, TSubKey, object?>> to, Func<string, object>? convertor = null!,
+      bool overrideIfExists = true);
 
    IGridifyMapper<T> AddMap(IGMap<T> gMap, bool overrideIfExists = true);
    IGridifyMapper<T> AddMap(string from, Func<string, object>? convertor = null!, bool overrideIfExists = true);
