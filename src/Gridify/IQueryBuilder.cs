@@ -62,6 +62,7 @@ public interface IQueryBuilder<T>
    IQueryBuilder<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
    IQueryBuilder<T> AddMap(string from, Expression<Func<T, int, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
    IQueryBuilder<T> AddMap(string from, Expression<Func<T, string, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
+   IQueryBuilder<T> AddMap<TSubKey>(string from, Expression<Func<T, TSubKey, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
    IQueryBuilder<T> RemoveMap(IGMap<T> map);
 
    /// <summary>
