@@ -83,7 +83,7 @@ var esc = Regex.Replace(value, "([(),|\\]|\/i)", "\\$1" );
 
 ## Passing Indexes
 
-Since version `v2.3.0`, Gridify support passing indexes to the sub collections. We can pass the index using the `[ ]`
+Since version `v2.3.0`, Gridify supports passing indexes to the sub-collections. We can pass the index using the `[ ]`
 brackets.
 In the bellow example we want to filter data using `8th` index of our SubCollection.
 
@@ -98,6 +98,28 @@ var gq = new GridifyQuery
 ```
 
 Checkout [Use Indexes on Sub-Collections](./gridifyMapper.md#use-indexes-on-sub-collections) for more information.
+
+## Passing Dictionary Keys
+
+Since version `v2.15.0`, Gridify supports passing custom keys to add a filtering condition on `IDictionary` properties.
+you can pass the key using the `{ }` brackets. for example if you want to search through a document database like MongoDb
+you can use this feature to search the additional metadata that stored in the `Dictionary`
+
+In the bellow example we can dynamically search the data in the dictionary.
+
+
+``` csharp{6}
+var gm = new GridifyMapper<TargetType>()
+      .AddMap("prop", (field , key) => field.Property[key]);
+
+var gq = new GridifyQuery
+{
+    Filter = "prop{name} = John" // 'name' is a key in the dictionary
+};
+```
+
+Checkout [Filtering on Dictionaries](./gridifyMapper.md#filtering-on-dictionaries) for more information.
+
 
 ## Custom Operators
 

@@ -6,8 +6,8 @@
    "repository": "https://github.com/alirezanet/Gridify.git",
    "license": "MIT",
    "devDependencies": {
-      "vitepress": "^1.0.0-rc.26",
-      "vue": "^3.3.8"
+      "vitepress": "^1.2.3",
+      "vue": "^3.4.29"
    },
    "scripts": {
       "dev": "vitepress dev",
