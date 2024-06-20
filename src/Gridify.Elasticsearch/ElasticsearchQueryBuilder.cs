@@ -8,11 +8,9 @@ using Gridify.Syntax;
 
 namespace Gridify.Elasticsearch;
 
-internal class ElasticsearchQueryBuilder<T> : BaseQueryBuilder<Query, T>
+internal class ElasticsearchQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Query, T>(mapper)
 {
-   public ElasticsearchQueryBuilder(IGridifyMapper<T> mapper) : base(mapper)
-   {
-   }
+   private readonly IGridifyMapper<T> _mapper = mapper;
 
    protected override Query BuildNestedQuery(
       Expression body, IGMap<T> gMap, ValueExpressionSyntax value, SyntaxNode op)
@@ -60,7 +58,7 @@ internal class ElasticsearchQueryBuilder<T> : BaseQueryBuilder<Query, T>
          isNumberExceptDecimalValue = true;
       }
 
-      var fieldName = body.BuildFieldName(isStringValue, mapper);
+      var fieldName = body.BuildFieldName(isStringValue, _mapper);
       var field = new Field(fieldName);
       var right = valueExpression.ValueToken.Text;
 
