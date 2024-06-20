@@ -124,11 +124,8 @@ internal abstract class BaseQueryBuilder<TQuery, T>
 
       if (gMap == null) throw new GridifyMapperException($"Mapping '{left}' not found");
 
-      if (fieldExpression!.SyntaxType == FieldExpressionSyntaxType.Collection)
-         gMap.To = UpdateExpressionIndex(gMap.To, int.Parse(fieldExpression.SubKey!));
-
-      if (fieldExpression!.SyntaxType == FieldExpressionSyntaxType.Dictionary)
-         gMap.To = UpdateExpressionKey(gMap.To, fieldExpression.SubKey!);
+      if (fieldExpression!.Indexer != null)
+         gMap.To = UpdateIndexerExpression(gMap.To, fieldExpression.Indexer!);
 
       var isNested = ((GMap<T>)gMap).IsNestedCollection();
       if (isNested)
@@ -209,13 +206,7 @@ internal abstract class BaseQueryBuilder<TQuery, T>
       return query;
    }
 
-   private static LambdaExpression UpdateExpressionIndex(LambdaExpression exp, int index)
-   {
-      var body = new ReplaceExpressionVisitor(exp.Parameters[1], Expression.Constant(index, typeof(int))).Visit(exp.Body);
-      return Expression.Lambda(body, exp.Parameters);
-   }
-
-   private static LambdaExpression UpdateExpressionKey(LambdaExpression exp, string key)
+   private static LambdaExpression UpdateIndexerExpression(LambdaExpression exp, string key)
    {
       var type = exp.Parameters[1].Type;
       var newValue = type == typeof(string)
@@ -226,5 +217,5 @@ internal abstract class BaseQueryBuilder<TQuery, T>
       return Expression.Lambda(body, exp.Parameters);
    }
 
-   private static MethodInfo GetToLowerMethod() => typeof(string).GetMethod("ToLower", new Type[] { })!;
+   private static MethodInfo GetToLowerMethod() => typeof(string).GetMethod("ToLower", [])!;
 }

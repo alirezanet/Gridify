@@ -11,7 +11,7 @@ internal class FieldExpressionComparer : IEqualityComparer<FieldExpressionSyntax
       if (ReferenceEquals(y, null)) return false;
       if (ReferenceEquals(x, y)) return true;
       if (x.GetType() != y.GetType()) return false;
-      return x.SubKey == y.SubKey && x.FieldToken.Text.Equals(y.FieldToken.Text);
+      return x.Indexer == y.Indexer && x.FieldToken.Text.Equals(y.FieldToken.Text);
    }
 
    public int GetHashCode(FieldExpressionSyntax obj)
@@ -20,13 +20,13 @@ internal class FieldExpressionComparer : IEqualityComparer<FieldExpressionSyntax
     unchecked
     {
         var hash = 17;
-        if (obj.SubKey != null)
-         hash = hash * 23 + obj.SubKey.GetHashCode();
+        if (obj.Indexer != null)
+         hash = hash * 23 + obj.Indexer.GetHashCode();
         hash = hash * 23 + obj.FieldToken.Text.GetHashCode();
         return hash;
     }
 #else
-      return HashCode.Combine(obj.SubKey, obj.FieldToken.Text);
+      return HashCode.Combine(obj.Indexer, obj.FieldToken.Text);
 #endif
    }
 }

@@ -161,13 +161,8 @@ internal class Parser
    {
       var fieldToken = Match(SyntaxKind.FieldToken);
 
-      if (TryMatch(SyntaxKind.FieldIndexToken, out var fieldSyntaxToken))
-         return new FieldExpressionSyntax(fieldToken, FieldExpressionSyntaxType.Collection, fieldSyntaxToken.Text);
-
-      if (TryMatch(SyntaxKind.FieldDictionaryToken, out var fieldDictionarySyntaxToken))
-         return new FieldExpressionSyntax(fieldToken, FieldExpressionSyntaxType.Dictionary, fieldDictionarySyntaxToken.Text);
-
-      return new FieldExpressionSyntax(fieldToken, FieldExpressionSyntaxType.Field);
-
+      return TryMatch(SyntaxKind.FieldIndexer, out var fieldIndexer)
+         ? new FieldExpressionSyntax(fieldToken, fieldIndexer.Text)
+         : new FieldExpressionSyntax(fieldToken);
    }
 }
