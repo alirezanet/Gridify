@@ -5,9 +5,6 @@ hero:
   name: "Gridify"
   text: "Documentation"
   tagline: A powerful dynamic LINQ library for .NET
-  # image:
-  #   src: /gridify-dark-logo.svg
-  #   alt: Gridify
   actions:
     - theme: brand
       text: Get Started

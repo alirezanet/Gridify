@@ -14,6 +14,7 @@ Here are some notable features of Gridify:
 - Supports nested queries and sub-collections
 - Allows mapping from strings to objects
 - Supports query compilation
+- Supports DocumentDBs
 - Compatible with collection indexes
 - Custom operators
 - Can be used with any collection that supports LINQ
