@@ -163,17 +163,40 @@ if you have only two-level nesting, you don't need to use `SelectMany`.
 
 ## Use Indexes on Sub-Collections
 
-Since version `v2.3.0`, GridifyMapper [AddMap](#addmap) method has a new overload that accepts a `index` parameter.
+Since version `v2.3.0`, GridifyMapper [AddMap](#addmap) method has a new overload that accepts an `index` parameter.
 In the bellow example we want to filter data using `8th` index of our SubCollection.
 
 ``` csharp{4}
 var gq = new GridifyQuery { Filter = "prop[8] > 10" };
 
 var gm = new GridifyMapper<TargetType>()
-      .AddMap("prop", (x , index) => x.SubCollection[index].SomeProp);
+      .AddMap("prop", (field , index) => field.SubCollection[index].SomeProp);
 ```
 
 checkout [Passing Indexes](./filtering.md#passing-indexes) for more information.
+
+## Filtering on Dictionaries
+
+Since version `v2.15.0`, GridifyMapper [AddMap](#addmap) method has a new overload that accepts an additional `key`
+parameter that you can use to map your alias to their corresponding properties and keys in your entity class.
+This allows to perform filtering operations on dictionary fields. Here is an example of how to use it:
+
+``` csharp{4}
+var gq = new GridifyQuery { Filter = "prop{name} = John" }; // 'name' is a key in our dictionary
+
+var gm = new GridifyMapper<TargetType>()
+      .AddMap("prop", (field , key) => field.Property[key]);
+```
+
+or if your dictionary key is not a `string`, you can use the generic overload of the `AddMap` method to pass the target type:
+
+``` csharp{2}
+var gm = new GridifyMapper<TargetType>()
+      .AddMap<Guid>("prop", (field , key) => x.Property[key]);
+```
+
+To learn about the filtering syntax checkout [Passing Dictionary Keys](./filtering.md#passing-dictionary-keys).
+
 
 ## GetExpression
 
