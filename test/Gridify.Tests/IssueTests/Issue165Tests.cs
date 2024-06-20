@@ -18,7 +18,7 @@ public class Issue165Tests
       // act
       var queryBuilder = new QueryBuilder<TestModel>()
          .AddMap("prop1", (field, key) => field.Prop1[key])
-         .AddCondition("prop1{subKey} = John");
+         .AddCondition("prop1[subKey] = John");
       var actual = queryBuilder.Build(ds);
 
       // assert
@@ -37,7 +37,7 @@ public class Issue165Tests
       // act
       var queryBuilder = new QueryBuilder<TestModel>()
          .AddMap("prop2", (field, key) => field.Prop2[key])
-         .AddCondition("prop2{5987} = John");
+         .AddCondition("prop2[5987] = John");
       var actual = queryBuilder.Build(ds);
 
       // assert
@@ -57,7 +57,7 @@ public class Issue165Tests
       // act
       var queryBuilder = new QueryBuilder<TestModel>()
          .AddMap("prop3", (field, key) => field.Prop3[Guid.Parse(key)])
-         .AddCondition($"prop3{{{id}}} = John");
+         .AddCondition($"prop3[{id}] = John");
       var actual = queryBuilder.Build(ds);
 
       // assert
@@ -85,7 +85,7 @@ public class Issue165Tests
       // act
       var queryBuilder = new QueryBuilder<TestModel>()
          .AddMap("prop5", (field, key) => field.Prop5[key])
-         .AddCondition("prop5{subkey} = true");
+         .AddCondition("prop5[subkey] = true");
       var actual = queryBuilder.Build(ds);
 
       // assert
@@ -114,7 +114,7 @@ public class Issue165Tests
       // act
       var queryBuilder = new QueryBuilder<TestModel>()
          .AddMap<Guid>("prop3", (field, key) => field.Prop3[key])
-         .AddCondition($"prop3{{{id:N}}} = John");
+         .AddCondition($"prop3[{id:N}] = John");
       var actual = queryBuilder.Build(ds);
 
       // assert
@@ -134,7 +134,7 @@ public class Issue165Tests
       // act
       var queryBuilder = new QueryBuilder<TestModel>()
          .AddMap<long>("prop4", (field, key) => field.Prop4[key])
-         .AddCondition("prop4{44} = 2024");
+         .AddCondition("prop4[44] = 2024");
       var actual = queryBuilder.Build(ds);
 
       // assert

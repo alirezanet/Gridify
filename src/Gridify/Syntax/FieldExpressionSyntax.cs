@@ -4,11 +4,10 @@ namespace Gridify.Syntax;
 
 internal sealed class FieldExpressionSyntax : ExpressionSyntax
 {
-   internal FieldExpressionSyntax(SyntaxToken fieldToken, FieldExpressionSyntaxType syntaxType, string? subKey = default)
+   internal FieldExpressionSyntax(SyntaxToken fieldToken, string? indexer = default)
    {
       FieldToken = fieldToken;
-      SyntaxType = syntaxType;
-      SubKey = subKey;
+      Indexer = indexer;
    }
 
    public override SyntaxKind Kind => SyntaxKind.FieldExpression;
@@ -18,14 +17,6 @@ internal sealed class FieldExpressionSyntax : ExpressionSyntax
       yield return FieldToken;
    }
 
-   public FieldExpressionSyntaxType SyntaxType { get; }
-   public string? SubKey { get; }
+   public string? Indexer { get; }
    public SyntaxToken FieldToken { get; }
-}
-
-public enum FieldExpressionSyntaxType
-{
-   Field,
-   Collection,
-   Dictionary
 }

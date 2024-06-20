@@ -149,9 +149,7 @@ internal ref struct Lexer
       }
 
       if (TryToReadTheValue(out var valueToken)) return valueToken!;
-      if (TryParseCollectionIndexes(peek, out var fieldIndexToken)) return fieldIndexToken;
-      if (TryParseDictionaryKey(peek, out var fieldDictionaryToken)) return fieldDictionaryToken;
-
+      if (TryParseIndexer(peek, out var fieldIndexToken)) return fieldIndexToken;
 
       if (char.IsLetter(Current) && !_waitingForValue)
       {
@@ -170,45 +168,13 @@ internal ref struct Lexer
       return new SyntaxToken(SyntaxKind.BadToken, _position++, string.Empty);
    }
 
-   private bool TryParseDictionaryKey(char peek, out SyntaxToken nextToken)
-   {
-      if (Current == '{')
-      {
-         Next();
-         var start = _position;
-         while (char.IsLetterOrDigit(Current))
-            Next();
-
-         var length = _position - start;
-         var text = _text.Slice(start, length);
-
-         if (Current == '}')
-         {
-            _position++;
-            {
-               nextToken = new SyntaxToken(SyntaxKind.FieldDictionaryToken, start, text.ToString());
-               return true;
-            }
-         }
-
-         _diagnostics.Add($"bad character input: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
-         {
-            nextToken = new SyntaxToken(SyntaxKind.BadToken, _position, Current.ToString());
-            return true;
-         }
-      }
-      nextToken = default!;
-      return false;
-   }
-
-
-   private bool TryParseCollectionIndexes(char peek, out SyntaxToken nextToken)
+   private bool TryParseIndexer(char peek, out SyntaxToken nextToken)
    {
       if (Current == '[')
       {
          Next();
          var start = _position;
-         while (char.IsDigit(Current))
+         while (Current != ']' && _position < _text.Length)
             Next();
 
          var length = _position - start;
@@ -218,12 +184,12 @@ internal ref struct Lexer
          {
             _position++;
             {
-               nextToken = new SyntaxToken(SyntaxKind.FieldIndexToken, start, text.ToString());
+               nextToken = new SyntaxToken(SyntaxKind.FieldIndexer, start, text.ToString());
                return true;
             }
          }
 
-         _diagnostics.Add($"bad character input: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
+         _diagnostics.Add($"Indexer is not closed: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
          {
             nextToken = new SyntaxToken(SyntaxKind.BadToken, _position, Current.ToString());
             return true;
