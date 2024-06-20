@@ -2,21 +2,13 @@ using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Gridify.Syntax;
 
 namespace Gridify.QueryBuilders;
 
-internal abstract class BaseQueryBuilder<TQuery, T>
+internal abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
    where TQuery : class
 {
-   protected readonly IGridifyMapper<T> mapper;
-
-   protected BaseQueryBuilder(IGridifyMapper<T> mapper)
-   {
-      this.mapper = mapper;
-   }
-
    internal TQuery Build(ExpressionSyntax expression)
    {
       var (query, _) = BuildQuery(expression);
@@ -56,7 +48,6 @@ internal abstract class BaseQueryBuilder<TQuery, T>
                var bExp = expression as BinaryExpressionSyntax;
 
                if (bExp!.Left is FieldExpressionSyntax && bExp.Right is ValueExpressionSyntax)
-               {
                   try
                   {
                      return ConvertBinaryExpressionSyntaxToQuery(bExp)
@@ -69,15 +60,12 @@ internal abstract class BaseQueryBuilder<TQuery, T>
 
                      throw;
                   }
-               }
 
                (TQuery query, bool isNested) leftQuery;
                (TQuery query, bool isNested) rightQuery;
 
                if (bExp.Left is ParenthesizedExpressionSyntax lpExp)
-               {
                   leftQuery = BuildQuery(lpExp.Expression, true);
-               }
                else
                   leftQuery = BuildQuery(bExp.Left);
 
@@ -115,7 +103,7 @@ internal abstract class BaseQueryBuilder<TQuery, T>
       var fieldExpression = binarySyntax.Left as FieldExpressionSyntax;
 
       var left = fieldExpression?.FieldToken.Text.Trim();
-      var right = (binarySyntax.Right as ValueExpressionSyntax);
+      var right = binarySyntax.Right as ValueExpressionSyntax;
       var op = binarySyntax.OperatorToken;
 
       if (left == null || right == null) return null;
@@ -124,8 +112,9 @@ internal abstract class BaseQueryBuilder<TQuery, T>
 
       if (gMap == null) throw new GridifyMapperException($"Mapping '{left}' not found");
 
-      if (fieldExpression!.Indexer != null)
-         gMap.To = UpdateIndexerExpression(gMap.To, fieldExpression.Indexer!);
+      var hasIndexer = fieldExpression?.Indexer != null;
+      if (hasIndexer)
+         gMap.To = UpdateIndexerKey(gMap.To, fieldExpression!.Indexer!);
 
       var isNested = ((GMap<T>)gMap).IsNestedCollection();
       if (isNested)
@@ -135,11 +124,33 @@ internal abstract class BaseQueryBuilder<TQuery, T>
          return (result, isNested);
       }
 
-      var query = BuildQuery(gMap.To.Body, gMap.To.Parameters[0], right, op, gMap.Convertor) as TQuery;
+      var query = BuildQuery(gMap.To.Body, gMap.To.Parameters[0], right, op, gMap.Convertor);
       if (query == null) return null;
-      return (query, false);
+
+      if (hasIndexer)
+         query = AddIndexerNullCheck(gMap, query);
+
+      return ((TQuery)query, false);
    }
 
+   private static object AddIndexerNullCheck(IGMap<T> gMap, object query)
+   {
+      if (GridifyGlobalConfiguration.DisableNullChecks || GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
+         return query;
+
+      var body = gMap.To.Body;
+      if (body is UnaryExpression unaryExpression)
+         body = unaryExpression.Operand;
+
+      if (body is not MethodCallExpression methodCallExpression) return query;
+
+      var containsKeyMethod = methodCallExpression.Object!.Type.GetMethod("ContainsKey", [gMap.To.Parameters[1].Type]);
+      if (containsKeyMethod == null) return query;
+      var mainQuery = (LambdaExpression)query;
+      var keyNullCheck = Expression.Call(methodCallExpression.Object!, containsKeyMethod, methodCallExpression.Arguments);
+      var newExp = Expression.AndAlso(keyNullCheck, mainQuery.Body);
+      return Expression.Lambda(newExp, mainQuery.Parameters);
+   }
 
 
    protected object? BuildQuery(
@@ -175,7 +186,6 @@ internal abstract class BaseQueryBuilder<TQuery, T>
 
          var converter = TypeDescriptor.GetConverter(body.Type);
          if (converter.CanConvertFrom(typeof(string)))
-         {
             try
             {
                value = converter.ConvertFromString(value.ToString()!);
@@ -188,7 +198,6 @@ internal abstract class BaseQueryBuilder<TQuery, T>
             {
                return BuildAlwaysFalseQuery(parameter);
             }
-         }
       }
 
       // handle case-Insensitive search
@@ -206,7 +215,7 @@ internal abstract class BaseQueryBuilder<TQuery, T>
       return query;
    }
 
-   private static LambdaExpression UpdateIndexerExpression(LambdaExpression exp, string key)
+   private static LambdaExpression UpdateIndexerKey(LambdaExpression exp, string key)
    {
       var type = exp.Parameters[1].Type;
       var newValue = type == typeof(string)
@@ -217,5 +226,8 @@ internal abstract class BaseQueryBuilder<TQuery, T>
       return Expression.Lambda(body, exp.Parameters);
    }
 
-   private static MethodInfo GetToLowerMethod() => typeof(string).GetMethod("ToLower", [])!;
+   private static MethodInfo GetToLowerMethod()
+   {
+      return typeof(string).GetMethod("ToLower", [])!;
+   }
 }
