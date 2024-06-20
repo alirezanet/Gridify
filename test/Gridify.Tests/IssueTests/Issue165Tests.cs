@@ -13,7 +13,7 @@ public class Issue165Tests
    {
       // arrange
       var ds = new List<TestModel>() { new() { Prop1 = new Dictionary<string, string> { { "subKey", "John" } } } }.AsQueryable();
-      var expected = ds.Where(field => field.Prop1["subKey"] == "John");
+      var expected = ds.Where(field => field.Prop1.ContainsKey("subKey") && field.Prop1["subKey"] == "John");
 
       // act
       var queryBuilder = new QueryBuilder<TestModel>()
@@ -28,11 +28,31 @@ public class Issue165Tests
    }
 
    [Fact]
+   private void FilteringWithDictionaryStringSubKey_WhenKeyDoesNotExists_ShouldNotThrowException()
+   {
+      // arrange
+      var ds = new List<TestModel>() { new() { Prop1 = new Dictionary<string, string> { { "key1", "John" } } } }.AsQueryable();
+      var expected = ds.Where(field => field.Prop1.ContainsKey("key2") && field.Prop1["key2"] == "John");
+      var x = expected.ToList();
+
+      // act
+      var queryBuilder = new QueryBuilder<TestModel>()
+         .AddMap("prop1", (field, key) => field.Prop1[key])
+         .AddCondition("prop1[key2] = John");
+      var actual = queryBuilder.Build(ds);
+
+      // assert
+      Assert.Equal(expected.ToString(), actual.ToString());
+      Assert.Empty(expected.ToList());
+      Assert.Equal(expected.ToList().Count, actual.ToList().Count);
+   }
+
+   [Fact]
    private void Filtering_WithDictionaryIntSubKey_ShouldReturnCorrectResult()
    {
       // arrange
       var ds = new List<TestModel>() { new() { Prop2 = new Dictionary<int, string> { { 5987, "John" } } } }.AsQueryable();
-      var expected = ds.Where(field => field.Prop2[5987] == "John");
+      var expected = ds.Where(field => field.Prop2.ContainsKey(5987) && field.Prop2[5987] == "John");
 
       // act
       var queryBuilder = new QueryBuilder<TestModel>()
@@ -78,7 +98,13 @@ public class Issue165Tests
          var method = typeof(IDictionary<string, bool?>).GetProperty("Item")?.GetGetMethod()!;
          var indexer = Expression.Call(property, method, Expression.Constant("subkey"));
          var condition = Expression.Equal(indexer, Expression.Constant(value, typeof(bool?)));
-         return Expression.Lambda<Func<TestModel, bool>>(condition, parameter);
+
+         // ((field.Prop5.ContainsKey(subkey)))
+         var containsKeyMethod = typeof(IDictionary<string, bool?>).GetMethod("ContainsKey", [typeof(string)]);
+         var keyNullCheck = Expression.Call(property, containsKeyMethod!, Expression.Constant("subkey"));
+
+         var combined = Expression.AndAlso(keyNullCheck, condition);
+         return Expression.Lambda<Func<TestModel, bool>>(combined, parameter);
       }
       var expected = ds.Where(BuildPredicate(true));
 
@@ -100,14 +126,21 @@ public class Issue165Tests
       // arrange
       var id = Guid.Parse("0f0ee7914ba7496aa13ae5ce4ff058b1");
       var ds = new List<TestModel>() { new() { Prop3 = new Dictionary<Guid, string> { { id, "John" } } } }.AsQueryable();
-      static Expression<Func<TestModel, bool>> BuildPredicate(Guid id)  // generates: (field => field.Prop3[id] == "John")
+      static Expression<Func<TestModel, bool>> BuildPredicate(Guid id)
       {
+         // (field.Prop3[id] == "John")
          var parameter = Expression.Parameter(typeof(TestModel), "field");
          var property = Expression.Property(parameter, nameof(TestModel.Prop3));
          var method = typeof(IDictionary<Guid, string>).GetProperty("Item")?.GetGetMethod()!;
          var indexer = Expression.Call(property, method, Expression.Constant(id));
          var condition = Expression.Equal(indexer, Expression.Constant("John"));
-         return Expression.Lambda<Func<TestModel, bool>>(condition, parameter);
+
+         // ((field.Prop3.ContainsKey(id)))
+         var containsKeyMethod = typeof(IDictionary<Guid, string>).GetMethod("ContainsKey", [typeof(Guid)]);
+         var keyNullCheck = Expression.Call(property, containsKeyMethod!, Expression.Constant(id));
+
+         var combined = Expression.AndAlso(keyNullCheck, condition);
+         return Expression.Lambda<Func<TestModel, bool>>(combined, parameter);
       }
       var expected = ds.Where(BuildPredicate(id));
 
@@ -118,9 +151,9 @@ public class Issue165Tests
       var actual = queryBuilder.Build(ds);
 
       // assert
+      Assert.Equal(expected.ToString(), actual.ToString());
       Assert.NotEmpty(expected.ToList());
       Assert.Equal(expected.ToList().Count, actual.ToList().Count);
-      Assert.Equal(expected.ToString(), actual.ToString());
    }
 
    [Fact]
@@ -128,8 +161,7 @@ public class Issue165Tests
    {
       // arrange
       var ds = new List<TestModel>() { new() { Prop4 = new Dictionary<long, long> { { 44, 2024 } } } }.AsQueryable();
-
-      var expected = ds.Where(field => field.Prop4[44] == 2024);
+      var expected = ds.Where(field => field.Prop4.ContainsKey(44) && field.Prop4[44] == 2024);
 
       // act
       var queryBuilder = new QueryBuilder<TestModel>()
