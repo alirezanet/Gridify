@@ -110,7 +110,7 @@ In the bellow example we can dynamically search the data in the dictionary.
 
 ``` csharp{6}
 var gm = new GridifyMapper<TargetType>()
-      .AddMap("prop", (field , key) => field.Property[key]);
+      .AddMap("prop", (target , key) => target.Property[key]);
 
 var gq = new GridifyQuery
 {
