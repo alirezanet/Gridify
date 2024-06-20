@@ -3,22 +3,16 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Gridify.Syntax;
 
 namespace Gridify.QueryBuilders;
 
-internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T>
+internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Expression<Func<T, bool>>, T>(mapper)
 {
-   public LinqQueryBuilder(IGridifyMapper<T> mapper) : base(mapper)
-   {
-   }
-
    protected override Expression<Func<T, bool>>? BuildNestedQuery(
       Expression body, IGMap<T> gMap, ValueExpressionSyntax value, SyntaxNode op)
    {
       while (true)
-      {
          switch (body)
          {
             case MethodCallExpression { Method.Name: "Select" } selectExp:
@@ -58,7 +52,6 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
                // this should never happening
                throw new GridifyFilteringException($"The 'Select' method on '{gMap.From}' for type {body.Type} not found");
          }
-      }
    }
 
    protected override Expression<Func<T, bool>> BuildAlwaysTrueQuery()
@@ -88,9 +81,7 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
          {
             if (leftExp.Arguments.Last() is not LambdaExpression leftLambda
                 || rightExp.Arguments.Last() is not LambdaExpression rightLambda)
-            {
                return null;
-            }
 
             var visitedRight = new ReplaceExpressionVisitor(rightLambda.Parameters[0], leftLambda.Parameters[0])
                .Visit(rightLambda.Body);
@@ -129,10 +120,12 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
             break;
          case SyntaxKind.Equal when valueExpression.IsNullOrDefault:
             if (body.Type == typeof(string))
+            {
                be = Expression.Call(null, GetIsNullOrEmptyMethod(), body);
+            }
             else
             {
-               var canBeNull = !body.Type.IsValueType || (Nullable.GetUnderlyingType(body.Type) != null);
+               var canBeNull = !body.Type.IsValueType || Nullable.GetUnderlyingType(body.Type) != null;
                be = canBeNull
                   ? Expression.OrElse(Expression.Equal(body, Expression.Constant(null)), Expression.Equal(body, Expression.Default(body.Type)))
                   : Expression.Equal(body, Expression.Default(body.Type));
@@ -144,10 +137,12 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
             break;
          case SyntaxKind.NotEqual when valueExpression.IsNullOrDefault:
             if (body.Type == typeof(string))
+            {
                be = Expression.Not(Expression.Call(null, GetIsNullOrEmptyMethod(), body));
+            }
             else
             {
-               var canBeNull = !body.Type.IsValueType || (Nullable.GetUnderlyingType(body.Type) != null);
+               var canBeNull = !body.Type.IsValueType || Nullable.GetUnderlyingType(body.Type) != null;
                be = canBeNull
                   ? Expression.AndAlso(Expression.NotEqual(body, Expression.Constant(null)),
                      Expression.NotEqual(body, Expression.Default(body.Type)))
@@ -192,7 +187,9 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
                be = Expression.Call(body, GetStartWithMethod(), GetValueExpression(body.Type, value?.ToString()));
             }
             else
+            {
                be = Expression.Call(body, GetStartWithMethod(), GetValueExpression(body.Type, value));
+            }
 
             break;
          case SyntaxKind.EndsWith:
@@ -202,7 +199,9 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
                be = Expression.Call(body, GetEndsWithMethod(), GetValueExpression(body.Type, value?.ToString()));
             }
             else
+            {
                be = Expression.Call(body, GetEndsWithMethod(), GetValueExpression(body.Type, value));
+            }
 
             break;
          case SyntaxKind.NotStartsWith:
@@ -212,7 +211,9 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
                be = Expression.Not(Expression.Call(body, GetStartWithMethod(), GetValueExpression(body.Type, value?.ToString())));
             }
             else
+            {
                be = Expression.Not(Expression.Call(body, GetStartWithMethod(), GetValueExpression(body.Type, value)));
+            }
 
             break;
          case SyntaxKind.NotEndsWith:
@@ -222,7 +223,9 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
                be = Expression.Not(Expression.Call(body, GetEndsWithMethod(), GetValueExpression(body.Type, value?.ToString())));
             }
             else
+            {
                be = Expression.Not(Expression.Call(body, GetEndsWithMethod(), GetValueExpression(body.Type, value)));
+            }
 
             break;
          case SyntaxKind.CustomOperator:
@@ -257,7 +260,6 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
    private Expression<Func<T, bool>>? GenerateNestedExpression(Expression body, IGMap<T> gMap, ValueExpressionSyntax value, SyntaxNode op)
    {
       while (true)
-      {
          switch (body)
          {
             case MethodCallExpression { Method.Name: "Select" } selectExp:
@@ -292,7 +294,6 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
                // this should never happening
                throw new GridifyFilteringException($"The 'Select' method on '{gMap.From}' for type {body.Type} not found");
          }
-      }
    }
 
    private LambdaExpression ParseMethodCallExpression(MethodCallExpression exp, LambdaExpression predicate)
@@ -323,7 +324,7 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
       }
    }
 
-   private ParameterExpression GetParameterExpression(MemberExpression member)
+   private static ParameterExpression GetParameterExpression(MemberExpression member)
    {
       return member.Expression switch
       {
@@ -333,7 +334,7 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
       };
    }
 
-   private MemberExpression GetPropertyOrField(MemberExpression member, ParameterExpression param)
+   private static MemberExpression GetPropertyOrField(MemberExpression member, ParameterExpression param)
    {
       return member.Expression switch
       {
@@ -343,7 +344,7 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
       };
    }
 
-   private LambdaExpression GetAnyExpression(MemberExpression member, Expression predicate)
+   private static LambdaExpression GetAnyExpression(MemberExpression member, Expression predicate)
    {
       var param = GetParameterExpression(member);
       var prop = GetPropertyOrField(member, param);
@@ -360,7 +361,7 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
       return GetExpressionWithNullCheck(prop, param, anyExp);
    }
 
-   private LambdaExpression GetExpressionWithNullCheck(MemberExpression prop, ParameterExpression param, Expression right)
+   private static LambdaExpression GetExpressionWithNullCheck(MemberExpression prop, ParameterExpression param, Expression right)
    {
       // Entityframework doesn't support NullChecking for Collections (issue #58)
       // also issue #70 for NHibernate - and #173
@@ -435,26 +436,47 @@ internal class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>,
          : Expression.Constant(StringComparison.Ordinal);
    }
 
-   private MethodInfo GetAnyMethod(Type @type) =>
-      typeof(Enumerable).GetMethods().Single(m => m.Name == "Any" && m.GetParameters().Length == 2).MakeGenericMethod(@type);
+   private static MethodInfo GetAnyMethod(Type type)
+   {
+      return typeof(Enumerable).GetMethods().Single(m => m.Name == "Any" && m.GetParameters().Length == 2).MakeGenericMethod(type);
+   }
 
-   private MethodInfo GetEndsWithMethod() => typeof(string).GetMethod("EndsWith", new[] { typeof(string) })!;
+   private static MethodInfo GetEndsWithMethod()
+   {
+      return typeof(string).GetMethod("EndsWith", new[] { typeof(string) })!;
+   }
 
-   private MethodInfo GetStartWithMethod() => typeof(string).GetMethod("StartsWith", new[] { typeof(string) })!;
+   private static MethodInfo GetStartWithMethod()
+   {
+      return typeof(string).GetMethod("StartsWith", new[] { typeof(string) })!;
+   }
 
-   private MethodInfo GetContainsMethod() => typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
+   private static MethodInfo GetContainsMethod()
+   {
+      return typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
+   }
 
-   private MethodInfo GetIsNullOrEmptyMethod() => typeof(string).GetMethod("IsNullOrEmpty", new[] { typeof(string) })!;
+   private static MethodInfo GetIsNullOrEmptyMethod()
+   {
+      return typeof(string).GetMethod("IsNullOrEmpty", new[] { typeof(string) })!;
+   }
 
-   private MethodInfo GetCompareMethodWithStringComparison() =>
-      typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) })!;
+   private static MethodInfo GetCompareMethodWithStringComparison()
+   {
+      return typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) })!;
+   }
 
-   private MethodInfo GetCompareMethod() =>
-      typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string) })!;
+   private static MethodInfo GetCompareMethod()
+   {
+      return typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string) })!;
+   }
 
-   private MethodInfo GetToStringMethod() => typeof(object).GetMethod("ToString")!;
+   private static MethodInfo GetToStringMethod()
+   {
+      return typeof(object).GetMethod("ToString")!;
+   }
 
-   private MethodCallExpression ParseNestedExpression(Expression exp)
+   private static MethodCallExpression ParseNestedExpression(Expression exp)
    {
       return exp switch
       {
