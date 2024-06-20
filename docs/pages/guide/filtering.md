@@ -89,7 +89,7 @@ In the bellow example we want to filter data using `8th` index of our SubCollect
 
 ``` csharp{6}
 var gm = new GridifyMapper<TargetType>()
-      .AddMap("prop", (x , index) => x.SubCollection[index].SomeProp);
+      .AddMap("prop", (target , index) => target.SubCollection[index].SomeProp);
 
 var gq = new GridifyQuery
 {

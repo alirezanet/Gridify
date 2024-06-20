@@ -170,7 +170,7 @@ In the bellow example we want to filter data using `8th` index of our SubCollect
 var gq = new GridifyQuery { Filter = "prop[8] > 10" };
 
 var gm = new GridifyMapper<TargetType>()
-      .AddMap("prop", (field , index) => field.SubCollection[index].SomeProp);
+      .AddMap("prop", (target, index) => target.SubCollection[index].SomeProp);
 ```
 
 checkout [Passing Indexes](./filtering.md#passing-indexes) for more information.
