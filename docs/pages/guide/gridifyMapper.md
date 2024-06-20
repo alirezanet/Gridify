@@ -185,14 +185,14 @@ This allows to perform filtering operations on dictionary fields. Here is an exa
 var gq = new GridifyQuery { Filter = "prop{name} = John" }; // 'name' is a key in our dictionary
 
 var gm = new GridifyMapper<TargetType>()
-      .AddMap("prop", (field , key) => field.Property[key]);
+      .AddMap("prop", (target , key) => target.Property[key]);
 ```
 
 or if your dictionary key is not a `string`, you can use the generic overload of the `AddMap` method to pass the target type:
 
 ``` csharp{2}
 var gm = new GridifyMapper<TargetType>()
-      .AddMap<Guid>("prop", (field , key) => x.Property[key]);
+      .AddMap<Guid>("prop", (target , key) => target.Property[key]);
 ```
 
 To learn about the filtering syntax checkout [Passing Dictionary Keys](./filtering.md#passing-dictionary-keys).
