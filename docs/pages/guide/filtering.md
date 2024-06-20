@@ -81,45 +81,35 @@ var esc = Regex.Replace(value, "([(),|\\]|\/i)", "\\$1" );
 // esc = \(test\,test2\)
 ```
 
-## Passing Indexes
+## Using Indexers
 
-Since version `v2.3.0`, Gridify supports passing indexes to the sub-collections. We can pass the index using the `[ ]`
-brackets.
-In the bellow example we want to filter data using `8th` index of our SubCollection.
+Starting from version `v2.15.0`, Gridify supports filtering on any property that is indexable, including sub-collections, arrays, and dictionaries. This feature allows you to create dynamic and flexible queries for a wide range of data structures.
 
-``` csharp{6}
+### Passing Index/Key to Sub-Collections, Arrays, and Dictionaries
+
+Gridify enables filtering on elements of sub-collections, arrays, and dictionary properties by specifying the index or key within square brackets `[ ]`.
+
+Here’s an example:
+
+```csharp
 var gm = new GridifyMapper<TargetType>()
-      .AddMap("prop", (target , index) => target.SubCollection[index].SomeProp);
+      .AddMap("arrayProp", (target, index) => target.MyArray[index].Prop)
+      .AddMap("dictProp", (target, key) => target.MyDictionary[key]);
 
 var gq = new GridifyQuery
 {
-    Filter = "prop[8] > 10"
+    Filter = "arrayProp[8] > 10 AND dictProp[name] = John"
 };
 ```
 
-Checkout [Use Indexes on Sub-Collections](./gridifyMapper.md#use-indexes-on-sub-collections) for more information.
+In this example:
 
-## Passing Dictionary Keys
+`arrayProp[8] > 10` filters on the 8th element of an array property.
+`dictProp[name] = John` filters on the value associated with the name key in a dictionary property.
 
-Since version `v2.15.0`, Gridify supports passing custom keys to add a filtering condition on `IDictionary` properties.
-you can pass the key using the `{ }` brackets. for example if you want to search through a document database like MongoDb
-you can use this feature to search the additional metadata that stored in the `Dictionary`
+This new capability makes Gridify a versatile and robust tool for handling complex data structures in your filtering logic.
 
-In the bellow example we can dynamically search the data in the dictionary.
-
-
-``` csharp{6}
-var gm = new GridifyMapper<TargetType>()
-      .AddMap("prop", (target , key) => target.Property[key]);
-
-var gq = new GridifyQuery
-{
-    Filter = "prop{name} = John" // 'name' is a key in the dictionary
-};
-```
-
-Checkout [Filtering on Dictionaries](./gridifyMapper.md#filtering-on-dictionaries) for more information.
-
+Check out [Defining Mappings for Indexable Properties](./gridifyMapper.md#defining-mappings-for-indexable-properties) for more information.
 
 ## Custom Operators
 
@@ -158,8 +148,8 @@ class RegexMatchOperator : IGridifyOperator
       return (prop, value) => Regex.IsMatch(prop.ToString(), value.ToString());
    }
 }
-
 ```
+
 - InOperator Example:
 
 ```csharp

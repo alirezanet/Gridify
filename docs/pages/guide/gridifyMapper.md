@@ -161,42 +161,54 @@ var query = level1List.ApplyFiltering("prop1 = 123", mapper);
 
 if you have only two-level nesting, you don't need to use `SelectMany`.
 
-## Use Indexes on Sub-Collections
+## Defining Mappings for Indexable Properties
 
-Since version `v2.3.0`, GridifyMapper [AddMap](#addmap) method has a new overload that accepts an `index` parameter.
-In the bellow example we want to filter data using `8th` index of our SubCollection.
+Starting from version `v2.15.0`, GridifyMapper's `AddMap` method supports filtering on properties that are **indexable**, such as sub-collections, arrays, and dictionaries. This allows you to create dynamic queries by defining mappings to specific indexes or dictionary keys using square brackets `[ ]`.
 
-``` csharp{4}
-var gq = new GridifyQuery { Filter = "prop[8] > 10" };
+### Using Indexes and Keys with AddMap
 
+GridifyMapper provides overloads of the `AddMap` method to support filtering on sub-collections, arrays, and dictionaries.
+
+#### Mapping to Array Indexes
+
+You can define a mapping to a specific index in an array or sub-collection by specifying the index within square brackets `[ ]`.`
+
+```csharp
 var gm = new GridifyMapper<TargetType>()
-      .AddMap("prop", (target, index) => target.SubCollection[index].SomeProp);
+      .AddMap("arrayProp", (target, index) => target.MyArray[index].Prop);
+
+var gq = new GridifyQuery
+{
+   // Filters on the 8th element of an array property
+   Filter = "arrayProp[8] > 10"
+};
 ```
 
-checkout [Passing Indexes](./filtering.md#passing-indexes) for more information.
+#### Mapping to Dictionary Keys
 
-## Filtering on Dictionaries
+Similarly, you can define a mapping to a specific key in a dictionary.
 
-Since version `v2.15.0`, GridifyMapper [AddMap](#addmap) method has a new overload that accepts an additional `key`
-parameter that you can use to map your alias to their corresponding properties and keys in your entity class.
-This allows to perform filtering operations on dictionary fields. Here is an example of how to use it:
-
-``` csharp{4}
-var gq = new GridifyQuery { Filter = "prop{name} = John" }; // 'name' is a key in our dictionary
-
+```csharp
 var gm = new GridifyMapper<TargetType>()
-      .AddMap("prop", (target , key) => target.Property[key]);
+      .AddMap("dictProp", (target, key) => target.MyDictionary[key]);
+
+var gq = new GridifyQuery
+{
+   // Filters on the value associated with the 'name' key in a dictionary
+   Filter = "dictProp[name] = John"
+};
 ```
 
-or if your dictionary key is not a `string`, you can use the generic overload of the `AddMap` method to pass the target type:
+### Generic Overload for Non-String Dictionary Keys
 
-``` csharp{2}
+If your dictionary key is not a string, you can use the generic overload of the `AddMap<T>` method to specify the key type.
+
+```csharp
 var gm = new GridifyMapper<TargetType>()
-      .AddMap<Guid>("prop", (target , key) => target.Property[key]);
+      .AddMap<Guid>("dictProp", (target, key) => target.MyDictionary[key]);
 ```
 
-To learn about the filtering syntax checkout [Passing Dictionary Keys](./filtering.md#passing-dictionary-keys).
-
+For more information on filtering using these mappings, refer to the [Using Indexers](./filtering.md#using-indexers).
 
 ## GetExpression
 
