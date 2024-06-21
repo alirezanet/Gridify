@@ -13,7 +13,7 @@ internal class ElasticsearchQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQuer
    private readonly IGridifyMapper<T> _mapper = mapper;
 
    protected override Query BuildNestedQuery(
-      Expression body, IGMap<T> gMap, ValueExpressionSyntax value, SyntaxNode op)
+      Expression body, IGMap<T> gMap, ValueExpressionSyntax value, ISyntaxNode op)
    {
       throw new NotSupportedException();
    }
@@ -40,7 +40,7 @@ internal class ElasticsearchQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQuer
       Expression body,
       ParameterExpression parameter,
       object? value,
-      SyntaxNode op,
+      ISyntaxNode op,
       ValueExpressionSyntax valueExpression)
    {
       if (valueExpression.IsCaseInsensitive)

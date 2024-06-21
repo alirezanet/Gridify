@@ -3,26 +3,18 @@ using System.Linq;
 
 namespace Gridify.Syntax;
 
-public class SyntaxToken : SyntaxNode
+public struct SyntaxToken(SyntaxKind kind, int position, string text) : ISyntaxNode
 {
-   public override SyntaxKind Kind { get; }
-   public int Position { get; }
-   public string Text { get; }
+   public int Position { get; } = position;
+   public string Text { get; } = text;
+   public SyntaxKind Kind { get; } = kind;
 
-   public override IEnumerable<SyntaxNode> GetChildren()
+   public IEnumerable<ISyntaxNode> GetChildren()
    {
-      return Enumerable.Empty<SyntaxNode>();
+      return Enumerable.Empty<ISyntaxNode>();
    }
 
-   public SyntaxToken(SyntaxKind kind, int position, string text)
+   public SyntaxToken() : this(SyntaxKind.End, 0, string.Empty)
    {
-      Kind = kind;
-      Position = position;
-      Text = text;
-   }
-
-   public SyntaxToken()
-   {
-      Text = string.Empty;
    }
 }

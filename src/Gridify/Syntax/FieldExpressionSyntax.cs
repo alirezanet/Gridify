@@ -12,7 +12,7 @@ internal sealed class FieldExpressionSyntax : ExpressionSyntax
 
    public override SyntaxKind Kind => SyntaxKind.FieldExpression;
 
-   public override IEnumerable<SyntaxNode> GetChildren()
+   public override IEnumerable<ISyntaxNode> GetChildren()
    {
       yield return FieldToken;
    }

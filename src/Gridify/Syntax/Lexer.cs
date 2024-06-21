@@ -192,7 +192,7 @@ internal ref struct Lexer(string text, IEnumerable<IGridifyOperator> customOpera
       return false;
    }
 
-   private bool TryToReadTheValue(out SyntaxToken? valueToken)
+   private bool TryToReadTheValue(out SyntaxToken valueToken)
    {
       if (_waitingForValue)
       {
@@ -249,7 +249,7 @@ internal ref struct Lexer(string text, IEnumerable<IGridifyOperator> customOpera
          }
       }
 
-      valueToken = null;
+      valueToken = new SyntaxToken();
       return false;
    }
 
