@@ -5,21 +5,14 @@ using System.Text;
 
 namespace Gridify.Syntax;
 
-internal ref struct Lexer
+internal ref struct Lexer(string text, IEnumerable<IGridifyOperator> customOperators)
 {
-   private readonly List<string> _diagnostics = new();
-   private readonly ReadOnlySpan<char> _text;
-   private readonly IEnumerable<IGridifyOperator> _customOperators;
+   private List<string>? _diagnostics = null;
+   private readonly ReadOnlySpan<char> _text = text.AsSpan();
    private int _position;
    private bool _waitingForValue;
 
-   public Lexer(string text, IEnumerable<IGridifyOperator> customOperators)
-   {
-      _text = text.AsSpan();
-      _customOperators = customOperators;
-   }
-
-   public IEnumerable<string> Diagnostics => _diagnostics;
+   public IEnumerable<string> Diagnostics => _diagnostics ?? Enumerable.Empty<string>();
 
    private char Current => _position >= _text.Length ? '\0' : _text[_position];
 
@@ -116,9 +109,9 @@ internal ref struct Lexer
                ? new SyntaxToken(SyntaxKind.GreaterOrEqualThan, _position += 2, ">=")
                : new SyntaxToken(SyntaxKind.GreaterThan, _position++, ">");
          }
-         case '#' when _customOperators.Any(): // Custom Operators
+         case '#' when customOperators.Any(): // Custom Operators
          {
-            foreach (var cOp in _customOperators)
+            foreach (var cOp in customOperators)
             {
                var op = cOp.GetOperator();
                var opSlice = op.AsSpan();
@@ -164,7 +157,7 @@ internal ref struct Lexer
          return new SyntaxToken(SyntaxKind.FieldToken, start, text.ToString());
       }
 
-      _diagnostics.Add($"bad character input: '{Current.ToString()}', at index {_position.ToString()}");
+      AddDiagnostics($"bad character input: '{Current.ToString()}', at index {_position.ToString()}");
       return new SyntaxToken(SyntaxKind.BadToken, _position++, string.Empty);
    }
 
@@ -189,7 +182,7 @@ internal ref struct Lexer
             }
          }
 
-         _diagnostics.Add($"Indexer is not closed: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
+         AddDiagnostics($"Indexer is not closed: '{peek.ToString()}' at {_position++.ToString()}. expected ']' ");
          {
             nextToken = new SyntaxToken(SyntaxKind.BadToken, _position, Current.ToString());
             return true;
@@ -258,5 +251,11 @@ internal ref struct Lexer
 
       valueToken = null;
       return false;
+   }
+
+   private void AddDiagnostics(string message)
+   {
+      _diagnostics ??= [];
+      _diagnostics.Add(message);
    }
 }
