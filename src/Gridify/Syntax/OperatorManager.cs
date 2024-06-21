@@ -1,25 +1,26 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Gridify.Syntax;
 
 public class OperatorManager
 {
-   private readonly ConcurrentDictionary<string, IGridifyOperator> _operators = new();
-   internal IEnumerable<IGridifyOperator> Operators => _operators.Values;
+   private ConcurrentDictionary<string, IGridifyOperator>? _operators;
+   internal IEnumerable<IGridifyOperator> Operators => _operators?.Values ?? Enumerable.Empty<IGridifyOperator>();
 
    public void Register<TOperator>() where TOperator : IGridifyOperator
    {
-      var gridifyOperator = (IGridifyOperator) Activator.CreateInstance(typeof(TOperator))!;
+      var gridifyOperator = (IGridifyOperator)Activator.CreateInstance(typeof(TOperator))!;
       Register(gridifyOperator);
    }
 
    public void Register(IGridifyOperator gridifyOperator)
    {
       Validate(gridifyOperator.GetOperator());
-
+      _operators ??= new();
       _operators.Add(gridifyOperator);
    }
 
@@ -28,15 +29,16 @@ public class OperatorManager
       Validate(@operator);
 
       var customOperator = new GridifyOperator(@operator, handler);
+      _operators ??= new();
       _operators.Add(customOperator);
    }
    public void Remove<TOperator>() where TOperator : IGridifyOperator
    {
-      var gridifyOperator = (IGridifyOperator) Activator.CreateInstance(typeof(TOperator))!;
+      var gridifyOperator = (IGridifyOperator)Activator.CreateInstance(typeof(TOperator))!;
       Remove(gridifyOperator.GetOperator());
    }
 
-   public void Remove(string @operator) => _operators.Remove(@operator);
+   public void Remove(string @operator) => _operators?.Remove(@operator);
 
    private static void Validate(string @operator)
    {

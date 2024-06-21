@@ -55,7 +55,7 @@ internal struct Parser
       return new SyntaxTree(_diagnostics ?? Enumerable.Empty<string>(), expression, end);
    }
 
-   private SyntaxKind GetExpectation(SyntaxKind kind)
+   private static SyntaxKind GetExpectation(SyntaxKind kind)
    {
       switch (kind)
       {
@@ -103,7 +103,7 @@ internal struct Parser
       return left;
    }
 
-   private ExpressionSyntax ParseValueExpression()
+   private ValueExpressionSyntax ParseValueExpression()
    {
       // field=
       if (Current.Kind != SyntaxKind.ValueToken)
@@ -140,7 +140,7 @@ internal struct Parser
 
       expectation ??= kind;
 
-      if (_diagnostics != null && !_diagnostics.Any(q => q.StartsWith("Unexpected token")))
+      if (_diagnostics is null || !_diagnostics.Any(q => q.StartsWith("Unexpected token")))
          AddDiagnostics($"Unexpected token <{Current.Kind}> at index {Current.Position}, expected <{expectation}>");
 
       return new SyntaxToken(kind, Current.Position, Current.Text);
@@ -156,7 +156,7 @@ internal struct Parser
       return new ParenthesizedExpressionSyntax(left, expression, right);
    }
 
-   private ExpressionSyntax ParseFieldExpression()
+   private FieldExpressionSyntax ParseFieldExpression()
    {
       var fieldToken = Match(SyntaxKind.FieldToken);
 
