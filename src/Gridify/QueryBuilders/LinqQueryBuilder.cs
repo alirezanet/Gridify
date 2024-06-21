@@ -10,7 +10,7 @@ namespace Gridify.QueryBuilders;
 internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Expression<Func<T, bool>>, T>(mapper)
 {
    protected override Expression<Func<T, bool>>? BuildNestedQuery(
-      Expression body, IGMap<T> gMap, ValueExpressionSyntax value, SyntaxNode op)
+      Expression body, IGMap<T> gMap, ValueExpressionSyntax value, ISyntaxNode op)
    {
       while (true)
          switch (body)
@@ -105,7 +105,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
       Expression body,
       ParameterExpression parameter,
       object? value,
-      SyntaxNode op,
+      ISyntaxNode op,
       ValueExpressionSyntax valueExpression)
    {
       Expression be;
@@ -229,7 +229,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
 
             break;
          case SyntaxKind.CustomOperator:
-            var token = op as SyntaxToken;
+            var token = (SyntaxToken)op;
             var customOperator = GridifyGlobalConfiguration.CustomOperators.Operators.First(q => q.GetOperator() == token!.Text);
             var customExp = customOperator.OperatorHandler();
 
@@ -257,7 +257,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
       return left.Or(right);
    }
 
-   private Expression<Func<T, bool>>? GenerateNestedExpression(Expression body, IGMap<T> gMap, ValueExpressionSyntax value, SyntaxNode op)
+   private Expression<Func<T, bool>>? GenerateNestedExpression(Expression body, IGMap<T> gMap, ValueExpressionSyntax value, ISyntaxNode op)
    {
       while (true)
          switch (body)

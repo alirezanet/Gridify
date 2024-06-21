@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Gridify.Syntax;
 
@@ -17,7 +17,7 @@ internal sealed class BinaryExpressionSyntax : ExpressionSyntax
 
    public override SyntaxKind Kind => SyntaxKind.BinaryExpression;
 
-   public override IEnumerable<SyntaxNode> GetChildren()
+   public override IEnumerable<ISyntaxNode> GetChildren()
    {
       yield return Left;
       yield return OperatorToken;

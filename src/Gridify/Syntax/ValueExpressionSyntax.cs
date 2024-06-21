@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Gridify.Syntax;
 
 internal sealed class ValueExpressionSyntax : ExpressionSyntax
 {
-   public ValueExpressionSyntax(SyntaxToken valueToken,bool isCaseInsensitive, bool isNullOrDefault)
+   public ValueExpressionSyntax(SyntaxToken valueToken, bool isCaseInsensitive, bool isNullOrDefault)
    {
       ValueToken = valueToken;
       IsCaseInsensitive = isCaseInsensitive;
@@ -13,7 +13,7 @@ internal sealed class ValueExpressionSyntax : ExpressionSyntax
 
    public override SyntaxKind Kind => SyntaxKind.ValueExpression;
 
-   public override IEnumerable<SyntaxNode> GetChildren()
+   public override IEnumerable<ISyntaxNode> GetChildren()
    {
       yield return ValueToken;
    }
