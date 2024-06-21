@@ -3,10 +3,10 @@ using System.Linq;
 
 namespace Gridify.Syntax;
 
-internal class Parser
+internal struct Parser
 {
-   private readonly List<string> _diagnostics = new();
-   private readonly SyntaxToken[] _tokens;
+   private List<string>? _diagnostics = null;
+   private readonly List<SyntaxToken> _tokens = [];
    private int _position;
 
    private static bool IsOperator(SyntaxKind kind)
@@ -28,17 +28,16 @@ internal class Parser
 
    public Parser(string text, IEnumerable<IGridifyOperator> customOperators)
    {
-      var tokens = new List<SyntaxToken>();
       var lexer = new Lexer(text, customOperators);
       SyntaxToken token;
       do
       {
          token = lexer.NextToken();
-         if (token.Kind != SyntaxKind.WhiteSpace) tokens.Add(token);
+         if (token.Kind != SyntaxKind.WhiteSpace) _tokens.Add(token);
       } while (token.Kind != SyntaxKind.End);
 
-      _tokens = tokens.ToArray();
-      _diagnostics.AddRange(lexer.Diagnostics);
+      if (lexer.Diagnostics.Any())
+         AddDiagnostics(lexer.Diagnostics);
    }
 
    private SyntaxToken Current => Peek(0);
@@ -46,14 +45,14 @@ internal class Parser
    private SyntaxToken Peek(int offset)
    {
       var index = _position + offset;
-      return index >= _tokens.Length ? _tokens[_tokens.Length - 1] : _tokens[index];
+      return index >= _tokens.Count ? _tokens[_tokens.Count - 1] : _tokens[index];
    }
 
    public SyntaxTree Parse()
    {
       var expression = ParseTerm();
       var end = Match(SyntaxKind.End, GetExpectation(expression.Kind));
-      return new SyntaxTree(_diagnostics, expression, end);
+      return new SyntaxTree(_diagnostics ?? Enumerable.Empty<string>(), expression, end);
    }
 
    private SyntaxKind GetExpectation(SyntaxKind kind)
@@ -141,8 +140,8 @@ internal class Parser
 
       expectation ??= kind;
 
-      if (!_diagnostics.Any(q => q.StartsWith("Unexpected token")))
-         _diagnostics.Add($"Unexpected token <{Current.Kind}> at index {Current.Position}, expected <{expectation}>");
+      if (_diagnostics != null && !_diagnostics.Any(q => q.StartsWith("Unexpected token")))
+         AddDiagnostics($"Unexpected token <{Current.Kind}> at index {Current.Position}, expected <{expectation}>");
 
       return new SyntaxToken(kind, Current.Position, Current.Text);
    }
@@ -164,5 +163,15 @@ internal class Parser
       return TryMatch(SyntaxKind.FieldIndexer, out var fieldIndexer)
          ? new FieldExpressionSyntax(fieldToken, fieldIndexer.Text)
          : new FieldExpressionSyntax(fieldToken);
+   }
+   private void AddDiagnostics(string message)
+   {
+      _diagnostics ??= [];
+      _diagnostics.Add(message);
+   }
+   private void AddDiagnostics(IEnumerable<string> messages)
+   {
+      _diagnostics ??= [];
+      _diagnostics.AddRange(messages);
    }
 }

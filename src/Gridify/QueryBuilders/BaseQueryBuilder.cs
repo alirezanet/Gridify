@@ -16,7 +16,7 @@ internal abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
    }
 
    protected abstract TQuery? BuildNestedQuery(
-      Expression body, IGMap<T> gMap, ValueExpressionSyntax value, SyntaxNode op);
+      Expression body, IGMap<T> gMap, ValueExpressionSyntax value, ISyntaxNode op);
 
    protected abstract TQuery BuildAlwaysTrueQuery();
 
@@ -31,7 +31,7 @@ internal abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       Expression body,
       ParameterExpression parameter,
       object? value,
-      SyntaxNode op,
+      ISyntaxNode op,
       ValueExpressionSyntax valueExpression);
 
    protected abstract TQuery CombineWithAndOperator(TQuery left, TQuery right);
@@ -157,7 +157,7 @@ internal abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       Expression body,
       ParameterExpression parameter,
       ValueExpressionSyntax valueExpression,
-      SyntaxNode op,
+      ISyntaxNode op,
       Func<string, object>? convertor)
    {
       // Remove the boxing for value types

@@ -197,9 +197,9 @@ public static partial class GridifyExtensions
       return mapper;
    }
 
-   private static IEnumerable<SyntaxNode> Descendants(this SyntaxNode root)
+   private static IEnumerable<ISyntaxNode> Descendants(this ISyntaxNode root)
    {
-      var nodes = new Stack<SyntaxNode>(new[] { root });
+      var nodes = new Stack<ISyntaxNode>(new[] { root });
       while (nodes.Any())
       {
          var node = nodes.Pop();

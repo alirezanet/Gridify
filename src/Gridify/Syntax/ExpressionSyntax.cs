@@ -1,5 +1,9 @@
-﻿namespace Gridify.Syntax;
+using System.Collections.Generic;
 
-public abstract class ExpressionSyntax : SyntaxNode
+namespace Gridify.Syntax;
+
+public abstract class ExpressionSyntax : ISyntaxNode
 {
+   public abstract SyntaxKind Kind { get; }
+   public abstract IEnumerable<ISyntaxNode> GetChildren();
 }
