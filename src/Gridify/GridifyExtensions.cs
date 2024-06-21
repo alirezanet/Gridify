@@ -178,24 +178,24 @@ public static partial class GridifyExtensions
 
       mapper = new GridifyMapper<T>();
 
-      var fields = syntaxTree.Root.Descendants()
-         .Where(q => q.Kind == SyntaxKind.FieldExpression)
-         .Cast<FieldExpressionSyntax>()
-         .Distinct(new FieldExpressionComparer());
+      var root = syntaxTree.Root;
+      var fields = root.Descendants()
+          .OfType<FieldExpressionSyntax>()
+          .Distinct(new FieldExpressionComparer());
 
-      foreach (var field in fields)
-         try
-         {
-            mapper.AddMap(field.FieldToken.Text);
-         }
-         catch (Exception)
-         {
-            if (!mapper.Configuration.IgnoreNotMappedFields)
-               throw new GridifyMapperException($"Property '{field.FieldToken.Text}' not found.");
-         }
+      try
+      {
+         foreach (var field in fields) mapper.AddMap(field.FieldToken.Text);
+      }
+      catch (Exception)
+      {
+         if (!mapper.Configuration.IgnoreNotMappedFields)
+            throw;
+      }
 
       return mapper;
    }
+
 
    private static IEnumerable<ISyntaxNode> Descendants(this ISyntaxNode root)
    {
