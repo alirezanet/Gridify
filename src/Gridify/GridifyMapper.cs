@@ -1,9 +1,8 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
+using Gridify.Syntax;
 
 namespace Gridify;
 
@@ -48,10 +47,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       Expression<Func<T, object>> to;
       try
       {
-         var expression = CreateExpression(from);
-         if (expression is null)
-            return this;
-         to = expression;
+         to = CreateExpression(from); ;
       }
       catch (Exception)
       {
@@ -85,7 +81,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          var fullName = string.IsNullOrEmpty(prefix) ? propertyName : $"{prefix}.{propertyName}";
 
          // Skip classes if nestingLevel is exceeded
-         if (item.PropertyType.IsClass && item.PropertyType != typeof(string))
+         if (item.PropertyType.IsClass && item.PropertyType != typeof(string) && !item.PropertyType.IsSimpleTypeCollection(out _))
          {
             if (currentDepth >= maxNestingDepth)
             {
@@ -214,14 +210,14 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    /// <returns>a comma seperated string</returns>
    public override string ToString() => string.Join(",", _mappings.Select(q => q.From));
 
-   internal static Expression<Func<T, object>>? CreateExpression(string from) // TODO: handle possible nulls
+   internal static Expression<Func<T, object>> CreateExpression(string from) // TODO: handle possible nulls
    {
       // Param_x =>
       var parameter = Expression.Parameter(typeof(T), "__" + typeof(T).Name);
       // Param_x.Name, Param_x.yyy.zz.xx
       var mapProperty = from.Split('.').Aggregate<string, Expression>(parameter, Expression.Property);
 
-      if (!IsListOrArrayOfPrimitivesOrString(mapProperty.Type, out var genericType))
+      if (!mapProperty.Type.IsSimpleTypeCollection(out var genericType))
       {
          // (object)Param_x.Name
          var convertedExpression = Expression.Convert(mapProperty, typeof(object));
@@ -229,9 +225,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          return Expression.Lambda<Func<T, object>>(convertedExpression, parameter);
       }
 
-      var selectMethod = GetSelectMethod([genericType!, genericType!]);
-      if (selectMethod is null)
-         return null;
+      var selectMethod = genericType!.GetSimpleTypeSelectMethod();
       var predicateParameter = Expression.Parameter(genericType!);
       var predicate = Expression.Lambda(predicateParameter, predicateParameter);
       //  Param_x.Name.Select(fc => fc)
@@ -239,39 +233,5 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       return Expression.Lambda<Func<T, object>>(body, parameter);
    }
 
-   private static MethodInfo? GetSelectMethod(Type[] type)
-   {
-      return typeof(Enumerable).GetMethods().First(m => m.Name == "Select").MakeGenericMethod(type);
-   }
-
-   private static bool IsListOrArrayOfPrimitivesOrString(Type type, out Type? itemType)
-   {
-      itemType = null;
-      if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-      {
-         var arguments = type.GetGenericArguments();
-         if (arguments.Length != 1 || !IsPrimitiveOrKnownType(arguments[0])) return false;
-
-         itemType = arguments[0];
-         return true;
-      }
-      if (!type.IsArray) return false;
-
-      var elementType = type.GetElementType();
-      if (elementType == null || !IsPrimitiveOrKnownType(elementType)) return false;
-      itemType = elementType;
-      return true;
-   }
-
-   private static bool IsPrimitiveOrKnownType(Type type)
-   {
-      // Primitive types in C# include: int, float, double, char, bool, etc.
-      // Also consider the known primitive types and string explicitly
-      return type.IsPrimitive ||
-             (type == typeof(string)) ||
-             (type == typeof(decimal)) ||
-             (type == typeof(DateTime)) ||
-             (type == typeof(Guid));
-   }
 
 }
