@@ -10,7 +10,7 @@ namespace Benchmarks;
 [MemoryDiagnoser]
 [RPlotExporter]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-public class NativeLinqComparisionBenchmark
+public class NativeLinqComparisonBenchmark
 {
    private static readonly Consumer Consumer = new();
    private TestClass[] _data;
