@@ -87,7 +87,7 @@ If you need to change your search values before the filtering operation you can 
 in the above example we want to convert the userName value to lowercase before the filtering operation.
 
 ``` csharp
-mapper = mapper.AddMap("userName", p => p.UserName, v => v.ToLower());
+mapper = mapper.AddMap("userName", p => p.UserName, value => value.ToLower());
 ```
 
 ## HasMap
@@ -165,11 +165,7 @@ if you have only two-level nesting, you don't need to use `SelectMany`.
 
 Starting from version `v2.15.0`, GridifyMapper's `AddMap` method supports filtering on properties that are **indexable**, such as sub-collections, arrays, and dictionaries. This allows you to create dynamic queries by defining mappings to specific indexes or dictionary keys using square brackets `[ ]`.
 
-### Using Indexes and Keys with AddMap
-
-GridifyMapper provides overloads of the `AddMap` method to support filtering on sub-collections, arrays, and dictionaries.
-
-#### Mapping to Array Indexes
+### Mapping to Array Indexes
 
 You can define a mapping to a specific index in an array or sub-collection by specifying the index within square brackets `[ ]`.`
 
@@ -184,7 +180,7 @@ var gq = new GridifyQuery
 };
 ```
 
-#### Mapping to Dictionary Keys
+### Mapping to Dictionary Keys
 
 Similarly, you can define a mapping to a specific key in a dictionary.
 
