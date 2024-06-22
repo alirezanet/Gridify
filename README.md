@@ -4,8 +4,9 @@
 [![Nuget](https://img.shields.io/nuget/dt/gridify?color=%239100ff)](https://www.nuget.org/packages/Gridify/)
 [![Static Badge](https://img.shields.io/badge/Documentation-42bc00?logo=readme&logoColor=white)](https://alirezanet.github.io/Gridify/)
 [![Static Badge](https://img.shields.io/badge/fuget-f88445?logo=readme&logoColor=white)](https://www.fuget.org/packages/Gridify)
-[![NuGet version (Gridify)](https://img.shields.io/nuget/v/Gridify.svg?style=flat-square)](https://www.nuget.org/packages/Gridify/)
-[![NPM Version](https://img.shields.io/npm/v/gridify-client?label=npm&color=darkcyan)](https://www.npmjs.com/package/gridify-client)
+[![NuGet version (Gridify)](https://img.shields.io/nuget/v/Gridify.svg?style=flat-square&label=stable)](https://www.nuget.org/packages/Gridify/)
+[![NuGet version (Gridify)](https://img.shields.io/nuget/vpre/Gridify.svg?style=flat-square&label=latest&color=yellowgreen)](https://www.nuget.org/packages/Gridify/)
+[![NPM Version](https://img.shields.io/npm/v/gridify-client?label=gridify-client&color=darkcyan)](https://www.npmjs.com/package/gridify-client)
  
 
 [![Gridify](https://raw.githubusercontent.com/alirezanet/Gridify/master/docs/pages/public/gridify-readme-logo.svg)](https://alirezanet.github.io/Gridify/)
