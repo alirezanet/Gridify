@@ -27,7 +27,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
 
                if (conditionExp is not LambdaExpression lambdaExp) return null;
 
-               return LinqQueryBuilder<T>.ParseMethodCallExpression(selectExp, lambdaExp, op) as Expression<Func<T, bool>>;
+               return ParseMethodCallExpression(selectExp, lambdaExp, op) as Expression<Func<T, bool>>;
             }
             case ConditionalExpression cExp:
             {
@@ -269,7 +269,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
 
                if (conditionExp is not LambdaExpression lambdaExp) return null;
 
-               return LinqQueryBuilder<T>.ParseMethodCallExpression(selectExp, lambdaExp, op) as Expression<Func<T, bool>>;
+               return ParseMethodCallExpression(selectExp, lambdaExp, op) as Expression<Func<T, bool>>;
             }
             case ConditionalExpression cExp:
             {
@@ -316,7 +316,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
                is LambdaExpression { Body: MemberExpression lambdaMember }:
          {
             var newPredicate = GetAnyExpression(lambdaMember, predicate);
-            return LinqQueryBuilder<T>.ParseMethodCallExpression(subExp, newPredicate, op);
+            return ParseMethodCallExpression(subExp, newPredicate, op);
          }
          case MethodCallExpression { Method.Name: "Select" } subExp
             when subExp.Arguments.Last() is LambdaExpression
@@ -326,7 +326,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
          {
             var newExp = new ReplaceExpressionVisitor(predicate.Parameters[0], lambdaMember).Visit(predicate.Body);
             var newPredicate = GetExpressionWithNullCheck(lambdaMember, lambda.Parameters[0], newExp);
-            return LinqQueryBuilder<T>.ParseMethodCallExpression(subExp, newPredicate, op);
+            return ParseMethodCallExpression(subExp, newPredicate, op);
          }
          default:
             throw new InvalidOperationException();
@@ -343,7 +343,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
          : prop.Type.GetElementType(); // array
 
       if (tp == null) throw new GridifyFilteringException($"Can not detect the '{member.Member.Name}' property type.");
-      var containsMethod = typeof(Enumerable).GetMethods().First(x => x.Name == "Contains").MakeGenericMethod(tp);
+      var containsMethod = GetContainsMethod(tp);
       Expression containsExp = Expression.Call(containsMethod, prop, binaryExpression.Right);
       if (op.Kind == SyntaxKind.NotEqual)
       {
@@ -351,6 +351,8 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
       }
       return GetExpressionWithNullCheck(prop, param, containsExp);
    }
+
+
 
    private static ParameterExpression GetParameterExpression(MemberExpression member)
    {
@@ -482,6 +484,11 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
    private static MethodInfo GetStringContainsMethod()
    {
       return typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
+   }
+
+   private static MethodInfo GetContainsMethod(Type tp)
+   {
+      return typeof(Enumerable).GetMethods().First(x => x.Name == "Contains").MakeGenericMethod(tp);
    }
 
    private static MethodInfo GetIsNullOrEmptyMethod()
