@@ -210,7 +210,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    /// <returns>a comma seperated string</returns>
    public override string ToString() => string.Join(",", _mappings.Select(q => q.From));
 
-   internal static Expression<Func<T, object>> CreateExpression(string from) // TODO: handle possible nulls
+   internal static Expression<Func<T, object>> CreateExpression(string from)
    {
       // Param_x =>
       var parameter = Expression.Parameter(typeof(T), "__" + typeof(T).Name);
