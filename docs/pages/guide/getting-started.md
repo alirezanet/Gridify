@@ -62,4 +62,4 @@ using Gridify;
 There are two ways to start using Gridify:
 
 - Using the [Extension](./extensions.md) methods
-- Using [QueryBuilder](./querybuilder.md)
+- Using [QueryBuilder](./queryBuilder.md)
