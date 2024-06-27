@@ -8,7 +8,7 @@ namespace Gridify;
 
 public class QueryBuilder<T> : IQueryBuilder<T>
 {
-   private readonly List<string> _conditionList = new();
+   private readonly List<string> _conditionList = [];
    private IGridifyMapper<T>? _mapper;
    private string _orderBy = string.Empty;
    private (int page, int pageSize)? _paging;
@@ -184,19 +184,19 @@ public class QueryBuilder<T> : IQueryBuilder<T>
       if (_conditionList.Count == 0)
          return _ => true;
 
-      var _conditions = _conditionList.Select(ConvertConditionToExpression).ToList();
-      return (_conditions.Aggregate(null, (LambdaExpression? x, LambdaExpression y)
+      var conditions = _conditionList.Select(ConvertConditionToExpression).ToList();
+      return (conditions.Aggregate(null, (LambdaExpression? x, LambdaExpression y)
          => x is null ? y : x.And(y)) as Expression<Func<T, bool>>)!;
    }
 
    /// <inheritdoc />
    public Func<IQueryable<T>, bool> BuildEvaluator()
    {
-      var _conditions = _conditionList.Select(ConvertConditionToExpression).ToList();
+      var conditions = _conditionList.Select(ConvertConditionToExpression).ToList();
       return collection =>
       {
-         return _conditions.Count == 0 ||
-                _conditions.Aggregate(true, (current, expression) =>
+         return conditions.Count == 0 ||
+                conditions.Aggregate(true, (current, expression) =>
                    current & collection.Any(expression));
       };
    }
@@ -204,9 +204,9 @@ public class QueryBuilder<T> : IQueryBuilder<T>
    /// <inheritdoc />
    public Func<IEnumerable<T>, bool> BuildCompiledEvaluator()
    {
-      var _conditions = _conditionList.Select(ConvertConditionToExpression).ToList();
-      var compiledCond = _conditions.Select(q => q.Compile()).ToList();
-      var length = _conditions.Count;
+      var conditions = _conditionList.Select(ConvertConditionToExpression).ToList();
+      var compiledCond = conditions.Select(q => q.Compile()).ToList();
+      var length = conditions.Count;
       return collection =>
       {
          return length == 0 ||
@@ -322,7 +322,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
             collection = collection.AsQueryable().ApplyOrdering(_orderBy, _mapper);
 
          var result = collection.ToList();
-         var count = result.Count();
+         var count = result.Count;
 
          return _paging.HasValue
             ? new Paging<T>(count, result.Skip(_paging.Value.page * _paging.Value.pageSize).Take(_paging.Value.pageSize))

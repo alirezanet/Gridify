@@ -2,19 +2,14 @@ using System.Collections.Generic;
 
 namespace Gridify.Syntax;
 
-internal sealed class ParenthesizedExpressionSyntax : ExpressionSyntax
+internal sealed class ParenthesizedExpressionSyntax(SyntaxToken openParenthesisToken, ExpressionSyntax expression, SyntaxToken closeParenthesisToken)
+   : ExpressionSyntax
 {
-   public SyntaxToken OpenParenthesisToken { get; }
-   public ExpressionSyntax Expression { get; }
-   public SyntaxToken CloseParenthesisToken { get; }
+   public SyntaxToken OpenParenthesisToken { get; } = openParenthesisToken;
+   public ExpressionSyntax Expression { get; } = expression;
+   public SyntaxToken CloseParenthesisToken { get; } = closeParenthesisToken;
    public override SyntaxKind Kind => SyntaxKind.ParenthesizedExpression;
 
-   public ParenthesizedExpressionSyntax(SyntaxToken openParenthesisToken, ExpressionSyntax expression, SyntaxToken closeParenthesisToken)
-   {
-      OpenParenthesisToken = openParenthesisToken;
-      Expression = expression;
-      CloseParenthesisToken = closeParenthesisToken;
-   }
    public override IEnumerable<ISyntaxNode> GetChildren()
    {
       yield return OpenParenthesisToken;

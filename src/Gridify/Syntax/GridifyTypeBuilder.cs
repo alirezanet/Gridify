@@ -82,15 +82,9 @@ internal static class GridifyTypeBuilder
       propertyBuilder.SetSetMethod(setPropMthdBldr);
    }
 
-   private class FieldDescriptor
+   private class FieldDescriptor(string fieldName, Type fieldType)
    {
-      public FieldDescriptor(string fieldName, Type fieldType)
-      {
-         FieldName = fieldName;
-         FieldType = fieldType;
-      }
-
-      public string FieldName { get; }
-      public Type FieldType { get; }
+      public string FieldName { get; } = fieldName;
+      public Type FieldType { get; } = fieldType;
    }
 }

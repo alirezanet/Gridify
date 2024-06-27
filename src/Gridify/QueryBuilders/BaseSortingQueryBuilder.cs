@@ -1,18 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Gridify.Syntax;
 
 namespace Gridify.QueryBuilders;
 
-internal abstract class BaseSortingQueryBuilder<TSortingQuery, T>
+internal abstract class BaseSortingQueryBuilder<TSortingQuery, T>(IGridifyMapper<T>? mapper = null)
 {
-   protected IGridifyMapper<T>? mapper;
-
-   protected BaseSortingQueryBuilder(IGridifyMapper<T>? mapper = null)
-   {
-      this.mapper = mapper;
-   }
+   protected IGridifyMapper<T>? mapper = mapper;
 
    protected abstract TSortingQuery ApplySorting(TSortingQuery query, ParsedOrdering ordering);
 

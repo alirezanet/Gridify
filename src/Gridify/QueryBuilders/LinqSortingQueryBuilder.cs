@@ -1,16 +1,12 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Gridify.Syntax;
 
 namespace Gridify.QueryBuilders;
 
-internal class LinqSortingQueryBuilder<T> : BaseSortingQueryBuilder<IQueryable<T>, T>
+internal class LinqSortingQueryBuilder<T>(IGridifyMapper<T>? mapper = null) : BaseSortingQueryBuilder<IQueryable<T>, T>(mapper)
 {
-   public LinqSortingQueryBuilder(IGridifyMapper<T>? mapper = null) : base(mapper)
-   {
-   }
-
    protected override IQueryable<T> ApplySorting(IQueryable<T> query, ParsedOrdering ordering)
    {
       return query.OrderByMember(GetOrderExpression(ordering), ordering.IsAscending);

@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 namespace Gridify.Syntax;
 
 /// <summary>
-/// By implementing this interface, you can define your own custom operators
+/// By implementing this interface, you can define your own custom operators.
 /// Custom operators must start with the '#' character
 /// </summary>
 public interface IGridifyOperator

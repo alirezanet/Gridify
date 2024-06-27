@@ -3,16 +3,11 @@ using System.Linq;
 
 namespace Gridify.Syntax;
 
-public sealed class SyntaxTree
+public sealed class SyntaxTree(IEnumerable<string> diagnostics, ExpressionSyntax root)
 {
-   public IReadOnlyList<string> Diagnostics { get; }
-   public ExpressionSyntax Root { get; }
+   public IEnumerable<string> Diagnostics { get; } = diagnostics;
+   public ExpressionSyntax Root { get; } = root;
 
-   public SyntaxTree(IEnumerable<string> diagnostics, ExpressionSyntax root, SyntaxToken endToken)
-   {
-      Diagnostics = diagnostics.ToArray();
-      Root = root;
-   }
 
    public static SyntaxTree Parse(string text, IEnumerable<IGridifyOperator> customOperators)
    {

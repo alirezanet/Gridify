@@ -16,14 +16,14 @@ public static class DependencyInjectionExtensions
    /// <param name="assembly">The assembly to scan for GridifyMapper implementations.</param>
    /// <param name="lifetime">The service lifetime for the registered mappers (default is Singleton).</param>
    public static IServiceCollection AddGridifyMappers(this IServiceCollection services, Assembly assembly,
-      ServiceLifetime lifetime = ServiceLifetime.Singleton)
+       ServiceLifetime lifetime = ServiceLifetime.Singleton)
    {
       var mapperType = typeof(GridifyMapper<>);
 
       var mapperTypes = assembly.GetTypes()
-         .Where(type =>
-            type is { IsAbstract: false, IsGenericTypeDefinition: false, BaseType.IsGenericType: true } &&
-            type.BaseType.GetGenericTypeDefinition() == mapperType);
+          .Where(type =>
+              type is { IsAbstract: false, IsGenericTypeDefinition: false, BaseType.IsGenericType: true } &&
+              type.BaseType.GetGenericTypeDefinition() == mapperType);
 
       foreach (var mapper in mapperTypes)
       {
@@ -31,10 +31,11 @@ public static class DependencyInjectionExtensions
          if (genericArguments is { Length: 1 })
          {
             var targetType = genericArguments[0];
-var interfaceType = typeof(IGridifyMapper<>).MakeGenericType(targetType);
-services.Add(new ServiceDescriptor(interfaceType, mapper, lifetime));
+            var interfaceType = typeof(IGridifyMapper<>).MakeGenericType(targetType);
+            services.Add(new ServiceDescriptor(interfaceType, mapper, lifetime));
          }
       }
+
       return services;
    }
 }
