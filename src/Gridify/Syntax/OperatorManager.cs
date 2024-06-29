@@ -9,7 +9,7 @@ namespace Gridify.Syntax;
 public class OperatorManager
 {
    private ConcurrentDictionary<string, IGridifyOperator>? _operators;
-   internal IEnumerable<IGridifyOperator> Operators => _operators?.Values ?? Enumerable.Empty<IGridifyOperator>();
+   public IEnumerable<IGridifyOperator> Operators => _operators?.Values ?? Enumerable.Empty<IGridifyOperator>();
 
    public void Register<TOperator>() where TOperator : IGridifyOperator
    {

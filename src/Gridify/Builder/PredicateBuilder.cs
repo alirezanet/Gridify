@@ -2,7 +2,7 @@ using System;
 using System.Linq.Expressions;
 using Gridify.Syntax;
 
-namespace Gridify;
+namespace Gridify.Builder;
 
 public static partial class PredicateBuilder
 {

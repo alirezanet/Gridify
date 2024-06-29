@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using Gridify.QueryBuilders;
+using Gridify.Builder;
 using Gridify.Syntax;
 
 namespace Gridify.Elasticsearch;
 
-internal class ElasticsearchQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Query, T>(mapper)
+public class ElasticsearchQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Query, T>(mapper)
 {
    private readonly IGridifyMapper<T> _mapper = mapper;
 

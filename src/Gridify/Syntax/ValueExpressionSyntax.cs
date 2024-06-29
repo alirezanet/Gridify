@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Gridify.Syntax;
 
-internal sealed class ValueExpressionSyntax(SyntaxToken valueToken, bool isCaseInsensitive, bool isNullOrDefault) : ExpressionSyntax
+public sealed class ValueExpressionSyntax(SyntaxToken valueToken, bool isCaseInsensitive, bool isNullOrDefault) : ExpressionSyntax
 {
    public override SyntaxKind Kind => SyntaxKind.ValueExpression;
 

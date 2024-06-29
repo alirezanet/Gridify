@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 
 namespace Gridify.Syntax;
 
-internal class ReplaceExpressionVisitor(Expression oldValue, Expression newValue) : ExpressionVisitor
+public class ReplaceExpressionVisitor(Expression oldValue, Expression newValue) : ExpressionVisitor
 {
    public override Expression Visit(Expression? node)
    {

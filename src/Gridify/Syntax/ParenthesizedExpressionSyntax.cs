@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Gridify.Syntax;
 
-internal sealed class ParenthesizedExpressionSyntax(SyntaxToken openParenthesisToken, ExpressionSyntax expression, SyntaxToken closeParenthesisToken)
+public sealed class ParenthesizedExpressionSyntax(SyntaxToken openParenthesisToken, ExpressionSyntax expression, SyntaxToken closeParenthesisToken)
    : ExpressionSyntax
 {
    public SyntaxToken OpenParenthesisToken { get; } = openParenthesisToken;

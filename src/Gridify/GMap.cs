@@ -17,7 +17,7 @@ public partial class GMap<T> : IGMap<T>
       Convertor = convertor;
    }
 
-   internal bool IsNestedCollection() => SelectRegex.IsMatch(To.ToString());
+   public bool IsNestedCollection() => SelectRegex.IsMatch(To.ToString());
 
    public GMap(string from, Expression<Func<T, int, object?>> to, Func<string, object>? convertor = null)
    {

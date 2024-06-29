@@ -3,9 +3,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using Gridify.Syntax;
 
-namespace Gridify.QueryBuilders;
+namespace Gridify.Builder;
 
-internal class LinqSortingQueryBuilder<T>(IGridifyMapper<T>? mapper = null) : BaseSortingQueryBuilder<IQueryable<T>, T>(mapper)
+public class LinqSortingQueryBuilder<T>(IGridifyMapper<T>? mapper = null) : BaseSortingQueryBuilder<IQueryable<T>, T>(mapper)
 {
    protected override IQueryable<T> ApplySorting(IQueryable<T> query, ParsedOrdering ordering)
    {
@@ -19,7 +19,7 @@ internal class LinqSortingQueryBuilder<T>(IGridifyMapper<T>? mapper = null) : Ba
 
    private Expression<Func<T, object>> GetOrderExpression(ParsedOrdering ordering)
    {
-      var exp = mapper!.GetExpression(ordering.MemberName);
+      var exp = Mapper!.GetExpression(ordering.MemberName);
       switch (ordering.OrderingType)
       {
          case OrderingType.Normal:

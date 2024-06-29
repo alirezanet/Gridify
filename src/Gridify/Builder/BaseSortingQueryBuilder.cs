@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using Gridify.Syntax;
 
-namespace Gridify.QueryBuilders;
+namespace Gridify.Builder;
 
-internal abstract class BaseSortingQueryBuilder<TSortingQuery, T>(IGridifyMapper<T>? mapper = null)
+public abstract class BaseSortingQueryBuilder<TSortingQuery, T>(IGridifyMapper<T>? mapper = null)
 {
-   protected IGridifyMapper<T>? mapper = mapper;
+   protected IGridifyMapper<T>? Mapper = mapper;
 
    protected abstract TSortingQuery ApplySorting(TSortingQuery query, ParsedOrdering ordering);
 
    protected abstract TSortingQuery ApplyAnotherSorting(TSortingQuery query, ParsedOrdering ordering);
 
-   internal TSortingQuery ProcessOrdering(TSortingQuery query, string orderings, bool startWithThenBy)
+   public TSortingQuery ProcessOrdering(TSortingQuery query, string orderings, bool startWithThenBy)
    {
       var isFirst = !startWithThenBy;
       var orders = orderings.ParseOrderings().ToList();
-      mapper ??= BuildMapper(orders);
+      Mapper ??= BuildMapper(orders);
 
       foreach (var order in orders)
       {
-         if (!mapper.HasMap(order.MemberName))
+         if (!Mapper.HasMap(order.MemberName))
          {
             // skip if there is no mappings available
-            if (mapper.Configuration.IgnoreNotMappedFields)
+            if (Mapper.Configuration.IgnoreNotMappedFields)
                continue;
 
             throw new GridifyMapperException($"Mapping '{order.MemberName}' not found");

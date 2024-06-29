@@ -4,12 +4,12 @@ using System.Linq.Expressions;
 using Gridify.Reflection;
 using Gridify.Syntax;
 
-namespace Gridify.QueryBuilders;
+namespace Gridify.Builder;
 
-internal abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
+public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
    where TQuery : class
 {
-   internal TQuery Build(ExpressionSyntax expression)
+   public TQuery Build(ExpressionSyntax expression)
    {
       var (query, _) = BuildQuery(expression);
       return query;

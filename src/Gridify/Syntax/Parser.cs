@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Gridify.Syntax;
 
-internal struct Parser
+public struct Parser
 {
    private List<string>? _diagnostics = null;
    private readonly List<SyntaxToken> _tokens = [];

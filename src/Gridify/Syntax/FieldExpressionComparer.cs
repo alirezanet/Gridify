@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Gridify.Syntax;
 
-internal class FieldExpressionComparer : IEqualityComparer<FieldExpressionSyntax>
+public class FieldExpressionComparer : IEqualityComparer<FieldExpressionSyntax>
 {
    public bool Equals(FieldExpressionSyntax? x, FieldExpressionSyntax? y)
    {

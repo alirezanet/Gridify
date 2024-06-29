@@ -5,9 +5,9 @@ using System.Linq.Expressions;
 using Gridify.Reflection;
 using Gridify.Syntax;
 
-namespace Gridify.QueryBuilders;
+namespace Gridify.Builder;
 
-internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Expression<Func<T, bool>>, T>(mapper)
+public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Expression<Func<T, bool>>, T>(mapper)
 {
    protected override Expression<Func<T, bool>>? BuildNestedQuery(
       Expression body, IGMap<T> gMap, ValueExpressionSyntax value, ISyntaxNode op)

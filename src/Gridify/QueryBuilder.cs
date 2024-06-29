@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Gridify.Syntax;
+using Gridify.Builder;
 
 namespace Gridify;
 
