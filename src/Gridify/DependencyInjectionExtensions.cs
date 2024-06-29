@@ -22,20 +22,7 @@ public static class DependencyInjectionExtensions
    public static IServiceCollection AddGridifyMappers(this IServiceCollection services, Assembly assembly,
        ServiceLifetime lifetime = ServiceLifetime.Singleton)
    {
-      var mapperTypes = assembly.GetTypes()
-          .Where(type =>
-              type is { IsAbstract: false, IsGenericTypeDefinition: false, BaseType.IsGenericType: true } &&
-              type.BaseType.GetGenericTypeDefinition() == GridifyMapperType);
-
-      foreach (var mapper in mapperTypes)
-      {
-         var genericArguments = mapper.BaseType?.GetGenericArguments();
-         if (genericArguments is not { Length: 1 }) continue;
-         var targetType = genericArguments[0];
-         var interfaceType = GridifyMapperType.MakeGenericType(targetType);
-         services.Add(new ServiceDescriptor(interfaceType, mapper, lifetime));
-      }
-
+      ScanAndAddByType(services, assembly, lifetime, GridifyMapperType);
       return services;
    }
 
@@ -48,20 +35,7 @@ public static class DependencyInjectionExtensions
    public static IServiceCollection AddGridifyQueryBuilders(this IServiceCollection services, Assembly assembly,
       ServiceLifetime lifetime = ServiceLifetime.Singleton)
    {
-      var queryBuilderTypes = assembly.GetTypes()
-         .Where(type =>
-            type is { IsAbstract: false, IsGenericTypeDefinition: false, BaseType.IsGenericType: true } &&
-            type.BaseType.GetGenericTypeDefinition() == QueryBuilderType);
-
-      foreach (var queryBuilder in queryBuilderTypes)
-      {
-         var genericArguments = queryBuilder.BaseType?.GetGenericArguments();
-         if (genericArguments is not { Length: 1 }) continue;
-         var targetType = genericArguments[0];
-         var interfaceType = QueryBuilderType.MakeGenericType(targetType);
-         services.Add(new ServiceDescriptor(interfaceType, queryBuilder, lifetime));
-      }
-
+      ScanAndAddByType(services, assembly, lifetime, QueryBuilderType);
       return services;
    }
 
@@ -85,10 +59,29 @@ public static class DependencyInjectionExtensions
          var genericArguments = type.BaseType?.GetGenericArguments();
          if (genericArguments is not { Length: 1 }) continue;
          var targetType = genericArguments[0];
-         var interfaceType = type.MakeGenericType(targetType);
+         var interfaceType = type.BaseType == GridifyMapperType
+            ? GridifyMapperType.MakeGenericType(targetType)
+            : QueryBuilderType.MakeGenericType(targetType);
          services.Add(new ServiceDescriptor(interfaceType, interfaceType, lifetime));
       }
 
       return services;
+   }
+
+   private static void ScanAndAddByType(IServiceCollection services, Assembly assembly, ServiceLifetime lifetime, Type scanType)
+   {
+      var mapperTypes = assembly.GetTypes()
+         .Where(type =>
+            type is { IsAbstract: false, IsGenericTypeDefinition: false, BaseType.IsGenericType: true } &&
+            type.BaseType.GetGenericTypeDefinition() == scanType);
+
+      foreach (var mapper in mapperTypes)
+      {
+         var genericArguments = mapper.BaseType?.GetGenericArguments();
+         if (genericArguments is not { Length: 1 }) continue;
+         var targetType = genericArguments[0];
+         var interfaceType = scanType.MakeGenericType(targetType);
+         services.Add(new ServiceDescriptor(interfaceType, mapper, lifetime));
+      }
    }
 }
