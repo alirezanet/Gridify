@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Gridify.Reflection;
 using Gridify.Syntax;
 
 namespace Gridify;
@@ -225,7 +226,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          return Expression.Lambda<Func<T, object>>(convertedExpression, parameter);
       }
 
-      var selectMethod = genericType!.GetSimpleTypeSelectMethod();
+      var selectMethod = genericType!.GetSelectMethod();
       var predicateParameter = Expression.Parameter(genericType!);
       var predicate = Expression.Lambda(predicateParameter, predicateParameter);
       //  Param_x.Name.Select(fc => fc)

@@ -1,15 +1,15 @@
 using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
-using System.Reflection;
+using Gridify.Reflection;
 using Gridify.Syntax;
 
-namespace Gridify.QueryBuilders;
+namespace Gridify.Builder;
 
-internal abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
+public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
    where TQuery : class
 {
-   internal TQuery Build(ExpressionSyntax expression)
+   public TQuery Build(ExpressionSyntax expression)
    {
       var (query, _) = BuildQuery(expression);
       return query;
@@ -208,7 +208,7 @@ internal abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
                             && op.Kind is not SyntaxKind.LessOrEqualThan)
       {
          value = value.ToString()?.ToLower();
-         body = Expression.Call(body, GetToLowerMethod());
+         body = Expression.Call(body, MethodInfoHelper.GetToLowerMethod());
       }
 
       var query = BuildQueryAccordingToValueType(body, parameter, value, op, valueExpression);
@@ -224,10 +224,5 @@ internal abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
 
       var body = new ReplaceExpressionVisitor(exp.Parameters[1], newValue).Visit(exp.Body);
       return Expression.Lambda(body, exp.Parameters);
-   }
-
-   private static MethodInfo GetToLowerMethod()
-   {
-      return typeof(string).GetMethod("ToLower", [])!;
    }
 }

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Gridify.Syntax;
 
-public struct SyntaxToken(SyntaxKind kind, int position, string text) : ISyntaxNode
+public readonly struct SyntaxToken(SyntaxKind kind, int position, string text) : ISyntaxNode
 {
    public int Position { get; } = position;
    public string Text { get; } = text;

@@ -2,15 +2,8 @@ using System.Collections.Generic;
 
 namespace Gridify.Syntax;
 
-internal sealed class ValueExpressionSyntax : ExpressionSyntax
+public sealed class ValueExpressionSyntax(SyntaxToken valueToken, bool isCaseInsensitive, bool isNullOrDefault) : ExpressionSyntax
 {
-   public ValueExpressionSyntax(SyntaxToken valueToken, bool isCaseInsensitive, bool isNullOrDefault)
-   {
-      ValueToken = valueToken;
-      IsCaseInsensitive = isCaseInsensitive;
-      IsNullOrDefault = isNullOrDefault;
-   }
-
    public override SyntaxKind Kind => SyntaxKind.ValueExpression;
 
    public override IEnumerable<ISyntaxNode> GetChildren()
@@ -18,7 +11,7 @@ internal sealed class ValueExpressionSyntax : ExpressionSyntax
       yield return ValueToken;
    }
 
-   public SyntaxToken ValueToken { get; }
-   public bool IsCaseInsensitive { get; }
-   public bool IsNullOrDefault { get; }
+   public SyntaxToken ValueToken { get; } = valueToken;
+   public bool IsCaseInsensitive { get; } = isCaseInsensitive;
+   public bool IsNullOrDefault { get; } = isNullOrDefault;
 }

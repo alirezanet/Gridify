@@ -2,12 +2,12 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
+using Gridify.Reflection;
 using Gridify.Syntax;
 
-namespace Gridify.QueryBuilders;
+namespace Gridify.Builder;
 
-internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Expression<Func<T, bool>>, T>(mapper)
+public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Expression<Func<T, bool>>, T>(mapper)
 {
    protected override Expression<Func<T, bool>>? BuildNestedQuery(
       Expression body, IGMap<T> gMap, ValueExpressionSyntax value, ISyntaxNode op)
@@ -121,7 +121,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
          case SyntaxKind.Equal when valueExpression.IsNullOrDefault:
             if (body.Type == typeof(string))
             {
-               be = Expression.Call(null, GetIsNullOrEmptyMethod(), body);
+               be = Expression.Call(null, MethodInfoHelper.GetIsNullOrEmptyMethod(), body);
             }
             else
             {
@@ -138,7 +138,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
          case SyntaxKind.NotEqual when valueExpression.IsNullOrDefault:
             if (body.Type == typeof(string))
             {
-               be = Expression.Not(Expression.Call(null, GetIsNullOrEmptyMethod(), body));
+               be = Expression.Not(Expression.Call(null, MethodInfoHelper.GetIsNullOrEmptyMethod(), body));
             }
             else
             {
@@ -175,56 +175,56 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
             be = GetLessThanOrEqualExpression(body, valueExpression, value);
             break;
          case SyntaxKind.Like:
-            be = Expression.Call(body, GetStringContainsMethod(), GetValueExpression(body.Type, value));
+            be = Expression.Call(body, MethodInfoHelper.GetStringContainsMethod(), GetValueExpression(body.Type, value));
             break;
          case SyntaxKind.NotLike:
-            be = Expression.Not(Expression.Call(body, GetStringContainsMethod(), GetValueExpression(body.Type, value)));
+            be = Expression.Not(Expression.Call(body, MethodInfoHelper.GetStringContainsMethod(), GetValueExpression(body.Type, value)));
             break;
          case SyntaxKind.StartsWith:
             if (body.Type != typeof(string))
             {
-               body = Expression.Call(body, GetToStringMethod());
-               be = Expression.Call(body, GetStartWithMethod(), GetValueExpression(body.Type, value?.ToString()));
+               body = Expression.Call(body, MethodInfoHelper.GetToStringMethod());
+               be = Expression.Call(body, MethodInfoHelper.GetStartWithMethod(), GetValueExpression(body.Type, value?.ToString()));
             }
             else
             {
-               be = Expression.Call(body, GetStartWithMethod(), GetValueExpression(body.Type, value));
+               be = Expression.Call(body, MethodInfoHelper.GetStartWithMethod(), GetValueExpression(body.Type, value));
             }
 
             break;
          case SyntaxKind.EndsWith:
             if (body.Type != typeof(string))
             {
-               body = Expression.Call(body, GetToStringMethod());
-               be = Expression.Call(body, GetEndsWithMethod(), GetValueExpression(body.Type, value?.ToString()));
+               body = Expression.Call(body, MethodInfoHelper.GetToStringMethod());
+               be = Expression.Call(body, MethodInfoHelper.GetEndsWithMethod(), GetValueExpression(body.Type, value?.ToString()));
             }
             else
             {
-               be = Expression.Call(body, GetEndsWithMethod(), GetValueExpression(body.Type, value));
+               be = Expression.Call(body, MethodInfoHelper.GetEndsWithMethod(), GetValueExpression(body.Type, value));
             }
 
             break;
          case SyntaxKind.NotStartsWith:
             if (body.Type != typeof(string))
             {
-               body = Expression.Call(body, GetToStringMethod());
-               be = Expression.Not(Expression.Call(body, GetStartWithMethod(), GetValueExpression(body.Type, value?.ToString())));
+               body = Expression.Call(body, MethodInfoHelper.GetToStringMethod());
+               be = Expression.Not(Expression.Call(body, MethodInfoHelper.GetStartWithMethod(), GetValueExpression(body.Type, value?.ToString())));
             }
             else
             {
-               be = Expression.Not(Expression.Call(body, GetStartWithMethod(), GetValueExpression(body.Type, value)));
+               be = Expression.Not(Expression.Call(body, MethodInfoHelper.GetStartWithMethod(), GetValueExpression(body.Type, value)));
             }
 
             break;
          case SyntaxKind.NotEndsWith:
             if (body.Type != typeof(string))
             {
-               body = Expression.Call(body, GetToStringMethod());
-               be = Expression.Not(Expression.Call(body, GetEndsWithMethod(), GetValueExpression(body.Type, value?.ToString())));
+               body = Expression.Call(body, MethodInfoHelper.GetToStringMethod());
+               be = Expression.Not(Expression.Call(body, MethodInfoHelper.GetEndsWithMethod(), GetValueExpression(body.Type, value?.ToString())));
             }
             else
             {
-               be = Expression.Not(Expression.Call(body, GetEndsWithMethod(), GetValueExpression(body.Type, value)));
+               be = Expression.Not(Expression.Call(body, MethodInfoHelper.GetEndsWithMethod(), GetValueExpression(body.Type, value)));
             }
 
             break;
@@ -343,7 +343,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
          : prop.Type.GetElementType(); // array
 
       if (tp == null) throw new GridifyFilteringException($"Can not detect the '{member.Member.Name}' property type.");
-      var containsMethod = GetContainsMethod(tp);
+      var containsMethod = MethodInfoHelper.GetContainsMethod(tp);
       Expression containsExp = Expression.Call(containsMethod, prop, binaryExpression.Right);
       if (op.Kind == SyntaxKind.NotEqual)
       {
@@ -385,7 +385,7 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
 
       if (tp == null) throw new GridifyFilteringException($"Can not detect the '{member.Member.Name}' property type.");
 
-      var anyMethod = GetAnyMethod(tp);
+      var anyMethod = MethodInfoHelper.GetAnyMethod(tp);
       var anyExp = Expression.Call(anyMethod, prop, predicate);
 
       return GetExpressionWithNullCheck(prop, param, anyExp);
@@ -418,10 +418,10 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
    private BinaryExpression GetLessThanOrEqualExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
       if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
-         return Expression.LessThanOrEqual(Expression.Call(null, GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
+         return Expression.LessThanOrEqual(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
-      return Expression.LessThanOrEqual(Expression.Call(null, GetCompareMethodWithStringComparison(), body,
+      return Expression.LessThanOrEqual(Expression.Call(null, MethodInfoHelper.GetCompareMethodWithStringComparison(), body,
          GetValueExpression(typeof(string), value),
          GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
    }
@@ -429,10 +429,10 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
    private BinaryExpression GetGreaterThanOrEqualExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
       if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
-         return Expression.GreaterThanOrEqual(Expression.Call(null, GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
+         return Expression.GreaterThanOrEqual(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
-      return Expression.GreaterThanOrEqual(Expression.Call(null, GetCompareMethodWithStringComparison(), body,
+      return Expression.GreaterThanOrEqual(Expression.Call(null, MethodInfoHelper.GetCompareMethodWithStringComparison(), body,
          GetValueExpression(typeof(string), value),
          GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
    }
@@ -440,10 +440,10 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
    private BinaryExpression GetLessThanExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
       if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
-         return Expression.LessThan(Expression.Call(null, GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
+         return Expression.LessThan(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
-      return Expression.LessThan(Expression.Call(null, GetCompareMethodWithStringComparison(), body,
+      return Expression.LessThan(Expression.Call(null, MethodInfoHelper.GetCompareMethodWithStringComparison(), body,
          GetValueExpression(typeof(string), value),
          GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
    }
@@ -451,10 +451,10 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
    private BinaryExpression GetGreaterThanExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
       if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
-         return Expression.GreaterThan(Expression.Call(null, GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
+         return Expression.GreaterThan(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
-      return Expression.GreaterThan(Expression.Call(null, GetCompareMethodWithStringComparison(), body,
+      return Expression.GreaterThan(Expression.Call(null, MethodInfoHelper.GetCompareMethodWithStringComparison(), body,
          GetValueExpression(typeof(string), value),
          GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
    }
@@ -464,51 +464,6 @@ internal class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<
       return isCaseInsensitive
          ? Expression.Constant(StringComparison.OrdinalIgnoreCase)
          : Expression.Constant(StringComparison.Ordinal);
-   }
-
-   private static MethodInfo GetAnyMethod(Type type)
-   {
-      return typeof(Enumerable).GetMethods().Single(m => m.Name == "Any" && m.GetParameters().Length == 2).MakeGenericMethod(type);
-   }
-
-   private static MethodInfo GetEndsWithMethod()
-   {
-      return typeof(string).GetMethod("EndsWith", new[] { typeof(string) })!;
-   }
-
-   private static MethodInfo GetStartWithMethod()
-   {
-      return typeof(string).GetMethod("StartsWith", new[] { typeof(string) })!;
-   }
-
-   private static MethodInfo GetStringContainsMethod()
-   {
-      return typeof(string).GetMethod("Contains", new[] { typeof(string) })!;
-   }
-
-   private static MethodInfo GetContainsMethod(Type tp)
-   {
-      return typeof(Enumerable).GetMethods().First(x => x.Name == "Contains").MakeGenericMethod(tp);
-   }
-
-   private static MethodInfo GetIsNullOrEmptyMethod()
-   {
-      return typeof(string).GetMethod("IsNullOrEmpty", new[] { typeof(string) })!;
-   }
-
-   private static MethodInfo GetCompareMethodWithStringComparison()
-   {
-      return typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) })!;
-   }
-
-   private static MethodInfo GetCompareMethod()
-   {
-      return typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string) })!;
-   }
-
-   private static MethodInfo GetToStringMethod()
-   {
-      return typeof(object).GetMethod("ToString")!;
    }
 
    private static MethodCallExpression ParseNestedExpression(Expression exp)

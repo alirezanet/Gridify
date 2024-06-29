@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Gridify.Syntax;
 
-internal ref struct Lexer(string text, IEnumerable<IGridifyOperator> customOperators)
+public ref struct Lexer(string text, IEnumerable<IGridifyOperator> customOperators)
 {
    private List<string>? _diagnostics = null;
    private readonly ReadOnlySpan<char> _text = text.AsSpan();

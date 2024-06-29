@@ -3,12 +3,10 @@ using System.Linq;
 
 namespace Gridify;
 
-public class Paging<T>
+public class Paging<T>(int count, IEnumerable<T> data)
 {
-
-   public Paging()
+   public Paging() : this(0, Enumerable.Empty<T>())
    {
-      Data = Enumerable.Empty<T>();
    }
    public void Deconstruct(out int count, out IEnumerable<T> data)
    {
@@ -16,11 +14,6 @@ public class Paging<T>
       data = Data;
    }
 
-   public Paging(int count,IEnumerable<T> data)
-   {
-      Count = count;
-      Data = data;
-   }
-   public int Count { get; set; }
-   public IEnumerable<T> Data { get; set; }
+   public int Count { get; set; } = count;
+   public IEnumerable<T> Data { get; set; } = data;
 }

@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Gridify;
 
-public class GMap<T> : IGMap<T>
+public partial class GMap<T> : IGMap<T>
 {
    public string From { get; set; }
    public LambdaExpression To { get; set; }
@@ -17,7 +17,7 @@ public class GMap<T> : IGMap<T>
       Convertor = convertor;
    }
 
-   internal bool IsNestedCollection() => Regex.IsMatch(To.ToString(), @"\.Select\s*\(", RegexOptions.Compiled);
+   public bool IsNestedCollection() => SelectRegex.IsMatch(To.ToString());
 
    public GMap(string from, Expression<Func<T, int, object?>> to, Func<string, object>? convertor = null)
    {
@@ -39,4 +39,7 @@ public class GMap<T> : IGMap<T>
       To = to;
       Convertor = convertor;
    }
+
+   private static Regex SelectRegex => new(@"\.Select\s*\(", RegexOptions.Compiled);
+
 }

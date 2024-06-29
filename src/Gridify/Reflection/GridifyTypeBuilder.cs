@@ -2,9 +2,9 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Gridify.Syntax;
+namespace Gridify.Reflection;
 
-internal static class GridifyTypeBuilder
+public static class GridifyTypeBuilder
 {
    public static (object? myObject, Type myType) CreateNewObject(Type type, string fieldName, object? value)
    {
@@ -63,7 +63,7 @@ internal static class GridifyTypeBuilder
             MethodAttributes.Public |
             MethodAttributes.SpecialName |
             MethodAttributes.HideBySig,
-            null, new[] { propertyType });
+            null, [propertyType]);
 
       var setIl = setPropMthdBldr.GetILGenerator();
       var modifyProperty = setIl.DefineLabel();
@@ -82,15 +82,9 @@ internal static class GridifyTypeBuilder
       propertyBuilder.SetSetMethod(setPropMthdBldr);
    }
 
-   private class FieldDescriptor
+   private class FieldDescriptor(string fieldName, Type fieldType)
    {
-      public FieldDescriptor(string fieldName, Type fieldType)
-      {
-         FieldName = fieldName;
-         FieldType = fieldType;
-      }
-
-      public string FieldName { get; }
-      public Type FieldType { get; }
+      public string FieldName { get; } = fieldName;
+      public Type FieldType { get; } = fieldType;
    }
 }

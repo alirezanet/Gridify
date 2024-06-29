@@ -3,11 +3,25 @@ using System.Linq;
 
 namespace Gridify.Syntax;
 
-internal struct Parser
+public struct Parser
 {
    private List<string>? _diagnostics = null;
    private readonly List<SyntaxToken> _tokens = [];
    private int _position;
+
+   public Parser(string text, IEnumerable<IGridifyOperator> customOperators)
+   {
+      var lexer = new Lexer(text, customOperators);
+      SyntaxToken token;
+      do
+      {
+         token = lexer.NextToken();
+         if (token.Kind != SyntaxKind.WhiteSpace) _tokens.Add(token);
+      } while (token.Kind != SyntaxKind.End);
+
+      if (lexer.Diagnostics.Any())
+         AddDiagnostics(lexer.Diagnostics);
+   }
 
    private static bool IsOperator(SyntaxKind kind)
    {
@@ -26,20 +40,6 @@ internal struct Parser
          SyntaxKind.CustomOperator;
    }
 
-   public Parser(string text, IEnumerable<IGridifyOperator> customOperators)
-   {
-      var lexer = new Lexer(text, customOperators);
-      SyntaxToken token;
-      do
-      {
-         token = lexer.NextToken();
-         if (token.Kind != SyntaxKind.WhiteSpace) _tokens.Add(token);
-      } while (token.Kind != SyntaxKind.End);
-
-      if (lexer.Diagnostics.Any())
-         AddDiagnostics(lexer.Diagnostics);
-   }
-
    private SyntaxToken Current => Peek(0);
 
    private SyntaxToken Peek(int offset)
@@ -52,7 +52,7 @@ internal struct Parser
    {
       var expression = ParseTerm();
       var end = Match(SyntaxKind.End, GetExpectation(expression.Kind));
-      return new SyntaxTree(_diagnostics ?? Enumerable.Empty<string>(), expression, end);
+      return new SyntaxTree(_diagnostics ?? Enumerable.Empty<string>(), expression);
    }
 
    private static SyntaxKind GetExpectation(SyntaxKind kind)

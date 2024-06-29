@@ -1,6 +1,6 @@
 namespace Gridify.Syntax;
 
-internal sealed class ParsedOrdering
+public sealed class ParsedOrdering
 {
    public string MemberName { get; set; } = string.Empty;
    public bool IsAscending { get; set; }
@@ -8,7 +8,7 @@ internal sealed class ParsedOrdering
    public OrderingType OrderingType { get; set; } = OrderingType.Normal;
 }
 
-internal enum OrderingType
+public enum OrderingType
 {
    Normal,
    NullCheck,

@@ -2,14 +2,8 @@ using System.Collections.Generic;
 
 namespace Gridify.Syntax;
 
-internal sealed class FieldExpressionSyntax : ExpressionSyntax
+public sealed class FieldExpressionSyntax(SyntaxToken fieldToken, string? indexer = default) : ExpressionSyntax
 {
-   internal FieldExpressionSyntax(SyntaxToken fieldToken, string? indexer = default)
-   {
-      FieldToken = fieldToken;
-      Indexer = indexer;
-   }
-
    public override SyntaxKind Kind => SyntaxKind.FieldExpression;
 
    public override IEnumerable<ISyntaxNode> GetChildren()
@@ -17,6 +11,6 @@ internal sealed class FieldExpressionSyntax : ExpressionSyntax
       yield return FieldToken;
    }
 
-   public string? Indexer { get; }
-   public SyntaxToken FieldToken { get; }
+   public string? Indexer { get; } = indexer;
+   public SyntaxToken FieldToken { get; } = fieldToken;
 }

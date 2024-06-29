@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Gridify.QueryBuilders;
+using Gridify.Builder;
 using Gridify.Syntax;
 
 namespace Gridify;
@@ -96,7 +96,7 @@ public static partial class GridifyExtensions
                Expression.Call(
                   typeof(Queryable),
                   isSortAsc ? "OrderBy" : "OrderByDescending",
-                  new[] { typeof(T), memberExpression.Type },
+                  [typeof(T), memberExpression.Type],
                   query.Expression,
                   Expression.Lambda(memberExpression, expression.Parameters)));
 
@@ -146,7 +146,7 @@ public static partial class GridifyExtensions
                Expression.Call(
                   typeof(Queryable),
                   isSortAsc ? "ThenBy" : "ThenByDescending",
-                  new[] { typeof(T), memberExpression.Type },
+                  [typeof(T), memberExpression.Type],
                   query.Expression,
                   Expression.Lambda(memberExpression, expression.Parameters)));
 
@@ -200,7 +200,7 @@ public static partial class GridifyExtensions
    private static IEnumerable<ISyntaxNode> Descendants(this ISyntaxNode root)
    {
       var nodes = new Stack<ISyntaxNode>(new[] { root });
-      while (nodes.Any())
+      while (nodes.Count != 0)
       {
          var node = nodes.Pop();
          yield return node;
@@ -306,8 +306,8 @@ public static partial class GridifyExtensions
             return false;
 
          var fieldExpressions = syntaxTree.Root.Descendants()
-            .Where(q => q.Kind is SyntaxKind.FieldExpression)
-            .Cast<FieldExpressionSyntax>().ToList();
+            .OfType<FieldExpressionSyntax>()
+            .Distinct(new FieldExpressionComparer());
 
          mapper ??= new GridifyMapper<T>(true);
 
@@ -345,15 +345,17 @@ public static partial class GridifyExtensions
       return chars.Aggregate(seed, (str, cItem) => str.Replace(cItem, replacementCharacter));
    }
 
+   private static readonly char[] OrderingSeparator = [' ', '\t'];
+
    internal static IEnumerable<ParsedOrdering> ParseOrderings(this string orderings)
    {
       var nullableChars = new[] { '?', '!' };
       foreach (var field in orderings.Split(','))
       {
          var orderingExp = field.Trim();
-         if (orderingExp.Contains(" "))
+         if (orderingExp.Contains(' '))
          {
-            var spliced = orderingExp.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            var spliced = orderingExp.Split(OrderingSeparator, StringSplitOptions.RemoveEmptyEntries);
             var isAsc = spliced.Last() switch
             {
                "desc" => false,
