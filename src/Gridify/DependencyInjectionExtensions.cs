@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,8 +9,6 @@ namespace Gridify;
 /// </summary>
 public static class DependencyInjectionExtensions
 {
-   private static readonly (Type BaseType, Type Interface) GridifyMapperType = (typeof(GridifyMapper<>), typeof(IGridifyMapper<>));
-
    /// <summary>
    /// Automatically scans an assembly for classes that inherit from GridifyMapper&lt;T&gt; and registers them in the Dependency Injection container.
    /// </summary>
@@ -24,14 +21,14 @@ public static class DependencyInjectionExtensions
       var targetTypes = assembly.GetTypes()
          .Where(type =>
             type is { IsAbstract: false, IsGenericTypeDefinition: false, BaseType.IsGenericType: true, BaseType.Namespace: nameof(Gridify) } &&
-            type.BaseType.GetGenericTypeDefinition() == GridifyMapperType.BaseType);
+            type.BaseType.GetGenericTypeDefinition() == typeof(GridifyMapper<>));
 
       foreach (var type in targetTypes)
       {
          var genericArguments = type.BaseType?.GetGenericArguments();
          if (genericArguments is not { Length: 1 }) continue;
          var targetType = genericArguments[0];
-         var interfaceType = GridifyMapperType.Interface.MakeGenericType(targetType);
+         var interfaceType = typeof(IGridifyMapper<>).MakeGenericType(targetType);
          services.Add(new ServiceDescriptor(interfaceType, type, lifetime));
       }
 
