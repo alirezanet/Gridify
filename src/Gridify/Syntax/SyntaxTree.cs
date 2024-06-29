@@ -9,8 +9,9 @@ public sealed class SyntaxTree(IEnumerable<string> diagnostics, ExpressionSyntax
    public ExpressionSyntax Root { get; } = root;
 
 
-   public static SyntaxTree Parse(string text, IEnumerable<IGridifyOperator> customOperators)
+   public static SyntaxTree Parse(string text, IEnumerable<IGridifyOperator>? customOperators = null!)
    {
+      customOperators ??= Enumerable.Empty<IGridifyOperator>();
       var parser = new Parser(text, customOperators);
       return parser.Parse();
    }
