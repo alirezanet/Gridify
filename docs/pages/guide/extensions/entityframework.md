@@ -45,7 +45,7 @@ WHERE [u].[Name] = @__Value_0
 
 ### EntityFrameworkCompatibilityLayer
 
-Setting this property to `true` Enables the EntityFramework Compatibility layer to make the generated expressions compatible whit entity framework.
+Setting this property to `true` Enables the EntityFramework Compatibility layer to make the generated expressions compatible with entity framework.
 
 - type: `bool`
 - default: `false`
