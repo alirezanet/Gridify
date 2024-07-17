@@ -18,7 +18,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       _mappings = new List<IGMap<T>>();
 
       if (autoGenerateMappings)
-         GenerateMappings();
+         GenerateMappings(maxNestingDepth);
    }
 
    public GridifyMapper(GridifyMapperConfiguration configuration, bool autoGenerateMappings = false)
