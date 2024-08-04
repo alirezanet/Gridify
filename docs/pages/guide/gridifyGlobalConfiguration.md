@@ -47,6 +47,13 @@ some ORMs like NHibernate don't support this. You can disable this behavior by s
 - type: `bool`
 - default: `false`
 
+### DefaultDateTimeKind
+
+By default, Gridify uses the `DateTimeKind.Unspecified` when parsing dates. You can change this behavior by setting this property to `DateTimeKind.Utc` or `DateTimeKind.Local`. This option is useful when you want to use Gridify with a database that requires a specific `DateTimeKind`, for example when using npgsql and postgresql. 
+
+- type: `DateTimeKind`
+- default: `null`
+
 ## CustomOperators
 
 Using the `Register` method of this property you can add your own custom operators.

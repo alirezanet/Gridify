@@ -46,6 +46,13 @@ namespace Gridify
       /// Default is false
       /// </summary>
       public static bool DisableNullChecks { get; set; } = false;
+      
+      /// <summary>
+      /// By default, DateTimeKind.Unspecified is used.
+      /// You can change this behavior by setting this property to a DateTimeKind value.
+      /// Default is null
+      /// </summary>
+      public static DateTimeKind? DefaultDateTimeKind { get; set; } = null;
 
       /// <summary>
       /// Specifies how field names are inferred from CLR property names.
