@@ -124,7 +124,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
          return (result, isNested);
       }
 
-      var query = BuildQuery(gMap.To.Body, gMap.To.Parameters[0], right, op, gMap.Convertor);
+      var query = BuildQuery(gMap.To.Body, gMap.To.Parameters[0], right, op, gMap.Convertor, false);
       if (query == null) return null;
 
       if (hasIndexer)
@@ -158,7 +158,8 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       ParameterExpression parameter,
       ValueExpressionSyntax valueExpression,
       ISyntaxNode op,
-      Func<string, object>? convertor)
+      Func<string, object>? convertor,
+      bool isNested)
    {
       // Remove the boxing for value types
       if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression)body).Operand;
@@ -201,7 +202,8 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       }
 
       // handle case-Insensitive search
-      if (value is not null && valueExpression.IsCaseInsensitive
+      if (value is not null && (valueExpression.IsCaseInsensitive
+                            || (GridifyGlobalConfiguration.DefaultStringComparisonIsCaseInsensitive && !isNested && body.Type == typeof(string)))
                             && op.Kind is not SyntaxKind.GreaterThan
                             && op.Kind is not SyntaxKind.LessThan
                             && op.Kind is not SyntaxKind.GreaterOrEqualThan

@@ -23,7 +23,8 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
                   targetExp.Parameters[0],
                   value,
                   op,
-                  gMap.Convertor);
+                  gMap.Convertor,
+                  true);
 
                if (conditionExp is not LambdaExpression lambdaExp) return null;
 
@@ -265,7 +266,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
             case MethodCallExpression { Method.Name: "Select" } selectExp:
             {
                var targetExp = selectExp.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
-               var conditionExp = BuildQuery(targetExp!.Body, targetExp.Parameters[0], value, op, gMap.Convertor);
+               var conditionExp = BuildQuery(targetExp!.Body, targetExp.Parameters[0], value, op, gMap.Convertor, true);
 
                if (conditionExp is not LambdaExpression lambdaExp) return null;
 
@@ -461,7 +462,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private ConstantExpression GetStringComparisonCaseExpression(bool isCaseInsensitive)
    {
-      return isCaseInsensitive
+      return isCaseInsensitive || GridifyGlobalConfiguration.DefaultStringComparisonIsCaseInsensitive
          ? Expression.Constant(StringComparison.OrdinalIgnoreCase)
          : Expression.Constant(StringComparison.Ordinal);
    }

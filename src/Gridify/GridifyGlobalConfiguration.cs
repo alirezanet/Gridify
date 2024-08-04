@@ -46,6 +46,13 @@ namespace Gridify
       /// Default is false
       /// </summary>
       public static bool DisableNullChecks { get; set; } = false;
+      
+      /// <summary>
+      /// By default, string comparison is case sensitive.
+      /// You can change this behavior by setting this property to true.
+      /// Default is false
+      /// </summary>
+      public static bool DefaultStringComparisonIsCaseInsensitive { get; set; } = false;
 
       /// <summary>
       /// Specifies how field names are inferred from CLR property names.
