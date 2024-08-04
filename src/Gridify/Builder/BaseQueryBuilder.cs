@@ -200,16 +200,17 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
             }
       }
 
-      // handle case-Insensitive search
-      if (value is not null && valueExpression.IsCaseInsensitive
-                            && op.Kind is not SyntaxKind.GreaterThan
-                            && op.Kind is not SyntaxKind.LessThan
-                            && op.Kind is not SyntaxKind.GreaterOrEqualThan
-                            && op.Kind is not SyntaxKind.LessOrEqualThan)
-      {
-         value = value.ToString()?.ToLower();
-         body = Expression.Call(body, MethodInfoHelper.GetToLowerMethod());
-      }
+      // // handle case-Insensitive search
+      // if (value is not null && valueExpression.IsCaseInsensitive
+      //                       && op.Kind is not SyntaxKind.GreaterThan
+      //                       && op.Kind is not SyntaxKind.LessThan
+      //                       && op.Kind is not SyntaxKind.GreaterOrEqualThan
+      //                       && op.Kind is not SyntaxKind.LessOrEqualThan)
+      // {
+      //    value = value.ToString();
+      //
+      //    // body = Expression.Call(body, MethodInfoHelper.GetToLowerMethod());
+      // }
 
       var query = BuildQueryAccordingToValueType(body, parameter, value, op, valueExpression);
       return query;

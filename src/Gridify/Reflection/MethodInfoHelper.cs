@@ -36,6 +36,11 @@ public static class MethodInfoHelper
       return typeof(Enumerable).GetMethods().First(x => x.Name == "Contains").MakeGenericMethod(tp);
    }
 
+   public static MethodInfo GetCaseAwareContainsMethod(Type tp)
+   {
+      return typeof(Enumerable).GetMethods().Last(x => x.Name == "Contains").MakeGenericMethod(tp);
+   }
+
    public static MethodInfo GetIsNullOrEmptyMethod()
    {
       return typeof(string).GetMethod("IsNullOrEmpty", [typeof(string)])!;

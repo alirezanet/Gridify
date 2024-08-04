@@ -112,9 +112,20 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
       // use string.Compare instead of operators if value and field are both strings
       var areBothStrings = body.Type == typeof(string) && value?.GetType() == typeof(string);
+      // TODO: move this methodInfo to Helper class
+      var equalsMethod = typeof(string).GetMethod("Equals", [typeof(string), typeof(string), typeof(StringComparison)])!;
 
       switch (op.Kind)
       {
+         case SyntaxKind.Equal when !valueExpression.IsNullOrDefault && areBothStrings && valueExpression.IsCaseInsensitive:
+            be = Expression.Call(
+               null,
+               equalsMethod,
+               body,
+               GetValueExpression(body.Type, value),
+               Expression.Constant(StringComparison.OrdinalIgnoreCase)
+            );
+            break;
          case SyntaxKind.Equal when !valueExpression.IsNullOrDefault:
             be = Expression.Equal(body, GetValueExpression(body.Type, value));
             break;
@@ -131,6 +142,15 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
                   : Expression.Equal(body, Expression.Default(body.Type));
             }
 
+            break;
+         case SyntaxKind.NotEqual when !valueExpression.IsNullOrDefault && areBothStrings && valueExpression.IsCaseInsensitive:
+            be = Expression.Not(Expression.Call(
+               null,
+               equalsMethod,
+               body,
+               GetValueExpression(body.Type, value),
+               Expression.Constant(StringComparison.OrdinalIgnoreCase))
+            );
             break;
          case SyntaxKind.NotEqual when !valueExpression.IsNullOrDefault:
             be = Expression.NotEqual(body, GetValueExpression(body.Type, value));
@@ -302,14 +322,14 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
       {
          case MemberExpression member:
          {
-            if (op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual &&
-                member.Type.IsSimpleTypeCollection(out _) &&
-                predicate.Body is BinaryExpression binaryExpression)
+            if (op.Kind is not (SyntaxKind.Equal or SyntaxKind.NotEqual) ||
+                !member.Type.IsSimpleTypeCollection(out _)) return GetAnyExpression(member, predicate);
+            return predicate.Body switch
             {
-               return GetContainsExpression(member, binaryExpression, op);
-            }
-
-            return GetAnyExpression(member, predicate);
+               BinaryExpression binaryExpression => GetContainsExpression(member, binaryExpression, op),
+               MethodCallExpression { Method.Name: "Equals" } methodCallExpression => GetCaseSensitiveContainsExpression(member, methodCallExpression, op),
+               _ => GetAnyExpression(member, predicate)
+            };
          }
          case MethodCallExpression { Method.Name: "SelectMany" } subExp
             when subExp.Arguments.Last()
@@ -331,6 +351,25 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
          default:
             throw new InvalidOperationException();
       }
+   }
+
+   private static LambdaExpression GetCaseSensitiveContainsExpression(MemberExpression member, MethodCallExpression methodCallExpression, ISyntaxNode op)
+   {
+      var param = GetParameterExpression(member);
+      var prop = GetPropertyOrField(member, param);
+
+      var tp = prop.Type.IsGenericType
+         ? prop.Type.GenericTypeArguments.First() // list
+         : prop.Type.GetElementType(); // array
+
+      if (tp == null) throw new GridifyFilteringException($"Can not detect the '{member.Member.Name}' property type.");
+      var containsMethod = MethodInfoHelper.GetCaseAwareContainsMethod(tp);
+      Expression containsExp = Expression.Call(containsMethod, prop, methodCallExpression.Arguments[1], methodCallExpression.Arguments[2]);
+      if (op.Kind == SyntaxKind.NotEqual)
+      {
+         containsExp = Expression.Not(containsExp);
+      }
+      return GetExpressionWithNullCheck(prop, param, containsExp);
    }
 
    private static LambdaExpression GetContainsExpression(MemberExpression member, BinaryExpression binaryExpression, ISyntaxNode op)
@@ -459,7 +498,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
          GetStringComparisonCaseExpression(valueExpression.IsCaseInsensitive)), Expression.Constant(0));
    }
 
-   private ConstantExpression GetStringComparisonCaseExpression(bool isCaseInsensitive)
+   private static ConstantExpression GetStringComparisonCaseExpression(bool isCaseInsensitive)
    {
       return isCaseInsensitive
          ? Expression.Constant(StringComparison.OrdinalIgnoreCase)
