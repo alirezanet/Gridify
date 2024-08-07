@@ -25,6 +25,12 @@ public record GridifyMapperConfiguration
    public bool IgnoreNotMappedFields { get; set; } = GridifyGlobalConfiguration.IgnoreNotMappedFields;
    
    /// <summary>
+   /// If true, string comparison operations are case insensitive by default.
+   /// Default is false
+   /// </summary>
+   public bool CaseInsensitiveFiltering { get; set; } = GridifyGlobalConfiguration.CaseInsensitiveFiltering;
+   
+   /// <summary>
    /// By default, DateTimeKind.Unspecified is used.
    /// You can change this behavior by setting this property to a DateTimeKind value.
    /// Default is null
