@@ -144,7 +144,6 @@ By setting this to `false`, Gridify don't allow searching on null values using t
 var mapper = new GridifyMapper<Person>(q => q.AllowNullSearch = false);
 ```
 
-
 ### DefaultDateTimeKind
 
 By setting this property to a `DateTimeKind` value, you can change the default `DateTimeKind` used when parsing dates.
@@ -152,6 +151,9 @@ By setting this property to a `DateTimeKind` value, you can change the default `
 - type: `DateTimeKind`
 - default: `null`
 
+``` csharp
+var mapper = new GridifyMapper<Person>(q => q.DefaultDateTimeKind = DateTimeKind.Utc);
+```
 
 ## Filtering on Nested Collections
 
