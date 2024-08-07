@@ -82,7 +82,8 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          var fullName = string.IsNullOrEmpty(prefix) ? propertyName : $"{prefix}.{propertyName}";
 
          // Skip classes if nestingLevel is exceeded
-         if (item.PropertyType.IsClass && item.PropertyType != typeof(string) && !item.PropertyType.IsSimpleTypeCollection(out _))
+         if (item.PropertyType.IsClass && item.PropertyType != typeof(string) && !item.PropertyType.IsSimpleTypeCollection(out _)
+             && !item.PropertyType.IsCollection())
          {
             if (currentDepth >= maxNestingDepth)
             {
