@@ -201,9 +201,9 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
          
          if (value is DateTime dateTime)
          {
-            if (GridifyGlobalConfiguration.DefaultDateTimeKind.HasValue)
+            if (mapper.Configuration.DefaultDateTimeKind.HasValue)
             {
-               value = DateTime.SpecifyKind(dateTime, GridifyGlobalConfiguration.DefaultDateTimeKind.Value);
+               value = DateTime.SpecifyKind(dateTime, mapper.Configuration.DefaultDateTimeKind.Value);
             }
          }
       }

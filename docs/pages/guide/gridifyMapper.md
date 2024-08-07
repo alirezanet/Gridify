@@ -144,6 +144,15 @@ By setting this to `false`, Gridify don't allow searching on null values using t
 var mapper = new GridifyMapper<Person>(q => q.AllowNullSearch = false);
 ```
 
+
+### DefaultDateTimeKind
+
+By setting this property to a `DateTimeKind` value, you can change the default `DateTimeKind` used when parsing dates.
+
+- type: `DateTimeKind`
+- default: `null`
+
+
 ## Filtering on Nested Collections
 
 You can use LINQ `Select` and `SelectMany` methods to filter your data using its nested collections.
