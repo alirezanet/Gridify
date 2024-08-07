@@ -29,6 +29,13 @@ public record GridifyMapperConfiguration
    /// Default is false
    /// </summary>
    public bool CaseInsensitiveFiltering { get; set; } = GridifyGlobalConfiguration.CaseInsensitiveFiltering;
+   
+   /// <summary>
+   /// By default, DateTimeKind.Unspecified is used.
+   /// You can change this behavior by setting this property to a DateTimeKind value.
+   /// Default is null
+   /// </summary>
+   public DateTimeKind? DefaultDateTimeKind { get; set; } = GridifyGlobalConfiguration.DefaultDateTimeKind;
 
    /// <summary>
    /// Specifies how field names are inferred from CLR property names.

@@ -199,6 +199,14 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
             {
                return BuildAlwaysFalseQuery(parameter);
             }
+         
+         if (value is DateTime dateTime)
+         {
+            if (mapper.Configuration.DefaultDateTimeKind.HasValue)
+            {
+               value = DateTime.SpecifyKind(dateTime, mapper.Configuration.DefaultDateTimeKind.Value);
+            }
+         }
       }
 
       // handle case-Insensitive search
