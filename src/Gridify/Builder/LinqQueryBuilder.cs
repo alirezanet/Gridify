@@ -462,7 +462,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private ConstantExpression GetStringComparisonCaseExpression(bool isCaseInsensitive)
    {
-      return isCaseInsensitive || GridifyGlobalConfiguration.DefaultStringComparisonIsCaseInsensitive
+      return isCaseInsensitive || mapper.Configuration.CaseInsensitiveFiltering
          ? Expression.Constant(StringComparison.OrdinalIgnoreCase)
          : Expression.Constant(StringComparison.Ordinal);
    }

@@ -23,6 +23,12 @@ public record GridifyMapperConfiguration
    /// Default is false
    /// </summary>
    public bool IgnoreNotMappedFields { get; set; } = GridifyGlobalConfiguration.IgnoreNotMappedFields;
+   
+   /// <summary>
+   /// If true, string comparison operations are case insensitive by default.
+   /// Default is false
+   /// </summary>
+   public bool CaseInsensitiveFiltering { get; set; } = GridifyGlobalConfiguration.CaseInsensitiveFiltering;
 
    /// <summary>
    /// Specifies how field names are inferred from CLR property names.

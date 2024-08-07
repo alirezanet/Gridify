@@ -52,7 +52,7 @@ namespace Gridify
       /// You can change this behavior by setting this property to true.
       /// Default is false
       /// </summary>
-      public static bool DefaultStringComparisonIsCaseInsensitive { get; set; } = false;
+      public static bool CaseInsensitiveFiltering { get; set; } = false;
 
       /// <summary>
       /// Specifies how field names are inferred from CLR property names.

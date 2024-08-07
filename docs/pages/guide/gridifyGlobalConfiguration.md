@@ -47,7 +47,7 @@ some ORMs like NHibernate don't support this. You can disable this behavior by s
 - type: `bool`
 - default: `false`
 
-### DefaultStringComparisonIsCaseInsensitive
+### CaseInsensitiveFiltering
 
 If true, string comparison operations are case insensitive by default.
 

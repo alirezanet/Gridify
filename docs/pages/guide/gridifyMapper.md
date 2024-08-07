@@ -144,6 +144,18 @@ By setting this to `false`, Gridify don't allow searching on null values using t
 var mapper = new GridifyMapper<Person>(q => q.AllowNullSearch = false);
 ```
 
+
+### CaseInsensitiveFiltering
+
+If true, string comparison operations are case insensitive by default.
+
+- type: `bool`
+- default: `false`
+
+``` csharp
+var mapper = new GridifyMapper<Person>(q => q.CaseInsensitiveFiltering = true);
+```
+
 ## Filtering on Nested Collections
 
 You can use LINQ `Select` and `SelectMany` methods to filter your data using its nested collections.
