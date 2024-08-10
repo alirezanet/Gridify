@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
-using Gridify.Reflection;
 using Gridify.Syntax;
 
 namespace Gridify.Builder;
@@ -124,7 +123,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
          return (result, isNested);
       }
 
-      var query = BuildQuery(gMap.To.Body, gMap.To.Parameters[0], right, op, gMap.Convertor, false);
+      var query = BuildQuery(gMap.To.Body, gMap.To.Parameters[0], right, op, gMap.Convertor);
       if (query == null) return null;
 
       if (hasIndexer)
@@ -158,8 +157,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       ParameterExpression parameter,
       ValueExpressionSyntax valueExpression,
       ISyntaxNode op,
-      Func<string, object>? convertor,
-      bool isNested)
+      Func<string, object>? convertor)
    {
       // Remove the boxing for value types
       if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression)body).Operand;
@@ -199,7 +197,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
             {
                return BuildAlwaysFalseQuery(parameter);
             }
-         
+
          if (value is DateTime dateTime)
          {
             if (mapper.Configuration.DefaultDateTimeKind.HasValue)
@@ -207,18 +205,6 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
                value = DateTime.SpecifyKind(dateTime, mapper.Configuration.DefaultDateTimeKind.Value);
             }
          }
-      }
-
-      // handle case-Insensitive search
-      if (value is not null && (valueExpression.IsCaseInsensitive
-                            || (mapper.Configuration.CaseInsensitiveFiltering && !isNested && body.Type == typeof(string)))
-                            && op.Kind is not SyntaxKind.GreaterThan
-                            && op.Kind is not SyntaxKind.LessThan
-                            && op.Kind is not SyntaxKind.GreaterOrEqualThan
-                            && op.Kind is not SyntaxKind.LessOrEqualThan)
-      {
-         value = value.ToString()?.ToLower();
-         body = Expression.Call(body, MethodInfoHelper.GetToLowerMethod());
       }
 
       var query = BuildQueryAccordingToValueType(body, parameter, value, op, valueExpression);
