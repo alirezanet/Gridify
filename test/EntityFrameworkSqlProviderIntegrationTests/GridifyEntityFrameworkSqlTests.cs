@@ -147,4 +147,27 @@ public class GridifyEntityFrameworkTests
       // Assert
       Assert.Equal(expected, actual);
    }
+
+   [Fact]
+   public void DictionaryMappingWithWhereStatement()
+   {
+      // arrange
+      GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+
+      var user = new { Name = "test user" };
+      var expected = _dbContext.Users.Where(u => u.Groups
+        .Any(q => q.Name == "test group" && q.Users
+            .Any(u2 => u2.Name == user.Name))).ToQueryString();
+
+      // act
+      var actualQuery = new QueryBuilder<User>()
+         .AddMap("usersByGroup", (user, groupName) => user.Groups.Where(q => q.Name == groupName).SelectMany(q => q.Users).Select(u => u.Name))
+         .AddCondition("usersByGroup[test group]=test user")
+         .Build(_dbContext.Users);
+
+      var actual = actualQuery.ToQueryString();
+
+      // assert
+      Assert.Equal(expected, actual.Replace(" @__Value_0", " @__user_Name_0"));
+   }
 }
