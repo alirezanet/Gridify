@@ -328,6 +328,21 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
             var newPredicate = GetExpressionWithNullCheck(lambdaMember, lambda.Parameters[0], newExp);
             return ParseMethodCallExpression(subExp, newPredicate, op);
          }
+         case MethodCallExpression { Method.Name: "Where" } subExp
+            when subExp.Arguments.Last() is LambdaExpression wherePredicate &&
+            wherePredicate.Parameters[0].Type == predicate.Parameters[0].Type:
+         {
+            // Use same parameter as the predicate
+            var newWhereExpression = (LambdaExpression)new ReplaceExpressionVisitor(wherePredicate.Parameters[0], predicate.Parameters[0]).Visit(wherePredicate);
+            // Join the two predicates
+            var andExpression = Expression.AndAlso(newWhereExpression.Body, predicate.Body);
+            // Replace predicate body with the new joined expression
+            var newPredicate = (LambdaExpression)new ReplaceExpressionVisitor(predicate.Body, andExpression).Visit(predicate);
+
+            var newExp = (MethodCallExpression)new ReplaceExpressionVisitor(subExp.Arguments[1], newPredicate).Visit(subExp);
+
+            return ParseMethodCallExpression(newExp, newPredicate, op);
+         }
          default:
             throw new InvalidOperationException();
       }
