@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Gridify.Reflection;
 using Gridify.Syntax;
 
@@ -81,9 +82,19 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          var propertyName = char.ToLowerInvariant(item.Name[0]) + item.Name.Substring(1); // camel-case name
          var fullName = string.IsNullOrEmpty(prefix) ? propertyName : $"{prefix}.{propertyName}";
 
+         if (item.PropertyType.IsComplexTypeCollection(out var genericType))
+         {
+            if (currentDepth >= maxNestingDepth)
+            {
+               continue;
+            }
+
+            GenerateMappingsRecursive(genericType!, fullName, maxNestingDepth, (ushort)(currentDepth + 1));
+            continue;
+         }
+
          // Skip classes if nestingLevel is exceeded
-         if (item.PropertyType.IsClass && item.PropertyType != typeof(string) && !item.PropertyType.IsSimpleTypeCollection(out _)
-             && !item.PropertyType.IsCollection())
+         if (item.PropertyType.IsClass && item.PropertyType != typeof(string) && !item.PropertyType.IsSimpleTypeCollection(out _))
          {
             if (currentDepth >= maxNestingDepth)
             {
@@ -166,6 +177,11 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       return this;
    }
 
+   public void ClearMappings()
+   {
+      _mappings.Clear();
+   }
+
    public bool HasMap(string from)
    {
       return Configuration.CaseSensitive
@@ -217,7 +233,14 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       // Param_x =>
       var parameter = Expression.Parameter(typeof(T), "__" + typeof(T).Name);
       // Param_x.Name, Param_x.yyy.zz.xx
-      var mapProperty = from.Split('.').Aggregate<string, Expression>(parameter, Expression.Property);
+      var mapProperty = from.Split('.').Aggregate<string, Expression>(parameter, CreatePropertyAccessExrpression);
+
+      if (mapProperty is MethodCallExpression methodCallExpression
+         && methodCallExpression.Method.Name.Equals("Select", StringComparison.InvariantCultureIgnoreCase)
+         && methodCallExpression.Arguments.Last() is LambdaExpression)
+      {
+         return Expression.Lambda<Func<T, object>>(methodCallExpression, parameter);
+      }
 
       if (!mapProperty.Type.IsSimpleTypeCollection(out var genericType))
       {
@@ -233,6 +256,37 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       //  Param_x.Name.Select(fc => fc)
       var body = Expression.Call(selectMethod, mapProperty, predicate);
       return Expression.Lambda<Func<T, object>>(body, parameter);
+   }
+
+   internal static Expression CreatePropertyAccessExrpression(Expression expression, string propertyName)
+   {
+      Type? itemType;
+
+      if (
+         ((expression is MemberExpression memberExpression && memberExpression.Member is PropertyInfo propertyInfo && propertyInfo.PropertyType.IsComplexTypeCollection(out itemType)) ||
+         (expression is MethodCallExpression methodCallExpression && methodCallExpression.Type.IsComplexTypeCollection(out itemType)))
+         && itemType is not null
+      )
+      {
+         var selectFunction = "Select";
+         var predicateParameter = Expression.Parameter(itemType);
+         var propertyType = itemType.GetProperties().FirstOrDefault(p => p.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase))?.PropertyType ?? throw new GridifyMapperException($"Property '{propertyName}' not found.");
+          
+         if (propertyType.IsComplexTypeCollection(out var propItemType) && propItemType is not null)
+         {
+            selectFunction = "SelectMany";
+            propertyType = propItemType;
+         }
+
+         var predicate = Expression.Lambda(Expression.Property(predicateParameter, propertyName), predicateParameter);
+         var selectMethod = typeof(Enumerable).GetMethods().First(m => m.Name.Equals(selectFunction, StringComparison.InvariantCulture)).MakeGenericMethod([itemType, propertyType]);
+
+         var selectExpression = Expression.Call(selectMethod, expression, predicate);
+
+         return selectExpression;
+      }
+         
+      return Expression.Property(expression, propertyName);
    }
 
 

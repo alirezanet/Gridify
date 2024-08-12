@@ -1,27 +1,54 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Gridify.Reflection;
 
 public static class SimpleTypeHelper
 {
+   public static bool IsCollection(this Type type, out Type? itemType)
+   {
+      itemType = null;
+      Type genericType = type;  
+      if ((type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>)) || (type != typeof(string) && type.GetInterfaces().Any(i => {
+         if (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+         {
+            genericType = i;
+            return true;
+         }
+         return false;
+      })))
+      {
+         var arguments = genericType.GetGenericArguments();
+         if (arguments.Length == 1)
+         {
+            itemType = arguments[0];
+            return true;
+         }
+      }
+      return false;
+   }
+
    public static bool IsSimpleTypeCollection(this Type type, out Type? itemType)
    {
       itemType = null;
-      if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+      if (IsCollection(type, out var collectionType) && IsSimpleType(collectionType!))
       {
-         var arguments = type.GetGenericArguments();
-         if (arguments.Length != 1 || !IsSimpleType(arguments[0])) return false;
-
-         itemType = arguments[0];
+         itemType = collectionType;
          return true;
       }
-      if (!type.IsArray) return false;
+      return false;
+   }
 
-      var elementType = type.GetElementType();
-      if (elementType == null || !IsSimpleType(elementType)) return false;
-      itemType = elementType;
-      return true;
+   public static bool IsComplexTypeCollection(this Type type, out Type? itemType)
+   {
+      itemType = null;
+      if (IsCollection(type, out var collectionType) && !IsSimpleType(collectionType!))
+      {
+         itemType = collectionType;
+         return true;
+      }
+      return false;
    }
 
    public static bool IsSimpleType(this Type type)
