@@ -10,35 +10,25 @@ public class Issue196Tests
     {
         var mapper = new GridifyMapper<TestClass>();
         mapper.GenerateMappings(2);
-        // test that no exception is thrown
-        Assert.True(true);
+        Assert.True(mapper.HasMap("childClass.name"));
         
         var issueMapper = new GridifyMapper<Issue196TestClass>();
         issueMapper.GenerateMappings(2);
-        // test that no exception is thrown
-        Assert.True(true);
-    }
+        Assert.True(issueMapper.HasMap("customFields.key"));
+   }
 }
 
 public class Issue196TestClass
 {    
-    public string Name { get; set; }
-    // DOES NOT WORK
-    // public CustomFields CustomFields { get; set; }
-	
-    // WORDS
-    public List<CustomField> CustomFields { get; set; }
+    public required string Name { get; set; }
+
+    public required CustomField CustomField { get; set; }
+
+    public List<CustomField> CustomFields { get; set; } = [];
 }
 
 public class CustomField
 {
-    public string Key { get; init; }
-    public string Value { get; set; }
-	
-    public CustomField(string key, string value)
-    {
-        Key = key;
-        Value = value;
-    }
-    public CustomField() { }
+    public required string Key { get; set; }
+    public required string Value { get; set; }
 }
