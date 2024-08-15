@@ -51,7 +51,7 @@ var mapper = new GridifyMapper<Person>()
                .GenerateMappings();
 ```
 
-- To generate mappings with **control over nesting depth**, you can specify the `maxNestingDepth` parameter. This parameter limits how deep the mappings will be generated for nested classes. Set it to 0 for no nesting or a positive value to control the depth `(added in v2.11.0)`:
+- To generate mappings with **control over nesting depth**, you can specify the `maxNestingDepth` parameter. This parameter limits how deep the mappings will be generated for nested classes and navigation properties `(added in v2.15.0)`. Set it to 0 for no nesting or a positive value to control the depth `(added in v2.11.0)`:
 
 ```csharp
 var mapper = new GridifyMapper<Person>()
@@ -64,6 +64,7 @@ Another alternative to generate default mappings for top-level public properties
 
 ``` csharp
 var mapper = new GridifyMapper<Person>(true);
+var mapperWithDepth = new GridifyMapper<Person>(true, 2);
 ```
 
 :::
@@ -93,6 +94,10 @@ mapper = mapper.AddMap("userName", p => p.UserName, value => value.ToLower());
 ## HasMap
 
 This method checks if the mapper has a mapping for the given field name.
+
+## ClearMaps
+
+This method clears the list of mappings
 
 ## GetCurrentMaps
 
@@ -204,11 +209,14 @@ var gq = new GridifyQuery
 
 ### Mapping to Dictionary Keys
 
-Similarly, you can define a mapping to a specific key in a dictionary.
+Similarly, you can define a mapping to a specific key in a dictionary or in a navigation property.
 
 ```csharp
 var gm = new GridifyMapper<TargetType>()
       .AddMap("dictProp", (target, key) => target.MyDictionary[key]);
+
+var gm2 = new GridifyMapper<TargetType>()
+      .AddMap("navProp", (target, key) => target.NavigationProperty.Where(n => n.Key == key).Select(n => n.Value));
 
 var gq = new GridifyQuery
 {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Gridify.Tests;
 
@@ -28,6 +29,8 @@ public class TestClass : ICloneable
    public string? Tag { get; set; }
 
    public bool IsActive { get; set; }
+
+   public ICollection<TestClass> Children { get; set; } = new List<TestClass>();
 
    public object Clone()
    {

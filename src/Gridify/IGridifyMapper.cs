@@ -47,4 +47,5 @@ public interface IGridifyMapper<T>
    bool HasMap(string key);
    public GridifyMapperConfiguration Configuration { get; }
    IEnumerable<IGMap<T>> GetCurrentMaps();
+   void ClearMappings();
 }

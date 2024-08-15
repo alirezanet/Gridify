@@ -20,6 +20,7 @@ public class GridifyEntityFrameworkTests
    [Fact]
    public void ApplyFiltering_GeneratedSqlShouldNotCreateParameterizedQuery_WhenCompatibilityLayerIsDisable_SqlServerProvider()
    {
+      GridifyGlobalConfiguration.DisableEntityFrameworkCompatibilityLayer();
       var actual = _dbContext.Users.ApplyFiltering("name = vahid").ToQueryString();
       var expected = _dbContext.Users.Where(q => q.Name == "vahid").ToQueryString();
 
@@ -146,5 +147,41 @@ public class GridifyEntityFrameworkTests
 
       // Assert
       Assert.Equal(expected, actual);
+   }
+
+   [Fact]
+   public void DictionaryMappingWithWhereStatement()
+   {
+      // arrange
+      GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+
+      var user = new { Name = "test user" };
+      var expected = _dbContext.Users.Where(u => u.Groups
+        .Any(q => q.Name == "test group" && q.Users
+            .Any(u2 => u2.Name == user.Name))).ToQueryString();
+
+      // act
+      var actualQuery = new QueryBuilder<User>()
+         .AddMap("usersByGroup", (user, groupName) => user.Groups.Where(q => q.Name == groupName).SelectMany(q => q.Users).Select(u => u.Name))
+         .AddCondition("usersByGroup[test group]=test user")
+         .Build(_dbContext.Users);
+
+      var actual = actualQuery.ToQueryString();
+
+      // assert
+      Assert.Equal(expected, actual.Replace(" @__Value_0", " @__user_Name_0"));
+   }
+   
+   [Fact]
+   public void ApplyFiltering_NestedProperty()
+   {
+      GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+      var gm = new GridifyMapper<User>(true, 3);
+
+      var name = "test";
+      var expected = _dbContext.Users.Where(q => q.Groups.Any(g => g.Users.Any(u => u.Name == name))).ToQueryString();
+      var actual = _dbContext.Users.ApplyFiltering("groups.users.name = test", gm).ToQueryString();
+
+      Assert.Equal(expected, actual.Replace("@__Value_0", "@__name_0"));
    }
 }

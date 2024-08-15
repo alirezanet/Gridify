@@ -10,6 +10,7 @@ start contributing to the project by submitting pull requests
 
 ## Todos
 
+- :zap: Add more Examples/use-case to the documentation
 - :zap: Resolve open issues
 - :zap: Improve the documentation site
 - :zap: Improve code documentation (summary)
