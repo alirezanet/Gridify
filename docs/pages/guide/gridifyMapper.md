@@ -149,6 +149,17 @@ By setting this to `false`, Gridify don't allow searching on null values using t
 var mapper = new GridifyMapper<Person>(q => q.AllowNullSearch = false);
 ```
 
+### CaseInsensitiveFiltering
+
+If true, string comparison operations are case insensitive by default.
+
+- type: `bool`
+- default: `false`
+
+``` csharp
+var mapper = new GridifyMapper<Person>(q => q.CaseInsensitiveFiltering = true);
+```
+
 ### DefaultDateTimeKind
 
 By setting this property to a `DateTimeKind` value, you can change the default `DateTimeKind` used when parsing dates.

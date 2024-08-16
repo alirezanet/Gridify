@@ -48,6 +48,13 @@ namespace Gridify
       public static bool DisableNullChecks { get; set; } = false;
       
       /// <summary>
+      /// By default, string comparison is case sensitive.
+      /// You can change this behavior by setting this property to true.
+      /// Default is false
+      /// </summary>
+      public static bool CaseInsensitiveFiltering { get; set; } = false;
+      
+      /// <summary>
       /// By default, DateTimeKind.Unspecified is used.
       /// You can change this behavior by setting this property to a DateTimeKind value.
       /// Default is null
