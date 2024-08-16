@@ -17,8 +17,6 @@ public partial class GMap<T> : IGMap<T>
       Convertor = convertor;
    }
 
-   public bool IsNestedCollection() => SelectRegex.IsMatch(To.ToString());
-
    public GMap(string from, Expression<Func<T, int, object?>> to, Func<string, object>? convertor = null)
    {
       From = from;
@@ -40,6 +38,13 @@ public partial class GMap<T> : IGMap<T>
       Convertor = convertor;
    }
 
-   private static Regex SelectRegex => new(@"\.Select\s*\(", RegexOptions.Compiled);
+#if NET8_0_OR_GREATER
+   public bool IsNestedCollection() => SelectRegex().IsMatch(To.ToString());
+   [GeneratedRegex(@"\.Select\s*\(", RegexOptions.Compiled)]
+   private static partial Regex SelectRegex();
+#else
+   public bool IsNestedCollection() => Regex.IsMatch(To.ToString(), @"\.Select\s*\(", RegexOptions.Compiled);
+#endif
+
 
 }
