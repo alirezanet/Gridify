@@ -108,42 +108,42 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       if (left == null || right == null) return null;
 
       var gMap = mapper.GetGMap(left);
-
       if (gMap == null) throw new GridifyMapperException($"Mapping '{left}' not found");
+      var mapTarget = gMap.To;
 
       var hasIndexer = fieldExpression?.Indexer != null;
       if (hasIndexer)
-         gMap.To = UpdateIndexerKey(gMap.To, fieldExpression!.Indexer!);
+         mapTarget = UpdateIndexerKey(mapTarget, fieldExpression!.Indexer!);
 
       var isNested = ((GMap<T>)gMap).IsNestedCollection();
       if (isNested)
       {
-         var result = BuildNestedQuery(gMap.To.Body, gMap, right, op);
+         var result = BuildNestedQuery(mapTarget.Body, gMap, right, op);
          if (result == null) return null;
          return (result, isNested);
       }
 
-      var query = BuildQuery(gMap.To.Body, gMap.To.Parameters[0], right, op, gMap.Convertor);
+      var query = BuildQuery(mapTarget.Body, mapTarget.Parameters[0], right, op, gMap.Convertor);
       if (query == null) return null;
 
       if (hasIndexer)
-         query = AddIndexerNullCheck(gMap, query);
+         query = AddIndexerNullCheck(mapTarget, query);
 
       return ((TQuery)query, false);
    }
 
-   private static object AddIndexerNullCheck(IGMap<T> gMap, object query)
+   private static object AddIndexerNullCheck(LambdaExpression mapTarget, object query)
    {
       if (GridifyGlobalConfiguration.DisableNullChecks || GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
          return query;
 
-      var body = gMap.To.Body;
+      var body = mapTarget.Body;
       if (body is UnaryExpression unaryExpression)
          body = unaryExpression.Operand;
 
       if (body is not MethodCallExpression methodCallExpression) return query;
 
-      var containsKeyMethod = methodCallExpression.Object!.Type.GetMethod("ContainsKey", [gMap.To.Parameters[1].Type]);
+      var containsKeyMethod = methodCallExpression.Object!.Type.GetMethod("ContainsKey", [mapTarget.Parameters[1].Type]);
       if (containsKeyMethod == null) return query;
       var mainQuery = (LambdaExpression)query;
       var keyNullCheck = Expression.Call(methodCallExpression.Object!, containsKeyMethod, methodCallExpression.Arguments);
