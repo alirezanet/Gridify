@@ -61,23 +61,8 @@ public static class MethodInfoHelper
       return typeof(Enumerable).GetMethods().Last(x => x.Name == "Contains").MakeGenericMethod(tp);
    }
 
-   public static MethodInfo GetCaseAwareStringContainsMethod()
-   {
-      return typeof(string).GetMethod("Contains", [typeof(string), typeof(StringComparison)])!;
-   }
-
    public static MethodInfo GetCaseAwareEqualsMethod()
    {
       return typeof(string).GetMethod("Equals", [typeof(string), typeof(string), typeof(StringComparison)])!;
-   }
-
-   public static MethodInfo GetCaseAwareStartsWithMethod()
-   {
-      return typeof(string).GetMethod("StartsWith", [typeof(string), typeof(StringComparison)])!;
-   }
-
-   public static MethodInfo GetCaseAwareEndsWithMethod()
-   {
-      return typeof(string).GetMethod("EndsWith", [typeof(string), typeof(StringComparison)])!;
    }
 }

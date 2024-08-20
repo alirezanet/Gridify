@@ -123,7 +123,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
                MethodInfoHelper.GetCaseAwareEqualsMethod(),
                body,
                GetValueExpression(body.Type, value),
-               Expression.Constant(StringComparison.InvariantCultureIgnoreCase)
+               Expression.Constant(StringComparison.OrdinalIgnoreCase)
             );
             break;
          case SyntaxKind.Equal when !valueExpression.IsNullOrDefault:
@@ -149,7 +149,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
                MethodInfoHelper.GetCaseAwareEqualsMethod(),
                body,
                GetValueExpression(body.Type, value),
-               Expression.Constant(StringComparison.InvariantCultureIgnoreCase))
+               Expression.Constant(StringComparison.OrdinalIgnoreCase))
             );
             break;
          case SyntaxKind.NotEqual when !valueExpression.IsNullOrDefault:
@@ -194,74 +194,60 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
          case SyntaxKind.LessOrEqualThan when areBothStrings:
             be = GetLessThanOrEqualExpression(body, valueExpression, value);
             break;
-         case SyntaxKind.Like or SyntaxKind.NotLike:
-            if (areBothStrings && (valueExpression.IsCaseInsensitive || mapper.Configuration.CaseInsensitiveFiltering))
-            {
-               be = Expression.Call(
-                  body,
-                  MethodInfoHelper.GetCaseAwareStringContainsMethod(),
-                  GetValueExpression(body.Type, value),
-                  Expression.Constant(StringComparison.InvariantCultureIgnoreCase)
-               );
-            }
-            else
-            {
-               be = Expression.Call(body, MethodInfoHelper.GetStringContainsMethod(), GetValueExpression(body.Type, value));
-            }
-
-            if (op.Kind == SyntaxKind.NotLike)
-               be = Expression.Not(be);
-
+         case SyntaxKind.Like: // TODO: test and support case sensitivity
+            be = Expression.Call(body, MethodInfoHelper.GetStringContainsMethod(), GetValueExpression(body.Type, value));
             break;
-         case SyntaxKind.StartsWith or SyntaxKind.NotStartsWith:
+         case SyntaxKind.NotLike:
+            be = Expression.Not(Expression.Call(body, MethodInfoHelper.GetStringContainsMethod(), GetValueExpression(body.Type, value)));
+            break;
+         case SyntaxKind.StartsWith:
             if (body.Type != typeof(string))
             {
                body = Expression.Call(body, MethodInfoHelper.GetToStringMethod());
                be = Expression.Call(body, MethodInfoHelper.GetStartWithMethod(), GetValueExpression(body.Type, value?.ToString()));
-            }
-            else if (areBothStrings && (valueExpression.IsCaseInsensitive || mapper.Configuration.CaseInsensitiveFiltering))
-            {
-               be = Expression.Call(
-                  body,
-                  MethodInfoHelper.GetCaseAwareStartsWithMethod(),
-                  GetValueExpression(body.Type, value),
-                  Expression.Constant(StringComparison.InvariantCultureIgnoreCase)
-               );
             }
             else
             {
                be = Expression.Call(body, MethodInfoHelper.GetStartWithMethod(), GetValueExpression(body.Type, value));
             }
 
-            if (op.Kind == SyntaxKind.NotStartsWith)
-               be = Expression.Not(be);
-
             break;
-         case SyntaxKind.EndsWith or SyntaxKind.NotEndsWith:
+         case SyntaxKind.EndsWith:
             if (body.Type != typeof(string))
             {
                body = Expression.Call(body, MethodInfoHelper.GetToStringMethod());
-               be = Expression.Call(body, MethodInfoHelper.GetStartWithMethod(), GetValueExpression(body.Type, value?.ToString()));
-            }
-            else if (areBothStrings && (valueExpression.IsCaseInsensitive || mapper.Configuration.CaseInsensitiveFiltering))
-            {
-               be = Expression.Call(
-                  body,
-                  MethodInfoHelper.GetCaseAwareEndsWithMethod(),
-                  GetValueExpression(body.Type, value),
-                  Expression.Constant(StringComparison.InvariantCultureIgnoreCase)
-               );
+               be = Expression.Call(body, MethodInfoHelper.GetEndsWithMethod(), GetValueExpression(body.Type, value?.ToString()));
             }
             else
             {
                be = Expression.Call(body, MethodInfoHelper.GetEndsWithMethod(), GetValueExpression(body.Type, value));
             }
 
-            if (op.Kind == SyntaxKind.NotEndsWith)
-               be = Expression.Not(be);
+            break;
+         case SyntaxKind.NotStartsWith:
+            if (body.Type != typeof(string))
+            {
+               body = Expression.Call(body, MethodInfoHelper.GetToStringMethod());
+               be = Expression.Not(Expression.Call(body, MethodInfoHelper.GetStartWithMethod(), GetValueExpression(body.Type, value?.ToString())));
+            }
+            else
+            {
+               be = Expression.Not(Expression.Call(body, MethodInfoHelper.GetStartWithMethod(), GetValueExpression(body.Type, value)));
+            }
 
             break;
+         case SyntaxKind.NotEndsWith:
+            if (body.Type != typeof(string))
+            {
+               body = Expression.Call(body, MethodInfoHelper.GetToStringMethod());
+               be = Expression.Not(Expression.Call(body, MethodInfoHelper.GetEndsWithMethod(), GetValueExpression(body.Type, value?.ToString())));
+            }
+            else
+            {
+               be = Expression.Not(Expression.Call(body, MethodInfoHelper.GetEndsWithMethod(), GetValueExpression(body.Type, value)));
+            }
 
+            break;
          case SyntaxKind.CustomOperator:
             var token = (SyntaxToken)op;
             var customOperator = GridifyGlobalConfiguration.CustomOperators.Operators.First(q => q.GetOperator() == token!.Text);
@@ -533,7 +519,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
    private static ConstantExpression GetStringComparisonCaseExpression(bool isCaseInsensitive)
    {
       return isCaseInsensitive
-         ? Expression.Constant(StringComparison.InvariantCultureIgnoreCase)
+         ? Expression.Constant(StringComparison.OrdinalIgnoreCase)
          : Expression.Constant(StringComparison.Ordinal);
    }
 
