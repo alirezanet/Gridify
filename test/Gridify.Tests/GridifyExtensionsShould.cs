@@ -581,7 +581,7 @@ public class GridifyExtensionsShould
    public void ApplyFiltering_GreaterThanOrEqual_CaseInsensitive_BetweenTwoStrings()
    {
       var actual = _fakeRepository.AsQueryable().ApplyFiltering("name >= j/i").ToList();
-      var expected = _fakeRepository.Where(q => string.Compare(q.Name, "j", StringComparison.InvariantCultureIgnoreCase) >= 0).ToList();
+      var expected = _fakeRepository.Where(q => string.Compare(q.Name, "j", StringComparison.OrdinalIgnoreCase) >= 0).ToList();
 
       Assert.Equal(expected.Count, actual.Count);
       Assert.Equal(expected, actual);

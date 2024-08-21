@@ -6,6 +6,11 @@ namespace Gridify.Reflection;
 
 public static class MethodInfoHelper
 {
+   public static MethodInfo GetToLowerMethod()
+   {
+      return typeof(string).GetMethod("ToLower", [])!;
+   }
+
    public static MethodInfo GetAnyMethod(Type type)
    {
       return typeof(Enumerable).GetMethods().Single(m => m.Name == "Any" && m.GetParameters().Length == 2).MakeGenericMethod(type);
@@ -54,30 +59,5 @@ public static class MethodInfoHelper
    public static MethodInfo GetSelectMethod(this Type type)
    {
       return typeof(Enumerable).GetMethods().First(m => m.Name == "Select").MakeGenericMethod([type, type]);
-   }
-
-   public static MethodInfo GetCaseAwareContainsMethod(Type tp)
-   {
-      return typeof(Enumerable).GetMethods().Last(x => x.Name == "Contains").MakeGenericMethod(tp);
-   }
-
-   public static MethodInfo GetCaseAwareStringContainsMethod()
-   {
-      return typeof(string).GetMethod("Contains", [typeof(string), typeof(StringComparison)])!;
-   }
-
-   public static MethodInfo GetCaseAwareEqualsMethod()
-   {
-      return typeof(string).GetMethod("Equals", [typeof(string), typeof(string), typeof(StringComparison)])!;
-   }
-
-   public static MethodInfo GetCaseAwareStartsWithMethod()
-   {
-      return typeof(string).GetMethod("StartsWith", [typeof(string), typeof(StringComparison)])!;
-   }
-
-   public static MethodInfo GetCaseAwareEndsWithMethod()
-   {
-      return typeof(string).GetMethod("EndsWith", [typeof(string), typeof(StringComparison)])!;
    }
 }
