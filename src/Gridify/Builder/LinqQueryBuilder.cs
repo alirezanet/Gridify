@@ -364,6 +364,9 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
       if (op.Kind == SyntaxKind.NotEqual)
       {
          containsExp = Expression.Not(containsExp);
+         // issue #204 we need to add or null check as well for Not Contains
+         containsExp = Expression.OrElse(Expression.Equal(prop, Expression.Constant(null)), containsExp);
+         return Expression.Lambda(containsExp, param);
       }
       return GetExpressionWithNullCheck(prop, param, containsExp);
    }

@@ -52,6 +52,7 @@ public class GridifyExtensionsShould
       lst.Add(new TestClass(27, "ali reza", null));
       lst.Add(new TestClass(27, "[ali]", null));
       lst.Add(new TestClass(28, @"Esc/\pe", null));
+      lst.Add(new TestClass(29, @"NullTag", null, tag: null));
 
       return lst;
    }

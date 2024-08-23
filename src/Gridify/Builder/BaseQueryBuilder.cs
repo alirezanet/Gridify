@@ -217,8 +217,13 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
                             && op.Kind is not SyntaxKind.GreaterOrEqualThan
                             && op.Kind is not SyntaxKind.LessOrEqualThan)
       {
-         value = value.ToString()?.ToLower();
-         body = Expression.Call(body, MethodInfoHelper.GetToLowerMethod());
+         var strLowerValue = value.ToString()?.ToLower();
+         value = strLowerValue;
+         
+         if(!string.IsNullOrEmpty(strLowerValue))
+         {
+            body = Expression.Call(body, MethodInfoHelper.GetToLowerMethod());   
+         }
       }
 
       var query = BuildQueryAccordingToValueType(body, parameter, value, op, valueExpression);
