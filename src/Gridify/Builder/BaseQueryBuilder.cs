@@ -166,19 +166,16 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
 
       object? value = valueExpression.ValueToken.Text;
 
+      var underlyingBodyType = Nullable.GetUnderlyingType(body.Type);      
       // execute user custom Convertor
       if (convertor != null)
          value = convertor.Invoke(valueExpression.ValueToken.Text);
 
       // handle the `null` keyword in value
-      if (mapper.Configuration.AllowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
+      else if (mapper.Configuration.AllowNullSearch && op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual && value.ToString() == "null")
          value = null;
-
-      // type fixer
-      // Check if body.Type is a nullable type and get its underlying type issue #134
-      var underlyingBodyType = Nullable.GetUnderlyingType(body.Type);
       
-      if (body.Type == typeof(DateTime) || underlyingBodyType == typeof(DateTime))
+      else if (body.Type == typeof(DateTime) || underlyingBodyType == typeof(DateTime))
       {
          var dateTime = ParseRelativeDate(valueExpression.ValueToken.Text);
          if (dateTime.HasValue)
