@@ -676,6 +676,29 @@ public class GridifyExtensionsShould
       Assert.True(actual.Any());
    }
 
+   [Fact]
+   public void ApplyFiltering_DateTime()
+   {
+      var actual = _fakeRepository.AsQueryable()
+         .ApplyFiltering($"MyDateTime>{DateTime.UtcNow.ToShortDateString()}")
+         .ToList();
+      var expected = _fakeRepository.Where(q => q.MyDateTime > DateTime.UtcNow.Date).ToList();
+      
+      Assert.Equal(expected.Count, actual.Count);
+   }
+   
+   [Fact]
+   public void ApplyFiltering_DateTime_Relative()
+   {
+      var actual = _fakeRepository.AsQueryable()
+         .ApplyFiltering("MyDateTime>today")
+         .ToList();
+      var expected = _fakeRepository.Where(q => q.MyDateTime > DateTime.UtcNow.Date).ToList();
+      
+      Assert.Equal(expected.Count, actual.Count);
+   }
+   
+
    #endregion
 
 

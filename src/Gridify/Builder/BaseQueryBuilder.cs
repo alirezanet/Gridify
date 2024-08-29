@@ -177,7 +177,20 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       // type fixer
       // Check if body.Type is a nullable type and get its underlying type issue #134
       var underlyingBodyType = Nullable.GetUnderlyingType(body.Type);
-      if (value is string strValue && (underlyingBodyType ?? body.Type) != strValue.GetType())
+      
+      if (body.Type == typeof(DateTime) || underlyingBodyType == typeof(DateTime))
+      {
+         var dateTime = ParseRelativeDate(valueExpression.ValueToken.Text);
+         if (dateTime.HasValue)
+         {
+            value = dateTime.Value;
+            if (mapper.Configuration.DefaultDateTimeKind.HasValue)
+            {
+               value = DateTime.SpecifyKind((DateTime)value, mapper.Configuration.DefaultDateTimeKind.Value);
+            }
+         }
+      }
+      else if (value is string strValue && (underlyingBodyType ?? body.Type) != strValue.GetType())
       {
          // handle bool, github issue #71
          if (body.Type == typeof(bool) && strValue is "true" or "false" or "1" or "0")
@@ -199,14 +212,6 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
             {
                return BuildAlwaysFalseQuery(parameter);
             }
-         
-         if (value is DateTime dateTime)
-         {
-            if (mapper.Configuration.DefaultDateTimeKind.HasValue)
-            {
-               value = DateTime.SpecifyKind(dateTime, mapper.Configuration.DefaultDateTimeKind.Value);
-            }
-         }
       }
 
       // handle case-Insensitive search
@@ -239,5 +244,15 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
 
       var body = new ReplaceExpressionVisitor(exp.Parameters[1], newValue).Visit(exp.Body);
       return Expression.Lambda(body, exp.Parameters);
+   }
+   
+   private static DateTime? ParseRelativeDate(string input)
+   {
+      var parser = new Chronic.Core.Parser();
+      var result = parser.Parse(input);
+      if (result != null) return result.Start;
+      
+      DateTime.TryParse(input, out var dateTime);
+      return dateTime;
    }
 }
