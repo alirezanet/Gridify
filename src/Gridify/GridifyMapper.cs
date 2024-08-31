@@ -225,25 +225,34 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    {
       foreach (var map in _mappings)
       {
-         if (map.To.Body is UnaryExpression unaryExpression)
+         switch (map.To.Body)
          {
-            if (targetTypes.Contains(unaryExpression.Operand.Type))
+            case UnaryExpression unaryExpression:
             {
-               yield return map;
+               if (targetTypes.Contains(unaryExpression.Operand.Type))
+               {
+                  yield return map;
+               }
+
+               break;
             }
-         }
-         else if (map.To.Body is MethodCallExpression methodCallExpression)
-         {
-            if (targetTypes.Contains(methodCallExpression.Type))
+            case MethodCallExpression methodCallExpression:
             {
-               yield return map;
+               if (targetTypes.Contains(methodCallExpression.Type))
+               {
+                  yield return map;
+               }
+
+               break;
             }
-         }
-         else if (map.To.Body is MemberExpression memberExpression)
-         {
-            if (targetTypes.Contains(memberExpression.Type))
+            case MemberExpression memberExpression:
             {
-               yield return map;
+               if (targetTypes.Contains(memberExpression.Type))
+               {
+                  yield return map;
+               }
+
+               break;
             }
          }
       }

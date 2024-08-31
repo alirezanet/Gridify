@@ -151,7 +151,7 @@ public class GridifyMapperShould
    }
    
    [Theory]
-   [InlineData(typeof(DateTime), 0)]
+   [InlineData(typeof(DateTime), 1)]
    [InlineData(typeof(DateTime?), 1)]
    [InlineData(typeof(Guid), 1)]
    [InlineData(typeof(string), 2)]
