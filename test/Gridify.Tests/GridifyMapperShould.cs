@@ -151,6 +151,13 @@ public class GridifyMapperShould
    }
 
 
+   [Fact]
+   public void GetMappingByType()
+   {
+      var gm = new GridifyMapper<TestClass>(true);
 
+      var dates = gm.GetCurrentMapsByType([typeof(DateTime), typeof(DateTime?)]);
 
+      Assert.Single(dates);
+   }
 }
