@@ -232,7 +232,20 @@ public class GridifyMapper<T> : IGridifyMapper<T>
                yield return map;
             }
          }
-         // TODO: need to implement other types that aren't unary expression
+         else if (map.To.Body is MethodCallExpression methodCallExpression)
+         {
+            if (targetTypes.Contains(methodCallExpression.Type))
+            {
+               yield return map;
+            }
+         }
+         else if (map.To.Body is MemberExpression memberExpression)
+         {
+            if (targetTypes.Contains(memberExpression.Type))
+            {
+               yield return map;
+            }
+         }
       }
    }
 
