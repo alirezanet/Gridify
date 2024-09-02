@@ -39,6 +39,7 @@ Check out our docs at [https://alirezanet.github.io/Gridify/](https://alirezanet
 
 ## Articles / Examples
 - [Using Gridify in the api controllers](https://alirezanet.github.io/Gridify/example/api-controller.html#using-gridify-in-api-controllers)
+- [The best dynamic LINQ with Gridify in .NET with Examples](https://medium.com/@valentin.osidach/the-best-dynamic-linq-library-with-gridify-in-net-ac3cb875b5b0) by Valentyn Osidach
 - [Trabajando con filtros dinámicos usando Gridify en .NET](https://henriquemauri.net/trabalhando-com-filtros-dinamicos-utilizando-o-gridify-no-net/) by [@Henrique Mauri](https://github.com/hgmauri) (Spanish)
 - [<span dir="rtl" align="right">آشنایی با Gridify</span>](https://www.dntips.ir/post/3345/%d8%a2%d8%b4%d9%86%d8%a7%db%8c%db%8c-%d8%a8%d8%a7-gridify) (Persian)
 - Comming soon
