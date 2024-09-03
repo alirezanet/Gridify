@@ -149,8 +149,31 @@ public class GridifyMapperShould
       //The thrown exception can be used for even more detailed assertions.
       Assert.Equal("Duplicate Key. the 'test' key already exists", exception.Message);
    }
+   
+   [Theory]
+   [InlineData(typeof(DateTime), 1)]
+   [InlineData(typeof(DateTime?), 1)]
+   [InlineData(typeof(Guid), 1)]
+   [InlineData(typeof(string), 2)]
+   [InlineData(typeof(bool), 1)]
+   [InlineData(typeof(int), 1)]
+   public void GetMappingByType(Type filterType, int count)
+   {
+      var gm = new GridifyMapper<TestClass>(true);
+      var maps = gm.GetCurrentMapsByType([filterType]);
+      Assert.Equal(count, maps.Count());
+   }
 
+   [Fact]
+   public void GetMappingsByCustomType()
+   {
+      var gm = new GridifyMapper<TypeMappingTest>().GenerateMappings();
+      var maps = gm.GetCurrentMapsByType([typeof(IEnumerable<string>)]);
+      Assert.Single(maps);
+   }
+}
 
-
-
+public class TypeMappingTest
+{
+   public List<string> MyListString { get; set; } = [];
 }

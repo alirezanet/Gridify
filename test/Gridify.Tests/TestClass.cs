@@ -25,6 +25,7 @@ public class TestClass : ICloneable
    public string? Name { get; set; } = string.Empty;
    public TestClass? ChildClass { get; set; }
    public DateTime? MyDateTime { get; set; }
+   public DateTime AnotherDateTime { get; set; }
    public Guid MyGuid { get; set; }
    public string? Tag { get; set; }
 

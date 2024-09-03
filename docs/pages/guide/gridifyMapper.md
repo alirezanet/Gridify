@@ -103,6 +103,10 @@ This method clears the list of mappings
 
 This method returns list of current mappings.
 
+## GetCurrentMapsByType
+
+This method returns list of current mappings for the given type.
+
 ## GridifyMapperConfiguration
 
 ``` csharp

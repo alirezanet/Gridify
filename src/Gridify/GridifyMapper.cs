@@ -220,6 +220,48 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    {
       return _mappings;
    }
+   
+   public IEnumerable<IGMap<T>> GetCurrentMapsByType(HashSet<Type> targetTypes)
+   {
+      foreach (var map in _mappings)
+      {
+         switch (map.To.Body)
+         {
+            case UnaryExpression unaryExpression:
+            {
+               if (targetTypes.Contains(unaryExpression.Operand.Type))
+               {
+                  yield return map;
+               }
+
+               break;
+            }
+            case MethodCallExpression methodCallExpression:
+            {
+               if (targetTypes.Contains(methodCallExpression.Type))
+               {
+                  yield return map;
+               }
+
+               break;
+            }
+            case MemberExpression memberExpression:
+            {
+               if (targetTypes.Contains(memberExpression.Type))
+               {
+                  yield return map;
+               }
+
+               break;
+            }
+         }
+      }
+   }
+
+   public IEnumerable<IGMap<T>> GetCurrentMapsByType<TTarget>()
+   {
+      return GetCurrentMapsByType([typeof(TTarget)]);
+   }
 
    /// <summary>
    /// Converts current mappings to a comma seperated list of map names.
