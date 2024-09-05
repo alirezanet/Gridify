@@ -52,6 +52,7 @@ Check out our docs at [https://alirezanet.github.io/Gridify/](https://alirezanet
 - Share your feedback and ideas to improve the library!
 - Share the library on your favorite social media and with your friends!
 - Help us to improve the documentation!
+- Become a sponsor to help us sustain and expand our work! Your support makes a huge difference!
 
 ## Contribution
 
