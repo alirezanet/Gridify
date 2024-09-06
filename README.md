@@ -44,6 +44,7 @@ Check out our docs at [https://alirezanet.github.io/Gridify/](https://alirezanet
 - [Working with Dynamic Filters Using Gridify in .NET](https://levelup.gitconnected.com/working-with-dynamic-filters-using-gridify-in-net-6bba618dd9f8) by Abnoan Muniz
 - [Building an ASP.NET Core Web API with Gridify](https://www.c-sharpcorner.com/article/building-an-asp-net-core-web-api-with-gridify) by Ajay Jumar
 - [<span dir="rtl" align="right">آشنایی با Gridify</span>](https://www.dntips.ir/post/3345/%d8%a2%d8%b4%d9%86%d8%a7%db%8c%db%8c-%d8%a8%d8%a7-gridify) (Persian)
+- [ASP.NET Core Web API with Gridify](https://medium.com/codenx/asp-net-core-web-api-with-gridify-d27627c81169) by Merwan Chinta
 - Comming soon
 
 ## Want to support us?
