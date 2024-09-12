@@ -135,6 +135,25 @@ public class GridifyExtensionsShould
       Assert.Equal(expected, actual);
       Assert.True(actual.Any());
    }
+   
+   [Fact] // issue #220
+   public void ApplyFiltering_CustomConvertor_ReturningNull_ShouldWork()
+   {
+      // create custom mapper
+      var gm = new GridifyMapper<TestClass>(q => q.AllowNullSearch = true).GenerateMappings();
+
+      // map any string to related property , also use Client convertor to handle custom scenarios
+      gm.AddMap("date", g => g.MyDateTime!, q => (q == "null" ? null : q)!);
+
+      var actual = _fakeRepository.AsQueryable()
+         .ApplyFiltering("date=null", gm)
+         .ToList();
+
+      var expected = _fakeRepository.Where(q => q.MyDateTime == null).ToList();
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
 
    [Fact]
    public void ApplyFiltering_NullHandlingUsingMapper()
