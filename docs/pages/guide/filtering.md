@@ -98,7 +98,7 @@ var gm = new GridifyMapper<TargetType>()
 
 var gq = new GridifyQuery
 {
-    Filter = "arrayProp[8] > 10 AND dictProp[name] = John"
+    Filter = "arrayProp[8] > 10, dictProp[name] = John"
 };
 ```
 
