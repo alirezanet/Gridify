@@ -31,7 +31,7 @@ export class GridifyQueryBuilder {
 
    addCondition(
       field: string,
-      operator: ConditionalOperator,
+      operator: ConditionalOperator | string,
       value: string | number | boolean,
       caseSensitive: boolean = true,
       escapeValue: boolean = true
@@ -43,6 +43,12 @@ export class GridifyQueryBuilder {
 
       if (!caseSensitive && value) {
          filterValue = `${filterValue.toString()}/i`;
+      }
+
+      if (typeof operator === "string" && !Object.values(ConditionalOperator).includes(operator as ConditionalOperator)) {
+         if (!operator.startsWith('#')) {
+            throw new Error(`Custom operators must start with the '#' character. Received: ${operator}`);
+         }
       }
 
       var filterExpression = `${field.trim()}${operator}${filterValue}`;

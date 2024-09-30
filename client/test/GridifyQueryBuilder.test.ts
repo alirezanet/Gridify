@@ -53,6 +53,24 @@ describe("GridifyQueryBuilder", () => {
    });
 });
 
+describe("GridifyQueryBuilder Custom Operator", () => {
+   it("should allow custom operator that starts with #", () => {
+      const query = new GridifyQueryBuilder()
+         .addCondition("age", "#customOp", 30)
+         .build();
+
+      expect(query.filter).toEqual("age#customOp30");
+   });
+
+   it("should throw an error for custom operator without # prefix", () => {
+      expect(() => {
+         new GridifyQueryBuilder()
+            .addCondition("age", "customOp", 30)
+            .build();
+      }).toThrow("Custom operators must start with the '#' character. Received: customOp");
+   });
+});
+
 describe("GridifyQueryBuilder Validation", () => {
    it("should allow balanced parentheses", () => {
       const query = new GridifyQueryBuilder()
@@ -161,3 +179,4 @@ describe("GridifyQueryBuilder Validation", () => {
    });
 
 });
+
