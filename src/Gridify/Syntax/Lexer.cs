@@ -148,7 +148,7 @@ public ref struct Lexer(string text, IEnumerable<IGridifyOperator> customOperato
       {
          var start = _position;
 
-         while (char.IsLetterOrDigit(Current) || Current is '_' || Current is '.')
+         while (char.IsLetterOrDigit(Current) || Current is '_' || Current is '.' || Current is '-')
             Next();
 
          var length = _position - start;
