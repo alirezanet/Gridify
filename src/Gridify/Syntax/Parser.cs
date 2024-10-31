@@ -107,7 +107,12 @@ public struct Parser
    {
       // field=
       if (Current.Kind != SyntaxKind.ValueToken)
-         return new ValueExpressionSyntax(new SyntaxToken(), false, true);
+      {
+         if (Current.Kind != SyntaxKind.CaseInsensitive) return new ValueExpressionSyntax(new SyntaxToken(), false, true);
+         NextToken(); // field=/i
+         return new ValueExpressionSyntax(new SyntaxToken(), true, true);
+      }
+
 
       var valueToken = Match(SyntaxKind.ValueToken);
       var isCaseInsensitive = TryMatch(SyntaxKind.CaseInsensitive, out _);

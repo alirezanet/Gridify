@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -7,7 +7,18 @@ namespace Gridify.Tests.IssueTests;
 public class Issue171Tests
 {
 
-   private readonly List<TestClass> _fakeRepository = [..GridifyExtensionsShould.GetSampleData(), new TestClass(4444,"/i",null)];
+   private readonly List<TestClass> _fakeRepository = [.. GridifyExtensionsShould.GetSampleData(), new TestClass(4444, "/i", null)];
+
+   [Fact]
+   public void ApplyFiltering_CaseInsensitiveEmptyFieldsWithParenthesis_ShouldFilter()
+   {
+      var actual = _fakeRepository.AsQueryable().ApplyFiltering("(tag=/i)").ToList();
+      var expected = _fakeRepository.Where(q => string.IsNullOrEmpty(q.Tag)).ToList();
+
+      Assert.Equal(expected.Count, actual.Count);
+      Assert.Equal(expected, actual);
+      Assert.True(actual.Any());
+   }
 
    [Fact]
    public void ApplyFiltering_CaseInsensitiveEmptyFields_ShouldFilter()
