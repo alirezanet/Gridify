@@ -44,7 +44,7 @@ public record GridifyMapperConfiguration
    /// you can disable this behavior by setting this option to true
    /// Default is false
    /// </summary>
-   public bool DisableNullChecks { get; set; } = GridifyGlobalConfiguration.DisableNullChecks;
+   public bool DisableCollectionNullChecks { get; set; } = GridifyGlobalConfiguration.DisableNullChecks;
 
    /// <summary>
    /// It makes the generated expressions compatible

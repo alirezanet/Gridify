@@ -135,7 +135,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
 
    private object AddIndexerNullCheck(LambdaExpression mapTarget, object query)
    {
-      if (mapper.Configuration.DisableNullChecks || mapper.Configuration.EntityFrameworkCompatibilityLayer)
+      if (mapper.Configuration.DisableCollectionNullChecks || mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return query;
 
       var body = mapTarget.Body;
