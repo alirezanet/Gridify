@@ -2,6 +2,7 @@
 using Gridify.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
@@ -135,7 +136,7 @@ public class GridifyExtensionsShould
       Assert.Equal(expected, actual);
       Assert.True(actual.Any());
    }
-   
+
    [Fact] // issue #220
    public void ApplyFiltering_CustomConvertor_ReturningNull_ShouldWork()
    {
@@ -695,6 +696,20 @@ public class GridifyExtensionsShould
       Assert.True(actual.Any());
    }
 
+   [Fact] // issue #238
+   public void ApplyFiltering_MapperDisableCollectionNullChecks_ShouldPreventAddingNullChecks()
+   {
+      var gm = new GridifyMapper<TestClass>(configuration => configuration.DisableCollectionNullChecks = true)
+               .AddMap("name", q => q.Children.Select(w => w.Name));
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+      var expected = _fakeRepository.AsQueryable().Where(q => q.Children.Any(w => w.Name.Contains("a"))).ToString();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+      var actual = _fakeRepository.AsQueryable().ApplyFiltering("name=*a", gm).ToString();
+
+      Assert.Equal(expected, actual);
+   }
+
    #endregion
 
 
@@ -723,6 +738,8 @@ public class GridifyExtensionsShould
    };
 
    [Fact]
+   [SuppressMessage("Assertions", "xUnit2031:Do not use Where clause with Assert.Single")]
+   [SuppressMessage("Assertions", "xUnit2029:Do not use Assert.Empty to check if a value does not exist in a collection")]
    public void CustomOperator_GenericRegisterAndRemove_ShouldNotThrowAnyException()
    {
       GridifyGlobalConfiguration.CustomOperators.Register<TestOperator>();
