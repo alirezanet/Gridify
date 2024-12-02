@@ -175,6 +175,32 @@ By setting this property to a `DateTimeKind` value, you can change the default `
 var mapper = new GridifyMapper<Person>(q => q.DefaultDateTimeKind = DateTimeKind.Utc);
 ```
 
+Here's the addition for `EntityFrameworkCompatibilityLayer` with slight improvements for clarity:
+
+---
+
+### DisableCollectionNullChecks
+
+This setting is similar to [`DisableNullChecks`](./gridifyGlobalConfiguration.md#disablenullchecks) in the global configuration, but it allows you to enable this setting on a per-query basis instead of globally. When set to true, Gridify won't check for null values in collections during filtering operations.
+
+- **Type:** `bool`
+- **Default:** `false`
+
+```csharp
+var mapper = new GridifyMapper<Person>(q => q.DisableCollectionNullChecks = true);
+```
+
+### EntityFrameworkCompatibilityLayer
+
+This setting is the same as [`EntityFrameworkCompatibilityLayer`](./extensions/entityframework.md#compatibility-layer) in the global configuration, but it allows you to enable this setting on a per-query basis instead of globally. When set to true, the EntityFramework Compatibility layer is enabled, making the generated expressions compatible with Entity Framework.
+
+- **Type:** `bool`
+- **Default:** `false`
+
+```csharp
+var mapper = new GridifyMapper<Person>(q => q.EntityFrameworkCompatibilityLayer = true);
+```
+
 ## Filtering on Nested Collections
 
 You can use LINQ `Select` and `SelectMany` methods to filter your data using its nested collections.
