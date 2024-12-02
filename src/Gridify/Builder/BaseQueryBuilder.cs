@@ -133,9 +133,9 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       return ((TQuery)query, false);
    }
 
-   private static object AddIndexerNullCheck(LambdaExpression mapTarget, object query)
+   private object AddIndexerNullCheck(LambdaExpression mapTarget, object query)
    {
-      if (GridifyGlobalConfiguration.DisableNullChecks || GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
+      if (mapper.Configuration.DisableNullChecks || mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return query;
 
       var body = mapTarget.Body;
@@ -199,7 +199,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
             {
                return BuildAlwaysFalseQuery(parameter);
             }
-         
+
          if (value is DateTime dateTime)
          {
             if (mapper.Configuration.DefaultDateTimeKind.HasValue)
@@ -219,10 +219,10 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       {
          var strLowerValue = value.ToString()?.ToLower();
          value = strLowerValue;
-         
-         if(!string.IsNullOrEmpty(strLowerValue))
+
+         if (!string.IsNullOrEmpty(strLowerValue))
          {
-            body = Expression.Call(body, MethodInfoHelper.GetToLowerMethod());   
+            body = Expression.Call(body, MethodInfoHelper.GetToLowerMethod());
          }
       }
 

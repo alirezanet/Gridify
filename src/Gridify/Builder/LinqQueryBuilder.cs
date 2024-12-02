@@ -297,7 +297,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
          }
    }
 
-   private static LambdaExpression ParseMethodCallExpression(MethodCallExpression exp, LambdaExpression predicate, ISyntaxNode op)
+   private LambdaExpression ParseMethodCallExpression(MethodCallExpression exp, LambdaExpression predicate, ISyntaxNode op)
    {
       switch (exp.Arguments.First())
       {
@@ -349,7 +349,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
       }
    }
 
-   private static LambdaExpression GetContainsExpression(MemberExpression member, BinaryExpression binaryExpression, ISyntaxNode op)
+   private LambdaExpression GetContainsExpression(MemberExpression member, BinaryExpression binaryExpression, ISyntaxNode op)
    {
       var param = GetParameterExpression(member);
       var prop = GetPropertyOrField(member, param);
@@ -393,7 +393,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
       };
    }
 
-   private static LambdaExpression GetAnyExpression(MemberExpression member, Expression predicate)
+   private LambdaExpression GetAnyExpression(MemberExpression member, Expression predicate)
    {
       var param = GetParameterExpression(member);
       var prop = GetPropertyOrField(member, param);
@@ -410,12 +410,11 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
       return GetExpressionWithNullCheck(prop, param, anyExp);
    }
 
-   private static LambdaExpression GetExpressionWithNullCheck(MemberExpression prop, ParameterExpression param, Expression right)
+   private LambdaExpression GetExpressionWithNullCheck(MemberExpression prop, ParameterExpression param, Expression right)
    {
       // Entityframework doesn't support NullChecking for Collections (issue #58)
       // also issue #70 for NHibernate - and #173
-      if (GridifyGlobalConfiguration.DisableNullChecks ||
-          GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
+      if (mapper.Configuration.DisableNullChecks || mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.Lambda(right, param);
 
       var nullChecker = Expression.NotEqual(prop, Expression.Constant(null));
@@ -425,7 +424,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private Expression GetValueExpression(Type type, object? value)
    {
-      if (!GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
+      if (!mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.Constant(value, type);
 
       // active parameterized query for EF
@@ -436,7 +435,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private BinaryExpression GetLessThanOrEqualExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
+      if (mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.LessThanOrEqual(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
@@ -447,7 +446,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private BinaryExpression GetGreaterThanOrEqualExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
+      if (mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.GreaterThanOrEqual(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
@@ -458,7 +457,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private BinaryExpression GetLessThanExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
+      if (mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.LessThan(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
@@ -469,7 +468,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private BinaryExpression GetGreaterThanExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (GridifyGlobalConfiguration.EntityFrameworkCompatibilityLayer)
+      if (mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.GreaterThan(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
