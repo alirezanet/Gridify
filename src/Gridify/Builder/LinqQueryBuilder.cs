@@ -414,7 +414,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
    {
       // Entityframework doesn't support NullChecking for Collections (issue #58)
       // also issue #70 for NHibernate - and #173
-      if (mapper.Configuration.DisableNullChecks || mapper.Configuration.EntityFrameworkCompatibilityLayer)
+      if (mapper.Configuration.DisableCollectionNullChecks || mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.Lambda(right, param);
 
       var nullChecker = Expression.NotEqual(prop, Expression.Constant(null));
