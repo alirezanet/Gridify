@@ -7,7 +7,7 @@ namespace Gridify
    {
       /// <summary>
       /// It makes the generated expressions compatible
-      /// whit the entity framework.
+      /// with the entity framework.
       /// Default is false.
       /// </summary>
       public static bool EntityFrameworkCompatibilityLayer { get; set; }
@@ -46,14 +46,14 @@ namespace Gridify
       /// Default is false
       /// </summary>
       public static bool DisableNullChecks { get; set; } = false;
-      
+
       /// <summary>
-      /// By default, string comparison is case sensitive.
+      /// By default, string comparison is case-sensitive.
       /// You can change this behavior by setting this property to true.
       /// Default is false
       /// </summary>
       public static bool CaseInsensitiveFiltering { get; set; } = false;
-      
+
       /// <summary>
       /// By default, DateTimeKind.Unspecified is used.
       /// You can change this behavior by setting this property to a DateTimeKind value.
