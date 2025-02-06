@@ -5,7 +5,7 @@ public class GridifyQuery : IGridifyQuery
    public GridifyQuery()
    {
    }
-   public GridifyQuery(int page, int pageSize, string filter, string? orderBy = null)
+   public GridifyQuery(int page, int pageSize, string? filter, string? orderBy = null)
    {
       Page = page;
       PageSize = pageSize;
