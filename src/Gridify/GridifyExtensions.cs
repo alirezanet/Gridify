@@ -492,7 +492,7 @@ public static partial class GridifyExtensions
    /// <param name="gridifyQuery">the configuration to apply paging, filtering and ordering</param>
    /// <param name="mapper">this is an optional parameter to apply filtering and ordering using a custom mapping configuration</param>
    /// <typeparam name="T">type of target entity</typeparam>
-   /// <returns>returns a <c>QueryablePaging<T><c/> after applying filtering, ordering and paging</returns>
+   /// <returns>returns a <c>QueryablePaging{T}</c> after applying filtering, ordering and paging</returns>
    public static QueryablePaging<T> GridifyQueryable<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
    {
       query = query.ApplyFiltering(gridifyQuery, mapper);
@@ -512,7 +512,7 @@ public static partial class GridifyExtensions
    /// <param name="gridifyQuery">the configuration to apply paging, filtering and ordering</param>
    /// <param name="mapper">this is an optional parameter to apply filtering and ordering using a custom mapping configuration</param>
    /// <typeparam name="T">type of target entity</typeparam>
-   /// <returns>returns a loaded <c>Paging<T><c /> after applying filtering, ordering and paging </returns>
+   /// <returns>returns a loaded <c>Paging{T}</c> after applying filtering, ordering and paging </returns>
    /// <returns></returns>
    public static Paging<T> Gridify<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
    {
@@ -530,7 +530,7 @@ public static partial class GridifyExtensions
    /// <param name="queryOption">the configuration to apply paging, filtering and ordering</param>
    /// <param name="mapper">this is an optional parameter to apply filtering and ordering using a custom mapping configuration</param>
    /// <typeparam name="T">type of target entity</typeparam>
-   /// <returns>returns a loaded <c>Paging<T><c /> after applying filtering, ordering and paging </returns>
+   /// <returns>returns a loaded <c>Paging{T}</c> after applying filtering, ordering and paging </returns>
    /// <returns></returns>
    public static Paging<T> Gridify<T>(this IQueryable<T> query, Action<IGridifyQuery> queryOption, IGridifyMapper<T>? mapper = null)
    {
