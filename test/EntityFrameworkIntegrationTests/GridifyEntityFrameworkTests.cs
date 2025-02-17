@@ -1,4 +1,5 @@
-﻿using System.Linq;
+using System;
+using System.Linq;
 using Gridify;
 using Xunit;
 
@@ -9,10 +10,14 @@ public class GridifyEntityFrameworkTests : IClassFixture<DatabaseFixture>
    private readonly DatabaseFixture fixture;
    private MyDbContext _ctx => fixture._dbContext;
 
+   private int GetDynamicAssembliesCount =>
+      AppDomain.CurrentDomain.GetAssemblies().Count(a => a.DefinedTypes.Any(ti => ti.Name == "GridifyDisplayClass"));
+
    public GridifyEntityFrameworkTests(DatabaseFixture fixture)
    {
       this.fixture = fixture;
    }
+
    [Fact]
    public void EntityFrameworkServiceProviderCachingShouldNotThrowException()
    {
@@ -80,4 +85,17 @@ public class GridifyEntityFrameworkTests : IClassFixture<DatabaseFixture>
 
    }
 
+   [Fact]
+   public void EntityFrameworkCompatibilityLayer_GridifyTypeBuilderShouldCacheDynamicAssembliesForEachType()
+   {
+      GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
+
+      var gq = new GridifyQuery { Filter = "Name=a,Id>2,CreateDate=null" };
+      _ = _ctx.Users.GridifyQueryable(gq);
+      var assemblyCountAfterFirst = GetDynamicAssembliesCount;
+      _ = _ctx.Users.GridifyQueryable(gq);
+      var assemblyCountAfterSecond = GetDynamicAssembliesCount;
+
+      Assert.Equal(assemblyCountAfterSecond, assemblyCountAfterFirst);
+   }
 }

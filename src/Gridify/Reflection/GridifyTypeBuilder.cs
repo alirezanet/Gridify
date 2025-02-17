@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -6,9 +7,19 @@ namespace Gridify.Reflection;
 
 public static class GridifyTypeBuilder
 {
+   private static readonly ConcurrentDictionary<Type, TypeInfo> Cache = new();
+
    public static (object? myObject, Type myType) CreateNewObject(Type type, string fieldName, object? value)
    {
-      var myTypeInfo = CompileResultTypeInfo(type, fieldName);
+      TypeInfo? myTypeInfo;
+      if (Cache.TryGetValue(type, out var expectedTypeInfo))
+         myTypeInfo = expectedTypeInfo;
+      else
+      {
+         myTypeInfo = CompileResultTypeInfo(type, fieldName);
+         Cache.TryAdd(type, myTypeInfo!);
+      }
+
       var myType = myTypeInfo!.AsType();
       var myObject = Activator.CreateInstance(myType);
       myType.GetProperty(fieldName)!.SetValue(myObject, value);
