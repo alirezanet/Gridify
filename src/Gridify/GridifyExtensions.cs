@@ -47,7 +47,7 @@ public static partial class GridifyExtensions
       IGridifyMapper<T>? mapper = null)
    {
       if (string.IsNullOrWhiteSpace(gridifyOrdering.OrderBy))
-         throw new GridifyQueryException("OrderBy is not defined or not Found");
+         throw new GridifyQueryException("OrderBy is not defined or not found");
 
 
       var members = ParseOrderings(gridifyOrdering.OrderBy!).Select(q => q.MemberName).ToList();
