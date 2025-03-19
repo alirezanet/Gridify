@@ -83,7 +83,5 @@ namespace Gridify.Syntax
             }
          }
       }
-
-    
    }
 }
