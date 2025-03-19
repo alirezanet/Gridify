@@ -178,15 +178,3 @@ Registration Example:
  GridifyGlobalConfiguration.CustomOperators.Register<RegexMatchOperator>();
  GridifyGlobalConfiguration.CustomOperators.Register<InOperator>();
 ```
-
-## Parsing Filterings Extensions
-
-If you like to parse the filter string to a list of `ParseFiltering` objects, you can use the `ParseFilterings` extension method on a `string`.
-
-::: note
-Make sure that you have included the `Gridify.Syntax` namespace.
-:::
-
-``` csharp
-var filterings = "Id desc, FirstName asc, LastName".ParseFilterings();
-```
