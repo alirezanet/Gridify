@@ -31,21 +31,21 @@ public class SyntaxNodeExtensionsShould
    }
 
    [Fact]
-   public void DescendantsFieldExpressions_ShouldReturnFieldExpressions()
+   public void DistinctFieldExpressions_ShouldReturnFieldExpressions()
    {
       var filterings = "name = Jack, arrayProp[8] > 10, dictProp[name] = John";
 
-      var syntaxNodes = SyntaxTree.Parse(filterings).Root.DescendantsFieldExpressions().ToList();
+      var syntaxNodes = SyntaxTree.Parse(filterings).Root.DistinctFieldExpressions().ToList();
 
       Assert.Equal(3, syntaxNodes.Count);
    }
 
    [Fact]
-   public void DescendantsFieldExpressions_WhenNull_ShouldThrow()
+   public void DistinctFieldExpressions_WhenNull_ShouldThrow()
    {
       ISyntaxNode syntaxNode = null!;
 
-      var act = () => syntaxNode.DescendantsFieldExpressions().ToList();
+      var act = () => syntaxNode.DistinctFieldExpressions().ToList();
 
       Assert.Throws<ArgumentNullException>(act);
 

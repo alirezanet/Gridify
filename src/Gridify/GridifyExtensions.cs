@@ -178,7 +178,7 @@ public static partial class GridifyExtensions
 
       mapper = new GridifyMapper<T>();
 
-      var fieldExpressions = syntaxTree.Root.DescendantsFieldExpressions();
+      var fieldExpressions = syntaxTree.Root.DistinctFieldExpressions();
 
       try
       {
@@ -290,7 +290,7 @@ public static partial class GridifyExtensions
          if (syntaxTree.Diagnostics.Any())
             return false;
 
-         var fieldExpressions = syntaxTree.Root.DescendantsFieldExpressions();
+         var fieldExpressions = syntaxTree.Root.DistinctFieldExpressions();
 
          mapper ??= new GridifyMapper<T>(true);
 
