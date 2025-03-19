@@ -77,31 +77,3 @@ Like [ApplyFilteringOrderingPaging](#ApplyFilteringOrderingPaging) but it return
 
 This is an ALL-IN-ONE package, it accepts `IGridifyQuery`, applies filtering, ordering, and paging, and returns a `Paging<T>` object.
 This method is completely optimized to be used with any **Grid** component.
-
-## Low-Level Methods
-
-## Descendants
-
-If you need more control about the syntax tree, there are also the following extension methods on `ISyntaxNode`.
-
-``` csharp
-  var filterings = "name = Jack, arrayProp[8] > 10, dictProp[name] = John";
-
-  // Gets all syntax nodes (self and transitive children) of the syntax tree.
-  var syntaxNodes = SyntaxTree.Parse(filterings).Root.Descendants();
-
-  var expressions = syntaxNodes.OfType<ExpressionSyntax>();
-  var valueExpressions = syntaxNodes.OfType<ValueExpressionSyntax>();
-  var fieldExpressions = syntaxNodes.OfType<FieldExpressionSyntax>();
-  var binaryExpressions = syntaxNodes.OfType<BinaryExpressionSyntax>();
-  var parenthesizedExpressions = syntaxNodes.OfType<ParenthesizedExpressionSyntax>();
-```
-
-## DistinctFieldExpressions
-
-``` csharp
-  var filterings = "name = Jack, arrayProp[8] > 10, dictProp[name] = John";
-
-  // Gets all distinct field expressions (self and transitive children) of the syntax tree.
-  var fieldExpressions = SyntaxTree.Parse(filterings).Root.DistinctFieldExpressions()
-```

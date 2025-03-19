@@ -63,15 +63,3 @@ var x = personsRepo.ApplyOrdering("BirthDate!");
 ::: warning
 These nullable characters will only work on the nullable types.
 :::
-
-## Parsing Orderings Extensions
-
-If you like to parse the ordering string to a list of `ParsedOrdering` objects, you can use the `ParseOrderings` extension method on a `string`.
-
-::: note
-Make sure that you have included the `Gridify.Syntax` namespace.
-:::
-
-``` csharp
-var orderings = "Id desc, FirstName asc, LastName".ParseOrderings();
-```
