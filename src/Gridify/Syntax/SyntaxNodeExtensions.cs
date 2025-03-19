@@ -9,11 +9,11 @@ namespace Gridify.Syntax
       private static readonly FieldExpressionComparer FieldExpressionComparer = new();
 
       /// <summary>
-      /// Retrieves all descendant field expressions from the specified syntax node.
+      /// Retrieves all distinct field expressions from the specified syntax node.
       /// </summary>
       /// <param name="syntaxNode">The syntax node from which to retrieve descendant field expressions.</param>
       /// <returns>An collection of <see cref="FieldExpressionSyntax"/> instances representing the descendant field expressions.</returns>
-      public static IEnumerable<FieldExpressionSyntax> DescendantsFieldExpressions(this ISyntaxNode syntaxNode)
+      public static IEnumerable<FieldExpressionSyntax> DistinctFieldExpressions(this ISyntaxNode syntaxNode)
       {
          if (syntaxNode is null) throw new ArgumentNullException(nameof(syntaxNode));
 

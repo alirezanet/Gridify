@@ -26,7 +26,7 @@ namespace Gridify.Syntax
             throw new GridifyFilteringException(string.Join("\n", syntaxTree.Diagnostics.Reverse()));
 
 
-         foreach (var fieldExpression in syntaxTree.Root.DescendantsFieldExpressions().OrderBy(x => x.FieldToken.Position))
+         foreach (var fieldExpression in syntaxTree.Root.DistinctFieldExpressions().OrderBy(x => x.FieldToken.Position))
          {
             yield return new ParsedFiltering
             {
