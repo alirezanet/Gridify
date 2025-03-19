@@ -9,9 +9,9 @@ namespace Gridify.Syntax
       private static readonly char[] OrderingSeparator = [' ', '\t'];
 
       /// <summary>
-      /// Parses a string of filtering into a list of <see cref="ParsedFiltering"/> objects.
+      /// Parses a string of filterings into a list of <see cref="ParsedFiltering"/> objects.
       /// </summary>
-      /// <param name="filterings">A string of filtering.</param>
+      /// <param name="filterings">A string of filterings.</param>
       /// <exception cref="GridifyFilteringException">Thrown when an invalid keyword is encountered in the filtering string.</exception>
       /// <returns>An <see cref="IEnumerable{ParsedFiltering}"/> representing the parsed filtering.</returns>
       public static IEnumerable<ParsedFiltering> ParseFilterings(this string filterings)
