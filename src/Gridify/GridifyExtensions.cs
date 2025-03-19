@@ -50,7 +50,7 @@ public static partial class GridifyExtensions
          throw new GridifyQueryException("OrderBy is not defined or not found");
 
 
-      var members = ParseOrderings(gridifyOrdering.OrderBy!).Select(q => q.MemberName).ToList();
+      var members = gridifyOrdering.OrderBy!.ParseOrderings().Select(q => q.MemberName).ToList();
       if (mapper is null)
          foreach (var member in members)
          {
@@ -178,14 +178,11 @@ public static partial class GridifyExtensions
 
       mapper = new GridifyMapper<T>();
 
-      var root = syntaxTree.Root;
-      var fields = root.Descendants()
-          .OfType<FieldExpressionSyntax>()
-          .Distinct(new FieldExpressionComparer());
+      var fieldExpressions = syntaxTree.Root.DescendantsFieldExpressions();
 
       try
       {
-         foreach (var field in fields) mapper.AddMap(field.FieldToken.Text);
+         foreach (var fieldExpression in fieldExpressions) mapper.AddMap(fieldExpression.FieldToken.Text);
       }
       catch (Exception)
       {
@@ -194,18 +191,6 @@ public static partial class GridifyExtensions
       }
 
       return mapper;
-   }
-
-
-   private static IEnumerable<ISyntaxNode> Descendants(this ISyntaxNode root)
-   {
-      var nodes = new Stack<ISyntaxNode>(new[] { root });
-      while (nodes.Count != 0)
-      {
-         var node = nodes.Pop();
-         yield return node;
-         foreach (var n in node.GetChildren()) nodes.Push(n);
-      }
    }
 
    /// <summary>
@@ -305,9 +290,7 @@ public static partial class GridifyExtensions
          if (syntaxTree.Diagnostics.Any())
             return false;
 
-         var fieldExpressions = syntaxTree.Root.Descendants()
-            .OfType<FieldExpressionSyntax>()
-            .Distinct(new FieldExpressionComparer());
+         var fieldExpressions = syntaxTree.Root.DescendantsFieldExpressions();
 
          mapper ??= new GridifyMapper<T>(true);
 
@@ -327,7 +310,7 @@ public static partial class GridifyExtensions
       if (string.IsNullOrWhiteSpace(ordering.OrderBy)) return true;
       try
       {
-         var orders = ParseOrderings(ordering.OrderBy!).ToList();
+         var orders = ordering.OrderBy!.ParseOrderings();
          mapper ??= new GridifyMapper<T>(true);
          if (orders.Any(order => !mapper.HasMap(order.MemberName)))
             return false;
@@ -343,47 +326,6 @@ public static partial class GridifyExtensions
    internal static string ReplaceAll(this string seed, IEnumerable<char> chars, char replacementCharacter)
    {
       return chars.Aggregate(seed, (str, cItem) => str.Replace(cItem, replacementCharacter));
-   }
-
-   private static readonly char[] OrderingSeparator = [' ', '\t'];
-
-   internal static IEnumerable<ParsedOrdering> ParseOrderings(this string orderings)
-   {
-      var nullableChars = new[] { '?', '!' };
-      foreach (var field in orderings.Split(','))
-      {
-         var orderingExp = field.Trim();
-         if (orderingExp.Contains(' '))
-         {
-            var spliced = orderingExp.Split(OrderingSeparator, StringSplitOptions.RemoveEmptyEntries);
-            var isAsc = spliced.Last() switch
-            {
-               "desc" => false,
-               "asc" => true,
-               _ => throw new GridifyOrderingException("Invalid keyword. expected 'desc' or 'asc'")
-            };
-            var member = spliced.First();
-            yield return new ParsedOrdering
-            {
-               MemberName = member.ReplaceAll(nullableChars, ' ').TrimEnd(),
-               IsAscending = isAsc,
-               OrderingType = member.EndsWith("?") ? OrderingType.NullCheck
-                  : member.EndsWith("!") ? OrderingType.NotNullCheck
-                  : OrderingType.Normal
-            };
-         }
-         else
-         {
-            yield return new ParsedOrdering
-            {
-               MemberName = orderingExp.ReplaceAll(nullableChars, ' ').TrimEnd(),
-               IsAscending = true,
-               OrderingType = orderingExp.EndsWith("?") ? OrderingType.NullCheck
-                  : orderingExp.EndsWith("!") ? OrderingType.NotNullCheck
-                  : OrderingType.Normal
-            };
-         }
-      }
    }
 
    /// <summary>
