@@ -11,12 +11,12 @@ public class TestOperator : IGridifyOperator
 {
    public string GetOperator()
    {
-      return "#Test";
+      return "#Glacor";
    }
 
    public Expression<OperatorParameter> OperatorHandler()
    {
-      return (prop, value) => value.ToString().Equals("Test Operator");
+      return (prop, value) => value.ToString()!.Equals("Test Operator");
    }
 }
 
