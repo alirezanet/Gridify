@@ -55,26 +55,7 @@ internal static class OperatorManagerExtensions
    internal static void Add(this ConcurrentDictionary<string, IGridifyOperator> operators, IGridifyOperator gridifyOperator)
    {
       var @operator = gridifyOperator.GetOperator();
-      if (operators.ContainsKey(@operator)) // already exists
-      {
-         return;
-      }
-
-      var retry = 0;
-      while (true)
-      {
-         if (operators.TryAdd(@operator, gridifyOperator))
-         {
-            return;
-         }
-
-         if (retry >= 3)
-         {
-            throw new Exception("Unexpected error! Can not add GridifyOperator");
-         }
-
-         retry++;
-      }
+      operators.TryAdd(@operator, gridifyOperator);
    }
 
    internal static void Remove(this ConcurrentDictionary<string, IGridifyOperator> operators, string @operator)
