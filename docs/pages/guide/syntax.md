@@ -38,16 +38,12 @@ var fieldExpressions = SyntaxTree.Parse(filterings).Root.DistinctFieldExpression
 
 ## Direct Parsing
 
-If you would like to parse a filtering or ordering string directly, you can use the following extension methods: `ParseFilterings` and `ParseOrderings`.
-
-::: note
-Make sure that you have included the `Gridify.Syntax` namespace.
-:::
+If you would like to parse a filtering or ordering string directly, you can use the following methods: `ParseFilterings` and `ParseOrderings`.
 
 ### ParseFilterings
 
 ``` csharp
-var filterings = "name = Jack, arrayProp[8] > 10, dictProp[name] = John".ParseFilterings();
+var filterings = SyntaxTree.ParseFilterings("name = Jack, arrayProp[8] > 10, dictProp[name] = John");
 
 foreach (var filtering in filterings)
 {
@@ -62,7 +58,7 @@ foreach (var filtering in filterings)
 ### ParseOrderings
 
 ``` csharp
-var orderings = "Id desc, FirstName asc, LastName".ParseOrderings();
+var orderings = SyntaxTree.ParseOrderings("Id desc, FirstName asc, LastName");
 
 foreach (var ordering in orderings)
 {
