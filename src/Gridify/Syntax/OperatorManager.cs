@@ -8,7 +8,7 @@ namespace Gridify.Syntax;
 
 public class OperatorManager
 {
-   private ConcurrentDictionary<string, IGridifyOperator>? _operators;
+   private readonly ConcurrentDictionary<string, IGridifyOperator> _operators = new();
    public IEnumerable<IGridifyOperator> Operators => _operators?.Values ?? Enumerable.Empty<IGridifyOperator>();
 
    public void Register<TOperator>() where TOperator : IGridifyOperator
@@ -20,7 +20,6 @@ public class OperatorManager
    public void Register(IGridifyOperator gridifyOperator)
    {
       Validate(gridifyOperator.GetOperator());
-      _operators ??= new();
       _operators.Add(gridifyOperator);
    }
 
@@ -29,7 +28,6 @@ public class OperatorManager
       Validate(@operator);
 
       var customOperator = new GridifyOperator(@operator, handler);
-      _operators ??= new();
       _operators.Add(customOperator);
    }
    public void Remove<TOperator>() where TOperator : IGridifyOperator
@@ -60,25 +58,6 @@ internal static class OperatorManagerExtensions
 
    internal static void Remove(this ConcurrentDictionary<string, IGridifyOperator> operators, string @operator)
    {
-      if (!operators.ContainsKey(@operator))
-      {
-         return;
-      }
-
-      var retry = 0;
-      while (true)
-      {
-         if (operators.TryRemove(@operator, out _))
-         {
-            return;
-         }
-
-         if (retry >= 3)
-         {
-            throw new Exception("Can not remove GridifyOperator or it is not registered");
-         }
-
-         retry++;
-      }
+      operators.TryRemove(@operator, out _);
    }
 }
