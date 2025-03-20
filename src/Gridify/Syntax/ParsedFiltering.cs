@@ -4,7 +4,13 @@ using System;
 
 public sealed class ParsedFiltering
 {
-   public string MemberName { get; set; } = string.Empty;
+   public ParsedFiltering(string memberName, string? indexer)
+   {
+      MemberName = memberName;
+      Indexer = indexer;
+   }
 
-   public string? Indexer { get; set; }
+   public string MemberName { get; }
+
+   public string? Indexer { get; }
 }

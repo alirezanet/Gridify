@@ -7,15 +7,14 @@ using Xunit;
 
 namespace Gridify.Tests;
 
-public class StringExtensionsShould
+public class SyntaxTreeShould
 {
    [Fact]
    public void ParseFilterings_MembersAndIndexerIsSet()
    {
       var filterings = "name = Jack, arrayProp[8] > 10, dictProp[name] = John";
 
-      var actual = filterings.ParseFilterings()
-         .ToList();
+      var actual = SyntaxTree.ParseFilterings(filterings).ToList();
 
       Assert.Equal(3, actual.Count);
 
@@ -34,8 +33,7 @@ public class StringExtensionsShould
    [InlineData("")]
    public void ParseFilterings_ShouldReturnEmtpy(string? filterings)
    {
-      var actual = filterings!.ParseFilterings()
-         .ToList();
+      var actual = SyntaxTree.ParseFilterings(filterings!).ToList();
 
       Assert.Empty(actual);
    }
@@ -45,8 +43,7 @@ public class StringExtensionsShould
    {
       var orderings = "name, firstName desc, lastName asc";
 
-      var actual = orderings.ParseOrderings()
-         .ToList();
+      var actual = SyntaxTree.ParseOrderings(orderings).ToList();
 
       Assert.Equal(3, actual.Count);
 
@@ -68,8 +65,7 @@ public class StringExtensionsShould
    [InlineData("")]
    public void ParseOrderings_ShouldReturnEmtpy(string? orderings)
    {
-      var actual = orderings!.ParseOrderings()
-         .ToList();
+      var actual = SyntaxTree.ParseOrderings(orderings!).ToList();
 
       Assert.Empty(actual);
    }
