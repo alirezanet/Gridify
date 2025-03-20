@@ -16,7 +16,7 @@ public abstract class BaseSortingQueryBuilder<TSortingQuery, T>(IGridifyMapper<T
    public TSortingQuery ProcessOrdering(TSortingQuery query, string orderings, bool startWithThenBy)
    {
       var isFirst = !startWithThenBy;
-      var orders = orderings.ParseOrderings().ToList();
+      var orders = SyntaxTree.ParseOrderings(orderings).ToList();
       Mapper ??= BuildMapper(orders);
 
       foreach (var order in orders)

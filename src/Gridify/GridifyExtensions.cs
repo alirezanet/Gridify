@@ -50,7 +50,7 @@ public static partial class GridifyExtensions
          throw new GridifyQueryException("OrderBy is not defined or not found");
 
 
-      var members = gridifyOrdering.OrderBy!.ParseOrderings().Select(q => q.MemberName).ToList();
+      var members = SyntaxTree.ParseOrderings(gridifyOrdering.OrderBy!).Select(q => q.MemberName).ToList();
       if (mapper is null)
          foreach (var member in members)
          {
@@ -310,7 +310,7 @@ public static partial class GridifyExtensions
       if (string.IsNullOrWhiteSpace(ordering.OrderBy)) return true;
       try
       {
-         var orders = ordering.OrderBy!.ParseOrderings();
+         var orders = SyntaxTree.ParseOrderings(ordering.OrderBy!);
          mapper ??= new GridifyMapper<T>(true);
          if (orders.Any(order => !mapper.HasMap(order.MemberName)))
             return false;
