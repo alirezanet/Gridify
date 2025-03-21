@@ -115,7 +115,9 @@ public ref struct Lexer(string text, IEnumerable<IGridifyOperator> customOperato
             {
                var op = cOp.GetOperator();
                var opSlice = op.AsSpan();
-               if (!opSlice.SequenceEqual(_text.Slice(_position, opSlice.Length))) continue;
+               var sliceSize = Math.Min(opSlice.Length, _text.Length - _position - 1);
+               var textSlice = _text.Slice(_position, sliceSize);
+               if (!opSlice.SequenceEqual(textSlice)) continue;
 
                var start = _position;
                _position += opSlice.Length;

@@ -8,8 +8,8 @@ namespace Gridify.Syntax;
 
 public class OperatorManager
 {
-   private ConcurrentDictionary<string, IGridifyOperator>? _operators;
-   public IEnumerable<IGridifyOperator> Operators => _operators?.Values ?? Enumerable.Empty<IGridifyOperator>();
+   private readonly ConcurrentDictionary<string, IGridifyOperator> _operators = new();
+   public IEnumerable<IGridifyOperator> Operators => _operators.Values;
 
    public void Register<TOperator>() where TOperator : IGridifyOperator
    {
@@ -20,8 +20,8 @@ public class OperatorManager
    public void Register(IGridifyOperator gridifyOperator)
    {
       Validate(gridifyOperator.GetOperator());
-      _operators ??= new();
-      _operators.Add(gridifyOperator);
+      var @operator = gridifyOperator.GetOperator();
+      _operators.TryAdd(@operator, gridifyOperator);
    }
 
    public void Register(string @operator, Expression<OperatorParameter> handler)
@@ -29,8 +29,7 @@ public class OperatorManager
       Validate(@operator);
 
       var customOperator = new GridifyOperator(@operator, handler);
-      _operators ??= new();
-      _operators.Add(customOperator);
+      _operators.TryAdd(@operator, customOperator);
    }
    public void Remove<TOperator>() where TOperator : IGridifyOperator
    {
@@ -38,66 +37,11 @@ public class OperatorManager
       Remove(gridifyOperator.GetOperator());
    }
 
-   public void Remove(string @operator) => _operators?.Remove(@operator);
+   public void Remove(string @operator) => _operators.TryRemove(@operator, out _);
 
    private static void Validate(string @operator)
    {
       if (!@operator.StartsWith("#"))
          throw new ArgumentException("Custom operator must start with '#'");
-   }
-}
-
-/// <summary>
-/// Retry if for some reason we couldn't add/remove the operator
-/// </summary>
-internal static class OperatorManagerExtensions
-{
-   internal static void Add(this ConcurrentDictionary<string, IGridifyOperator> operators, IGridifyOperator gridifyOperator)
-   {
-      var @operator = gridifyOperator.GetOperator();
-      if (operators.ContainsKey(@operator)) // already exists
-      {
-         return;
-      }
-
-      var retry = 0;
-      while (true)
-      {
-         if (operators.TryAdd(@operator, gridifyOperator))
-         {
-            return;
-         }
-
-         if (retry >= 3)
-         {
-            throw new Exception("Unexpected error! Can not add GridifyOperator");
-         }
-
-         retry++;
-      }
-   }
-
-   internal static void Remove(this ConcurrentDictionary<string, IGridifyOperator> operators, string @operator)
-   {
-      if (!operators.ContainsKey(@operator))
-      {
-         return;
-      }
-
-      var retry = 0;
-      while (true)
-      {
-         if (operators.TryRemove(@operator, out _))
-         {
-            return;
-         }
-
-         if (retry >= 3)
-         {
-            throw new Exception("Can not remove GridifyOperator or it is not registered");
-         }
-
-         retry++;
-      }
    }
 }
