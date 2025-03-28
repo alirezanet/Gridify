@@ -204,7 +204,12 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
          {
             if (mapper.Configuration.DefaultDateTimeKind.HasValue)
             {
-               value = dateTime.ToUniversalTime();
+               value = mapper.Configuration.DefaultDateTimeKind.Value switch
+               {
+                  DateTimeKind.Local => dateTime.ToLocalTime(),
+                  DateTimeKind.Utc => dateTime.ToUniversalTime(),
+                  _ => dateTime
+               };
             }
          }
       }
