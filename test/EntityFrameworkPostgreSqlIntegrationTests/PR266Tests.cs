@@ -1,7 +1,6 @@
 using EntityFrameworkIntegrationTests.cs;
 using Gridify;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
 using Xunit;
 
 namespace EntityFrameworkPostgreSqlIntegrationTests;
@@ -25,36 +24,38 @@ public class PR266Tests
    [Fact]
    public void ISO_Should_ShowcaseDifferentConversions_LocalToUtc()
    {
-      var localDt = DateTime.Parse("2025-03-31T02:54:09Z", new CultureInfo("lt-LT"));
+      var localOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
+
+      var localDt = DateTime.Parse("2025-03-31T02:54:09Z");
       Assert.Equal(DateTimeKind.Local, localDt.Kind);
-      Assert.Equal("2025-03-31T05:54:09", localDt.ToString("s"));
 
       // Past behavior. Kind becomes Utc, but time is not converted.
       var utcDtWrong = DateTime.SpecifyKind(localDt, DateTimeKind.Utc);
       Assert.Equal(DateTimeKind.Utc, utcDtWrong.Kind);
-      Assert.Equal("2025-03-31T05:54:09", utcDtWrong.ToString("s"));
+      Assert.Equal(localDt, utcDtWrong);
 
       // Current behavior. Kind becomes Utc, and time is converted.
       var utcDtCorrect = localDt.ToUniversalTime();
       Assert.Equal(DateTimeKind.Utc, utcDtCorrect.Kind);
-      Assert.Equal("2025-03-31T02:54:09", utcDtCorrect.ToString("s"));
+      Assert.Equal(localDt.Subtract(localOffset), utcDtCorrect);
    }
 
    [Fact]
    public void ISO_Should_ShowcaseDifferentConversions_UtcToLocal()
    {
-      var utcDt = DateTime.Parse("2025-03-31T02:54:09Z", new CultureInfo("lt-LT")).ToUniversalTime();
+      var localOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
+
+      var utcDt = DateTime.Parse("2025-03-31T02:54:09Z").ToUniversalTime();
       Assert.Equal(DateTimeKind.Utc, utcDt.Kind);
-      Assert.Equal("2025-03-31T02:54:09", utcDt.ToString("s"));
 
       // Past behavior. Kind becomes Local, but time is not converted.
       var localDtWrong = DateTime.SpecifyKind(utcDt, DateTimeKind.Local);
       Assert.Equal(DateTimeKind.Local, localDtWrong.Kind);
-      Assert.Equal("2025-03-31T02:54:09", localDtWrong.ToString("s"));
+      Assert.Equal(utcDt, localDtWrong);
 
       // Current behavior. Kind becomes Local, and time is converted.
       var localDtCorrect = utcDt.ToLocalTime();
       Assert.Equal(DateTimeKind.Local, localDtCorrect.Kind);
-      Assert.Equal("2025-03-31T05:54:09", localDtCorrect.ToString("s"));
+      Assert.Equal(utcDt.Add(localOffset), localDtCorrect);
    }
 }
