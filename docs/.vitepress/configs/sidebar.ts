@@ -40,6 +40,7 @@ export const sidebar: DefaultTheme.Sidebar = {
             { text: 'Dependency injection', link: '/guide/dependency-injection' },
             { text: 'Compilation', link: '/guide/compile' },
             { text: 'AutoMapper', link: '/guide/autoMapper' },
+            { text: 'Syntax', link: '/guide/syntax.md' },
          ]
       },
 
