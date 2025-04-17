@@ -25,6 +25,12 @@ namespace Gridify
       public static bool CaseSensitiveMapper { get; set; }
 
       /// <summary>
+      /// This option enables allows for an intermediate object to be null i.e in obj.PropA.Prob PropA can be null
+      /// Default is false
+      /// </summary>
+      public static bool AvoidNullReference { get; set; } = true;
+
+      /// <summary>
       /// This option enables the 'null' keyword in filtering operations
       /// Default is true
       /// </summary>
