@@ -42,7 +42,7 @@ namespace Gridify
       /// This configuration is specific for properties and was introduced after DisableNullChecks.
       /// Hence it has its own property.
       /// </summary>
-      public static bool AvoidNullReference { get; set; } = true;
+      public static bool AvoidNullReference { get; set; } = false;
 
       /// <summary>
       /// On nested collections by default gridify adds null check condition

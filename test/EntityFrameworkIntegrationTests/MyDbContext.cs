@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore;
 
 namespace EntityFrameworkIntegrationTests.cs;
@@ -18,7 +18,8 @@ public class MyDbContext : DbContext
 public class User
 {
    public int Id { get; set; }
-   public string Name { get; set; }
+   public string? Name { get; set; }
    public DateTime? CreateDate { get; set; }
    public Guid FkGuid { get; set; }
+   public User? Friend { get; set; }
 }
