@@ -190,6 +190,19 @@ This setting is similar to [`DisableNullChecks`](./gridifyGlobalConfiguration.md
 var mapper = new GridifyMapper<Person>(q => q.DisableCollectionNullChecks = true);
 ```
 
+### AvoidNullReference
+
+
+This setting is similar to [`AvoidNullReference`](./gridifyGlobalConfiguration.md#avoidnullreference) in the global configuration, but it allows you to enable this setting on a per-query basis instead of globally. When set to true, Gridify won't check for null values in collections during filtering operations.
+
+- **Type:** `bool`
+- **Default:** `false`
+
+```csharp
+var mapper = new GridifyMapper<Person>(q => q.AvoidNullReference = true);
+```
+
+
 ### EntityFrameworkCompatibilityLayer
 
 This setting is the same as [`EntityFrameworkCompatibilityLayer`](./extensions/entityframework.md#compatibility-layer) in the global configuration, but it allows you to enable this setting on a per-query basis instead of globally. When set to true, the EntityFramework Compatibility layer is enabled, making the generated expressions compatible with Entity Framework.

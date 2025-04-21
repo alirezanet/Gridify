@@ -147,7 +147,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
 
    private object AddNullPropagator(LambdaExpression mapTarget, object query)
    {
-      if (!mapper.Configuration.DisableNullChecks)
+      if (!mapper.Configuration.AvoidNullReference)
          return query;
 
       var mainQuery = query as LambdaExpression;

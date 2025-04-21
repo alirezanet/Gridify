@@ -10,7 +10,7 @@ public class TestClassGridifyMapper : GridifyMapper<TestClass>
    public TestClassGridifyMapper()
    {
       GenerateMappings()
-         .AddMap("ChildName", e => e.ChildClass.Name);
+         .AddMap("ChildName", e => e.ChildClass!.Name);
    }
 }
 
@@ -24,7 +24,7 @@ public class Issue268Tests
       fakeList.Add(new TestClass() { ChildClass = new TestClass() });
       fakeList.Add(new TestClass() { ChildClass = new TestClass() { Name = "glacor" } });
       var mapper = new TestClassGridifyMapper();
-      mapper.Configuration.DisableNullChecks = true;
+      mapper.Configuration.AvoidNullReference = true;
 
       var result = fakeList.AsQueryable().ApplyFiltering("ChildName=glacor", mapper).Distinct().ToList();
       var result2 = fakeList.AsQueryable().ApplyFiltering("ChildName=", mapper).Distinct().ToList();
