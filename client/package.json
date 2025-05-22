@@ -7,10 +7,12 @@
    "browser": "dist/index.umd.js",
    "types": "dist/index.d.ts",
    "exports": {
-      "require": "./dist/index.cjs.js",
-      "import": "./dist/index.esm.js",
-      "browser": "./dist/index.umd.js",
-      "types": "./dist/index.d.ts"
+      ".": {
+         "require": "./dist/index.cjs.js",
+         "import": "./dist/index.esm.js",
+         "browser": "./dist/index.umd.js",
+         "types": "./dist/index.d.ts"
+      }
    },
    "repository": "https://github.com/alirezanet/Gridify/",
    "homepage": "https://alirezanet.github.io/Gridify/guide/gridify-client/",
