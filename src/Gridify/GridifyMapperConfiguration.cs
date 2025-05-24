@@ -17,6 +17,14 @@ public record GridifyMapperConfiguration
    public bool AllowNullSearch { get; set; } = GridifyGlobalConfiguration.AllowNullSearch;
 
    /// <summary>
+   /// This option allows for an intermediate object to be null i.e in obj.PropA.Prob PropA can be null
+   /// This configuration is specific for properties and was introduced after DisableCollectionNullChecks.
+   /// Hence it has its own property.
+   /// Default is false
+   /// </summary>
+   public bool AvoidNullReference { get; set; } = GridifyGlobalConfiguration.AvoidNullReference;
+
+   /// <summary>
    /// If true, in filtering and ordering operations,
    /// gridify doesn't return any exceptions when a mapping
    /// is not defined for the fields

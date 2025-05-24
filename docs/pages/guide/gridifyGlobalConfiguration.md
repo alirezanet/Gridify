@@ -47,6 +47,15 @@ some ORMs like NHibernate don't support this. You can disable this behavior by s
 - type: `bool`
 - default: `false`
 
+### AvoidNullReference
+
+This option allows for an intermediate object to be null
+
+e.g on `obj.PropA.Prob`, `PropA` can be null
+
+This configuration is specific for properties and was introduced after DisableNullChecks.
+Hence it has its own property.
+
 ### CaseInsensitiveFiltering
 
 If true, string comparison operations are case insensitive by default.
