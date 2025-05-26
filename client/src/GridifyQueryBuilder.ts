@@ -82,13 +82,18 @@ export class GridifyQueryBuilder {
    and(optional?: boolean): GridifyQueryBuilder {
       this.filteringExpressions.push({
          value: LogicalOperator.And,
-         type: "op", optional
+         type: "op",
+         optional
       });
       return this;
    }
 
    or(optional?: boolean): GridifyQueryBuilder {
-      this.filteringExpressions.push({ value: LogicalOperator.Or, type: "op", optional });
+      this.filteringExpressions.push({
+         value: LogicalOperator.Or,
+         type: "op",
+         optional
+      });
       return this;
    }
 
@@ -163,6 +168,9 @@ export class GridifyQueryBuilder {
       if (groupCounter != 0) {
          throw new Error("Group not properly closed");
       }
+
+      // postprocess
+      this.query.filter = this.query.filter?.replace(/[,|]?\(\)/gi, "");
 
       return this.query;
    }
