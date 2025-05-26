@@ -1,15 +1,25 @@
 import { ConditionalOperator, LogicalOperator } from "./GridifyOperator";
+import { GridifyQueryBuilderOptions } from "./GridifyQueryBuilderOptions";
 import { IGridifyQuery } from "./IGridifyQuery";
 
 export class GridifyQueryBuilder {
-   private query: IGridifyQuery = {
+   protected query: IGridifyQuery = {
       page: 1,
       pageSize: 20,
       orderBy: "",
       filter: "",
    };
 
-   private filteringExpressions: IExpression[] = [];
+   protected filteringExpressions: IExpression[] = [];
+
+   constructor(protected readonly options: GridifyQueryBuilderOptions = {}) {
+      if (options.from) {
+         const builder = options.from;
+
+         this.query = { ...builder.query };
+         this.filteringExpressions = builder.filteringExpressions.map((exp) => ({ ...exp }));
+      }
+   }
 
    setPage(page: number): GridifyQueryBuilder {
       this.query.page = page;
@@ -69,16 +79,16 @@ export class GridifyQueryBuilder {
       return this;
    }
 
-   and(): GridifyQueryBuilder {
+   and(optional?: boolean): GridifyQueryBuilder {
       this.filteringExpressions.push({
          value: LogicalOperator.And,
-         type: "op",
+         type: "op", optional
       });
       return this;
    }
 
-   or(): GridifyQueryBuilder {
-      this.filteringExpressions.push({ value: LogicalOperator.Or, type: "op" });
+   or(optional?: boolean): GridifyQueryBuilder {
+      this.filteringExpressions.push({ value: LogicalOperator.Or, type: "op", optional });
       return this;
    }
 
@@ -96,6 +106,9 @@ export class GridifyQueryBuilder {
 
          //,
          if (previousType === null && exp.type === "op") {
+            if (exp.optional) {
+               return
+            }
             throw new Error("expression cannot start with a logical operator");
          }
 
@@ -108,6 +121,9 @@ export class GridifyQueryBuilder {
 
          // ,,
          if (previousType === "op" && exp.type === "op") {
+            if (exp.optional) {
+               return
+            }
             throw new Error(
                "consecutive operators are not allowed, consider adding a filter"
             );
@@ -115,6 +131,9 @@ export class GridifyQueryBuilder {
 
          // (,
          if (previousType === "startGroup" && exp.type === "op") {
+            if (exp.optional) {
+               return
+            }
             throw new Error(
                "logical operator immediately after startGroup is not allowed"
             );
@@ -126,8 +145,10 @@ export class GridifyQueryBuilder {
          }
 
          // ()
-         if (previousType === "startGroup" && exp.type === "endGroup") {
-            throw new Error("Empty groups are not allowed");
+         if (!this.options.allowEmptyGroups) {
+            if (previousType === "startGroup" && exp.type === "endGroup") {
+               throw new Error("Empty groups are not allowed");
+            }
          }
 
          // )(
@@ -150,4 +171,5 @@ export class GridifyQueryBuilder {
 interface IExpression {
    value: string;
    type: "filter" | "op" | "startGroup" | "endGroup";
+   optional?: boolean
 }
