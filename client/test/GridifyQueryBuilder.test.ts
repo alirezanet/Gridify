@@ -1,5 +1,5 @@
-import { GridifyQueryBuilder } from "../src/GridifyQueryBuilder";
 import { ConditionalOperator as op } from "../src/GridifyOperator";
+import { GridifyQueryBuilder } from "../src/GridifyQueryBuilder";
 
 describe("GridifyQueryBuilder", () => {
    it("should build a simple query", () => {
@@ -15,6 +15,93 @@ describe("GridifyQueryBuilder", () => {
          pageSize: 20,
          orderBy: "name",
          filter: "age>30",
+      });
+   });
+
+   it("can be extended by the user", () => {
+      const query = new GridifyQueryBuilder()
+         .setPage(1)
+         .setPageSize(20)
+         .addOrderBy("name")
+         .addCondition("age", op.GreaterThan, 30);
+
+      class CustomQueryImpl extends GridifyQueryBuilder {
+
+         override build() {
+            return {
+               ...super.build(),
+               pageSize: this.query.pageSize + 1,
+               addition: 1
+            }
+         }
+      }
+
+      const customQuery = new CustomQueryImpl({
+         from: query
+      }).build();
+
+      expect(customQuery).toEqual({
+         page: 1,
+         pageSize: 21,
+         orderBy: "name",
+         filter: "age>30",
+         addition: 1
+      });
+   });
+
+   it("should be able to inherit existing instances", () => {
+      const query = new GridifyQueryBuilder()
+         .setPage(1)
+         .setPageSize(20)
+         .addOrderBy("name")
+         .addCondition("age", op.GreaterThan, 30);
+
+      const cloned = new GridifyQueryBuilder({
+         from: query
+      });
+
+      expect(cloned.build()).toEqual(query.build());
+   });
+
+   it("should remove all empty groups", () => {
+      const query = new GridifyQueryBuilder({
+         allowEmptyGroups: true
+      })
+         .setPage(1)
+         .setPageSize(20)
+         .addOrderBy("name")
+         .startGroup().endGroup().or(true)
+         .startGroup().endGroup()
+         .build();
+
+
+      expect(query).toEqual({
+         page: 1,
+         pageSize: 20,
+         orderBy: "name",
+         filter: "",
+      });
+   });
+
+   it("should be able to skip empty groups", () => {
+      const query = new GridifyQueryBuilder({
+         allowEmptyGroups: true
+      })
+         .setPage(1)
+         .setPageSize(20)
+         .addOrderBy("name")
+         .startGroup()
+         .addCondition("age", op.GreaterThan, 30)
+         .endGroup()
+         .and(true)
+         .startGroup().endGroup().build();
+
+
+      expect(query).toEqual({
+         page: 1,
+         pageSize: 20,
+         orderBy: "name",
+         filter: "(age>30)",
       });
    });
 
@@ -85,13 +172,13 @@ describe("GridifyQueryBuilder Validation", () => {
    it("should allow nested balanced parentheses", () => {
       const query = new GridifyQueryBuilder()
          .startGroup()
-            .addCondition("field", op.Equal, "value")
-            .and()
-            .startGroup()
-               .addCondition("field", op.Equal, "value")
-               .or()
-               .addCondition("field", op.Equal, "value")
-            .endGroup()
+         .addCondition("field", op.Equal, "value")
+         .and()
+         .startGroup()
+         .addCondition("field", op.Equal, "value")
+         .or()
+         .addCondition("field", op.Equal, "value")
+         .endGroup()
          .endGroup()
          .build();
 
