@@ -17,6 +17,21 @@ npm i gridify-client
 The `GridifyQueryBuilder` interface represents the methods available for constructing dynamic queries using the Gridify
 Client library.
 
+When creating a new instance of `GridifyQueryBuilder`, you can pass an optional `GridifyQueryBuilderOptions` object to the constructor. This allows you to configure advanced behaviors:
+
+- `from`: Clone an existing builder's state.
+- `allowEmptyGroups`: Allow empty logical groups in the filter expression (default is `false`).
+
+**Example:**
+
+```ts
+import { GridifyQueryBuilder } from "gridify-client";
+
+const builder = new GridifyQueryBuilder({
+  allowEmptyGroups: true
+});
+```
+
 The following table describes the methods available in the GridifyQueryBuilder interface for constructing dynamic queries.
 
 | Method       | Parameter                                          | Description                                                                                                           |
@@ -27,10 +42,12 @@ The following table describes the methods available in the GridifyQueryBuilder i
 | addCondition | field, operator, value, caseSensitive, escapeValue | Add filtering conditions. `caseSensitive` and `escapeValue` are optional parameters.                                  |
 | startGroup   | -                                                  | Start a logical grouping of conditions.                                                                               |
 | endGroup     | -                                                  | End the current logical group.                                                                                        |
-| and          | -                                                  | Add the logical AND operator.                                                                                         |
-| or           | -                                                  | Add the logical OR operator.                                                                                          |
+| and          | optional?: boolean                                 | Add the logical AND operator. If `optional` is `true`, the operator will be ignored if it would be invalid in the current context. |
+| or           | optional?: boolean                                 | Add the logical OR operator. If `optional` is `true`, the operator will be ignored if it would be invalid in the current context.  |
 | build        | -                                                  | Build and retrieve the constructed query.                                                                             |
 
+> **Note:**  
+> The `and` and `or` methods accepts an optional boolean parameter. If set to `true`, the logical operator will be treated as optional and ignored if it would result in an invalid expression (such as being the first operator or consecutive with another operator).
 
 ## Conditional Operators
 
@@ -86,3 +103,4 @@ Output:
   "filter": "(age<50|name^A),isActive=true"
 }
 ```
+
