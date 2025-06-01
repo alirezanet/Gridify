@@ -5,6 +5,7 @@ using Xunit;
 
 namespace EntityFrameworkIntegrationTests.cs;
 
+[Collection("Context collection")]
 public class GridifyEntityFrameworkTests : IClassFixture<DatabaseFixture>
 {
    private readonly DatabaseFixture fixture;
