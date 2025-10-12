@@ -6,6 +6,11 @@ using Gridify.Syntax;
 
 namespace Gridify.Builder;
 
+internal abstract class BaseQueryBuilder
+{
+   internal static MemberNullPropagationVisitor MemberNullPropagatorVisitor { get; } = new();
+}
+
 public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
    where TQuery : class
 {
@@ -38,6 +43,50 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
 
    protected abstract TQuery CombineWithOrOperator(TQuery left, TQuery right);
 
+   private (TQuery Query, bool IsNested) BuildQueryFromBinaryExpression(BinaryExpressionSyntax? bExp, bool isParenthesisOpen = false)
+   {
+      if (bExp!.Left is FieldExpressionSyntax && bExp.Right is ValueExpressionSyntax)
+         try
+         {
+            return ConvertBinaryExpressionSyntaxToQuery(bExp)
+                   ?? throw new GridifyFilteringException("Invalid expression");
+         }
+         catch (GridifyMapperException)
+         {
+            if (mapper.Configuration.IgnoreNotMappedFields)
+               return (BuildAlwaysTrueQuery(), false);
+
+            throw;
+         }
+
+      (TQuery query, bool isNested) leftQuery;
+      (TQuery query, bool isNested) rightQuery;
+
+      if (bExp.Left is ParenthesizedExpressionSyntax lpExp)
+         leftQuery = BuildQuery(lpExp.Expression, true);
+      else
+         leftQuery = BuildQuery(bExp.Left);
+
+
+      if (bExp.Right is ParenthesizedExpressionSyntax rpExp)
+         rightQuery = BuildQuery(rpExp.Expression, true);
+      else
+         rightQuery = BuildQuery(bExp.Right);
+
+      // check for nested collections
+      if (isParenthesisOpen &&
+          CheckIfCanMergeQueries(leftQuery, rightQuery, bExp.OperatorToken.Kind) is { } mergedResult)
+         return (mergedResult, true);
+
+      var result = bExp.OperatorToken.Kind switch
+      {
+         SyntaxKind.And => CombineWithAndOperator(leftQuery.query, rightQuery.query),
+         SyntaxKind.Or => CombineWithOrOperator(leftQuery.query, rightQuery.query),
+         _ => throw new GridifyFilteringException($"Invalid expression Operator '{bExp.OperatorToken.Kind}'")
+      };
+      return (result, false);
+   }
+
    private (TQuery Query, bool IsNested) BuildQuery(ExpressionSyntax expression, bool isParenthesisOpen = false)
    {
       while (true)
@@ -46,47 +95,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
             case SyntaxKind.BinaryExpression:
             {
                var bExp = expression as BinaryExpressionSyntax;
-
-               if (bExp!.Left is FieldExpressionSyntax && bExp.Right is ValueExpressionSyntax)
-                  try
-                  {
-                     return ConvertBinaryExpressionSyntaxToQuery(bExp)
-                            ?? throw new GridifyFilteringException("Invalid expression");
-                  }
-                  catch (GridifyMapperException)
-                  {
-                     if (mapper.Configuration.IgnoreNotMappedFields)
-                        return (BuildAlwaysTrueQuery(), false);
-
-                     throw;
-                  }
-
-               (TQuery query, bool isNested) leftQuery;
-               (TQuery query, bool isNested) rightQuery;
-
-               if (bExp.Left is ParenthesizedExpressionSyntax lpExp)
-                  leftQuery = BuildQuery(lpExp.Expression, true);
-               else
-                  leftQuery = BuildQuery(bExp.Left);
-
-
-               if (bExp.Right is ParenthesizedExpressionSyntax rpExp)
-                  rightQuery = BuildQuery(rpExp.Expression, true);
-               else
-                  rightQuery = BuildQuery(bExp.Right);
-
-               // check for nested collections
-               if (isParenthesisOpen &&
-                   CheckIfCanMergeQueries(leftQuery, rightQuery, bExp.OperatorToken.Kind) is { } mergedResult)
-                  return (mergedResult, true);
-
-               var result = bExp.OperatorToken.Kind switch
-               {
-                  SyntaxKind.And => CombineWithAndOperator(leftQuery.query, rightQuery.query),
-                  SyntaxKind.Or => CombineWithOrOperator(leftQuery.query, rightQuery.query),
-                  _ => throw new GridifyFilteringException($"Invalid expression Operator '{bExp.OperatorToken.Kind}'")
-               };
-               return (result, false);
+               return BuildQueryFromBinaryExpression(bExp, isParenthesisOpen);
             }
             case SyntaxKind.ParenthesizedExpression: // first entrypoint only
             {
@@ -129,8 +138,43 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
 
       if (hasIndexer)
          query = AddIndexerNullCheck(mapTarget, query);
+      else
+         query = AddNullPropagator(mapTarget, query);
 
       return ((TQuery)query, false);
+   }
+
+
+   private object AddNullPropagator(LambdaExpression mapTarget, object query)
+   {
+      if (!mapper.Configuration.AvoidNullReference)
+         return query;
+
+      var mainQuery = query as LambdaExpression;
+      if (mainQuery == null)
+         return query;
+
+      var nullPropagatedExpression = BaseQueryBuilder.MemberNullPropagatorVisitor.Visit(mapTarget) as LambdaExpression;
+      if (mainQuery.Body is MethodCallExpression methodExp
+         && nullPropagatedExpression!.Body.Type != typeof(object)
+         && methodExp.Arguments.Count == 1)
+      {
+         var call = Expression.Call(methodExp.Method!, nullPropagatedExpression!.Body);
+         return Expression.Lambda(call, mainQuery.Parameters);
+      }
+
+      var body = mainQuery.Body;
+      if (body is not BinaryExpression bExp)
+         return query;
+
+      if (bExp.Method == null
+         || nullPropagatedExpression!.Body.Type == typeof(object)
+         || nullPropagatedExpression.Body is MethodCallExpression)
+      {
+         return query;
+      }
+      var newExp = Expression.Call(bExp.Method!, nullPropagatedExpression.Body, bExp.Right);
+      return Expression.Lambda(newExp, mainQuery.Parameters);
    }
 
    private object AddIndexerNullCheck(LambdaExpression mapTarget, object query)

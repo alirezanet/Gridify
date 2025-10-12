@@ -38,6 +38,12 @@ namespace Gridify
       /// </summary>
       public static bool IgnoreNotMappedFields { get; set; }
 
+      /// This option allows for an intermediate object to be null i.e in obj.PropA.Prob PropA can be null
+      /// This configuration is specific for properties and was introduced after DisableNullChecks.
+      /// Hence it has its own property.
+      /// </summary>
+      public static bool AvoidNullReference { get; set; } = false;
+
       /// <summary>
       /// On nested collections by default gridify adds null check condition
       /// to prevent null reference exceptions, e.g () => field != null && field....
