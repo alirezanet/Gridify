@@ -86,6 +86,9 @@ public struct Parser
          left = new BinaryExpressionSyntax(left, operatorToken, right);
       }
 
+      if (left.Kind is SyntaxKind.FieldExpression)
+         AddDiagnostics($"Unexpected token <{Current.Kind}> at index {Current.Position}, expected <{SyntaxKind.Operator}>");
+
       return left;
    }
 
