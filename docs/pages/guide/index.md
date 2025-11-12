@@ -32,25 +32,29 @@ To provide a better understanding of Gridify's functionality, we have prepared a
 
 ## Performance
 
-Filtering is the most expensive feature in Gridify.
-The following benchmark compares filtering in various popular dynamic LINQ libraries.
-Interestingly, Gridify outperforms even Native LINQ in terms of speed.
-It's worth mentioning that other features like Pagination and Sorting in Gridify have minimal impact on performance.
+Filtering remains the most expensive operation in Gridify.
+In .NET 8, Gridify was slightly faster than native LINQ, but with .NET 10 improvements to LINQ itself,
+native performance has caught up.
+The latest benchmark shows Gridify performing nearly identically to native LINQ,
+while still clearly ahead of other dynamic LINQ libraries.
+Pagination and sorting continue to have minimal performance impact.
 
-| Method           |         Mean |       Error |      StdDev |  Ratio |   Allocated | Alloc Ratio |
-|------------------|-------------:|------------:|------------:|-------:|------------:|------------:|
-| Gridify          |     599.8 us |     2.76 us |     2.45 us |   0.92 |    36.36 KB |        1.11 |
-| Native_LINQ      |     649.9 us |     2.55 us |     2.38 us |   1.00 |    32.74 KB |        1.00 |
-| DynamicLinq      |     734.8 us |    13.90 us |    13.01 us |   1.13 |    119.4 KB |        3.65 |
-| Sieve            |   1,190.9 us |     7.41 us |     6.93 us |   1.83 |    53.05 KB |        1.62 |
-| Fop              |   2,637.6 us |     8.59 us |     7.61 us |   4.06 |   321.57 KB |        9.82 |
-| CSharp_Scripting | 216,863.8 us | 4,295.66 us | 6,021.92 us | 336.64 | 23660.26 KB |      722.71 |
+| Method                | Mean       | Error     | StdDev    | Ratio  | RatioSD | Allocated   | Alloc Ratio |
+|---------------------- |-----------:|----------:|----------:|-------:|--------:|------------:|------------:|
+| Native_LINQ           |   1.049 ms | 0.0047 ms | 0.0041 ms |   1.00 |    0.01 |    32.02 KB |        1.00 |
+| Gridify               |   1.079 ms | 0.0071 ms | 0.0066 ms |   1.03 |    0.01 |    34.76 KB |        1.09 |
+| Gridify_WithoutMapper |   1.090 ms | 0.0074 ms | 0.0069 ms |   1.04 |    0.01 |    40.37 KB |        1.26 |
+| Sieve                 |   1.216 ms | 0.0103 ms | 0.0097 ms |   1.16 |    0.01 |    44.21 KB |        1.38 |
+| DynamicLinq           |   1.284 ms | 0.0088 ms | 0.0082 ms |   1.22 |    0.01 |    92.42 KB |        2.89 |
+| Fop                   |   4.749 ms | 0.0445 ms | 0.0416 ms |   4.53 |    0.04 |   284.77 KB |        8.89 |
+| CSharp_Scripting      | 224.708 ms | 4.4534 ms | 7.5621 ms | 214.24 |    7.17 | 23303.11 KB |      727.67 |
 
 ::: details
-BenchmarkDotNet v0.13.10, Windows 11 (10.0.22621.2715/22H2/2022Update/SunValley2)
-12th Gen Intel Core i7-12800H, 1 CPU, 20 logical and 14 physical cores
-.NET SDK 8.0.100
-[Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+BenchmarkDotNet v0.15.6, Windows 11 (10.0.26200.7171)
+AMD Ryzen 7 7800X3D 4.20GHz, 1 CPU, 8 logical and 8 physical cores
+.NET SDK 10.0.100
+[Host]     : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v4
+DefaultJob : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v4
 
 This Benchmark is
 available [Here](https://github.com/alirezanet/Gridify/blob/master/benchmark/LibraryComparisionFilteringBenchmark.cs)
