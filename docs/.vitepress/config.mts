@@ -14,5 +14,8 @@ export default defineConfig({
    head: head,
    sitemap: {
       hostname: "https://alirezanet.github.io/Gridify/",
+   },
+   vite: {
+      resolve: { preserveSymlinks: true }, // to fix local development in linked folders
    }
 });
