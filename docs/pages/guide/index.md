@@ -2,7 +2,7 @@
 
 Greetings!
 
-Gridify is an exceptional dynamic LINQ library designed to simplify the process of converting strings into LINQ queries. It offers remarkable performance and ease-of-use, making it effortless to apply filtering, sorting, and pagination utilizing text-based data.
+Gridify is a dynamic LINQ library designed to simplify the process of converting strings into LINQ queries. It offers remarkable performance and ease-of-use, making it effortless to apply filtering, sorting, and pagination utilizing text-based data.
 
 ## Features
 
@@ -33,10 +33,13 @@ To provide a better understanding of Gridify's functionality, we have prepared a
 ## Performance
 
 Filtering remains the most expensive operation in Gridify.
+
 In .NET 8, Gridify was slightly faster than native LINQ, but with .NET 10 improvements to LINQ itself,
 native performance has caught up.
+
 The latest benchmark shows Gridify performing nearly identically to native LINQ,
 while still clearly ahead of other dynamic LINQ libraries.
+
 Pagination and sorting continue to have minimal performance impact.
 
 | Method                | Mean       | Error     | StdDev    | Ratio  | RatioSD | Allocated   | Alloc Ratio |
@@ -50,18 +53,20 @@ Pagination and sorting continue to have minimal performance impact.
 | CSharp_Scripting      | 224.708 ms | 4.4534 ms | 7.5621 ms | 214.24 |    7.17 | 23303.11 KB |      727.67 |
 
 ::: details
+```
 BenchmarkDotNet v0.15.6, Windows 11 (10.0.26200.7171)
 AMD Ryzen 7 7800X3D 4.20GHz, 1 CPU, 8 logical and 8 physical cores
 .NET SDK 10.0.100
 [Host]     : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v4
 DefaultJob : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v4
+```
 
 This Benchmark is
 available [Here](https://github.com/alirezanet/Gridify/blob/master/benchmark/LibraryComparisionFilteringBenchmark.cs)
 :::
 
 <style scoped>
-   tr:nth-child(1) {
+   tr:nth-child(2) {
       color: #a8b1ff;
    }
 </style>
