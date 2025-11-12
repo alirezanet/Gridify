@@ -40,8 +40,8 @@ public class GridifyEntityFrameworkTests
 
       var actual = _dbContext.Users.ApplyFiltering("name = vahid").ToQueryString();
 
-      Assert.StartsWith("DECLARE @__Value", actual);
-      Assert.StartsWith("DECLARE @__name", expected);
+      Assert.StartsWith("DECLARE @Value", actual);
+      Assert.StartsWith("DECLARE @name", expected);
    }
 
 
@@ -52,10 +52,10 @@ public class GridifyEntityFrameworkTests
    {
       GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
       var sb = new StringBuilder();
-      sb.AppendLine("DECLARE @__Value_0 nvarchar(4000) = N'h';");
+      sb.AppendLine("DECLARE @Value nvarchar(4000) = N'h';");
       sb.AppendLine("SELECT [u].[Id], [u].[CreateDate], [u].[FkGuid], [u].[Name], [u].[shadow1]");
       sb.AppendLine("FROM [Users] AS [u]");
-      sb.AppendLine("WHERE [u].[Name] > @__Value_0");
+      sb.AppendLine("WHERE [u].[Name] > @Value");
 
       var actual = _dbContext.Users.ApplyFiltering("name > h").ToQueryString();
       Assert.True(string.Compare(
@@ -169,9 +169,9 @@ public class GridifyEntityFrameworkTests
       var actual = actualQuery.ToQueryString();
 
       // assert
-      Assert.Equal(expected, actual.Replace(" @__Value_0", " @__user_Name_0"));
+      Assert.Equal(expected, actual.Replace(" @Value", " @user_Name"));
    }
-   
+
    [Fact]
    public void ApplyFiltering_NestedProperty()
    {
@@ -182,6 +182,6 @@ public class GridifyEntityFrameworkTests
       var expected = _dbContext.Users.Where(q => q.Groups.Any(g => g.Users.Any(u => u.Name == name))).ToQueryString();
       var actual = _dbContext.Users.ApplyFiltering("groups.users.name = test", gm).ToQueryString();
 
-      Assert.Equal(expected, actual.Replace("@__Value_0", "@__name_0"));
+      Assert.Equal(expected, actual.Replace("@Value", "@name"));
    }
 }

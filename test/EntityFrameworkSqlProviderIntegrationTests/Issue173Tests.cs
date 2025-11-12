@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Gridify;
 using Microsoft.EntityFrameworkCore;
 using xRetry;
@@ -17,7 +17,7 @@ public class Issue173Tests
       // arrange
       GridifyGlobalConfiguration.EnableEntityFrameworkCompatibilityLayer();
 
-      var group = new { Name =  "test group" };
+      var group = new { Name = "test group" };
       var expected = _dbContext.Users.Where(u => u.Groups.Any(g => g.Name == group.Name)).ToQueryString();
 
       // act
@@ -28,7 +28,7 @@ public class Issue173Tests
          .ToQueryString();
 
       // assert
-      Assert.Equal(expected, actual.Replace(" @__Value_0", " @__group_Name_0"));
+      Assert.Equal(expected, actual.Replace(" @Value", " @group_Name"));
    }
 
    [RetryFact]
