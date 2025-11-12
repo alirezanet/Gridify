@@ -18,7 +18,7 @@
       <SymbolPackageFormat>snupkg</SymbolPackageFormat>
       <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
       <PackageReadmeFile>README.md</PackageReadmeFile>
-      <TargetFrameworks>net6.0;netstandard2.0;netstandard2.1;net7.0;net8.0;net9.0</TargetFrameworks>
+      <TargetFrameworks>net10.0;netstandard2.0;netstandard2.1;net8.0;net9.0</TargetFrameworks>
 
    </PropertyGroup>
 
@@ -26,34 +26,30 @@
       <None Include="..\..\README.md" Pack="true" PackagePath="\" />
    </ItemGroup>
 
+   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+   </ItemGroup>
+
    <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[9.0.0,10.0.0)" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
    </ItemGroup>
 
    <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[8.0.0,10.0.0)" />
-   </ItemGroup>
-
-   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[7.0.0,9.0.0)" />
-   </ItemGroup>
-
-   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[6.0.0,9.0.0)" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
    </ItemGroup>
 
    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
    </ItemGroup>
 
    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-      <PackageReference Include="System.Memory" Version="4.5.4" />
+      <PackageReference Include="System.Memory" Version="4.6.3" />
       <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
    </ItemGroup>
 
    <ItemGroup>
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 
    </ItemGroup>
 

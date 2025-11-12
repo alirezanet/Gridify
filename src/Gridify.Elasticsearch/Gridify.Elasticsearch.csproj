@@ -13,7 +13,7 @@
       <IncludeSymbols>true</IncludeSymbols>
       <SymbolPackageFormat>snupkg</SymbolPackageFormat>
       <PackageReadmeFile>README.md</PackageReadmeFile>
-      <TargetFrameworks>net6.0;netstandard2.0;netstandard2.1;net7.0;net8.0;net9.0</TargetFrameworks>
+      <TargetFrameworks>net10.0;netstandard2.0;netstandard2.1;net8.0;net9.0</TargetFrameworks>
       <LangVersion>default</LangVersion>
       <Nullable>enable</Nullable>
    </PropertyGroup>
