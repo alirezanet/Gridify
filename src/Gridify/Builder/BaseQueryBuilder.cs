@@ -187,6 +187,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
          body = unaryExpression.Operand;
 
       if (body is not MethodCallExpression methodCallExpression) return query;
+      if (methodCallExpression.Object is null) return query;
 
       var containsKeyMethod = methodCallExpression.Object!.Type.GetMethod("ContainsKey", [mapTarget.Parameters[1].Type]);
       if (containsKeyMethod == null) return query;
