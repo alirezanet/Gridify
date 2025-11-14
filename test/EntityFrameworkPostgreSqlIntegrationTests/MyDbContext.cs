@@ -1,7 +1,6 @@
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace EntityFrameworkIntegrationTests.cs;
 
@@ -33,6 +32,7 @@ public class User
    public string Name { get; set; } = string.Empty;
    public DateTime? CreateDate { get; set; }
    public Guid FkGuid { get; set; }
+   public JsonDocument Properties { get; set; }
 }
 public class Products
 {

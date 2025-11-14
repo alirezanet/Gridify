@@ -49,7 +49,8 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       Expression<Func<T, object>> to;
       try
       {
-         to = CreateExpression(from); ;
+         to = CreateExpression(from);
+         ;
       }
       catch (Exception)
       {
@@ -100,6 +101,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
             {
                continue;
             }
+
             // If nestingLevel is not exceeded and the property is a class, recursively generate mappings
             GenerateMappingsRecursive(item.PropertyType, fullName, maxNestingDepth, (ushort)(currentDepth + 1));
             continue;
@@ -213,14 +215,32 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
       if (expression == null)
          throw new GridifyMapperException($"Mapping Key `{key}` not found.");
-      return expression as Expression<Func<T, object>> ?? throw new GridifyMapperException($"Expression fir the `{key}` not found.");
+
+      var exception = new GridifyMapperException($"Expression for the `{key}` not found.");
+      ;
+
+      // handle 2-parameter mapping: (target, keyParam) => ...
+      if (expression.Parameters.Count == 2)
+      {
+         var targetParam = expression.Parameters[0];
+         var keyParam = expression.Parameters[1];
+
+         var constKey = Expression.Constant(key, typeof(string));
+
+         // replace `keyParam` with `"keyValue"`
+         var bodyWithKey = new ReplaceExpressionVisitor(keyParam, constKey).Visit(expression.Body);
+
+         return Expression.Lambda<Func<T, object>>(bodyWithKey, targetParam);
+      }
+
+      return expression as Expression<Func<T, object>> ?? throw exception;
    }
 
    public IEnumerable<IGMap<T>> GetCurrentMaps()
    {
       return _mappings;
    }
-   
+
    public IEnumerable<IGMap<T>> GetCurrentMapsByType(HashSet<Type> targetTypes)
    {
       foreach (var map in _mappings)
@@ -278,8 +298,8 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       var mapProperty = from.Split('.').Aggregate<string, Expression>(parameter, CreatePropertyAccessExrpression);
 
       if (mapProperty is MethodCallExpression methodCallExpression
-         && methodCallExpression.Method.Name.Equals("Select", StringComparison.InvariantCultureIgnoreCase)
-         && methodCallExpression.Arguments.Last() is LambdaExpression)
+          && methodCallExpression.Method.Name.Equals("Select", StringComparison.InvariantCultureIgnoreCase)
+          && methodCallExpression.Arguments.Last() is LambdaExpression)
       {
          return Expression.Lambda<Func<T, object>>(methodCallExpression, parameter);
       }
@@ -305,15 +325,18 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       Type? itemType;
 
       if (
-         ((expression is MemberExpression memberExpression && memberExpression.Member is PropertyInfo propertyInfo && propertyInfo.PropertyType.IsComplexTypeCollection(out itemType)) ||
-         (expression is MethodCallExpression methodCallExpression && methodCallExpression.Type.IsComplexTypeCollection(out itemType)))
+         ((expression is MemberExpression memberExpression && memberExpression.Member is PropertyInfo propertyInfo &&
+           propertyInfo.PropertyType.IsComplexTypeCollection(out itemType)) ||
+          (expression is MethodCallExpression methodCallExpression && methodCallExpression.Type.IsComplexTypeCollection(out itemType)))
          && itemType is not null
       )
       {
          var selectFunction = "Select";
          var predicateParameter = Expression.Parameter(itemType);
-         var propertyType = itemType.GetProperties().FirstOrDefault(p => p.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase))?.PropertyType ?? throw new GridifyMapperException($"Property '{propertyName}' not found.");
-          
+         var propertyType =
+            itemType.GetProperties().FirstOrDefault(p => p.Name.Equals(propertyName, StringComparison.InvariantCultureIgnoreCase))?.PropertyType ??
+            throw new GridifyMapperException($"Property '{propertyName}' not found.");
+
          if (propertyType.IsComplexTypeCollection(out var propItemType) && propItemType is not null)
          {
             selectFunction = "SelectMany";
@@ -321,15 +344,14 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          }
 
          var predicate = Expression.Lambda(Expression.Property(predicateParameter, propertyName), predicateParameter);
-         var selectMethod = typeof(Enumerable).GetMethods().First(m => m.Name.Equals(selectFunction, StringComparison.InvariantCulture)).MakeGenericMethod([itemType, propertyType]);
+         var selectMethod = typeof(Enumerable).GetMethods().First(m => m.Name.Equals(selectFunction, StringComparison.InvariantCulture))
+            .MakeGenericMethod([itemType, propertyType]);
 
          var selectExpression = Expression.Call(selectMethod, expression, predicate);
 
          return selectExpression;
       }
-         
+
       return Expression.Property(expression, propertyName);
    }
-
-
 }
