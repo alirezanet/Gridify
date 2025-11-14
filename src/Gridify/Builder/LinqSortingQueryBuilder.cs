@@ -34,7 +34,7 @@ public class LinqSortingQueryBuilder<T>(IGridifyMapper<T>? mapper = null) : Base
                throw new GridifyOrderingException($"'{ordering.MemberName}' is not nullable type");
             }
 
-            var prop = Expression.Property(exp.Parameters[0], ordering.MemberName);
+            var prop = unary.Operand as MemberExpression ?? Expression.Property(exp.Parameters[0], ordering.MemberName);
             var hasValue = Expression.PropertyOrField(prop, "HasValue");
 
             switch (ordering.OrderingType)
