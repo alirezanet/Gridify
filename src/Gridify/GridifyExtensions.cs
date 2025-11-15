@@ -284,27 +284,8 @@ public static partial class GridifyExtensions
 
    public static bool IsValid<T>(this IGridifyFiltering filtering, IGridifyMapper<T>? mapper = null)
    {
-      if (string.IsNullOrWhiteSpace(filtering.Filter)) return true;
-      try
-      {
-         var parser = new Parser(filtering.Filter!, GridifyGlobalConfiguration.CustomOperators.Operators);
-         var syntaxTree = parser.Parse();
-         if (syntaxTree.Diagnostics.Any())
-            return false;
-
-         var fieldExpressions = syntaxTree.Root.DistinctFieldExpressions();
-
-         mapper ??= new GridifyMapper<T>(true);
-
-         if (fieldExpressions.Any(field => !mapper.HasMap(field.FieldToken.Text)))
-            return false;
-      }
-      catch (Exception)
-      {
-         return false;
-      }
-
-      return true;
+      // Call the new overload with detailed validation and discard the error messages
+      return filtering.IsValid(out _, mapper);
    }
 
    public static bool IsValid<T>(this IGridifyOrdering ordering, IGridifyMapper<T>? mapper = null)
@@ -600,7 +581,7 @@ public static partial class GridifyExtensions
       }
 
       // Now it should be a member expression pointing to a property
-      if (expression is MemberExpression member && member.Member is System.Reflection.PropertyInfo propInfo)
+      if (expression is MemberExpression member && member.Member is PropertyInfo propInfo)
       {
          var propertyType = propInfo.PropertyType;
 

@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Gridify.Tests.IssueTests;
+namespace Gridify.Tests;
 
-public class Issue293Tests
+/// <summary>
+/// Comprehensive tests for GridifyQuery validation functionality.
+/// Tests both the basic IsValid() method and the detailed IsValid(out errors) overload.
+/// </summary>
+public class GridifyQueryValidationTests
 {
    public class TestEntity
    {
@@ -27,8 +31,10 @@ public class Issue293Tests
       Value3 = 3
    }
 
+   #region Tests for IsValid(out List<string> errors) overload
+
    [Fact]
-   public void IsValid_WithValidIntValue_ReturnsTrue()
+   public void IsValid_WithErrors_WithValidIntValue_ReturnsTrue()
    {
       var query = new GridifyQuery { Filter = "IntProperty=123" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -38,7 +44,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithInvalidIntValue_ReturnsFalse()
+   public void IsValid_WithErrors_WithInvalidIntValue_ReturnsFalse()
    {
       var query = new GridifyQuery { Filter = "IntProperty=xyz" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -49,7 +55,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithValidDateTimeValue_ReturnsTrue()
+   public void IsValid_WithErrors_WithValidDateTimeValue_ReturnsTrue()
    {
       var query = new GridifyQuery { Filter = "DateProperty=2024-01-15" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -59,7 +65,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithInvalidDateTimeValue_ReturnsFalse()
+   public void IsValid_WithErrors_WithInvalidDateTimeValue_ReturnsFalse()
    {
       var query = new GridifyQuery { Filter = "DateProperty=notadate" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -70,7 +76,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithValidEnumValue_ReturnsTrue()
+   public void IsValid_WithErrors_WithValidEnumValue_ReturnsTrue()
    {
       var query = new GridifyQuery { Filter = "EnumProperty=Value1" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -80,7 +86,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithInvalidEnumValue_ReturnsFalse()
+   public void IsValid_WithErrors_WithInvalidEnumValue_ReturnsFalse()
    {
       var query = new GridifyQuery { Filter = "EnumProperty=InvalidValue" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -90,7 +96,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithOverflowIntValue_ReturnsFalse()
+   public void IsValid_WithErrors_WithOverflowIntValue_ReturnsFalse()
    {
       var query = new GridifyQuery { Filter = "IntProperty=999999999999999" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -104,7 +110,7 @@ public class Issue293Tests
    [InlineData("false")]
    [InlineData("1")]
    [InlineData("0")]
-   public void IsValid_WithValidBooleanValues_ReturnsTrue(string value)
+   public void IsValid_WithErrors_WithValidBooleanValues_ReturnsTrue(string value)
    {
       var query = new GridifyQuery { Filter = $"BoolProperty={value}" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -114,7 +120,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithInvalidBooleanValue_ReturnsFalse()
+   public void IsValid_WithErrors_WithInvalidBooleanValue_ReturnsFalse()
    {
       var query = new GridifyQuery { Filter = "BoolProperty=notbool" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -124,7 +130,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithValidGuidValue_ReturnsTrue()
+   public void IsValid_WithErrors_WithValidGuidValue_ReturnsTrue()
    {
       var validGuid = Guid.NewGuid().ToString();
       var query = new GridifyQuery { Filter = $"GuidProperty={validGuid}" };
@@ -135,7 +141,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithInvalidGuidValue_ReturnsFalse()
+   public void IsValid_WithErrors_WithInvalidGuidValue_ReturnsFalse()
    {
       var query = new GridifyQuery { Filter = "GuidProperty=not-a-guid" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -145,7 +151,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithMultipleInvalidValues_ReturnsAllErrors()
+   public void IsValid_WithErrors_WithMultipleInvalidValues_ReturnsAllErrors()
    {
       var query = new GridifyQuery
       {
@@ -158,7 +164,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithNullValue_ReturnsTrue()
+   public void IsValid_WithErrors_WithNullValue_ReturnsTrue()
    {
       var query = new GridifyQuery { Filter = "StringProperty=null" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -168,7 +174,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithEmptyValue_ReturnsTrue()
+   public void IsValid_WithErrors_WithEmptyValue_ReturnsTrue()
    {
       var query = new GridifyQuery { Filter = "StringProperty=" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -178,7 +184,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithUnmappedField_ReturnsFalse()
+   public void IsValid_WithErrors_WithUnmappedField_ReturnsFalse()
    {
       var query = new GridifyQuery { Filter = "NonExistentField=123" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -188,16 +194,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_BackwardCompatibility_ExistingIsValidStillWorks()
-   {
-      var query = new GridifyQuery { Filter = "IntProperty=123" };
-      var isValid = query.IsValid<TestEntity>();
-
-      Assert.True(isValid);
-   }
-
-   [Fact]
-   public void IsValid_WithDecimalValue_ReturnsTrue()
+   public void IsValid_WithErrors_WithDecimalValue_ReturnsTrue()
    {
       var query = new GridifyQuery { Filter = "DecimalProperty=123.45" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -207,7 +204,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithInvalidDecimalValue_ReturnsFalse()
+   public void IsValid_WithErrors_WithInvalidDecimalValue_ReturnsFalse()
    {
       var query = new GridifyQuery { Filter = "DecimalProperty=notanumber" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -217,7 +214,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithComplexQuery_ValidatesCorrectly()
+   public void IsValid_WithErrors_WithComplexQuery_ValidatesCorrectly()
    {
       var query = new GridifyQuery
       {
@@ -230,7 +227,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithCustomMapper_ValidatesCorrectly()
+   public void IsValid_WithErrors_WithCustomMapper_ValidatesCorrectly()
    {
       var mapper = new GridifyMapper<TestEntity>()
           .AddMap("CustomInt", x => x.IntProperty);
@@ -243,7 +240,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithNullableIntAndValidValue_ReturnsTrue()
+   public void IsValid_WithErrors_WithNullableIntAndValidValue_ReturnsTrue()
    {
       var query = new GridifyQuery { Filter = "NullableIntProperty=123" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -253,7 +250,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithNullableIntAndInvalidValue_ReturnsFalse()
+   public void IsValid_WithErrors_WithNullableIntAndInvalidValue_ReturnsFalse()
    {
       var query = new GridifyQuery { Filter = "NullableIntProperty=xyz" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -268,7 +265,7 @@ public class Issue293Tests
    [InlineData("IntProperty>=100")]
    [InlineData("IntProperty<=100")]
    [InlineData("IntProperty!=100")]
-   public void IsValid_WithDifferentOperatorsAndValidValues_ReturnsTrue(string filter)
+   public void IsValid_WithErrors_WithDifferentOperatorsAndValidValues_ReturnsTrue(string filter)
    {
       var query = new GridifyQuery { Filter = filter };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -278,7 +275,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithEmptyFilter_ReturnsTrue()
+   public void IsValid_WithErrors_WithEmptyFilter_ReturnsTrue()
    {
       var query = new GridifyQuery { Filter = "" };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -288,7 +285,7 @@ public class Issue293Tests
    }
 
    [Fact]
-   public void IsValid_WithNullFilter_ReturnsTrue()
+   public void IsValid_WithErrors_WithNullFilter_ReturnsTrue()
    {
       var query = new GridifyQuery { Filter = null };
       var isValid = query.IsValid<TestEntity>(out var errors);
@@ -296,4 +293,127 @@ public class Issue293Tests
       Assert.True(isValid);
       Assert.Empty(errors);
    }
+
+   #endregion
+
+   #region Tests for backward compatible IsValid() method
+
+   [Fact]
+   public void IsValid_WithValidIntValue_ReturnsTrue()
+   {
+      var query = new GridifyQuery { Filter = "IntProperty=123" };
+      var isValid = query.IsValid<TestEntity>();
+
+      Assert.True(isValid);
+   }
+
+   [Fact]
+   public void IsValid_WithInvalidIntValue_ReturnsFalse()
+   {
+      var query = new GridifyQuery { Filter = "IntProperty=xyz" };
+      var isValid = query.IsValid<TestEntity>();
+
+      Assert.False(isValid);
+   }
+
+   [Fact]
+   public void IsValid_WithValidDateTimeValue_ReturnsTrue()
+   {
+      var query = new GridifyQuery { Filter = "DateProperty=2024-01-15" };
+      var isValid = query.IsValid<TestEntity>();
+
+      Assert.True(isValid);
+   }
+
+   [Fact]
+   public void IsValid_WithInvalidDateTimeValue_ReturnsFalse()
+   {
+      var query = new GridifyQuery { Filter = "DateProperty=notadate" };
+      var isValid = query.IsValid<TestEntity>();
+
+      Assert.False(isValid);
+   }
+
+   [Fact]
+   public void IsValid_WithValidEnumValue_ReturnsTrue()
+   {
+      var query = new GridifyQuery { Filter = "EnumProperty=Value1" };
+      var isValid = query.IsValid<TestEntity>();
+
+      Assert.True(isValid);
+   }
+
+   [Fact]
+   public void IsValid_WithInvalidEnumValue_ReturnsFalse()
+   {
+      var query = new GridifyQuery { Filter = "EnumProperty=InvalidValue" };
+      var isValid = query.IsValid<TestEntity>();
+
+      Assert.False(isValid);
+   }
+
+   [Fact]
+   public void IsValid_WithUnmappedField_ReturnsFalse()
+   {
+      var query = new GridifyQuery { Filter = "NonExistentField=123" };
+      var isValid = query.IsValid<TestEntity>();
+
+      Assert.False(isValid);
+   }
+
+   [Fact]
+   public void IsValid_WithEmptyFilter_ReturnsTrue()
+   {
+      var query = new GridifyQuery { Filter = "" };
+      var isValid = query.IsValid<TestEntity>();
+
+      Assert.True(isValid);
+   }
+
+   [Fact]
+   public void IsValid_WithNullFilter_ReturnsTrue()
+   {
+      var query = new GridifyQuery { Filter = null };
+      var isValid = query.IsValid<TestEntity>();
+
+      Assert.True(isValid);
+   }
+
+   [Fact]
+   public void IsValid_WithCustomMapper_ValidatesCorrectly()
+   {
+      var mapper = new GridifyMapper<TestEntity>()
+          .AddMap("CustomInt", x => x.IntProperty);
+
+      var query = new GridifyQuery { Filter = "CustomInt=xyz" };
+      var isValid = query.IsValid(mapper);
+
+      Assert.False(isValid);
+   }
+
+   #endregion
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
