@@ -1,9 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using Gridify.Builder;
 using Gridify.Syntax;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Gridify;
 
@@ -282,27 +284,8 @@ public static partial class GridifyExtensions
 
    public static bool IsValid<T>(this IGridifyFiltering filtering, IGridifyMapper<T>? mapper = null)
    {
-      if (string.IsNullOrWhiteSpace(filtering.Filter)) return true;
-      try
-      {
-         var parser = new Parser(filtering.Filter!, GridifyGlobalConfiguration.CustomOperators.Operators);
-         var syntaxTree = parser.Parse();
-         if (syntaxTree.Diagnostics.Any())
-            return false;
-
-         var fieldExpressions = syntaxTree.Root.DistinctFieldExpressions();
-
-         mapper ??= new GridifyMapper<T>(true);
-
-         if (fieldExpressions.Any(field => !mapper.HasMap(field.FieldToken.Text)))
-            return false;
-      }
-      catch (Exception)
-      {
-         return false;
-      }
-
-      return true;
+      // Call the new overload with detailed validation and discard the error messages
+      return filtering.IsValid(out _, mapper);
    }
 
    public static bool IsValid<T>(this IGridifyOrdering ordering, IGridifyMapper<T>? mapper = null)
@@ -483,4 +466,243 @@ public static partial class GridifyExtensions
    }
 
    #endregion
+
+   /// <summary>
+   /// Validates the GridifyQuery including field names and value type compatibility.
+   /// </summary>
+   /// <param name="filtering">The filtering query to validate.</param>
+   /// <param name="validationErrors">List of validation error messages if validation fails.</param>
+   /// <param name="mapper">Optional custom mapper.</param>
+   /// <returns>True if the query is valid; otherwise, false.</returns>
+   public static bool IsValid<T>(
+       this IGridifyFiltering filtering,
+       out List<string> validationErrors,
+       IGridifyMapper<T>? mapper = null)
+   {
+      validationErrors = new List<string>();
+
+      // Empty or null filters are always valid
+      if (string.IsNullOrWhiteSpace(filtering.Filter))
+         return true;
+
+      try
+      {
+         // Parse the filter string into a syntax tree
+         var parser = new Parser(filtering.Filter!, GridifyGlobalConfiguration.CustomOperators.Operators);
+         var syntaxTree = parser.Parse();
+
+         // Check for syntax errors during parsing
+         if (syntaxTree.Diagnostics.Any())
+         {
+            validationErrors.AddRange(syntaxTree.Diagnostics);
+            return false;
+         }
+
+         // Use default auto-generated mapper if none provided
+         mapper ??= new GridifyMapper<T>(true);
+
+         // Use Gridify's built-in method to find all field expressions
+         var fieldExpressions = syntaxTree.Root.DistinctFieldExpressions();
+
+         // Validate each field referenced in the filter
+         foreach (var fieldExp in fieldExpressions)
+         {
+            var fieldName = fieldExp.FieldToken.Text;
+            var gMap = mapper.GetGMap(fieldName);
+
+            // Check if the field is mapped
+            if (gMap == null)
+            {
+               validationErrors.Add($"Field '{fieldName}' is not mapped");
+               continue;
+            }
+
+            // Extract the actual property type from the expression tree
+            var propertyType = ExtractPropertyType(gMap.To);
+            if (propertyType == null)
+            {
+               // Skip validation if we can't determine the type
+               continue;
+            }
+
+            // Find all value expressions associated with this field
+            var valueExpressions = FindValueExpressionsForField(syntaxTree.Root, fieldName);
+
+            // Validate each value against the property type
+            foreach (var (valueExp, operatorKind) in valueExpressions)
+            {
+               // Skip null or default values (handled by query builder)
+               if (valueExp.IsNullOrDefault)
+                  continue;
+
+               var valueText = valueExp.ValueToken.Text;
+
+               // Allow "null" keyword for null searches if configured
+               if (GridifyGlobalConfiguration.AllowNullSearch &&
+                   valueText == "null" &&
+                   operatorKind is SyntaxKind.Equal or SyntaxKind.NotEqual)
+                  continue;
+
+               // Attempt to convert the value to the target type
+               if (!TryConvertValue(valueText, propertyType, out var errorMessage))
+               {
+                  validationErrors.Add($"Cannot convert value '{valueText}' to type '{propertyType.Name}' for field '{fieldName}': {errorMessage}");
+               }
+            }
+         }
+
+         return validationErrors.Count == 0;
+      }
+      catch (Exception ex)
+      {
+         validationErrors.Add($"Validation error: {ex.Message}");
+         return false;
+      }
+   }
+
+   /// <summary>
+   /// Extracts the actual property type from an expression tree.
+   /// Handles lambda expressions, unary conversions (boxing), and member expressions.
+   /// </summary>
+   /// <param name="expression">The expression to analyze</param>
+   /// <returns>The actual property type, or null if it cannot be determined</returns>
+   private static Type? ExtractPropertyType(Expression expression)
+   {
+      // If it's a lambda expression, extract the body
+      if (expression is LambdaExpression lambda)
+      {
+         expression = lambda.Body;
+      }
+
+      // If it's a unary expression (e.g., boxing conversion to object), get the operand
+      if (expression is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
+      {
+         expression = unary.Operand;
+      }
+
+      // Now it should be a member expression pointing to a property
+      if (expression is MemberExpression member && member.Member is PropertyInfo propInfo)
+      {
+         var propertyType = propInfo.PropertyType;
+
+         // Handle nullable types - extract the underlying type
+         var underlyingType = Nullable.GetUnderlyingType(propertyType);
+         return underlyingType ?? propertyType;
+      }
+
+      return null;
+   }
+
+   /// <summary>
+   /// Finds all value expressions associated with a specific field in the syntax tree.
+   /// </summary>
+   /// <param name="root">The root expression to search</param>
+   /// <param name="fieldName">The field name to look for</param>
+   /// <returns>List of tuples containing the value expression and its operator</returns>
+   private static List<(ValueExpressionSyntax Value, SyntaxKind Operator)> FindValueExpressionsForField(
+       ExpressionSyntax root,
+       string fieldName)
+   {
+      var results = new List<(ValueExpressionSyntax, SyntaxKind)>();
+      TraverseForValues(root, fieldName, results);
+      return results;
+   }
+
+   /// <summary>
+   /// Recursively traverses the syntax tree to find value expressions for a specific field.
+   /// </summary>
+   /// <param name="expression">Current expression node</param>
+   /// <param name="fieldName">Field name to match</param>
+   /// <param name="results">Collection to add results to</param>
+   private static void TraverseForValues(
+       ExpressionSyntax expression,
+       string fieldName,
+       List<(ValueExpressionSyntax, SyntaxKind)> results)
+   {
+      if (expression is BinaryExpressionSyntax binary)
+      {
+         // Check if this binary expression matches our field
+         if (binary.Left is FieldExpressionSyntax field &&
+             field.FieldToken.Text == fieldName &&
+             binary.Right is ValueExpressionSyntax value)
+         {
+            results.Add((value, binary.OperatorToken.Kind));
+         }
+
+         // Recursively traverse left and right branches
+         TraverseForValues(binary.Left, fieldName, results);
+         TraverseForValues(binary.Right, fieldName, results);
+      }
+      else if (expression is ParenthesizedExpressionSyntax parenthesized)
+      {
+         // Unwrap parenthesized expressions
+         TraverseForValues(parenthesized.Expression, fieldName, results);
+      }
+   }
+
+   /// <summary>
+   /// Attempts to convert a string value to a target type using TypeConverter.
+   /// Includes special handling for bool and Guid types.
+   /// </summary>
+   /// <param name="value">String value to convert</param>
+   /// <param name="targetType">Type to convert to</param>
+   /// <param name="errorMessage">Error message if conversion fails</param>
+   /// <returns>True if conversion is possible; otherwise false</returns>
+   private static bool TryConvertValue(string value, Type targetType, out string errorMessage)
+   {
+      errorMessage = string.Empty;
+
+      try
+      {
+         // Special handling for boolean values
+         if (targetType == typeof(bool))
+         {
+            if (value is "true" or "false" or "True" or "False" or "1" or "0")
+               return true;
+            errorMessage = "Invalid boolean value";
+            return false;
+         }
+
+         // Special handling for GUID values
+         if (targetType == typeof(Guid))
+         {
+            if (Guid.TryParse(value, out _))
+               return true;
+            errorMessage = "Invalid GUID format";
+            return false;
+         }
+
+         // Use TypeConverter for all other types
+         var converter = TypeDescriptor.GetConverter(targetType);
+         if (converter.CanConvertFrom(typeof(string)))
+         {
+            // Attempt the actual conversion to validate
+            converter.ConvertFromString(value);
+            return true;
+         }
+
+         errorMessage = $"No type converter available";
+         return false;
+      }
+      catch (FormatException)
+      {
+         errorMessage = "Invalid format";
+         return false;
+      }
+      catch (OverflowException)
+      {
+         errorMessage = "Value is too large or too small";
+         return false;
+      }
+      catch (ArgumentException ex)
+      {
+         errorMessage = ex.Message;
+         return false;
+      }
+      catch (Exception ex)
+      {
+         errorMessage = ex.Message;
+         return false;
+      }
+   }
 }
