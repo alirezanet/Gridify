@@ -10,7 +10,7 @@
       <PackageReference Include="AutoBogus" Version="2.13.1" />
       <PackageReference Include="BenchmarkDotNet" Version="0.15.6" />
       <PackageReference Include="Fop" Version="1.0.3" />
-      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0-2.final" />
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" Version="9.6.10" />
       <PackageReference Include="Sieve" Version="3.0.0-beta0015" />
     </ItemGroup>
