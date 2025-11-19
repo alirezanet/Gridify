@@ -28,7 +28,7 @@
    </ItemGroup>
 
    <ItemGroup>
-      <PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.18.*" />
+      <PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.2.1" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
    </ItemGroup>
 
