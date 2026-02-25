@@ -518,6 +518,22 @@ public class GridifyExtensionsTests
    }
 
    [Theory]
+   // string equals with CaseInsensitiveFiltering should produce correct field name (not empty .keyword)
+   [InlineData("Name=John", """{"term":{"Name.keyword":{"value":"John"}}}""")]
+   [InlineData("Name!=John", """{"bool":{"must_not":{"term":{"Name.keyword":{"value":"John"}}}}}""")]
+   [InlineData("Name=*ohn", """{"wildcard":{"Name.keyword":{"value":"*ohn*"}}}""")]
+   public void ToElasticsearchQuery_WhenCalledWithGlobalCaseInsensitiveFiltering_ShouldProduceCorrectFieldName(
+      string filter, string expected)
+   {
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true)
+      {
+         Configuration = { CaseInsensitiveFiltering = true }
+      };
+
+      AssertFilter(filter, expected, mapper);
+   }
+
+   [Theory]
    [InlineData("Id asc", """[{"Id":{"order":"asc"}}]""")]
    [InlineData("Id desc", """[{"Id":{"order":"desc"}}]""")]
    [InlineData("Id asc, Name desc", """[{"Id":{"order":"asc"}},{"Name.keyword":{"order":"desc"}}]""")]

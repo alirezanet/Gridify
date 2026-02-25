@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -54,6 +54,11 @@ internal static class ExpressionExtensions
       {
          // Handle cases when TValue is object and implicit conversion exists
          VisitMemberAccessChain(unaryExpression.Operand, result);
+      }
+      else if (expression is MethodCallExpression { Object: not null } methodCallExpression)
+      {
+         // Handle cases when the expression is a method call on a member (e.g. ToLower() for case-insensitive filtering)
+         VisitMemberAccessChain(methodCallExpression.Object, result);
       }
    }
 }
