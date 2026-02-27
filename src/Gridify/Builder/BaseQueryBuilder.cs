@@ -10,6 +10,7 @@ namespace Gridify.Builder;
 internal abstract class BaseQueryBuilder
 {
    internal static MemberNullPropagationVisitor MemberNullPropagatorVisitor { get; } = new();
+   internal static readonly Regex SelectRegex = new Regex(@"\.Select\s*\(", RegexOptions.Compiled);
 }
 
 public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
@@ -137,7 +138,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
                exprMapTarget = (Expression<Func<T, object?>>)UpdateIndexerKey(exprMapTarget, fieldExpression!.Indexer!);
 
             // Check if this expression is a nested collection
-            var exprIsNested = Regex.IsMatch(exprMapTarget.ToString(), @"\.Select\s*\(", RegexOptions.Compiled);
+            var exprIsNested = BaseQueryBuilder.SelectRegex.IsMatch(exprMapTarget.ToString());
 
             TQuery? currentQuery;
             if (exprIsNested)
