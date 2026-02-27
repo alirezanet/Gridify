@@ -12,3 +12,4 @@ docs/.vuepress/dist
 /*.user
 client/dist
 global.json
+.nuget/
