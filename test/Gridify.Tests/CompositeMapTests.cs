@@ -6,7 +6,7 @@ using Xunit;
 namespace Gridify.Tests;
 
 /// <summary>
-/// Basic tests for CompositeMap feature - tests only what currently works
+/// Comprehensive tests for CompositeMap feature covering all working operators
 /// </summary>
 public class CompositeMapBasicTests
 {
@@ -27,11 +27,8 @@ public class CompositeMapBasicTests
    [Fact]
    public void AddCompositeMap_WithMultipleProperties_ShouldCreateCompositeMapping()
    {
-      // Arrange
       var mapper = new GridifyMapper<TestClass>()
           .AddCompositeMap("search", x => x.Name, x => x.Tag);
-
-      // Assert
       Assert.True(mapper.HasMap("search"));
       var gMap = mapper.GetGMap("search");
       Assert.NotNull(gMap);
@@ -44,131 +41,180 @@ public class CompositeMapBasicTests
    [Fact]
    public void AddCompositeMap_WithEmptyExpressions_ShouldThrowException()
    {
-      // Arrange
       var mapper = new GridifyMapper<TestClass>();
-
-      // Act & Assert
       Assert.Throws<GridifyMapperException>(() => mapper.AddCompositeMap("search"));
    }
 
    [Fact]
-   public void CompositeMap_ExactMatchOnFirstProperty()
+   public void CompositeMap_Equal_Operator()
    {
-      // Arrange
       var mapper = new GridifyMapper<TestClass>()
           .AddCompositeMap("search", x => x.Name, x => x.Tag);
-
-      var gridifyQuery = new GridifyQuery { Filter = "search=John" };
-
-      // Act
-      var result = _fakeRepository.AsQueryable().ApplyFiltering(gridifyQuery, mapper).ToList();
-
-      // Assert
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=John", mapper).ToList();
       Assert.Single(result);
       Assert.Equal("John", result[0].Name);
    }
 
    [Fact]
-   public void CompositeMap_ExactMatchOnSecondProperty()
+   public void CompositeMap_Equal_MatchesSecondProperty()
    {
-      // Arrange
       var mapper = new GridifyMapper<TestClass>()
           .AddCompositeMap("search", x => x.Name, x => x.Tag);
-
-      var gridifyQuery = new GridifyQuery { Filter = "search=TagB" };
-
-      // Act
-      var result = _fakeRepository.AsQueryable().ApplyFiltering(gridifyQuery, mapper).ToList();
-
-      // Assert
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=TagB", mapper).ToList();
       Assert.Single(result);
       Assert.Equal("Bob", result[0].Name);
    }
 
    [Fact]
-   public void CompositeMap_WithDifferentTypes_IntAndString()
+   public void CompositeMap_StartsWith_Operator()
    {
-      // Arrange
-      var mapper = new GridifyMapper<TestClass>()
-          .AddCompositeMap("search", x => (object)x.Id, x => x.Name);
+      var mapper = new GridifyMapper<TestClass>(cfg => cfg.CaseInsensitiveFiltering = true)
+          .AddCompositeMap("search", x => x.Name, x => x.Tag);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search^Tag", mapper).ToList();
+      Assert.Equal(5, result.Count);
+   }
 
-      var gridifyQuery = new GridifyQuery { Filter = "search=1" };
-
-      // Act
-      var result = _fakeRepository.AsQueryable().ApplyFiltering(gridifyQuery, mapper).ToList();
-
-      // Assert - should find Id=1
+   [Fact]
+   public void CompositeMap_EndsWith_Operator()
+   {
+      var mapper = new GridifyMapper<TestClass>(cfg => cfg.CaseInsensitiveFiltering = true)
+          .AddCompositeMap("search", x => x.Name, x => x.Tag);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search$hn", mapper).ToList();
       Assert.Single(result);
-      Assert.Equal(1, result[0].Id);
+      Assert.Equal("John", result[0].Name);
+   }
+
+   [Fact]
+   public void CompositeMap_WithConvertor()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", val => val.ToUpper(), x => x.Name, x => x.Tag);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=john", mapper).ToList();
+      Assert.Empty(result);
+   }
+
+   [Fact]
+   public void CompositeMap_WithConvertor_MatchesAfterConversion()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", val => val.ToUpper(), x => x.Name.ToUpper(), x => x.Tag.ToUpper());
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=john", mapper).ToList();
+      Assert.Single(result);
+      Assert.Equal("John", result[0].Name);
+   }
+
+   [Fact]
+   public void CompositeMap_GreaterThan_OnNumericProperty()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", x => (object)x.Id);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search>3", mapper).ToList();
+      Assert.Equal(2, result.Count);
+      Assert.True(result.All(x => x.Id > 3));
+   }
+
+   [Fact]
+   public void CompositeMap_LessThan_OnNumericProperty()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", x => (object)x.Id);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search<3", mapper).ToList();
+      Assert.Equal(2, result.Count);
+      Assert.True(result.All(x => x.Id < 3));
+   }
+
+   [Fact]
+   public void CompositeMap_GreaterOrEqual_OnNumericProperty()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", x => (object)x.Id);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search>=4", mapper).ToList();
+      Assert.Equal(2, result.Count);
+      Assert.True(result.All(x => x.Id >= 4));
+   }
+
+   [Fact]
+   public void CompositeMap_LessOrEqual_OnNumericProperty()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", x => (object)x.Id);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search<=2", mapper).ToList();
+      Assert.Equal(2, result.Count);
+      Assert.True(result.All(x => x.Id <= 2));
    }
 
    [Fact]
    public void CompositeMap_CombinedWithOtherFilters_UsingOr()
    {
-      // Arrange
       var mapper = new GridifyMapper<TestClass>()
           .AddCompositeMap("search", x => x.Name, x => x.Tag)
           .AddMap("id", x => x.Id);
-
-      var gridifyQuery = new GridifyQuery { Filter = "search=John|id=2" };
-
-      // Act
-      var result = _fakeRepository.AsQueryable().ApplyFiltering(gridifyQuery, mapper).ToList();
-
-      // Assert - should find John OR Id=2
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=John|id=2", mapper).ToList();
       Assert.Equal(2, result.Count);
       Assert.Contains(result, x => x.Name == "John");
       Assert.Contains(result, x => x.Id == 2);
    }
 
    [Fact]
+   public void CompositeMap_CombinedWithOtherFilters_UsingAnd()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", x => x.Name, x => x.Tag)
+          .AddMap("id", x => x.Id);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=John,id=1", mapper).ToList();
+      Assert.Single(result);
+      Assert.Equal("John", result[0].Name);
+      Assert.Equal(1, result[0].Id);
+   }
+
+   [Fact]
    public void CompositeMap_WithThreeProperties()
    {
-      // Arrange
       var mapper = new GridifyMapper<TestClass>()
           .AddCompositeMap("search", x => x.Name, x => x.Tag, x => (object)x.Id);
-
-      var gridifyQuery = new GridifyQuery { Filter = "search=5" };
-
-      // Act
-      var result = _fakeRepository.AsQueryable().ApplyFiltering(gridifyQuery, mapper).ToList();
-
-      // Assert - should find Id=5
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=5", mapper).ToList();
       Assert.Single(result);
       Assert.Equal(5, result[0].Id);
    }
 
    [Fact]
-   public void CompositeMap_CanBeOverridden()
+   public void CompositeMap_WithGuidType()
    {
-      // Arrange
       var mapper = new GridifyMapper<TestClass>()
-          .AddCompositeMap("search", x => x.Name, x => x.Tag)
-          .AddCompositeMap("search", x => x.Name); // Override with single property
-
-      var gridifyQuery = new GridifyQuery { Filter = "search=TagA" };
-
-      // Act
-      var result = _fakeRepository.AsQueryable().ApplyFiltering(gridifyQuery, mapper).ToList();
-
-      // Assert - should not find anything because we're only searching Name now, not Tag
-      Assert.Empty(result);
+          .AddCompositeMap("search", x => (object)x.MyGuid, x => x.Name);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=00000000-0000-0000-0000-000000000001", mapper).ToList();
+      Assert.Single(result);
+      Assert.Equal(1, result[0].Id);
    }
 
    [Fact]
-   public void CompositeMap_WithGuidType()
+   public void CompositeMap_WithMixedStringTypes()
    {
-      // Arrange
       var mapper = new GridifyMapper<TestClass>()
-          .AddCompositeMap("search", x => (object)x.MyGuid, x => x.Name);
-
-      var gridifyQuery = new GridifyQuery { Filter = "search=00000000-0000-0000-0000-000000000001" };
-
-      // Act
-      var result = _fakeRepository.AsQueryable().ApplyFiltering(gridifyQuery, mapper).ToList();
-
-      // Assert - should find by GUID
+          .AddCompositeMap("search", x => x.Name, x => x.Tag);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=Bob", mapper).ToList();
       Assert.Single(result);
-      Assert.Equal(1, result[0].Id);
+      Assert.Equal("Bob", result[0].Name);
+   }
+
+   [Fact]
+   public void CompositeMap_ParenthesizedExpression()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", x => x.Name, x => x.Tag)
+          .AddMap("id", x => x.Id);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("(search=John|id=2),id<3", mapper).ToList();
+      Assert.True(result.Count > 0);
+      Assert.True(result.All(x => x.Id < 3));
+   }
+
+   [Fact]
+   public void CompositeMap_CanBeOverridden()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", x => x.Name, x => x.Tag)
+          .AddCompositeMap("search", x => x.Name); // Override
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=TagA", mapper).ToList();
+      Assert.Empty(result); // Only searches Name now, not Tag
    }
 }

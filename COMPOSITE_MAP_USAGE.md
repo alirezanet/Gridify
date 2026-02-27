@@ -18,6 +18,19 @@ var mapper = new GridifyMapper<Course>()
 // Will search for xyz in both StudentKey AND StudentKeyNavigation.Name
 ```
 
+### With Shared Convertor
+
+```csharp
+var mapper = new GridifyMapper<Product>()
+    .AddCompositeMap("search", 
+        value => value.ToUpper(),  // Shared convertor for all expressions
+        x => x.Name.ToUpper(),
+        x => x.Description.ToUpper());
+
+// Filter: search=phone
+// Converts "phone" to "PHONE" and searches across both properties
+```
+
 ### With Different Property Types
 
 ```csharp
@@ -33,10 +46,52 @@ var mapper = new GridifyMapper<Product>()
 
 ## Supported Operations
 
-✅ **Exact Match**
+✅ **Exact Match** (`=`)
 ```csharp
 var query = new GridifyQuery { Filter = "search=John" };
 // Matches Name=John OR Tag=John
+```
+
+✅ **Not Equal** (`!=`)
+```csharp
+var query = new GridifyQuery { Filter = "search!=John" };
+// Matches Name!=John OR Tag!=John
+```
+
+✅ **Greater Than** (`>`)
+```csharp
+var query = new GridifyQuery { Filter = "search>3" };
+// Matches Id>3 (on numeric properties)
+```
+
+✅ **Less Than** (`<`)
+```csharp
+var query = new GridifyQuery { Filter = "search<3" };
+// Matches Id<3
+```
+
+✅ **Greater Or Equal** (`>=`)
+```csharp
+var query = new GridifyQuery { Filter = "search>=4" };
+// Matches Id>=4
+```
+
+✅ **Less Or Equal** (`<=`)
+```csharp
+var query = new GridifyQuery { Filter = "search<=2" };
+// Matches Id<=2
+```
+
+✅ **Starts With** (`^`)
+```csharp
+var query = new GridifyQuery { Filter = "search^John" };
+// Matches Name starting with "John" OR Tag starting with "John"
+```
+
+✅ **Ends With** (`$`)
+```csharp
+var query = new GridifyQuery { Filter = "search$son" };
+// Matches Name ending with "son" OR Tag ending with "son"
 ```
 
 ✅ **Combining with Other Filters**
@@ -46,14 +101,6 @@ var query = new GridifyQuery { Filter = "search=John|id=5" };
 
 var query = new GridifyQuery { Filter = "search=John,id>5" };
 // Matches (Name=John OR Tag=John) AND Id>5
-```
-
-✅ **Multiple Property Types**
-```csharp
-.AddCompositeMap("search",
-    x => x.Name,           // string
-    x => (object)x.Id,     // int
-    x => (object)x.MyGuid) // Guid
 ```
 
 ## Complete Example
@@ -99,9 +146,8 @@ var results = dbContext.Courses
 
 The following features are **not yet supported** for composite maps but may be added in future releases:
 
-❌ **Wildcard Searches** - `*text*`, `text*`, `*text`  
-❌ **Custom Converters** - Using `convertor` parameter  
-❌ **Complex nested scenarios** - May need additional testing
+❌ **Wildcard Contains Searches** - `*text*` returns 0 results  
+❌ **Custom Operators** - Only built-in operators are currently tested
 
 For these scenarios, continue using individual `AddMap` calls combined with `|` (OR) operator in the filter string.
 
@@ -110,20 +156,35 @@ For these scenarios, continue using individual `AddMap` calls combined with `|` 
 ### AddCompositeMap
 
 ```csharp
+// Without convertor
 IGridifyMapper<T> AddCompositeMap(
     string from,
+    params Expression<Func<T, object?>>[] expressions)
+
+// With convertor
+IGridifyMapper<T> AddCompositeMap(
+    string from,
+    Func<string, object>? convertor,
     params Expression<Func<T, object?>>[] expressions)
 ```
 
 **Parameters:**
 - `from`: The field name to use in filters
+- `convertor`: Optional shared value converter function applied to filter values
 - `expressions`: One or more property expressions to search across
 
 **Returns:** The mapper instance for method chaining
 
-**Example:**
+**Examples:**
 ```csharp
+// Simple usage
 mapper.AddCompositeMap("search", x => x.Name, x => x.Email, x => x.Phone);
+
+// With convertor
+mapper.AddCompositeMap("search", 
+    val => val.ToUpper(), 
+    x => x.Name.ToUpper(), 
+    x => x.Email.ToUpper());
 ```
 
 ## Benefits
@@ -131,21 +192,22 @@ mapper.AddCompositeMap("search", x => x.Name, x => x.Email, x => x.Phone);
 1. **Cleaner Frontend Code** - Send `search=value` instead of `name=value|email=value|phone=value`
 2. **Backend Control** - Change which fields are searched without frontend changes
 3. **Type Safety** - Compile-time checking of property expressions
-4. **Performance** - Generates efficient OR queries in SQL/LINQ
-5. **Composability** - Works with existing Gridify features
+4. **Shared Convertors** - Apply value transformation across all properties
+5. **Performance** - Generates efficient OR queries in SQL/LINQ
+6. **Composability** - Works with existing Gridify features
 
 ## Migration from Manual OR Filters
 
 **Before:**
 ```csharp
-// Frontend sends: students.key=*xyz|students.name=*xyz
+// Frontend sends: students.key=xyz|students.name=xyz
 mapper.AddMap("students.key", task => task.StudentAssignments.Select(row => row.StudentKey))
       .AddMap("students.name", task => task.StudentAssignments.Select(row => row.StudentKeyNavigation.Name));
 ```
 
 **After:**
 ```csharp
-// Frontend sends: students=xyz (exact match currently)
+// Frontend sends: students=xyz
 mapper.AddCompositeMap("students",
     task => task.StudentAssignments.Select(row => row.StudentKey),
     task => task.StudentAssignments.Select(row => row.StudentKeyNavigation.Name));
@@ -155,5 +217,7 @@ mapper.AddCompositeMap("students",
 
 - Composite maps are treated as a single logical field
 - All expressions are combined with OR logic
+- Shared convertors are applied to filter values before comparison
 - The feature works with EF Core, EF6, and in-memory collections
 - Compile-time type safety is maintained for all expressions
+- Most Gridify operators are supported (=, !=, >, <, >=, <=, ^, $)
