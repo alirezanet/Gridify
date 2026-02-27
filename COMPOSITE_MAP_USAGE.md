@@ -1,8 +1,8 @@
-# Composite Map Feature - Usage Examples
+# Composite Map Feature - Usage Guide
 
 ## Overview
 
-The Composite Map feature allows you to search across multiple properties with a single filter reference, automatically combining them with OR logic. This is particularly useful when you want users to search a single field that should match against multiple entity properties.
+The Composite Map feature allows you to search across multiple properties with a single filter reference, automatically combining them with OR logic. This eliminates the need to construct complex filter strings on the frontend.
 
 ## Basic Usage
 
@@ -14,8 +14,8 @@ var mapper = new GridifyMapper<Course>()
         x => x.StudentAssignments.Select(s => s.StudentKey),
         x => x.StudentAssignments.Select(s => s.StudentKeyNavigation.Name));
 
-// Filter: student=xyz
-// Will search for xyz in both StudentKey AND StudentKeyNavigation.Name
+// Frontend sends: student=xyz
+// Generates: WHERE StudentKey = 'xyz' OR Name = 'xyz'
 ```
 
 ### With Shared Convertor
@@ -41,66 +41,7 @@ var mapper = new GridifyMapper<Product>()
         x => (object)x.Id);  // Cast to object for non-string types
 
 // Filter: search=123
-// Will search in Name, Description, and Id
-```
-
-## Supported Operations
-
-✅ **Exact Match** (`=`)
-```csharp
-var query = new GridifyQuery { Filter = "search=John" };
-// Matches Name=John OR Tag=John
-```
-
-✅ **Not Equal** (`!=`)
-```csharp
-var query = new GridifyQuery { Filter = "search!=John" };
-// Matches Name!=John OR Tag!=John
-```
-
-✅ **Greater Than** (`>`)
-```csharp
-var query = new GridifyQuery { Filter = "search>3" };
-// Matches Id>3 (on numeric properties)
-```
-
-✅ **Less Than** (`<`)
-```csharp
-var query = new GridifyQuery { Filter = "search<3" };
-// Matches Id<3
-```
-
-✅ **Greater Or Equal** (`>=`)
-```csharp
-var query = new GridifyQuery { Filter = "search>=4" };
-// Matches Id>=4
-```
-
-✅ **Less Or Equal** (`<=`)
-```csharp
-var query = new GridifyQuery { Filter = "search<=2" };
-// Matches Id<=2
-```
-
-✅ **Starts With** (`^`)
-```csharp
-var query = new GridifyQuery { Filter = "search^John" };
-// Matches Name starting with "John" OR Tag starting with "John"
-```
-
-✅ **Ends With** (`$`)
-```csharp
-var query = new GridifyQuery { Filter = "search$son" };
-// Matches Name ending with "son" OR Tag ending with "son"
-```
-
-✅ **Combining with Other Filters**
-```csharp
-var query = new GridifyQuery { Filter = "search=John|id=5" };
-// Matches (Name=John OR Tag=John) OR Id=5
-
-var query = new GridifyQuery { Filter = "search=John,id>5" };
-// Matches (Name=John OR Tag=John) AND Id>5
+// Searches in Name, Description, and Id
 ```
 
 ## Complete Example
@@ -131,25 +72,17 @@ var mapper = new GridifyMapper<Course>()
         task => task.StudentAssignments.Select(row => row.StudentKey),
         task => task.StudentAssignments.Select(row => row.StudentKeyNavigation.Name));
 
-// Usage
-var query = new GridifyQuery { Filter = "student=xyz" };
+// Usage - all Gridify operators are supported
+var query1 = new GridifyQuery { Filter = "student=xyz" };        // Exact match
+var query2 = new GridifyQuery { Filter = "student=*xyz*" };      // Contains
+var query3 = new GridifyQuery { Filter = "student=xyz*" };       // Starts with
+var query4 = new GridifyQuery { Filter = "student!=xyz" };       // Not equal
+var query5 = new GridifyQuery { Filter = "student>100" };        // Greater than
+
 var results = dbContext.Courses
-    .ApplyFiltering(query, mapper)
+    .ApplyFiltering(query1, mapper)
     .ToList();
-
-// SQL Generated will have: 
-// WHERE StudentAssignments.StudentKey = 'xyz' 
-//    OR StudentAssignments.StudentKeyNavigation.Name = 'xyz'
 ```
-
-## Current Limitations
-
-The following features are **not yet supported** for composite maps but may be added in future releases:
-
-❌ **Wildcard Contains Searches** - `*text*` returns 0 results  
-❌ **Custom Operators** - Only built-in operators are currently tested
-
-For these scenarios, continue using individual `AddMap` calls combined with `|` (OR) operator in the filter string.
 
 ## API Reference
 
@@ -187,27 +120,45 @@ mapper.AddCompositeMap("search",
     x => x.Email.ToUpper());
 ```
 
+## Supported Operators
+
+Composite maps support **all** Gridify operators:
+
+- `=` - Equal
+- `!=` - Not Equal  
+- `>`, `<`, `>=`, `<=` - Comparison operators
+- `=*` or `*text*` - Contains
+- `text*` - Starts with
+- `*text` - Ends with (when using `=` operator)
+- `!*` - Not contains
+- `!text*` - Not starts with
+- `!*text` - Not ends with
+- `^` - Starts with operator
+- `$` - Ends with operator
+- `!^`, `!$` - Negated starts/ends with
+- Custom operators defined via `GridifyGlobalConfiguration`
+
 ## Benefits
 
 1. **Cleaner Frontend Code** - Send `search=value` instead of `name=value|email=value|phone=value`
 2. **Backend Control** - Change which fields are searched without frontend changes
 3. **Type Safety** - Compile-time checking of property expressions
 4. **Shared Convertors** - Apply value transformation across all properties
-5. **Performance** - Generates efficient OR queries in SQL/LINQ
-6. **Composability** - Works with existing Gridify features
+5. **Performance** - Generates efficient OR queries that work with query providers
+6. **Composability** - Works with all Gridify features and operators
 
 ## Migration from Manual OR Filters
 
 **Before:**
 ```csharp
-// Frontend sends: students.key=xyz|students.name=xyz
+// Frontend sends: students.key=*xyz|students.name=*xyz
 mapper.AddMap("students.key", task => task.StudentAssignments.Select(row => row.StudentKey))
       .AddMap("students.name", task => task.StudentAssignments.Select(row => row.StudentKeyNavigation.Name));
 ```
 
 **After:**
 ```csharp
-// Frontend sends: students=xyz
+// Frontend sends: students=*xyz
 mapper.AddCompositeMap("students",
     task => task.StudentAssignments.Select(row => row.StudentKey),
     task => task.StudentAssignments.Select(row => row.StudentKeyNavigation.Name));
@@ -218,6 +169,6 @@ mapper.AddCompositeMap("students",
 - Composite maps are treated as a single logical field
 - All expressions are combined with OR logic
 - Shared convertors are applied to filter values before comparison
-- The feature works with EF Core, EF6, and in-memory collections
+- The feature works with all query providers (Entity Framework, in-memory collections, etc.)
 - Compile-time type safety is maintained for all expressions
-- Most Gridify operators are supported (=, !=, >, <, >=, <=, ^, $)
+- All Gridify operators are fully supported
