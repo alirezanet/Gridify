@@ -372,8 +372,10 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
          var toLowerCall = Expression.Call(selectParam, MethodInfoHelper.GetToLowerMethod());
          var selectLambda = Expression.Lambda(toLowerCall, selectParam);
          var selectMethod = typeof(Enumerable).GetMethods()
-            .First(m => m.Name == "Select" && m.GetParameters().Length == 2)
-            .MakeGenericMethod(tp, typeof(string));
+            .FirstOrDefault(m => m.Name == "Select" && m.GetParameters().Length == 2)
+            ?.MakeGenericMethod(tp, typeof(string));
+         if (selectMethod == null)
+            throw new GridifyFilteringException("Could not find the Select method for case-insensitive collection filtering.");
          collectionExp = Expression.Call(selectMethod, prop, selectLambda);
       }
 

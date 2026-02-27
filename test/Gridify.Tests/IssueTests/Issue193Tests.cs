@@ -15,7 +15,7 @@ public class Issue193Tests
       // arrange
       var dataSource = Test.GetTestDataSource();
 
-      var expected = dataSource.Where(q => q.FavouriteColorList.Select(c => c.ToLower()).Contains("red") |
+      var expected = dataSource.Where(q => q.FavouriteColorList.Select(c => c.ToLower()).Contains("red") ||
                                            q.FavouriteColorList.Select(c => c.ToLower()).Contains("blue"))
          .ToList();
 
@@ -34,7 +34,7 @@ public class Issue193Tests
       // arrange
       var dataSource = Test.GetTestDataSource();
 
-      var expected = dataSource.Where(q => q.FavouriteColorList.Select(c => c.ToLower()).Contains("red") |
+      var expected = dataSource.Where(q => q.FavouriteColorList.Select(c => c.ToLower()).Contains("red") ||
                                            q.FavouriteColorList.Select(c => c.ToLower()).Contains("blue"))
          .ToList();
 
