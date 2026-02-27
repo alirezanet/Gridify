@@ -1,0 +1,29 @@
+--- test/Gridify.Tests/CompositeMapTests.cs
++++ test/Gridify.Tests/CompositeMapTests.cs
+@@ -89,7 +89,7 @@ namespace Gridify.Tests;
+     public void CompositeMap_SearchAcrossMultipleProperties_OrBehavior()
+     {
+        // Arrange
+-       var mapper = new GridifyMapper<TestClass>()
++       var mapper = new GridifyMapper<TestClass>(cfg => cfg.CaseInsensitiveFiltering = true)
+            .AddCompositeMap("search", x => x.Name, x => x.Tag);
+ 
+        var gridifyQuery = new GridifyQuery { Filter = "search=*a*" };
+@@ -125,7 +125,7 @@ namespace Gridify.Tests;
+     public void CompositeMap_WithStartsWith()
+     {
+        // Arrange
+-       var mapper = new GridifyMapper<TestClass>()
++       var mapper = new GridifyMapper<TestClass>(cfg => cfg.CaseInsensitiveFiltering = true)
+            .AddCompositeMap("search", x => x.Name, x => x.Tag);
+ 
+        var gridifyQuery = new GridifyQuery { Filter = "search=^Tag" };
+@@ -141,7 +141,7 @@ namespace Gridify.Tests;
+     public void CompositeMap_CombinedWithOtherFilters_UsingAnd()
+     {
+        // Arrange
+-       var mapper = new GridifyMapper<TestClass>()
++       var mapper = new GridifyMapper<TestClass>(cfg => cfg.CaseInsensitiveFiltering = true)
+            .AddCompositeMap("search", x => x.Name, x => x.Tag)
+            .AddMap("id", x => x.Id);
+ 
