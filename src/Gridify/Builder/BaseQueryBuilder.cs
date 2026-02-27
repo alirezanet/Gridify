@@ -286,39 +286,38 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
 
          if (isLikeOperator || hasLeadingWildcard || hasTrailingWildcard)
          {
-            // Strip wildcards from value
+            // Strip wildcards from value using modern C# syntax
             var processedValue = wildcardValue;
             if (hasLeadingWildcard)
-               processedValue = processedValue.Substring(1);
+               processedValue = processedValue[1..];
             if (hasTrailingWildcard)
-               processedValue = processedValue.Substring(0, processedValue.Length - 1);
+               processedValue = processedValue[..^1];
 
             value = processedValue;
 
             // Convert operator based on context
             var isNegated = op.Kind is SyntaxKind.NotLike or SyntaxKind.NotEqual;
 
-            if (isLikeOperator)
+            if (!isLikeOperator)
             {
-               // Already Like/NotLike (from =* or !* operator), keep as Contains
-               // Just strip any trailing wildcard from value
-               // e.g., "name=*text" or "name=*text*" both become Contains
+               // For Equal/NotEqual operators with wildcards in values, convert to appropriate operator
+               if (hasLeadingWildcard && hasTrailingWildcard)
+               {
+                  // "name=*text*" with = operator -> Contains
+                  op = new SyntaxToken(isNegated ? SyntaxKind.NotLike : SyntaxKind.Like, 0, "");
+               }
+               else if (hasLeadingWildcard)
+               {
+                  // "name=*text" with = operator -> EndsWith
+                  op = new SyntaxToken(isNegated ? SyntaxKind.NotEndsWith : SyntaxKind.EndsWith, 0, "");
+               }
+               else // hasTrailingWildcard
+               {
+                  // "name=text*" with = operator -> StartsWith
+                  op = new SyntaxToken(isNegated ? SyntaxKind.NotStartsWith : SyntaxKind.StartsWith, 0, "");
+               }
             }
-            else if (hasLeadingWildcard && hasTrailingWildcard)
-            {
-               // "name=*text*" with = operator -> Contains
-               op = new SyntaxToken(isNegated ? SyntaxKind.NotLike : SyntaxKind.Like, 0, "");
-            }
-            else if (hasLeadingWildcard)
-            {
-               // "name=*text" with = operator -> EndsWith
-               op = new SyntaxToken(isNegated ? SyntaxKind.NotEndsWith : SyntaxKind.EndsWith, 0, "");
-            }
-            else // hasTrailingWildcard
-            {
-               // "name=text*" with = operator -> StartsWith
-               op = new SyntaxToken(isNegated ? SyntaxKind.NotStartsWith : SyntaxKind.StartsWith, 0, "");
-            }
+            // else: Already Like/NotLike (from =* or !* operator), keep as Contains
          }
       }
 

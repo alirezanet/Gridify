@@ -127,16 +127,38 @@ Composite maps support **all** Gridify operators:
 - `=` - Equal
 - `!=` - Not Equal  
 - `>`, `<`, `>=`, `<=` - Comparison operators
-- `=*` or `*text*` - Contains
-- `text*` - Starts with
-- `*text` - Ends with (when using `=` operator)
+- `^` - Starts with
+- `$` - Ends with
+- `!^`, `!$` - Not starts/ends with
+
+### Wildcard Syntax
+
+Wildcards can be used in two ways:
+
+1. **Using the `=*` operator** (Contains):
+   ```csharp
+   search=*text      // Contains "text"
+   search=*text*     // Contains "text" (trailing * stripped automatically)
+   ```
+
+2. **Using wildcards in values** with `=` operator:
+   ```csharp
+   search=*text*     // Contains "text"
+   search=text*      // Starts with "text"
+   search=*text      // Ends with "text"
+   ```
+
+Both approaches work identically. The `=*` operator is automatically converted to the Like operator (Contains), while wildcards in values are detected and converted to the appropriate operator.
+
+### Negated Wildcards
+
 - `!*` - Not contains
-- `!text*` - Not starts with
-- `!*text` - Not ends with
-- `^` - Starts with operator
-- `$` - Ends with operator
-- `!^`, `!$` - Negated starts/ends with
-- Custom operators defined via `GridifyGlobalConfiguration`
+- `!text*` - Not starts with (using != operator)
+- `!*text` - Not ends with (using != operator)
+
+### Custom Operators
+
+Custom operators defined via `GridifyGlobalConfiguration` are also supported.
 
 ## Benefits
 
