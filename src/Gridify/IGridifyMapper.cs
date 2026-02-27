@@ -19,6 +19,14 @@ public interface IGridifyMapper<T>
    IGridifyMapper<T> AddMap(string from, Func<string, object>? convertor = null!, bool overrideIfExists = true);
 
    /// <summary>
+   /// Adds a composite mapping that combines multiple property expressions with OR logic.
+   /// </summary>
+   /// <param name="from">The field name to map from</param>
+   /// <param name="expressions">Multiple expressions that will be combined with OR logic</param>
+   /// <returns>An instance of <see cref="IGridifyMapper{T}"/> for method chaining</returns>
+   IGridifyMapper<T> AddCompositeMap(string from, params Expression<Func<T, object?>>[] expressions);
+
+   /// <summary>
    /// Generates property mappings for the specified class type <typeparamref name="T"/>.
    /// </summary>
    /// <returns>An instance of <see cref="IGridifyMapper{T}"/> with property mappings.</returns>
