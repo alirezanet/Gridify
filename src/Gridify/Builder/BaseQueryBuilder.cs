@@ -271,6 +271,57 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
 
       object? value = valueExpression.ValueToken.Text;
 
+      // Handle wildcards in values
+      // Supports: "name=*text", "name=*text*", "name=text*", "name=*text"
+      // Note: "name=*text" is parsed as operator Like (from =*) with value "text"
+      //       "name=*text*" is parsed as operator Like (from =*) with value "text*"
+      if (value is string wildcardValue &&
+          op.Kind is SyntaxKind.Like or SyntaxKind.NotLike or SyntaxKind.Equal or SyntaxKind.NotEqual)
+      {
+         var hasTrailingWildcard = wildcardValue.EndsWith("*") && wildcardValue.Length > 1;
+         var hasLeadingWildcard = wildcardValue.StartsWith("*");
+
+         // For Like/NotLike operators, leading wildcard was already consumed by parser (=* or !* operator)
+         var isLikeOperator = op.Kind is SyntaxKind.Like or SyntaxKind.NotLike;
+
+         if (isLikeOperator || hasLeadingWildcard || hasTrailingWildcard)
+         {
+            // Strip wildcards from value
+            var processedValue = wildcardValue;
+            if (hasLeadingWildcard)
+               processedValue = processedValue.Substring(1);
+            if (hasTrailingWildcard)
+               processedValue = processedValue.Substring(0, processedValue.Length - 1);
+
+            value = processedValue;
+
+            // Convert operator based on context
+            var isNegated = op.Kind is SyntaxKind.NotLike or SyntaxKind.NotEqual;
+
+            if (isLikeOperator)
+            {
+               // Already Like/NotLike (from =* or !* operator), keep as Contains
+               // Just strip any trailing wildcard from value
+               // e.g., "name=*text" or "name=*text*" both become Contains
+            }
+            else if (hasLeadingWildcard && hasTrailingWildcard)
+            {
+               // "name=*text*" with = operator -> Contains
+               op = new SyntaxToken(isNegated ? SyntaxKind.NotLike : SyntaxKind.Like, 0, "");
+            }
+            else if (hasLeadingWildcard)
+            {
+               // "name=*text" with = operator -> EndsWith
+               op = new SyntaxToken(isNegated ? SyntaxKind.NotEndsWith : SyntaxKind.EndsWith, 0, "");
+            }
+            else // hasTrailingWildcard
+            {
+               // "name=text*" with = operator -> StartsWith
+               op = new SyntaxToken(isNegated ? SyntaxKind.NotStartsWith : SyntaxKind.StartsWith, 0, "");
+            }
+         }
+      }
+
       // execute user custom Convertor
       if (convertor != null)
          value = convertor.Invoke(valueExpression.ValueToken.Text);

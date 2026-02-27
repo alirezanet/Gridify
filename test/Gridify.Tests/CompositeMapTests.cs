@@ -217,4 +217,33 @@ public class CompositeMapBasicTests
       var result = _fakeRepository.AsQueryable().ApplyFiltering("search=TagA", mapper).ToList();
       Assert.Empty(result); // Only searches Name now, not Tag
    }
+
+   [Fact]
+   public void CompositeMap_Like_Wildcard_Prefix()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", x => x.Name, x => x.Tag);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=*oh*", mapper).ToList();
+      Assert.Single(result); // John
+      Assert.Equal("John", result[0].Name);
+   }
+
+   [Fact]
+   public void CompositeMap_Like_Wildcard_Suffix()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", x => x.Name, x => x.Tag);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=Bo*", mapper).ToList();
+      Assert.Single(result); // Bob
+      Assert.Equal("Bob", result[0].Name);
+   }
+
+   [Fact]
+   public void CompositeMap_Like_Wildcard_Both()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+          .AddCompositeMap("search", x => x.Name, x => x.Tag);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=*a*", mapper).ToList();
+      Assert.Equal(5, result.Count); // All have 'a' in Tag
+   }
 }
