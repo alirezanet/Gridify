@@ -359,8 +359,26 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
          : prop.Type.GetElementType(); // array
 
       if (tp == null) throw new GridifyFilteringException($"Can not detect the '{member.Member.Name}' property type.");
-      var containsMethod = MethodInfoHelper.GetContainsMethod(tp);
-      Expression containsExp = Expression.Call(containsMethod, prop, binaryExpression.Right);
+
+      // Check if case-insensitive filtering is requested by looking at the binary expression
+      // If the left side is a ToLower() call, we need to apply ToLower() to the collection elements too
+      var isCaseInsensitive = binaryExpression.Left is MethodCallExpression { Method.Name: "ToLower" };
+      Expression collectionExp = prop;
+
+      // For string collections with case-insensitive filtering, apply Select(x => x.ToLower())
+      if (isCaseInsensitive && tp == typeof(string))
+      {
+         var selectParam = Expression.Parameter(tp, "x");
+         var toLowerCall = Expression.Call(selectParam, MethodInfoHelper.GetToLowerMethod());
+         var selectLambda = Expression.Lambda(toLowerCall, selectParam);
+         var selectMethod = typeof(Enumerable).GetMethods()
+            .First(m => m.Name == "Select" && m.GetParameters().Length == 2)
+            .MakeGenericMethod(tp, typeof(string));
+         collectionExp = Expression.Call(selectMethod, prop, selectLambda);
+      }
+
+      var containsMethod = MethodInfoHelper.GetContainsMethod(isCaseInsensitive && tp == typeof(string) ? typeof(string) : tp);
+      Expression containsExp = Expression.Call(containsMethod, collectionExp, binaryExpression.Right);
       if (op.Kind == SyntaxKind.NotEqual)
       {
          containsExp = Expression.Not(containsExp);
