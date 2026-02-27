@@ -11,4 +11,4 @@ node_modules
 docs/.vuepress/dist
 /*.user
 client/dist
-global.json
+global.json.nuget/
