@@ -60,4 +60,11 @@ public static class MethodInfoHelper
    {
       return typeof(Enumerable).GetMethods().First(m => m.Name == "Select").MakeGenericMethod([type, type]);
    }
+
+   public static MethodInfo GetSelectMethod(Type sourceType, Type resultType)
+   {
+      return typeof(Enumerable).GetMethods()
+         .First(m => m.Name == "Select" && m.GetParameters().Length == 2)
+         .MakeGenericMethod(sourceType, resultType);
+   }
 }
