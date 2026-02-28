@@ -19,18 +19,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => x.Name, x => x.Id.ToString());
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search=John", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search=John", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name == "John" || u.Id.ToString() == "John").ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify OR condition between Name and Id
-      Assert.Contains("OR", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify both columns are referenced
-      Assert.Contains("\"Name\"", queryString);
-      Assert.Contains("\"Id\"", queryString);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -41,17 +34,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => x.Name);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search=TestUser", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search=TestUser", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name == "TestUser").ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Name column is referenced
-      Assert.Contains("\"Name\"", queryString);
-      // Verify equality operator
-      Assert.Contains("=", queryString);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -62,17 +49,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => x.Name);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search^John", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search^John", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name.ToLower().StartsWith("john")).ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Name column is referenced
-      Assert.Contains("\"Name\"", queryString);
-      // Verify LIKE pattern for StartsWith
-      Assert.Contains("LIKE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify case insensitive function
-      Assert.Contains("LOWER", queryString, StringComparison.OrdinalIgnoreCase);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -83,17 +64,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => x.Name);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search$son", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search$son", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name.ToLower().EndsWith("son")).ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Name column is referenced
-      Assert.Contains("\"Name\"", queryString);
-      // Verify LIKE pattern for EndsWith
-      Assert.Contains("LIKE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify case insensitive function
-      Assert.Contains("LOWER", queryString, StringComparison.OrdinalIgnoreCase);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -104,17 +79,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => x.Name);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search=*oh*", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search=*oh*", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name.Contains("oh*")).ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Name column is referenced
-      Assert.Contains("\"Name\"", queryString);
-      // Verify LIKE operator for contains
-      Assert.Contains("LIKE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -125,17 +94,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => x.Id);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search>5", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search>5", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Id > 5).ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Id column is referenced
-      Assert.Contains("\"Id\"", queryString);
-      // Verify greater than operator
-      Assert.Contains(">", queryString);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -146,17 +109,13 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => (object)x.Id);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search<10", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search<10", mapper).ToQueryString();
 
-      // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Id column is referenced
-      Assert.Contains("\"Id\"", queryString);
-      // Verify less than operator
-      Assert.Contains("<", queryString);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      // Assert - Cannot create equivalent LINQ for object < object, verify structure
+      Assert.Contains("WHERE", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains("\"Id\"", actualSql);
+      Assert.Contains("<", actualSql);
+      Assert.Contains("10", actualSql);
    }
 
    [Fact]
@@ -167,17 +126,13 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => (object)x.Id);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search>=3", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search>=3", mapper).ToQueryString();
 
-      // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Id column is referenced
-      Assert.Contains("\"Id\"", queryString);
-      // Verify greater than or equal operator
-      Assert.Contains(">=", queryString);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      // Assert - Cannot create equivalent LINQ for object >= object, verify structure
+      Assert.Contains("WHERE", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains("\"Id\"", actualSql);
+      Assert.Contains(">=", actualSql);
+      Assert.Contains("3", actualSql);
    }
 
    [Fact]
@@ -188,17 +143,13 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => (object)x.Id);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search<=7", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search<=7", mapper).ToQueryString();
 
-      // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Id column is referenced
-      Assert.Contains("\"Id\"", queryString);
-      // Verify less than or equal operator
-      Assert.Contains("<=", queryString);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      // Assert - Cannot create equivalent LINQ for object <= object, verify structure
+      Assert.Contains("WHERE", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains("\"Id\"", actualSql);
+      Assert.Contains("<=", actualSql);
+      Assert.Contains("7", actualSql);
    }
 
    [Fact]
@@ -209,16 +160,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => x.FkGuid.ToString(), x => x.Name);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search=00000000-0000-0000-0000-000000000001", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search=00000000-0000-0000-0000-000000000001", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.FkGuid.ToString() == "00000000-0000-0000-0000-000000000001" || u.Name == "00000000-0000-0000-0000-000000000001").ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify OR condition between FkGuid and Name
-      Assert.Contains("OR", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify both columns are referenced
-      Assert.Contains("\"FkGuid\"", queryString);
-      Assert.Contains("\"Name\"", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -229,18 +175,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => x.Name, x => x.Id.ToString());
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search=John", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search=John", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name == "John" || u.Id.ToString() == "John").ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify OR condition between properties
-      Assert.Contains("OR", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify both columns are referenced
-      Assert.Contains("\"Name\"", queryString);
-      Assert.Contains("\"Id\"", queryString);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -251,15 +190,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", val => val.ToUpper(), x => x.Name.ToUpper());
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search=john", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search=john", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name.ToUpper() == "JOHN").ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Name column is referenced
-      Assert.Contains("\"Name\"", queryString);
-      // Verify UPPER function is applied
-      Assert.Contains("UPPER", queryString, StringComparison.OrdinalIgnoreCase);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -271,18 +206,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddMap("id", x => x.Id);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search=John|id=5", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search=John|id=5", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name == "John" || u.Id == 5).ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify OR is used to combine filters
-      Assert.Contains("OR", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify both columns are referenced
-      Assert.Contains("\"Name\"", queryString);
-      Assert.Contains("\"Id\"", queryString);
-      // Verify parameters are used
-      Assert.Matches(@"@__p_\d+", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -294,18 +222,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddMap("id", x => x.Id);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search=John,id=1", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search=John,id=1", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name == "John" && u.Id == 1).ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify AND is used to combine filters
-      Assert.Contains("AND", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify both columns are referenced
-      Assert.Contains("\"Name\"", queryString);
-      Assert.Contains("\"Id\"", queryString);
-      // Verify equality operators
-      Assert.Matches(@"=\s*@__p_", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -317,39 +238,30 @@ public class CompositeMapEFPostgreSqlTests
          .AddMap("id", x => x.Id);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("(search=John|id=2),id<10", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("(search=John|id=2),id<10", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => (u.Name == "John" || u.Id == 2) && u.Id < 10).ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify all columns are referenced
-      Assert.Contains("\"Name\"", queryString);
-      Assert.Contains("\"Id\"", queryString);
-      // Verify logical operators
-      Assert.Contains("OR", queryString, StringComparison.OrdinalIgnoreCase);
-      Assert.Contains("AND", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify less than operator
-      Assert.Contains("<", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
    public void CompositeMap_WithDateTimeProperty_ShouldGenerateValidSQL()
    {
-      // Arrange
+      //Arrange
       var mapper = new GridifyMapper<User>(cfg => cfg.DefaultDateTimeKind = DateTimeKind.Utc)
          .AddCompositeMap("search", x => x.Name, x => (object)x.CreateDate);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search=2024-01-01", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search=2024-01-01", mapper).ToQueryString();
 
-      // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify OR condition between Name and CreateDate
-      Assert.Contains("OR", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify both columns are referenced
-      Assert.Contains("\"Name\"", queryString);
-      Assert.Contains("\"CreateDate\"", queryString);
+      // Assert - Verify structure (exact timestamp depends on system timezone)
+      Assert.Contains("WHERE", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains("OR", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains("\"Name\"", actualSql);
+      Assert.Contains("\"CreateDate\"", actualSql);
+      Assert.Contains("TIMESTAMPTZ", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains("2024-01-01", actualSql); // String comparison
    }
 
    [Fact]
@@ -360,17 +272,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => x.Name);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search!=John", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search!=John", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name != "John").ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Name column is referenced
-      Assert.Contains("\"Name\"", queryString);
-      // Verify not equal operator
-      Assert.Contains("<>", queryString);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -381,15 +287,11 @@ public class CompositeMapEFPostgreSqlTests
          .AddCompositeMap("search", x => x.Name);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("search=JOHN", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("search=JOHN", mapper).ToQueryString();
+      var expectedSql = _dbContext.Users.Where(u => u.Name.ToLower() == "john").ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Name column is referenced
-      Assert.Contains("\"Name\"", queryString);
-      // Verify case insensitive function is applied
-      Assert.Contains("LOWER", queryString, StringComparison.OrdinalIgnoreCase);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -401,17 +303,17 @@ public class CompositeMapEFPostgreSqlTests
          .AddMap("name", x => x.Name);
 
       // Act - Apply filtering and ordering
-      var query = _dbContext.Users.ApplyFiltering("search=John", mapper);
-      var queryString = query.ApplyOrdering("name", mapper).ToQueryString();
+      var actualSql = _dbContext.Users
+         .ApplyFiltering("search=John", mapper)
+         .ApplyOrdering("name", mapper)
+         .ToQueryString();
+      var expectedSql = _dbContext.Users
+         .Where(u => u.Name == "John")
+         .OrderBy(u => u.Name)
+         .ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      Assert.Contains("ORDER BY", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Name column is referenced in both WHERE and ORDER BY
-      Assert.Contains("\"Name\"", queryString);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -423,19 +325,18 @@ public class CompositeMapEFPostgreSqlTests
       var gridifyQuery = new GridifyQuery { Filter = "search=John", Page = 1, PageSize = 10 };
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering(gridifyQuery.Filter, mapper)
+      var actualSql = _dbContext.Users
+         .ApplyFiltering(gridifyQuery.Filter, mapper)
          .ApplyPaging(gridifyQuery.Page, gridifyQuery.PageSize)
+         .ToQueryString();
+      var expectedSql = _dbContext.Users
+         .Where(u => u.Name == "John")
+         .Skip(0)
+         .Take(10)
          .ToQueryString();
 
       // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      Assert.Contains("OFFSET", queryString, StringComparison.OrdinalIgnoreCase);
-      Assert.Contains("LIMIT", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify Name column is referenced
-      Assert.Contains("\"Name\"", queryString);
-      // Verify parameter usage
-      Assert.Contains("@__p_", queryString);
+      Assert.Equal(expectedSql, actualSql);
    }
 
    [Fact]
@@ -447,19 +348,40 @@ public class CompositeMapEFPostgreSqlTests
          .AddMap("createDate", x => x.CreateDate);
 
       // Act
-      var queryString = _dbContext.Users.ApplyFiltering("(search=John|search=5),createDate>2020-01-01", mapper).ToQueryString();
+      var actualSql = _dbContext.Users.ApplyFiltering("(search=John|search=5),createDate>2020-01-01", mapper).ToQueryString();
 
-      // Assert
-      Assert.NotNull(queryString);
-      Assert.Contains("WHERE", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify all columns are referenced
-      Assert.Contains("\"Name\"", queryString);
-      Assert.Contains("\"Id\"", queryString);
-      Assert.Contains("\"CreateDate\"", queryString);
-      // Verify logical operators
-      Assert.Contains("OR", queryString, StringComparison.OrdinalIgnoreCase);
-      Assert.Contains("AND", queryString, StringComparison.OrdinalIgnoreCase);
-      // Verify greater than operator
-      Assert.Contains(">", queryString);
+      // Assert - Verify structure (exact timestamp depends on system timezone)
+      Assert.Contains("WHERE", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains("\"Name\"", actualSql);
+      Assert.Contains("\"Id\"", actualSql);
+      Assert.Contains("\"CreateDate\"", actualSql);
+      Assert.Contains("OR", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains("AND", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains(">", actualSql);
+      Assert.Contains("TIMESTAMPTZ", actualSql, StringComparison.OrdinalIgnoreCase);
+   }
+
+   [Fact]
+   public void CompositeMap_WithEntityFrameworkCompatibilityLayer_ShouldGenerateParameterizedSQL()
+   {
+      // Arrange - Enable EF Compatibility Layer for parameterized queries
+      var mapper = new GridifyMapper<User>(cfg => cfg.EntityFrameworkCompatibilityLayer = true)
+         .AddCompositeMap("search", x => x.Name, x => x.Id.ToString());
+
+      // Act
+      var actualSql = _dbContext.Users.ApplyFiltering("search=John", mapper).ToQueryString();
+
+      // Assert - Should use parameters instead of inlined values
+      Assert.Contains("WHERE", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains("OR", actualSql, StringComparison.OrdinalIgnoreCase);
+      Assert.Contains("\"Name\"", actualSql);
+      Assert.Contains("\"Id\"", actualSql);
+      // Verify parameters are used (EF Compatibility Layer uses @Value pattern)
+      Assert.Matches(@"@Value\d*", actualSql); // Should find @Value, @Value0, etc.
+
+      // Should NOT contain inlined 'John' value in the query body
+      // (it appears in comments but not as a SQL literal)
+      var sqlWithoutComments = System.Text.RegularExpressions.Regex.Replace(actualSql, @"--[^\r\n]*", "");
+      Assert.DoesNotContain("'John'", sqlWithoutComments);
    }
 }
