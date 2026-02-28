@@ -181,9 +181,24 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    }
 
    public IGridifyMapper<T> AddNestedMapper<TProperty>(
+      string prefix,
       Expression<Func<T, TProperty>> propertyExpression,
       IGridifyMapper<TProperty> nestedMapper,
-      string? prefix = null,
+      bool overrideIfExists = true)
+   {
+      if (string.IsNullOrEmpty(prefix))
+         throw new ArgumentNullException(nameof(prefix));
+      if (propertyExpression == null)
+         throw new ArgumentNullException(nameof(propertyExpression));
+      if (nestedMapper == null)
+         throw new ArgumentNullException(nameof(nestedMapper));
+
+      return AddNestedMapperInternal(propertyExpression, nestedMapper, prefix, overrideIfExists);
+   }
+
+   public IGridifyMapper<T> AddNestedMapper<TProperty>(
+      Expression<Func<T, TProperty>> propertyExpression,
+      IGridifyMapper<TProperty> nestedMapper,
       bool overrideIfExists = true)
    {
       if (propertyExpression == null)
@@ -191,11 +206,17 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       if (nestedMapper == null)
          throw new ArgumentNullException(nameof(nestedMapper));
 
-      // Extract property name from expression if prefix not provided
-      if (string.IsNullOrEmpty(prefix))
-      {
-         prefix = ExtractPropertyNameInCamelCase(propertyExpression);
-      }
+      // Extract property name from expression to use as prefix
+      var prefix = ExtractPropertyNameInCamelCase(propertyExpression);
+      return AddNestedMapperInternal(propertyExpression, nestedMapper, prefix, overrideIfExists);
+   }
+
+   private IGridifyMapper<T> AddNestedMapperInternal<TProperty>(
+      Expression<Func<T, TProperty>> propertyExpression,
+      IGridifyMapper<TProperty> nestedMapper,
+      string prefix,
+      bool overrideIfExists)
+   {
 
       // Get the parameter from the parent expression
       var parentParameter = propertyExpression.Parameters[0];

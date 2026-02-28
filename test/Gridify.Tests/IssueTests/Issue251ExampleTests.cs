@@ -119,7 +119,7 @@ public class Issue251ExampleTests
       // Reuse for Company with custom prefix "location"
       var companyMapper = new GridifyMapper<Company>()
           .AddMap("name", q => q.Name)
-          .AddNestedMapper(q => q.Address, addressMapper, prefix: "location");
+          .AddNestedMapper("location", q => q.Address, addressMapper);
 
       // Verify User mapper uses "address." prefix
       Assert.True(userMapper.HasMap("address.city"));

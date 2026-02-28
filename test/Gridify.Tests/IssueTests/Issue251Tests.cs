@@ -96,7 +96,7 @@ public class Issue251Tests
 
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper(x => x.Address, addressMapper, prefix: "location");
+          .AddNestedMapper("location", x => x.Address, addressMapper);
 
       var users = new List<User>
         {
@@ -248,5 +248,38 @@ public class Issue251Tests
       // The expression should still point to Email, not Address.City
       var expression = map.To.ToString();
       Assert.Contains("Email", expression);
+   }
+
+   [Fact]
+   public void AddNestedMapper_OverloadWithPrefixAsFirstParameter_ShouldWork()
+   {
+      // Arrange
+      var addressMapper = new GridifyMapper<Address>()
+          .AddMap("city", x => x.City)
+          .AddMap("country", x => x.Country);
+
+      // Act - use the overload with prefix as first parameter
+      var userMapper = new GridifyMapper<User>()
+          .AddMap("email", x => x.Email)
+          .AddNestedMapper("customLocation", x => x.Address, addressMapper);
+
+      var users = new List<User>
+      {
+          new() { Email = "test@example.com", Address = new Address { City = "Paris", Country = "France" } },
+          new() { Email = "test2@example.com", Address = new Address { City = "Berlin", Country = "Germany" } }
+      };
+
+      // Assert - verify the custom prefix is used
+      Assert.True(userMapper.HasMap("customLocation.city"));
+      Assert.True(userMapper.HasMap("customLocation.country"));
+      Assert.False(userMapper.HasMap("address.city")); // Should not have the default prefix
+
+      // Test filtering with the custom prefix
+      var result = users.AsQueryable()
+          .ApplyFiltering("customLocation.city=Paris", userMapper)
+          .ToList();
+
+      Assert.Single(result);
+      Assert.Equal("Paris", result[0].Address.City);
    }
 }

@@ -205,7 +205,7 @@ var companyMapper = new GridifyMapper<Company>()
 
 ### With Custom Prefix
 
-By default, the method uses the property name in camelCase as the prefix. You can override this:
+You can specify a custom prefix for the nested mappings:
 
 ```csharp
 var addressMapper = new GridifyMapper<Address>()
@@ -214,24 +214,31 @@ var addressMapper = new GridifyMapper<Address>()
 
 var companyMapper = new GridifyMapper<Company>()
     .AddMap("name", x => x.Name)
-    .AddNestedMapper(x => x.Address, addressMapper, prefix: "location");
+    .AddNestedMapper("location", x => x.Address, addressMapper);
 // Now supports: "location.city=London", "location.country=UK"
 ```
 
-### Method Signature
+### Method Signatures
 
 ```csharp
+// With explicit prefix (recommended for consistency with AddMap)
+IGridifyMapper<T> AddNestedMapper<TProperty>(
+    string prefix,
+    Expression<Func<T, TProperty>> propertyExpression,
+    IGridifyMapper<TProperty> nestedMapper,
+    bool overrideIfExists = true)
+
+// With automatic prefix generation from property name
 IGridifyMapper<T> AddNestedMapper<TProperty>(
     Expression<Func<T, TProperty>> propertyExpression,
     IGridifyMapper<TProperty> nestedMapper,
-    string? prefix = null,
     bool overrideIfExists = true)
 ```
 
 **Parameters:**
+- `prefix`: Prefix to prepend to nested mapping keys (first overload only)
 - `propertyExpression`: Expression pointing to the nested property (e.g., `x => x.Address`)
 - `nestedMapper`: The mapper containing mappings for the nested type
-- `prefix`: Optional prefix for nested mapping keys. If null, uses the property name in camelCase
 - `overrideIfExists`: Whether to override existing mappings with the same key (default: true)
 
 **Returns:** The mapper instance for method chaining
