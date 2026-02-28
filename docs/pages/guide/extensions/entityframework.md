@@ -57,3 +57,62 @@ Simply sets the [EntityFrameworkCompatibilityLayer](#entityframeworkcompatibilit
 ### DisableEntityFrameworkCompatibilityLayer()
 
 Simply sets the [EntityFrameworkCompatibilityLayer](#entityframeworkcompatibilitylayer) property to `false`.
+
+## Composite Maps Compatibility
+
+When using [composite maps](../gridifyMapper#addcompositemap) with Entity Framework (especially PostgreSQL), follow these guidelines for optimal compatibility:
+
+### Working with Different Data Types
+
+::: warning Guid Properties
+```csharp
+// ✅ Recommended for EF
+mapper.AddCompositeMap("search", 
+    x => x.FkGuid.ToString(),  // Convert to string
+    x => x.Name);
+
+// ❌ Not recommended for EF (may cause translation issues)
+mapper.AddCompositeMap("search", 
+    x => (object)x.FkGuid,
+    x => x.Name);
+```
+:::
+
+::: warning Numeric Properties
+```csharp
+// ✅ Recommended for EF
+mapper.AddCompositeMap("search", 
+    x => x.Name,
+    x => x.Id.ToString());  // Convert to string
+
+// ❌ Not recommended for EF (may cause type mismatch)
+mapper.AddCompositeMap("search", 
+    x => x.Name,
+    x => (object)x.Id);
+```
+:::
+
+::: warning DateTime Properties (PostgreSQL)
+```csharp
+// ✅ Required for PostgreSQL
+var mapper = new GridifyMapper<User>(cfg => cfg.DefaultDateTimeKind = DateTimeKind.Utc)
+    .AddCompositeMap("search", 
+        x => x.Name,
+        x => (object)x.CreateDate);
+
+// ❌ Without UTC configuration, PostgreSQL will throw an error
+```
+:::
+
+### Best Practices
+
+1. **Use `.ToString()` for type consistency** - When combining different property types (string, numeric, Guid), convert them all to strings
+2. **Set UTC DateTimeKind for PostgreSQL** - Configure `DefaultDateTimeKind = DateTimeKind.Utc` when working with DateTime properties
+3. **Test with `.ToQueryString()`** - Verify EF can translate your expressions to SQL:
+   ```csharp
+   var sql = dbContext.Users
+       .ApplyFiltering("search=value", mapper)
+       .ToQueryString();
+   ```
+4. **Keep types homogeneous** - When possible, map properties of the same type together for better performance
+

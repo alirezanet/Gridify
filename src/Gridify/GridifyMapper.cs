@@ -165,6 +165,21 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       return this;
    }
 
+   public IGridifyMapper<T> AddCompositeMap(string from, params Expression<Func<T, object?>>[] expressions)
+   {
+      return AddCompositeMap(from, null, expressions);
+   }
+
+   public IGridifyMapper<T> AddCompositeMap(string from, Func<string, object>? convertor, params Expression<Func<T, object?>>[] expressions)
+   {
+      if (expressions == null || expressions.Length == 0)
+         throw new GridifyMapperException("At least one expression must be provided");
+
+      RemoveMap(from);
+      _mappings.Add(new CompositeGMap<T>(from, convertor, expressions));
+      return this;
+   }
+
    public IGridifyMapper<T> RemoveMap(string from)
    {
       var map = GetGMap(from);

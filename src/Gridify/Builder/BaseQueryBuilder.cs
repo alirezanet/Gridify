@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using Gridify.Reflection;
 using Gridify.Syntax;
 
@@ -9,6 +10,7 @@ namespace Gridify.Builder;
 internal abstract class BaseQueryBuilder
 {
    internal static MemberNullPropagationVisitor MemberNullPropagatorVisitor { get; } = new();
+   internal static readonly Regex SelectRegex = new Regex(@"\.Select\s*\(", RegexOptions.Compiled);
 }
 
 public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
@@ -119,13 +121,71 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
 
       var gMap = mapper.GetGMap(left);
       if (gMap == null) throw new GridifyMapperException($"Mapping '{left}' not found");
+
+      // Handle composite maps - combine multiple expressions with OR
+      if (gMap is CompositeGMap<T> compositeMap && compositeMap.IsComposite)
+      {
+         TQuery? combinedQuery = null;
+         bool isFirstNested = false;
+
+         for (int i = 0; i < compositeMap.Expressions.Count; i++)
+         {
+            var expression = compositeMap.Expressions[i];
+            var exprMapTarget = expression;
+
+            var exprHasIndexer = fieldExpression?.Indexer != null;
+            if (exprHasIndexer)
+               exprMapTarget = (Expression<Func<T, object?>>)UpdateIndexerKey(exprMapTarget, fieldExpression!.Indexer!);
+
+            // Check if this expression is a nested collection
+            var exprIsNested = BaseQueryBuilder.SelectRegex.IsMatch(exprMapTarget.ToString());
+
+            TQuery? currentQuery;
+            if (exprIsNested)
+            {
+               currentQuery = BuildNestedQuery(exprMapTarget.Body, gMap, right, op);
+               if (currentQuery == null) continue;
+            }
+            else
+            {
+               var exprQuery = BuildQuery(exprMapTarget.Body, exprMapTarget.Parameters[0], right, op, gMap.Convertor, false);
+               if (exprQuery == null) continue;
+
+               if (exprHasIndexer)
+                  exprQuery = AddIndexerNullCheck(exprMapTarget, exprQuery);
+               else
+                  exprQuery = AddNullPropagator(exprMapTarget, exprQuery);
+
+               currentQuery = (TQuery)exprQuery;
+            }
+
+            if (combinedQuery == null)
+            {
+               combinedQuery = currentQuery;
+               isFirstNested = exprIsNested;
+            }
+            else
+            {
+               combinedQuery = CombineWithOrOperator(combinedQuery, currentQuery);
+            }
+         }
+
+         if (combinedQuery == null)
+            return null;
+
+         return (combinedQuery, isFirstNested);
+      }
+
+      // Original single map handling
       var mapTarget = gMap.To;
 
       var hasIndexer = fieldExpression?.Indexer != null;
       if (hasIndexer)
          mapTarget = UpdateIndexerKey(mapTarget, fieldExpression!.Indexer!);
 
-      var isNested = ((GMap<T>)gMap).IsNestedCollection();
+      var isNested = gMap is GMap<T> gMapTyped
+         ? gMapTyped.IsNestedCollection()
+         : false; // CompositeGMap without composite behavior is treated as non-nested
       if (isNested)
       {
          var result = BuildNestedQuery(mapTarget.Body, gMap, right, op);
