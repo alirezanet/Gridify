@@ -180,6 +180,120 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       return this;
    }
 
+   public IGridifyMapper<T> AddNestedMapper<TProperty>(
+      Expression<Func<T, TProperty>> propertyExpression,
+      IGridifyMapper<TProperty> nestedMapper,
+      string? prefix = null,
+      bool overrideIfExists = true)
+   {
+      if (propertyExpression == null)
+         throw new ArgumentNullException(nameof(propertyExpression));
+      if (nestedMapper == null)
+         throw new ArgumentNullException(nameof(nestedMapper));
+
+      // Extract property name from expression if prefix not provided
+      if (string.IsNullOrEmpty(prefix))
+      {
+         if (propertyExpression.Body is MemberExpression memberExpr)
+         {
+            var propertyName = memberExpr.Member.Name;
+            prefix = char.ToLowerInvariant(propertyName[0]) + propertyName.Substring(1);
+         }
+         else if (propertyExpression.Body is UnaryExpression { Operand: MemberExpression unaryMemberExpr })
+         {
+            var propertyName = unaryMemberExpr.Member.Name;
+            prefix = char.ToLowerInvariant(propertyName[0]) + propertyName.Substring(1);
+         }
+         else
+         {
+            throw new GridifyMapperException("Unable to extract property name from expression. Please provide a prefix.");
+         }
+      }
+
+      // Get the parameter from the parent expression
+      var parentParameter = propertyExpression.Parameters[0];
+
+      // Iterate through all mappings in the nested mapper
+      foreach (var nestedMap in nestedMapper.GetCurrentMaps())
+      {
+         var compositeKey = $"{prefix}.{nestedMap.From}";
+
+         // Get the nested expression
+         var nestedExpression = nestedMap.To;
+
+         // Compose the expressions: parent property access + nested property access
+         Expression composedBody;
+
+         if (nestedExpression is Expression<Func<TProperty, object>> typedNestedExpr)
+         {
+            // Replace the nested parameter with the parent's property access
+            var propertyAccess = propertyExpression.Body;
+
+            // If the body is a conversion (UnaryExpression), unwrap it
+            if (propertyAccess is UnaryExpression unaryExpr && unaryExpr.NodeType == ExpressionType.Convert)
+            {
+               propertyAccess = unaryExpr.Operand;
+            }
+
+            composedBody = new ReplaceExpressionVisitor(typedNestedExpr.Parameters[0], propertyAccess)
+               .Visit(typedNestedExpr.Body)!;
+         }
+         else
+         {
+            // Handle non-generic lambda expressions
+            var propertyAccess = propertyExpression.Body;
+
+            // If the body is a conversion (UnaryExpression), unwrap it
+            if (propertyAccess is UnaryExpression unaryExpr && unaryExpr.NodeType == ExpressionType.Convert)
+            {
+               propertyAccess = unaryExpr.Operand;
+            }
+
+            composedBody = new ReplaceExpressionVisitor(nestedExpression.Parameters[0], propertyAccess)
+               .Visit(nestedExpression.Body)!;
+         }
+
+         // Create the composed expression
+         var composedExpression = Expression.Lambda<Func<T, object>>(composedBody, parentParameter);
+
+         // Handle CompositeGMap specially
+         if (nestedMap is CompositeGMap<TProperty> compositeMap)
+         {
+            // For composite maps, we need to compose all expressions
+            var composedExpressions = new List<Expression<Func<T, object?>>>();
+
+            foreach (var expr in compositeMap.Expressions)
+            {
+               var propertyAccess = propertyExpression.Body;
+               if (propertyAccess is UnaryExpression unaryExpr && unaryExpr.NodeType == ExpressionType.Convert)
+               {
+                  propertyAccess = unaryExpr.Operand;
+               }
+
+               var composedExpr = new ReplaceExpressionVisitor(expr.Parameters[0], propertyAccess)
+                  .Visit(expr.Body)!;
+
+               composedExpressions.Add(Expression.Lambda<Func<T, object?>>(composedExpr, parentParameter));
+            }
+
+            AddCompositeMap(compositeKey, nestedMap.Convertor, composedExpressions.ToArray());
+         }
+         else
+         {
+            // Skip if the map already exists and overrideIfExists is false
+            if (!overrideIfExists && HasMap(compositeKey))
+            {
+               continue;
+            }
+
+            // Add the composed mapping - cast to Expression<Func<T, object?>> to satisfy nullability
+            AddMap(compositeKey, (Expression<Func<T, object?>>)composedExpression, nestedMap.Convertor, overrideIfExists);
+         }
+      }
+
+      return this;
+   }
+
    public IGridifyMapper<T> RemoveMap(string from)
    {
       var map = GetGMap(from);

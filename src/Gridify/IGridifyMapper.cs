@@ -36,6 +36,34 @@ public interface IGridifyMapper<T>
    IGridifyMapper<T> AddCompositeMap(string from, params Expression<Func<T, object?>>[] expressions);
 
    /// <summary>
+   /// Reuses mappings from a nested object's mapper by composing expressions.
+   /// This allows defining mappings for a nested type once and reusing them in parent types.
+   /// </summary>
+   /// <typeparam name="TProperty">The type of the nested property</typeparam>
+   /// <param name="propertyExpression">Expression pointing to the nested property (e.g., x => x.Address)</param>
+   /// <param name="nestedMapper">The mapper containing mappings for the nested type</param>
+   /// <param name="prefix">Optional prefix to prepend to nested mapping keys. If null, uses the property name in camelCase.</param>
+   /// <param name="overrideIfExists">Whether to override existing mappings with the same key</param>
+   /// <returns>An instance of <see cref="IGridifyMapper{T}"/> for method chaining</returns>
+   /// <example>
+   /// <code>
+   /// var addressMapper = new GridifyMapper&lt;Address&gt;()
+   ///     .AddMap("city", x => x.City)
+   ///     .AddMap("country", x => x.Country);
+   /// 
+   /// var userMapper = new GridifyMapper&lt;User&gt;()
+   ///     .AddMap("email", x => x.Email)
+   ///     .AddNestedMapper(x => x.Address, addressMapper);
+   /// // Now supports: "address.city=London", "address.country=UK"
+   /// </code>
+   /// </example>
+   IGridifyMapper<T> AddNestedMapper<TProperty>(
+      Expression<Func<T, TProperty>> propertyExpression,
+      IGridifyMapper<TProperty> nestedMapper,
+      string? prefix = null,
+      bool overrideIfExists = true);
+
+   /// <summary>
    /// Generates property mappings for the specified class type <typeparamref name="T"/>.
    /// </summary>
    /// <returns>An instance of <see cref="IGridifyMapper{T}"/> with property mappings.</returns>
