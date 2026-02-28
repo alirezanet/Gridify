@@ -143,6 +143,22 @@ public class QueryBuilder<T> : IQueryBuilder<T>
       return this;
    }
 
+   /// <inheritdoc />
+   public IQueryBuilder<T> AddCompositeMap(string from, params Expression<Func<T, object?>>[] expressions)
+   {
+      _mapper ??= new GridifyMapper<T>(true);
+      _mapper.AddCompositeMap(from, expressions);
+      return this;
+   }
+
+   /// <inheritdoc />
+   public IQueryBuilder<T> AddCompositeMap(string from, Func<string, object>? convertor, params Expression<Func<T, object?>>[] expressions)
+   {
+      _mapper ??= new GridifyMapper<T>(true);
+      _mapper.AddCompositeMap(from, convertor, expressions);
+      return this;
+   }
+
 
    /// <inheritdoc />
    public IQueryBuilder<T> RemoveMap(IGMap<T> map)

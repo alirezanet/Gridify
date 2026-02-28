@@ -63,6 +63,24 @@ public interface IQueryBuilder<T>
    IQueryBuilder<T> AddMap(string from, Expression<Func<T, int, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
    IQueryBuilder<T> AddMap(string from, Expression<Func<T, string, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
    IQueryBuilder<T> AddMap<TSubKey>(string from, Expression<Func<T, TSubKey, object?>> to, Func<string, object>? convertor = null, bool overwrite = true);
+
+   /// <summary>
+   /// Adds a composite map that combines multiple property expressions with OR logic for a single filter key
+   /// </summary>
+   /// <param name="from">The field name to use in filters</param>
+   /// <param name="expressions">One or more property expressions to search across</param>
+   /// <returns>returns IQueryBuilder</returns>
+   IQueryBuilder<T> AddCompositeMap(string from, params Expression<Func<T, object?>>[] expressions);
+
+   /// <summary>
+   /// Adds a composite map with a shared value convertor that combines multiple property expressions with OR logic for a single filter key
+   /// </summary>
+   /// <param name="from">The field name to use in filters</param>
+   /// <param name="convertor">Optional shared value converter function</param>
+   /// <param name="expressions">One or more property expressions to search across</param>
+   /// <returns>returns IQueryBuilder</returns>
+   IQueryBuilder<T> AddCompositeMap(string from, Func<string, object>? convertor, params Expression<Func<T, object?>>[] expressions);
+
    IQueryBuilder<T> RemoveMap(IGMap<T> map);
 
    /// <summary>
