@@ -119,37 +119,6 @@ mapper.AddCompositeMap("search",
     x => x.Email.ToUpper());
 ```
 
-## Supported Operators
-
-Composite maps support **all** Gridify operators:
-
-- `=` - Equal
-- `!=` - Not Equal  
-- `>`, `<`, `>=`, `<=` - Comparison operators
-- `=*` - Contains (Like operator)
-- `!*` - Not contains (NotLike operator)
-- `^` - Starts with
-- `$` - Ends with
-- `!^`, `!$` - Not starts/ends with
-
-### Contains Operator
-
-The `=*` operator provides "contains" functionality:
-
-```csharp
-search=*text      // Searches for fields containing "text"
-```
-
-The `!*` operator provides "not contains" functionality:
-
-```csharp
-search!*text      // Searches for fields NOT containing "text"
-```
-
-### Custom Operators
-
-Custom operators defined via `GridifyGlobalConfiguration` are also supported.
-
 ## Benefits
 
 1. **Cleaner Frontend Code** - Send `search=value` instead of `name=value|email=value|phone=value`

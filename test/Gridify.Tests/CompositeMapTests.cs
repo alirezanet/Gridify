@@ -96,11 +96,13 @@ public class CompositeMapBasicTests
    [Fact]
    public void CompositeMap_WithConvertor_MatchesAfterConversion()
    {
+      // Convertor prepends "Tag" to the search value
+      Func<string, object> convertor = val => "Tag" + val;
       var mapper = new GridifyMapper<TestClass>()
-          .AddCompositeMap("search", val => val.ToUpper(), x => x.Name.ToUpper(), x => x.Tag.ToUpper());
-      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=john", mapper).ToList();
+          .AddCompositeMap("search", convertor, x => x.Tag);
+      var result = _fakeRepository.AsQueryable().ApplyFiltering("search=A", mapper).ToList();
       Assert.Single(result);
-      Assert.Equal("John", result[0].Name);
+      Assert.Equal("TagA", result[0].Tag);
    }
 
    [Fact]
