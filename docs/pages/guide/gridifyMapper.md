@@ -177,6 +177,108 @@ Composite maps support all Gridify operators: `=`, `!=`, `>`, `<`, `>=`, `<=`, `
 When using composite maps with Entity Framework, especially with PostgreSQL, follow the [Entity Framework compatibility guidelines](./extensions/entityframework#composite-maps-compatibility) for proper type handling.
 :::
 
+## AddNestedMapper
+
+The `AddNestedMapper` method allows you to reuse mapper configurations for nested objects across multiple entities. This is particularly useful when you have the same nested type (like `Address`) used in multiple parent entities (like `User` and `Company`), and you want to define the nested mappings once and reuse them everywhere.
+
+### Basic Usage
+
+```csharp
+// Define a reusable mapper for Address
+var addressMapper = new GridifyMapper<Address>()
+    .AddMap("city", x => x.City)
+    .AddMap("country", x => x.Country);
+// Note: Secret is intentionally not mapped
+
+// Reuse the address mapper for User
+var userMapper = new GridifyMapper<User>()
+    .AddMap("email", x => x.Email)
+    .AddNestedMapper(x => x.Address, addressMapper);
+// Now supports: "address.city=London", "address.country=UK"
+
+// Reuse the same mapper for Company
+var companyMapper = new GridifyMapper<Company>()
+    .AddMap("name", x => x.Name)
+    .AddNestedMapper(x => x.Address, addressMapper);
+// Also supports: "address.city=London", "address.country=UK"
+```
+
+### With Custom Prefix
+
+By default, the method uses the property name in camelCase as the prefix. You can override this:
+
+```csharp
+var addressMapper = new GridifyMapper<Address>()
+    .AddMap("city", x => x.City)
+    .AddMap("country", x => x.Country);
+
+var companyMapper = new GridifyMapper<Company>()
+    .AddMap("name", x => x.Name)
+    .AddNestedMapper(x => x.Address, addressMapper, prefix: "location");
+// Now supports: "location.city=London", "location.country=UK"
+```
+
+### Method Signature
+
+```csharp
+IGridifyMapper<T> AddNestedMapper<TProperty>(
+    Expression<Func<T, TProperty>> propertyExpression,
+    IGridifyMapper<TProperty> nestedMapper,
+    string? prefix = null,
+    bool overrideIfExists = true)
+```
+
+**Parameters:**
+- `propertyExpression`: Expression pointing to the nested property (e.g., `x => x.Address`)
+- `nestedMapper`: The mapper containing mappings for the nested type
+- `prefix`: Optional prefix for nested mapping keys. If null, uses the property name in camelCase
+- `overrideIfExists`: Whether to override existing mappings with the same key (default: true)
+
+**Returns:** The mapper instance for method chaining
+
+### Features
+
+- **Reusability** - Define nested mappings once, reuse across multiple entities
+- **Type Safety** - Compile-time checking of property expressions
+- **Convertor Support** - Nested mappings preserve their value convertors
+- **Composite Map Support** - Works with composite maps defined in the nested mapper
+- **Security** - Only expose fields you explicitly map; unmapped fields remain hidden
+
+### Example: Securing Nested Properties
+
+```csharp
+public class Address
+{
+    public string City { get; set; }
+    public string Country { get; set; }
+    public string Secret { get; set; }  // Sensitive data
+}
+
+// Create a secure address mapper that excludes Secret
+var addressMapper = new GridifyMapper<Address>()
+    .AddMap("city", x => x.City)
+    .AddMap("country", x => x.Country);
+    // Secret is intentionally not mapped
+
+// Apply to multiple entities
+var userMapper = new GridifyMapper<User>()
+    .AddNestedMapper(x => x.Address, addressMapper);
+
+var companyMapper = new GridifyMapper<Company>()
+    .AddNestedMapper(x => x.Address, addressMapper);
+
+// Secret is not exposed in any of these mappers
+Assert.False(userMapper.HasMap("address.secret"));
+Assert.False(companyMapper.HasMap("address.secret"));
+```
+
+### Benefits
+
+- **DRY Principle** - Don't repeat yourself; define nested mappings once
+- **Consistency** - Ensure the same fields are exposed/hidden across all entities
+- **Maintainability** - Change nested mappings in one place, apply everywhere
+- **Similar to AutoMapper** - Works like embedded DTO mappings in AutoMapper
+
 ## HasMap
 
 This method checks if the mapper has a mapping for the given field name.
