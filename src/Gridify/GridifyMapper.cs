@@ -194,20 +194,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       // Extract property name from expression if prefix not provided
       if (string.IsNullOrEmpty(prefix))
       {
-         if (propertyExpression.Body is MemberExpression memberExpr)
-         {
-            var propertyName = memberExpr.Member.Name;
-            prefix = char.ToLowerInvariant(propertyName[0]) + propertyName.Substring(1);
-         }
-         else if (propertyExpression.Body is UnaryExpression { Operand: MemberExpression unaryMemberExpr })
-         {
-            var propertyName = unaryMemberExpr.Member.Name;
-            prefix = char.ToLowerInvariant(propertyName[0]) + propertyName.Substring(1);
-         }
-         else
-         {
-            throw new GridifyMapperException("Unable to extract property name from expression. Please provide a prefix.");
-         }
+         prefix = ExtractPropertyNameInCamelCase(propertyExpression);
       }
 
       // Get the parameter from the parent expression
@@ -482,5 +469,29 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       }
 
       return Expression.Property(expression, propertyName);
+   }
+
+   /// <summary>
+   /// Helper method to extract property name from expression and convert to camelCase
+   /// </summary>
+   private static string ExtractPropertyNameInCamelCase<TProperty>(Expression<Func<T, TProperty>> propertyExpression)
+   {
+      string propertyName;
+
+      if (propertyExpression.Body is MemberExpression memberExpr)
+      {
+         propertyName = memberExpr.Member.Name;
+      }
+      else if (propertyExpression.Body is UnaryExpression { Operand: MemberExpression unaryMemberExpr })
+      {
+         propertyName = unaryMemberExpr.Member.Name;
+      }
+      else
+      {
+         throw new GridifyMapperException("Unable to extract property name from expression. Please provide a prefix.");
+      }
+
+      // Convert to camelCase
+      return $"{char.ToLowerInvariant(propertyName[0])}{propertyName.Substring(1)}";
    }
 }
