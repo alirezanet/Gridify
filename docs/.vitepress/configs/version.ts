@@ -1,1 +1,1 @@
-export const version: string = '2.18.0'
+export const version: string = '2.19.0-preview1'
