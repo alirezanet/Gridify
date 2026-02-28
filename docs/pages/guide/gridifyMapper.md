@@ -91,6 +91,92 @@ in the above example we want to convert the userName value to lowercase before t
 mapper = mapper.AddMap("userName", p => p.UserName, value => value.ToLower());
 ```
 
+## AddCompositeMap
+
+The `AddCompositeMap` method allows you to search across multiple properties with a single filter reference, automatically combining them with OR logic. This eliminates the need to construct complex OR filter strings on the frontend.
+
+### Basic Usage
+
+```csharp
+var mapper = new GridifyMapper<Person>()
+    .AddCompositeMap("search", 
+        x => x.FirstName,
+        x => x.LastName,
+        x => x.UserName);
+
+// Frontend sends: search=John
+// Generates: WHERE FirstName = 'John' OR LastName = 'John' OR UserName = 'John'
+```
+
+### With Shared Convertor
+
+You can apply a shared value converter function that transforms filter values before comparison:
+
+```csharp
+var mapper = new GridifyMapper<Product>()
+    .AddCompositeMap("search", 
+        value => value.ToUpper(),  // Shared convertor
+        x => x.Name.ToUpper(),
+        x => x.Description.ToUpper());
+
+// Filter: search=phone
+// Converts "phone" to "PHONE" before searching
+```
+
+### With Different Property Types
+
+```csharp
+// For in-memory collections
+var mapper = new GridifyMapper<Product>()
+    .AddCompositeMap("search",
+        x => x.Name,
+        x => x.Description,
+        x => (object)x.Id);  // Cast to object for non-string types
+
+// For Entity Framework (recommended)
+var mapper = new GridifyMapper<Product>()
+    .AddCompositeMap("search",
+        x => x.Name,
+        x => x.Description,
+        x => x.Id.ToString());  // Convert to string for EF compatibility
+```
+
+### Method Signatures
+
+```csharp
+// Without convertor
+IGridifyMapper<T> AddCompositeMap(
+    string from,
+    params Expression<Func<T, object?>>[] expressions)
+
+// With convertor
+IGridifyMapper<T> AddCompositeMap(
+    string from,
+    Func<string, object>? convertor,
+    params Expression<Func<T, object?>>[] expressions)
+```
+
+**Parameters:**
+- `from`: The field name to use in filters
+- `convertor`: Optional shared value converter function
+- `expressions`: One or more property expressions to search across
+
+**Returns:** The mapper instance for method chaining
+
+### Supported Operators
+
+Composite maps support all Gridify operators: `=`, `!=`, `>`, `<`, `>=`, `<=`, `=*`, `!*`, `^`, `$`, `!^`, `!$`
+
+### Benefits
+
+- **Cleaner Frontend Code** - Send `search=value` instead of `name=value|email=value|phone=value`
+- **Backend Control** - Change searchable fields without frontend changes
+- **Type Safety** - Compile-time checking of property expressions
+
+::: warning Entity Framework Users
+When using composite maps with Entity Framework, especially with PostgreSQL, follow the [Entity Framework compatibility guidelines](./extensions/entityframework#composite-maps-compatibility) for proper type handling.
+:::
+
 ## HasMap
 
 This method checks if the mapper has a mapping for the given field name.
