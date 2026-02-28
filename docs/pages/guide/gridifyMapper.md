@@ -116,8 +116,8 @@ You can apply a shared value converter function that transforms filter values be
 var mapper = new GridifyMapper<Product>()
     .AddCompositeMap("search", 
         value => value.ToUpper(),  // Shared convertor
-        x => x.Name.ToUpper(),
-        x => x.Description.ToUpper());
+        x => x.Name,
+        x => x.Description);
 
 // Filter: search=phone
 // Converts "phone" to "PHONE" before searching
