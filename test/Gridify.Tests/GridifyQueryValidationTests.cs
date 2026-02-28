@@ -15,7 +15,7 @@ public class GridifyQueryValidationTests
    {
       public int IntProperty { get; set; }
       public int? NullableIntProperty { get; set; }
-      public string StringProperty { get; set; }
+      public string StringProperty { get; set; } = string.Empty;
       public DateTime DateProperty { get; set; }
       public DateTime? NullableDateProperty { get; set; }
       public TestEnum EnumProperty { get; set; }

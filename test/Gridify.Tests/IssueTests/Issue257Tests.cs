@@ -18,7 +18,7 @@ public class Issue257Tests
    }
    class Person
    {
-      public Dictionary<string, string> MetaData { get; set; }
+      public Dictionary<string, string> MetaData { get; set; } = null!;
    }
 
    class Utils

@@ -7,8 +7,14 @@ using Gridify.Syntax;
 
 namespace Gridify.Builder;
 
-public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Expression<Func<T, bool>>, T>(mapper)
+public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T>
 {
+   private readonly IGridifyMapper<T> _mapper;
+
+   public LinqQueryBuilder(IGridifyMapper<T> mapper) : base(mapper)
+   {
+      _mapper = mapper;
+   }
    protected override Expression<Func<T, bool>>? BuildNestedQuery(
       Expression body, IGMap<T> gMap, ValueExpressionSyntax value, ISyntaxNode op)
    {
@@ -430,7 +436,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
    {
       // Entityframework doesn't support NullChecking for Collections (issue #58)
       // also issue #70 for NHibernate - and #173
-      if (mapper.Configuration.DisableCollectionNullChecks || mapper.Configuration.EntityFrameworkCompatibilityLayer)
+      if (_mapper.Configuration.DisableCollectionNullChecks || _mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.Lambda(right, param);
 
       var nullChecker = Expression.NotEqual(prop, Expression.Constant(null));
@@ -440,7 +446,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private Expression GetValueExpression(Type type, object? value)
    {
-      if (!mapper.Configuration.EntityFrameworkCompatibilityLayer)
+      if (!_mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.Constant(value, type);
 
       // active parameterized query for EF
@@ -451,7 +457,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private BinaryExpression GetLessThanOrEqualExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (mapper.Configuration.EntityFrameworkCompatibilityLayer)
+      if (_mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.LessThanOrEqual(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
@@ -462,7 +468,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private BinaryExpression GetGreaterThanOrEqualExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (mapper.Configuration.EntityFrameworkCompatibilityLayer)
+      if (_mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.GreaterThanOrEqual(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
@@ -473,7 +479,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private BinaryExpression GetLessThanExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (mapper.Configuration.EntityFrameworkCompatibilityLayer)
+      if (_mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.LessThan(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
@@ -484,7 +490,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private BinaryExpression GetGreaterThanExpression(Expression body, ValueExpressionSyntax valueExpression, object? value)
    {
-      if (mapper.Configuration.EntityFrameworkCompatibilityLayer)
+      if (_mapper.Configuration.EntityFrameworkCompatibilityLayer)
          return Expression.GreaterThan(Expression.Call(null, MethodInfoHelper.GetCompareMethod(), body, GetValueExpression(typeof(string), value)),
             Expression.Constant(0));
 
@@ -495,7 +501,7 @@ public class LinqQueryBuilder<T>(IGridifyMapper<T> mapper) : BaseQueryBuilder<Ex
 
    private ConstantExpression GetStringComparisonCaseExpression(bool isCaseInsensitive)
    {
-      return isCaseInsensitive || mapper.Configuration.CaseInsensitiveFiltering
+      return isCaseInsensitive || _mapper.Configuration.CaseInsensitiveFiltering
          ? Expression.Constant(StringComparison.OrdinalIgnoreCase)
          : Expression.Constant(StringComparison.Ordinal);
    }

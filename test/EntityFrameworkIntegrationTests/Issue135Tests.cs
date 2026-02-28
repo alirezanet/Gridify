@@ -110,7 +110,7 @@ public class Issue135Tests
 
       // ReSharper disable once InconsistentNaming (needed for the test)
       var Value = new List<string> { "2", "4", "6" };
-      var expected = _dbContext.Users.Where(q => Value.Contains(q.Name)).ToQueryString();
+      var expected = _dbContext.Users.Where(q => Value.Contains(q.Name!)).ToQueryString();
 
       // act
       var actual = new QueryBuilder<User>()
@@ -148,9 +148,9 @@ class StringInOperator : IGridifyOperator
 
    public Expression<OperatorParameter> OperatorHandler()
    {
-      return (prop, value) => value.ToString()
+      return (prop, value) => value.ToString()!
          .Split(";", StringSplitOptions.RemoveEmptyEntries)
-         .Contains(prop.ToString());
+         .Contains(prop.ToString()!);
    }
 }
 

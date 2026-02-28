@@ -250,7 +250,7 @@ public class CompositeMapEFPostgreSqlTests
    {
       //Arrange
       var mapper = new GridifyMapper<User>(cfg => cfg.DefaultDateTimeKind = DateTimeKind.Utc)
-         .AddCompositeMap("search", x => x.Name, x => (object)x.CreateDate);
+         .AddCompositeMap("search", x => x.Name, x => (object)x.CreateDate!);
 
       // Act
       var actualSql = _dbContext.Users.ApplyFiltering("search=2024-01-01", mapper).ToQueryString();

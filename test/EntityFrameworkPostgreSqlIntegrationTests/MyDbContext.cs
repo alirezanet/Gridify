@@ -32,7 +32,7 @@ public class User
    public string Name { get; set; } = string.Empty;
    public DateTime? CreateDate { get; set; }
    public Guid FkGuid { get; set; }
-   public JsonDocument Properties { get; set; }
+   public JsonDocument Properties { get; set; } = null!;
 }
 public class Products
 {
