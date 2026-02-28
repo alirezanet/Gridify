@@ -74,10 +74,9 @@ var mapper = new GridifyMapper<Course>()
 
 // Usage - all Gridify operators are supported
 var query1 = new GridifyQuery { Filter = "student=xyz" };        // Exact match
-var query2 = new GridifyQuery { Filter = "student=*xyz*" };      // Contains
-var query3 = new GridifyQuery { Filter = "student=xyz*" };       // Starts with
-var query4 = new GridifyQuery { Filter = "student!=xyz" };       // Not equal
-var query5 = new GridifyQuery { Filter = "student>100" };        // Greater than
+var query2 = new GridifyQuery { Filter = "student=*xyz" };       // Contains (=* operator)
+var query3 = new GridifyQuery { Filter = "student!=xyz" };       // Not equal
+var query4 = new GridifyQuery { Filter = "student>100" };        // Greater than
 
 var results = dbContext.Courses
     .ApplyFiltering(query1, mapper)
@@ -127,34 +126,25 @@ Composite maps support **all** Gridify operators:
 - `=` - Equal
 - `!=` - Not Equal  
 - `>`, `<`, `>=`, `<=` - Comparison operators
+- `=*` - Contains (Like operator)
+- `!*` - Not contains (NotLike operator)
 - `^` - Starts with
 - `$` - Ends with
 - `!^`, `!$` - Not starts/ends with
 
-### Wildcard Syntax
+### Contains Operator
 
-Wildcards can be used in two ways:
+The `=*` operator provides "contains" functionality:
 
-1. **Using the `=*` operator** (Contains):
-   ```csharp
-   search=*text      // Contains "text"
-   search=*text*     // Contains "text" (trailing * stripped automatically)
-   ```
+```csharp
+search=*text      // Searches for fields containing "text"
+```
 
-2. **Using wildcards in values** with `=` operator:
-   ```csharp
-   search=*text*     // Contains "text"
-   search=text*      // Starts with "text"
-   search=*text      // Ends with "text"
-   ```
+The `!*` operator provides "not contains" functionality:
 
-Both approaches work identically. The `=*` operator is automatically converted to the Like operator (Contains), while wildcards in values are detected and converted to the appropriate operator.
-
-### Negated Wildcards
-
-- `!*` - Not contains
-- `!text*` - Not starts with (using != operator)
-- `!*text` - Not ends with (using != operator)
+```csharp
+search!*text      // Searches for fields NOT containing "text"
+```
 
 ### Custom Operators
 
