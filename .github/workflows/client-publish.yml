@@ -1,10 +1,15 @@
 name: Publish GridifyClient
 
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
 
 jobs:
   publish-npm:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     environment: npm
 
