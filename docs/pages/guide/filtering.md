@@ -63,9 +63,7 @@ this query matches with JOHN - john - John - jOHn ...
 
 ## Escaping
 
-Gridify have five special operators  `, | ( ) /i` to handle complex queries and case-insensitive searches. If you want
-to use these characters in your query values (after conditional operator), you should add a backslash <code>\ </code>
-before them. having this regex could be helpful `([(),|]|\/i)`.
+Gridify has five special operators: `, | ( ) /i` that are used to handle complex queries and case-insensitive searches. If you want to use these characters as literal values in your queries (after the conditional operator), you need to escape them by adding a backslash `\` before each one. This regex pattern can help identify characters that need escaping: `([(),|]|\/i)`.
 
 JavaScript escape example:
 
@@ -113,15 +111,12 @@ Check out [Defining Mappings for Indexable Properties](./gridifyMapper.md#defini
 
 ## Custom Operators
 
-Sometimes the default Gridify operators are not enough, For example, if you need an operator for regex matching or when
-you are using the EntityFramework, you may want to use `EF.Functions.FreeText` rather than a LIKE with wildcards. In
-this case, you can define your own operators. (added in `v2.6.0`)
+Sometimes the default Gridify operators are not enough. For example, if you need an operator for regex matching, or when using Entity Framework and you want to use `EF.Functions.FreeText` instead of a LIKE with wildcards. In these cases, you can define your own custom operators (added in `v2.6.0`).
 
-To define a custom operator, you need to create a class that implements the `IGridifyOperator` interface. then you need
-to register it through the global [CustomOperators](./gridifyGlobalConfiguration.md#customoperators) configuration.
+To define a custom operator, create a class that implements the `IGridifyOperator` interface, then register it through the global [CustomOperators](./gridifyGlobalConfiguration.md#customoperators) configuration.
 
 ::: tip
-Custom operators must be start with the `#` character.
+Custom operators must start with the `#` character.
 :::
 
 - FreeTextOperator Example:

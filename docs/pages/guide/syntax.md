@@ -1,6 +1,6 @@
 # Parsing and Syntax Tree
 
-Gridify internally uses a syntax tree to generate the expression tree that is used to filter or order objects based on their members. If you need more control or insights over the `SyntaxTree`, you can use the following extension methods inside the `Gridify.Syntax` namespace.
+Gridify internally uses a syntax tree to generate the expression tree used for filtering or ordering objects based on their members. If you need more control or insights into the `SyntaxTree`, you can use the following extension methods in the `Gridify.Syntax` namespace.
 
 ## SyntaxTree
 

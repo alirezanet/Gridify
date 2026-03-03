@@ -1,8 +1,8 @@
 # Ordering
 
-The ordering query expression can be built with a comma-delimited ordered list of field/property names followed by **`asc`** or **`desc`** keywords.
+The ordering query expression is built using a comma-delimited list of field/property names followed by **`asc`** or **`desc`** keywords.
 
-By default, if you don't add these keywords, Gridify assumes you need Ascending ordering.
+By default, if you don't specify these keywords, Gridify assumes ascending order.
 
 :::: code-group
 

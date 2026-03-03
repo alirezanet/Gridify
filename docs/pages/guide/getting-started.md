@@ -1,23 +1,20 @@
 
 # Getting Started
 
-There are three packages available for gridify in the nuget repository:
+There are three main packages available for Gridify on NuGet:
 
 - [Gridify](https://www.nuget.org/packages/Gridify/)
 - [Gridify.EntityFramework](https://www.nuget.org/packages/Gridify.EntityFramework/)
-
-::: tip
-If you are using the Entity Framework in your project, you should install the `Gridify.EntityFramework` package instead of `Gridify`.
-
-This package provides the same functionality as the `Gridify` package but is designed to be more compatible with [Entity Framework](./extensions/entityframework).
-:::
-
----
-
 - [Gridify.Elasticsearch](https://www.nuget.org/packages/Gridify.Elasticsearch/)
 
 ::: tip
-To use Gridify with Elasticsearch, it's necessary to install [`Gridify.Elasticsearch`](./extensions/elasticsearch).
+If you are using Entity Framework in your project, install the `Gridify.EntityFramework` package instead of `Gridify`.
+
+This package provides the same functionality as the `Gridify` package but is optimized for [Entity Framework](./extensions/entityframework) compatibility.
+:::
+
+::: tip
+To use Gridify with Elasticsearch, install the [`Gridify.Elasticsearch`](./extensions/elasticsearch) package.
 :::
 
 ---

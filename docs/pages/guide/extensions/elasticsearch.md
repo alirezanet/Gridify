@@ -1,10 +1,10 @@
 # Elasticsearch
 
-Gridify.Elasticsearch is an extension of Gridify, that provides an ability to generate Elasticsearch DSL queries.
+Gridify.Elasticsearch is an extension of Gridify that provides the ability to generate Elasticsearch DSL queries.
 
 ## Gridify.Elasticsearch Package
 
-The `Gridify.Elasticsearch` package has a bunch of extension methods that allow to convert Gridify filters and sortings to Elasticsearch DSL queries using Elastic.Clients.Elasticsearch .NET client.
+The `Gridify.Elasticsearch` package includes extension methods that convert Gridify filters and sortings to Elasticsearch DSL queries using the Elastic.Clients.Elasticsearch .NET client.
 
 ## Installation
 

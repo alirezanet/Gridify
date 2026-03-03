@@ -1,6 +1,6 @@
 # GridifyGlobalConfiguration
 
-Using this class you can change the default behavior and configuration of the Gridify library.
+Using this class, you can change the default behavior and configuration of the Gridify library.
 
 ## General configurations
 
@@ -22,7 +22,7 @@ You can change this behavior by setting this property to `true`.
 
 ### AllowNullSearch
 
-This option enables the `null` keyword in filtering operations, for example, `name=null` searches for all records with a null value for the `name` field not the string `"null"`. if you need to search for the string `"null"` you can disable this option.
+This option enables the `null` keyword in filtering operations. For example, `name=null` searches for all records with a null value for the `name` field, not the string `"null"`. If you need to search for the literal string `"null"`, disable this option.
 
 - type: `bool`
 - default: `true`
@@ -30,7 +30,7 @@ This option enables the `null` keyword in filtering operations, for example, `na
 
 ### IgnoreNotMappedFields
 
-If true, in filtering and ordering operations, gridify doesn't return any exceptions when a mapping is not defined for the given field.
+If true, Gridify doesn't throw exceptions during filtering and ordering operations when a mapping is not defined for the given field.
 
 - type: `bool`
 - default: `false`
@@ -38,23 +38,23 @@ If true, in filtering and ordering operations, gridify doesn't return any except
 
 ### DisableNullChecks
 
-On nested collections by default gridify adds a null checking condition to prevent the null reference exceptions
+By default, Gridify adds null-checking conditions on nested collections to prevent null reference exceptions, e.g., `() => field != null && field....`
 
-e.g `() => field != null && field....`
-
-some ORMs like NHibernate don't support this. You can disable this behavior by setting this option to true.
+Some ORMs like NHibernate don't support this. You can disable this behavior by setting this option to `true`.
 
 - type: `bool`
 - default: `false`
 
 ### AvoidNullReference
 
-This option allows for an intermediate object to be null
+This option allows intermediate objects to be null.
 
-e.g on `obj.PropA.Prob`, `PropA` can be null
+For example, in `obj.PropA.PropB`, `PropA` can be null.
 
-This configuration is specific for properties and was introduced after DisableNullChecks.
-Hence it has its own property.
+This configuration is specific to properties and was introduced after `DisableNullChecks`.
+
+- type: `bool`
+- default: `false`
 
 ### CaseInsensitiveFiltering
 

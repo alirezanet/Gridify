@@ -1,8 +1,8 @@
 # GridifyMapper
 
-Internally Gridify is using an auto generated mapper that maps your string base field names to actual properties in your entities, but sometimes we don't want to support filtering or sorting on a specific field. If you want to control what field names are mapped to what properties, you can create a custom mapper.
+Internally, Gridify uses an auto-generated mapper that maps your string-based field names to actual properties in your entities. However, sometimes you may want to control which fields support filtering or sorting. You can create a custom mapper to define exactly what field names map to which properties.
 
-To get a better understanding of how this works, consider the following example:
+To better understand how this works, consider the following example:
 
 ``` csharp
 // sample Entities
@@ -71,7 +71,7 @@ var mapperWithDepth = new GridifyMapper<Person>(true, 2);
 
 ## RemoveMap
 
-This method removes mapping from the mapper. Usually you will use this method after you have generated the mappings to ignore some properties that you don't want to be supported by Gridify filtering or ordering actions.
+This method removes a mapping from the mapper. You will typically use this method after generating mappings to ignore properties that you don't want to support with Gridify filtering or ordering actions.
 
 ## AddMap
 
@@ -81,11 +81,11 @@ This method adds a mapping to the mapper.
 - the second parameter is a property selector expression
 - the third parameter is an optional [value convertor](#value-convertor) expression that you can use to convert user inputs to anything you want
 
-### Value convertor
+### Value Convertor
 
-If you need to change your search values before the filtering operation you can use this feature, the third parameter of the GridifyMapper AddMap method accepts a function that you can use to convert the input values.
+If you need to modify search values before the filtering operation, you can use this feature. The third parameter of the GridifyMapper `AddMap` method accepts a function to convert input values.
 
-in the above example we want to convert the userName value to lowercase before the filtering operation.
+In the example above, we convert the userName value to lowercase before filtering:
 
 ``` csharp
 mapper = mapper.AddMap("userName", p => p.UserName, value => value.ToLower());
@@ -183,15 +183,15 @@ This method checks if the mapper has a mapping for the given field name.
 
 ## ClearMaps
 
-This method clears the list of mappings
+This method clears the list of mappings.
 
 ## GetCurrentMaps
 
-This method returns list of current mappings.
+This method returns the list of current mappings.
 
 ## GetCurrentMapsByType
 
-This method returns list of current mappings for the given type.
+This method returns the list of current mappings for the given type.
 
 ## GridifyMapperConfiguration
 
@@ -208,7 +208,7 @@ var mapper = new GridifyMapper<Person>(mapperConfig);
 
 ### CaseSensitive
 
-By default mapper is `Case-insensitive` but you can change this behavior if you need `Case-Sensitive` mappings.
+By default, the mapper is **case-insensitive**, but you can enable **case-sensitive** mappings if needed.
 
 - Type: `bool`
 - Default: `false`
@@ -219,7 +219,7 @@ var mapper = new GridifyMapper<Person>(q => q.CaseSensitive = true);
 
 ### IgnoreNotMappedFields
 
-By setting this to `true` Gridify don't throw an exception when a field name is not mapped. for instance, in the above example, searching for `password` will not throw an exception.
+By setting this to `true`, Gridify won't throw an exception when a field name is not mapped. For instance, in the example above, searching for `password` will not throw an exception.
 
 - Type: `bool`
 - Default: `false`
@@ -230,7 +230,7 @@ var mapper = new GridifyMapper<Person>(q => q.IgnoreNotMappedFields = true);
 
 ### AllowNullSearch
 
-By setting this to `false`, Gridify don't allow searching on null values using the `null` keyword for values.
+By setting this to `false`, Gridify won't allow searching for null values using the `null` keyword.
 
 - Type: `bool`
 - Default: `true`

@@ -1,13 +1,13 @@
 # Compile and Reuse
 
-You can access Gridify generated expressions using the `GetFilteringExpression` of [GridifyQuery](./gridifyQuery.md)
-or `BuildCompiled` methods of [QueryBuilder](./queryBuilder.md) class,
-by storing an expression you can use it multiple times without having any overheads,
-also if you store a compiled expression you get a massive performance boost.
+You can access Gridify-generated expressions using the `GetFilteringExpression` method of [GridifyQuery](./gridifyQuery.md)
+or the `BuildCompiled` method of the [QueryBuilder](./queryBuilder.md) class.
+By storing an expression, you can reuse it multiple times without any overhead.
+If you store a compiled expression, you get a massive performance boost.
 
 ::: warning
-You should only use a **compiled** expression (delegate) if you are **not** using Gridify alongside an ORM like
-Entity-Framework.
+You should only use a **compiled** expression (delegate) if you are **not** using Gridify with an ORM like
+Entity Framework.
 :::
 
 ``` csharp

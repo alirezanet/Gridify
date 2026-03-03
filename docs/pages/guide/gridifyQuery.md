@@ -20,11 +20,12 @@ Here’s an updated version of the `IsValid` section you can drop into the docs.
 
 ## IsValid
 
-This extension method checks if a `GridifyQuery` (`Filter`, `OrderBy`) is valid to use with a custom mapper or the auto-generated mapper and returns `true` or `false`.
+This extension method checks if a `GridifyQuery` (`Filter`, `OrderBy`) is valid for use with a custom mapper or the auto-generated mapper. It returns `true` if valid, `false` otherwise.
 
+The validation checks:
 * Field names (mapped or actual properties)
 * Filter syntax
-* **Value type compatibility** (ints, `DateTime`, enums, `bool`, `Guid`, etc.)
+* **Value type compatibility** (integers, `DateTime`, enums, `bool`, `Guid`, etc.)
 
 ### Basic usage
 

@@ -1,8 +1,8 @@
 # Using Gridify in API Controllers
 
-When working with ASP.NET APIs, especially when you need to apply string-based filtering conditions, sorting based on field names, or implementing pagination functionality, the Gridify library is a valuable tool. It can be used in any .NET project and with any type of collection, not just limited to ASP.NET projects.
+When working with ASP.NET APIs, especially when you need to apply string-based filtering, sorting by field names, or implementing pagination, the Gridify library is a valuable tool. It can be used in any .NET project and with any type of collection, not just limited to ASP.NET projects.
 
-To demonstrate the core concepts of Gridify, let's look at a simple implementation in the following example.
+Let's look at a simple implementation to demonstrate the core concepts of Gridify.
 
 ## Describing the Scenario
 

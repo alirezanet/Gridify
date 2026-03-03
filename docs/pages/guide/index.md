@@ -2,7 +2,7 @@
 
 Greetings!
 
-Gridify is a dynamic LINQ library designed to simplify the process of converting strings into LINQ queries. It offers remarkable performance and ease-of-use, making it effortless to apply filtering, sorting, and pagination utilizing text-based data.
+Gridify is a dynamic LINQ library designed to simplify converting strings into LINQ queries. It offers exceptional performance and ease of use, making it effortless to apply filtering, sorting, and pagination using text-based data.
 
 ## Features
 

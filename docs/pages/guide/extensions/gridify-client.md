@@ -1,8 +1,6 @@
 # Gridify Client Library
 
-The Gridify Client library is a lightweight JavaScript and TypeScript library designed to simplify the creation of
-dynamic queries on the client side. This library facilitates the construction of queries that can be seamlessly
-integrated with your server-side APIs, leveraging the powerful features of Gridify.
+The Gridify Client library is a lightweight JavaScript and TypeScript library designed to simplify creating dynamic queries on the client side. This library facilitates building queries that can be seamlessly integrated with your server-side APIs, leveraging the powerful features of Gridify.
 
 ## Installation
 

@@ -1,10 +1,10 @@
 # Dependency Injection
 
-Gridify offers a powerful feature that enables you to streamline data mapping and configurations in your application by integrating with the Dependency Injection (DI) container. By registering your mapping profiles with DI, you can achieve cleaner, more maintainable code and improved separation of concerns. This section provides an overview of how to register your GridifyMapper configurations with DI.
+Gridify offers a powerful feature that enables you to streamline data mapping and configuration in your application by integrating with the Dependency Injection (DI) container. By registering your mapping profiles with DI, you can achieve cleaner, more maintainable code and improved separation of concerns. This section provides an overview of how to register your GridifyMapper configurations in the DI container.
 
 ## Register GridifyMapper with DI
 
-Registering Gridify mapping with DI is a straightforward process. You'll define mapping profiles for your models and then register them in the DI container. Follow these steps to get started:
+Registering Gridify mappings with DI is straightforward. Define mapping profiles for your models, then register them in the DI container. Follow these steps to get started:
 
 ## 1. Define Mapping Profiles
 
