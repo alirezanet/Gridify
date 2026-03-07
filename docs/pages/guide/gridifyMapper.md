@@ -181,7 +181,41 @@ When using composite maps with Entity Framework, especially with PostgreSQL, fol
 
 The `AddNestedMapper` method allows you to reuse mapper configurations for nested objects across multiple entities. This is particularly useful when you have the same nested type (like `Address`) used in multiple parent entities (like `User` and `Company`), and you want to define the nested mappings once and reuse them everywhere.
 
-### Basic Usage with Prefix
+### Method Overloads
+
+#### 1. Without Prefix (Merge Directly)
+
+```csharp
+// With explicit mapper
+IGridifyMapper<T> AddNestedMapper<TProperty>(
+    Expression<Func<T, TProperty>> propertyExpression,
+    IGridifyMapper<TProperty> nestedMapper,
+    bool overrideIfExists = true)
+
+// With auto-generated mapper
+IGridifyMapper<T> AddNestedMapper<TProperty>(
+    Expression<Func<T, TProperty>> propertyExpression,
+    bool overrideIfExists = true)
+```
+
+#### 2. With Prefix
+
+```csharp
+// With explicit mapper
+IGridifyMapper<T> AddNestedMapper<TProperty>(
+    string prefix,
+    Expression<Func<T, TProperty>> propertyExpression,
+    IGridifyMapper<TProperty> nestedMapper,
+    bool overrideIfExists = true)
+
+// With auto-generated mapper
+IGridifyMapper<T> AddNestedMapper<TProperty>(
+    string prefix,
+    Expression<Func<T, TProperty>> propertyExpression,
+    bool overrideIfExists = true)
+```
+
+### Basic Usage
 
 ```csharp
 // Define a reusable mapper for Address
@@ -190,51 +224,38 @@ var addressMapper = new GridifyMapper<Address>()
     .AddMap("country", x => x.Country);
 // Note: Secret is intentionally not mapped
 
-// Reuse the address mapper for User with "address" prefix
+// Without prefix - merges directly
 var userMapper = new GridifyMapper<User>()
     .AddMap("email", x => x.Email)
-    .AddNestedMapper("address", x => x.Address, addressMapper);
-// Now supports: "address.city=London", "address.country=UK"
+    .AddNestedMapper(x => x.Address, addressMapper);
+// Supports: "city=London", "country=UK"
 
-// Reuse the same mapper for Company with "location" prefix
+// With prefix
 var companyMapper = new GridifyMapper<Company>()
     .AddMap("name", x => x.Name)
     .AddNestedMapper("location", x => x.Address, addressMapper);
 // Supports: "location.city=London", "location.country=UK"
 ```
 
-### Merging Without Prefix
+### Auto-Generated Mappings
 
-You can merge nested mappings directly without a prefix by passing `null` or an empty string:
+You can use the generic overloads to automatically generate mappings for the nested type:
 
 ```csharp
-var addressMapper = new GridifyMapper<Address>()
-    .AddMap("city", x => x.City)
-    .AddMap("country", x => x.Country);
+// Without prefix - auto-generates all Address mappings
+var userMapper = new GridifyMapper<User>()
+    .AddMap("email", x => x.Email)
+    .AddNestedMapper<Address>(x => x.Address);
+// Supports: "city=London", "country=UK", "secret=value" (all properties)
 
+// With prefix - auto-generates with prefix
 var companyMapper = new GridifyMapper<Company>()
     .AddMap("name", x => x.Name)
-    .AddNestedMapper(null, x => x.Address, addressMapper);
-// Now supports: "city=London", "country=UK" (no prefix)
+    .AddNestedMapper<Address>("location", x => x.Address);
+// Supports: "location.city=London", "location.country=UK", etc.
 ```
 
-### Method Signature
-
-```csharp
-IGridifyMapper<T> AddNestedMapper<TProperty>(
-    string? prefix,
-    Expression<Func<T, TProperty>> propertyExpression,
-    IGridifyMapper<TProperty> nestedMapper,
-    bool overrideIfExists = true)
-```
-
-**Parameters:**
-- `prefix`: Optional prefix to prepend to nested mapping keys. If null or empty, merges mappings directly without a prefix.
-- `propertyExpression`: Expression pointing to the nested property (e.g., `x => x.Address`)
-- `nestedMapper`: The mapper containing mappings for the nested type
-- `overrideIfExists`: Whether to override existing mappings with the same key (default: true)
-
-**Returns:** The mapper instance for method chaining
+**Note:** Auto-generated mappings expose all properties. For security, use explicit mappers to control which fields are exposed.
 
 ### Features
 

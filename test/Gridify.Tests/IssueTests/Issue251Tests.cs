@@ -291,10 +291,10 @@ public class Issue251Tests
           .AddMap("city", x => x.City)
           .AddMap("country", x => x.Country);
 
-      // Act - use null prefix to merge directly
+      // Act - use overload without prefix parameter to merge directly
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper(null, x => x.Address, addressMapper);
+          .AddNestedMapper(x => x.Address, addressMapper);
 
       var users = new List<User>
       {
@@ -314,5 +314,61 @@ public class Issue251Tests
 
       Assert.Single(result);
       Assert.Equal("Tokyo", result[0].Address.City);
+   }
+
+   [Fact]
+   public void AddNestedMapper_GenericOverload_WithoutPrefix_ShouldAutoGenerateMappings()
+   {
+      // Arrange & Act - use generic overload without prefix
+      var userMapper = new GridifyMapper<User>()
+          .AddMap("email", x => x.Email)
+          .AddNestedMapper<Address>(x => x.Address);
+
+      var users = new List<User>
+      {
+          new() { Email = "test@example.com", Address = new Address { City = "Tokyo", Country = "Japan" } },
+          new() { Email = "test2@example.com", Address = new Address { City = "Seoul", Country = "Korea" } }
+      };
+
+      // Assert - verify auto-generated maps are accessible without prefix
+      Assert.True(userMapper.HasMap("city"));
+      Assert.True(userMapper.HasMap("country"));
+      Assert.False(userMapper.HasMap("address.city")); // Should not have any prefix
+
+      // Test filtering without prefix
+      var result = users.AsQueryable()
+          .ApplyFiltering("city=Tokyo", userMapper)
+          .ToList();
+
+      Assert.Single(result);
+      Assert.Equal("Tokyo", result[0].Address.City);
+   }
+
+   [Fact]
+   public void AddNestedMapper_GenericOverload_WithPrefix_ShouldAutoGenerateMappings()
+   {
+      // Arrange & Act - use generic overload with prefix
+      var userMapper = new GridifyMapper<User>()
+          .AddMap("email", x => x.Email)
+          .AddNestedMapper<Address>("location", x => x.Address);
+
+      var users = new List<User>
+      {
+          new() { Email = "test@example.com", Address = new Address { City = "Paris", Country = "France" } },
+          new() { Email = "test2@example.com", Address = new Address { City = "Berlin", Country = "Germany" } }
+      };
+
+      // Assert - verify auto-generated maps are accessible with prefix
+      Assert.True(userMapper.HasMap("location.city"));
+      Assert.True(userMapper.HasMap("location.country"));
+      Assert.False(userMapper.HasMap("city")); // Should have prefix
+
+      // Test filtering with prefix
+      var result = users.AsQueryable()
+          .ApplyFiltering("location.city=Paris", userMapper)
+          .ToList();
+
+      Assert.Single(result);
+      Assert.Equal("Paris", result[0].Address.City);
    }
 }

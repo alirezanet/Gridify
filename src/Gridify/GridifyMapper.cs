@@ -180,8 +180,8 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       return this;
    }
 
+   // Overload 1: Without prefix - property expression first, merges directly
    public IGridifyMapper<T> AddNestedMapper<TProperty>(
-      string? prefix,
       Expression<Func<T, TProperty>> propertyExpression,
       IGridifyMapper<TProperty> nestedMapper,
       bool overrideIfExists = true)
@@ -191,11 +191,53 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       if (nestedMapper == null)
          throw new ArgumentNullException(nameof(nestedMapper));
 
-      // If no prefix provided, extract property name from expression to use as prefix
+      return AddNestedMapperInternal(propertyExpression, nestedMapper, null, overrideIfExists);
+   }
+
+   // Overload 2: With prefix - prefix first, then property expression
+   public IGridifyMapper<T> AddNestedMapper<TProperty>(
+      string prefix,
+      Expression<Func<T, TProperty>> propertyExpression,
+      IGridifyMapper<TProperty> nestedMapper,
+      bool overrideIfExists = true)
+   {
       if (string.IsNullOrEmpty(prefix))
-      {
-         prefix = null; // Will merge directly without prefix
-      }
+         throw new ArgumentException("Prefix cannot be null or empty when using this overload. Use the overload without prefix parameter to merge mappings directly.", nameof(prefix));
+      if (propertyExpression == null)
+         throw new ArgumentNullException(nameof(propertyExpression));
+      if (nestedMapper == null)
+         throw new ArgumentNullException(nameof(nestedMapper));
+
+      return AddNestedMapperInternal(propertyExpression, nestedMapper, prefix, overrideIfExists);
+   }
+
+   // Overload 3: Generic without prefix - auto-generates mapper for TProperty and merges directly
+   public IGridifyMapper<T> AddNestedMapper<TProperty>(
+      Expression<Func<T, TProperty>> propertyExpression,
+      bool overrideIfExists = true)
+   {
+      if (propertyExpression == null)
+         throw new ArgumentNullException(nameof(propertyExpression));
+
+      // Auto-generate mappings for the nested type
+      var nestedMapper = new GridifyMapper<TProperty>().GenerateMappings();
+
+      return AddNestedMapperInternal(propertyExpression, nestedMapper, null, overrideIfExists);
+   }
+
+   // Overload 4: Generic with prefix - auto-generates mapper for TProperty
+   public IGridifyMapper<T> AddNestedMapper<TProperty>(
+      string prefix,
+      Expression<Func<T, TProperty>> propertyExpression,
+      bool overrideIfExists = true)
+   {
+      if (string.IsNullOrEmpty(prefix))
+         throw new ArgumentException("Prefix cannot be null or empty when using this overload. Use the overload without prefix parameter to merge mappings directly.", nameof(prefix));
+      if (propertyExpression == null)
+         throw new ArgumentNullException(nameof(propertyExpression));
+
+      // Auto-generate mappings for the nested type
+      var nestedMapper = new GridifyMapper<TProperty>().GenerateMappings();
 
       return AddNestedMapperInternal(propertyExpression, nestedMapper, prefix, overrideIfExists);
    }
