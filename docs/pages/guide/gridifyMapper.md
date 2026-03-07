@@ -181,7 +181,7 @@ When using composite maps with Entity Framework, especially with PostgreSQL, fol
 
 The `AddNestedMapper` method allows you to reuse mapper configurations for nested objects across multiple entities. This is particularly useful when you have the same nested type (like `Address`) used in multiple parent entities (like `User` and `Company`), and you want to define the nested mappings once and reuse them everywhere.
 
-### Basic Usage
+### Basic Usage with Prefix
 
 ```csharp
 // Define a reusable mapper for Address
@@ -190,22 +190,22 @@ var addressMapper = new GridifyMapper<Address>()
     .AddMap("country", x => x.Country);
 // Note: Secret is intentionally not mapped
 
-// Reuse the address mapper for User
+// Reuse the address mapper for User with "address" prefix
 var userMapper = new GridifyMapper<User>()
     .AddMap("email", x => x.Email)
-    .AddNestedMapper(x => x.Address, addressMapper);
+    .AddNestedMapper("address", x => x.Address, addressMapper);
 // Now supports: "address.city=London", "address.country=UK"
 
-// Reuse the same mapper for Company
+// Reuse the same mapper for Company with "location" prefix
 var companyMapper = new GridifyMapper<Company>()
     .AddMap("name", x => x.Name)
-    .AddNestedMapper(x => x.Address, addressMapper);
-// Also supports: "address.city=London", "address.country=UK"
+    .AddNestedMapper("location", x => x.Address, addressMapper);
+// Supports: "location.city=London", "location.country=UK"
 ```
 
-### With Custom Prefix
+### Merging Without Prefix
 
-You can specify a custom prefix for the nested mappings:
+You can merge nested mappings directly without a prefix by passing `null` or an empty string:
 
 ```csharp
 var addressMapper = new GridifyMapper<Address>()
@@ -214,29 +214,22 @@ var addressMapper = new GridifyMapper<Address>()
 
 var companyMapper = new GridifyMapper<Company>()
     .AddMap("name", x => x.Name)
-    .AddNestedMapper("location", x => x.Address, addressMapper);
-// Now supports: "location.city=London", "location.country=UK"
+    .AddNestedMapper(null, x => x.Address, addressMapper);
+// Now supports: "city=London", "country=UK" (no prefix)
 ```
 
-### Method Signatures
+### Method Signature
 
 ```csharp
-// With explicit prefix (recommended for consistency with AddMap)
 IGridifyMapper<T> AddNestedMapper<TProperty>(
-    string prefix,
-    Expression<Func<T, TProperty>> propertyExpression,
-    IGridifyMapper<TProperty> nestedMapper,
-    bool overrideIfExists = true)
-
-// With automatic prefix generation from property name
-IGridifyMapper<T> AddNestedMapper<TProperty>(
+    string? prefix,
     Expression<Func<T, TProperty>> propertyExpression,
     IGridifyMapper<TProperty> nestedMapper,
     bool overrideIfExists = true)
 ```
 
 **Parameters:**
-- `prefix`: Prefix to prepend to nested mapping keys (first overload only)
+- `prefix`: Optional prefix to prepend to nested mapping keys. If null or empty, merges mappings directly without a prefix.
 - `propertyExpression`: Expression pointing to the nested property (e.g., `x => x.Address`)
 - `nestedMapper`: The mapper containing mappings for the nested type
 - `overrideIfExists`: Whether to override existing mappings with the same key (default: true)
@@ -250,6 +243,7 @@ IGridifyMapper<T> AddNestedMapper<TProperty>(
 - **Convertor Support** - Nested mappings preserve their value convertors
 - **Composite Map Support** - Works with composite maps defined in the nested mapper
 - **Security** - Only expose fields you explicitly map; unmapped fields remain hidden
+- **Flexible Prefixing** - Use custom prefixes or merge directly without prefix
 
 ### Example: Securing Nested Properties
 
@@ -267,16 +261,16 @@ var addressMapper = new GridifyMapper<Address>()
     .AddMap("country", x => x.Country);
     // Secret is intentionally not mapped
 
-// Apply to multiple entities
+// Apply to multiple entities with prefix
 var userMapper = new GridifyMapper<User>()
-    .AddNestedMapper(x => x.Address, addressMapper);
+    .AddNestedMapper("address", x => x.Address, addressMapper);
 
 var companyMapper = new GridifyMapper<Company>()
-    .AddNestedMapper(x => x.Address, addressMapper);
+    .AddNestedMapper("location", x => x.Address, addressMapper);
 
 // Secret is not exposed in any of these mappers
 Assert.False(userMapper.HasMap("address.secret"));
-Assert.False(companyMapper.HasMap("address.secret"));
+Assert.False(companyMapper.HasMap("location.secret"));
 ```
 
 ### Benefits

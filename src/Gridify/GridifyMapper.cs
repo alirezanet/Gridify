@@ -181,40 +181,29 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    }
 
    public IGridifyMapper<T> AddNestedMapper<TProperty>(
-      string prefix,
+      string? prefix,
       Expression<Func<T, TProperty>> propertyExpression,
       IGridifyMapper<TProperty> nestedMapper,
       bool overrideIfExists = true)
    {
+      if (propertyExpression == null)
+         throw new ArgumentNullException(nameof(propertyExpression));
+      if (nestedMapper == null)
+         throw new ArgumentNullException(nameof(nestedMapper));
+
+      // If no prefix provided, extract property name from expression to use as prefix
       if (string.IsNullOrEmpty(prefix))
-         throw new ArgumentNullException(nameof(prefix));
-      if (propertyExpression == null)
-         throw new ArgumentNullException(nameof(propertyExpression));
-      if (nestedMapper == null)
-         throw new ArgumentNullException(nameof(nestedMapper));
+      {
+         prefix = null; // Will merge directly without prefix
+      }
 
-      return AddNestedMapperInternal(propertyExpression, nestedMapper, prefix, overrideIfExists);
-   }
-
-   public IGridifyMapper<T> AddNestedMapper<TProperty>(
-      Expression<Func<T, TProperty>> propertyExpression,
-      IGridifyMapper<TProperty> nestedMapper,
-      bool overrideIfExists = true)
-   {
-      if (propertyExpression == null)
-         throw new ArgumentNullException(nameof(propertyExpression));
-      if (nestedMapper == null)
-         throw new ArgumentNullException(nameof(nestedMapper));
-
-      // Extract property name from expression to use as prefix
-      var prefix = ExtractPropertyNameInCamelCase(propertyExpression);
       return AddNestedMapperInternal(propertyExpression, nestedMapper, prefix, overrideIfExists);
    }
 
    private IGridifyMapper<T> AddNestedMapperInternal<TProperty>(
       Expression<Func<T, TProperty>> propertyExpression,
       IGridifyMapper<TProperty> nestedMapper,
-      string prefix,
+      string? prefix,
       bool overrideIfExists)
    {
 
@@ -224,7 +213,10 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       // Iterate through all mappings in the nested mapper
       foreach (var nestedMap in nestedMapper.GetCurrentMaps())
       {
-         var compositeKey = $"{prefix}.{nestedMap.From}";
+         // If prefix is null or empty, merge directly without prefix
+         var compositeKey = string.IsNullOrEmpty(prefix)
+            ? nestedMap.From
+            : $"{prefix}.{nestedMap.From}";
 
          // Get the nested expression
          var nestedExpression = nestedMap.To;
@@ -262,7 +254,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          }
 
          // Create the composed expression
-         var composedExpression = Expression.Lambda<Func<T, object>>(composedBody, parentParameter);
+         var composedExpression = Expression.Lambda<Func<T, object?>>(composedBody, parentParameter);
 
          // Handle CompositeGMap specially
          if (nestedMap is CompositeGMap<TProperty> compositeMap)
@@ -294,8 +286,8 @@ public class GridifyMapper<T> : IGridifyMapper<T>
                continue;
             }
 
-            // Add the composed mapping - cast to Expression<Func<T, object?>> to satisfy nullability
-            AddMap(compositeKey, (Expression<Func<T, object?>>)composedExpression, nestedMap.Convertor, overrideIfExists);
+            // Add the composed mapping
+            AddMap(compositeKey, composedExpression, nestedMap.Convertor, overrideIfExists);
          }
       }
 

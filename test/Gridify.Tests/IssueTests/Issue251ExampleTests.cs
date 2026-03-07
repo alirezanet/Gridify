@@ -48,12 +48,12 @@ public class Issue251ExampleTests
       // Step 2: Create a mapper for User that reuses the Address mapper
       var userGridifyMapper = new GridifyMapper<User>()
           .AddMap("email", q => q.Email)
-          .AddNestedMapper(q => q.Address, addressGridifyMapper);
+          .AddNestedMapper("address", q => q.Address, addressGridifyMapper);
 
       // Step 3: Create a mapper for Company that also reuses the Address mapper
       var companyGridifyMapper = new GridifyMapper<Company>()
           .AddMap("companyName", q => q.Name)
-          .AddNestedMapper(q => q.Address, addressGridifyMapper);
+          .AddNestedMapper("address", q => q.Address, addressGridifyMapper);
 
       // Test data
       var users = new List<User>
@@ -111,10 +111,10 @@ public class Issue251ExampleTests
           .AddMap("city", q => q.City)
           .AddMap("country", q => q.Country);
 
-      // Reuse for User with default prefix "address"
+      // Reuse for User with explicit prefix "address"
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", q => q.Email)
-          .AddNestedMapper(q => q.Address, addressMapper);
+          .AddNestedMapper("address", q => q.Address, addressMapper);
 
       // Reuse for Company with custom prefix "location"
       var companyMapper = new GridifyMapper<Company>()

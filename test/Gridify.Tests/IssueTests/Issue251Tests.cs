@@ -38,7 +38,7 @@ public class Issue251Tests
 
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper(x => x.Address, addressMapper);
+          .AddNestedMapper("address", x => x.Address, addressMapper);
 
       var users = new List<User>
         {
@@ -67,7 +67,7 @@ public class Issue251Tests
 
       var companyMapper = new GridifyMapper<Company>()
           .AddMap("companyName", x => x.Name)
-          .AddNestedMapper(x => x.Address, addressMapper);
+          .AddNestedMapper("address", x => x.Address, addressMapper);
 
       var companies = new List<Company>
         {
@@ -125,7 +125,7 @@ public class Issue251Tests
 
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper(x => x.Address, addressMapper);
+          .AddNestedMapper("address", x => x.Address, addressMapper);
 
       // Act & Assert - verify that "address.secret" is not mapped
       Assert.False(userMapper.HasMap("address.secret"));
@@ -143,7 +143,7 @@ public class Issue251Tests
 
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper(x => x.Address, addressMapper);
+          .AddNestedMapper("address", x => x.Address, addressMapper);
 
       var users = new List<User>
         {
@@ -177,7 +177,7 @@ public class Issue251Tests
 
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper(x => x.Address, addressMapper);
+          .AddNestedMapper("address", x => x.Address, addressMapper);
 
       var users = new List<User>
         {
@@ -204,7 +204,7 @@ public class Issue251Tests
 
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper(x => x.Address, addressMapper);
+          .AddNestedMapper("address", x => x.Address, addressMapper);
 
       var users = new List<User>
         {
@@ -239,7 +239,7 @@ public class Issue251Tests
 
       var userMapper = new GridifyMapper<User>()
           .AddMap("address.city", x => x.Email) // Intentionally map to email first
-          .AddNestedMapper(x => x.Address, addressMapper, overrideIfExists: false);
+          .AddNestedMapper("address", x => x.Address, addressMapper, overrideIfExists: false);
 
       // Assert - the original mapping should remain
       var map = userMapper.GetGMap("address.city");
@@ -281,5 +281,38 @@ public class Issue251Tests
 
       Assert.Single(result);
       Assert.Equal("Paris", result[0].Address.City);
+   }
+
+   [Fact]
+   public void AddNestedMapper_WithNullPrefix_ShouldMergeDirectlyWithoutPrefix()
+   {
+      // Arrange
+      var addressMapper = new GridifyMapper<Address>()
+          .AddMap("city", x => x.City)
+          .AddMap("country", x => x.Country);
+
+      // Act - use null prefix to merge directly
+      var userMapper = new GridifyMapper<User>()
+          .AddMap("email", x => x.Email)
+          .AddNestedMapper(null, x => x.Address, addressMapper);
+
+      var users = new List<User>
+      {
+          new() { Email = "test@example.com", Address = new Address { City = "Tokyo", Country = "Japan" } },
+          new() { Email = "test2@example.com", Address = new Address { City = "Seoul", Country = "Korea" } }
+      };
+
+      // Assert - verify maps are accessible without prefix
+      Assert.True(userMapper.HasMap("city"));
+      Assert.True(userMapper.HasMap("country"));
+      Assert.False(userMapper.HasMap("address.city")); // Should not have any prefix
+
+      // Test filtering without prefix
+      var result = users.AsQueryable()
+          .ApplyFiltering("city=Tokyo", userMapper)
+          .ToList();
+
+      Assert.Single(result);
+      Assert.Equal("Tokyo", result[0].Address.City);
    }
 }
