@@ -181,40 +181,6 @@ When using composite maps with Entity Framework, especially with PostgreSQL, fol
 
 The `AddNestedMapper` method allows you to reuse mapper configurations for nested objects across multiple entities. This is particularly useful when you have the same nested type (like `Address`) used in multiple parent entities (like `User` and `Company`), and you want to define the nested mappings once and reuse them everywhere.
 
-### Method Overloads
-
-#### 1. Without Prefix (Merge Directly)
-
-```csharp
-// With explicit mapper
-IGridifyMapper<T> AddNestedMapper<TProperty>(
-    Expression<Func<T, TProperty>> propertyExpression,
-    IGridifyMapper<TProperty> nestedMapper,
-    bool overrideIfExists = true)
-
-// With auto-generated mapper
-IGridifyMapper<T> AddNestedMapper<TProperty>(
-    Expression<Func<T, TProperty>> propertyExpression,
-    bool overrideIfExists = true)
-```
-
-#### 2. With Prefix
-
-```csharp
-// With explicit mapper
-IGridifyMapper<T> AddNestedMapper<TProperty>(
-    string prefix,
-    Expression<Func<T, TProperty>> propertyExpression,
-    IGridifyMapper<TProperty> nestedMapper,
-    bool overrideIfExists = true)
-
-// With auto-generated mapper
-IGridifyMapper<T> AddNestedMapper<TProperty>(
-    string prefix,
-    Expression<Func<T, TProperty>> propertyExpression,
-    bool overrideIfExists = true)
-```
-
 ### Basic Usage
 
 ```csharp
