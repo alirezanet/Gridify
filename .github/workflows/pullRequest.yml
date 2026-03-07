@@ -85,7 +85,7 @@ jobs:
         node-version: '18'
     - name: Install dependencies
       working-directory: ./client
-      run: npm install
+      run: npm install --legacy-peer-deps
     - name: Build
       working-directory: ./client
       run: npm run build
