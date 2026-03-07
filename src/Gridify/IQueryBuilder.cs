@@ -78,8 +78,122 @@ public interface IQueryBuilder<T>
    /// <param name="from">The field name to use in filters</param>
    /// <param name="convertor">Optional shared value converter function</param>
    /// <param name="expressions">One or more property expressions to search across</param>
-   /// <returns>returns IQueryBuilder</returns>
+   /// <inheritdoc cref="AddCompositeMap(string, Func{string, object}, Expression{Func{T, object}}[])" />
    IQueryBuilder<T> AddCompositeMap(string from, Func<string, object>? convertor, params Expression<Func<T, object?>>[] expressions);
+
+   /// <summary>
+   /// Reuses mappings from a nested object's mapper by composing expressions.
+   /// Merges nested mappings directly without a prefix.
+   /// </summary>
+   /// <typeparam name="TProperty">The type of the nested property</typeparam>
+   /// <param name="propertyExpression">Expression pointing to the nested property (e.g., x => x.Address)</param>
+   /// <param name="nestedMapper">The mapper containing mappings for the nested type</param>
+   /// <param name="overrideIfExists">Whether to override existing mappings with the same key</param>
+   /// <returns>returns IQueryBuilder</returns>
+   /// <example>
+   /// <code>
+   /// var addressMapper = new GridifyMapper&lt;Address&gt;()
+   ///     .AddMap("city", x => x.City)
+   ///     .AddMap("country", x => x.Country);
+   ///
+   /// var builder = new QueryBuilder&lt;User&gt;()
+   ///     .AddMap("email", x => x.Email)
+   ///     .AddNestedMapper(x => x.Address, addressMapper);
+   /// // Now supports: "city=London", "country=UK"
+   /// </code>
+   /// </example>
+   IQueryBuilder<T> AddNestedMapper<TProperty>(
+      Expression<Func<T, TProperty>> propertyExpression,
+      IGridifyMapper<TProperty> nestedMapper,
+      bool overrideIfExists = true);
+
+   /// <summary>
+   /// Reuses mappings from a nested object's mapper by composing expressions with a prefix.
+   /// </summary>
+   /// <typeparam name="TProperty">The type of the nested property</typeparam>
+   /// <param name="prefix">Prefix to prepend to nested mapping keys (e.g., "location" creates "location.city")</param>
+   /// <param name="propertyExpression">Expression pointing to the nested property (e.g., x => x.Address)</param>
+   /// <param name="nestedMapper">The mapper containing mappings for the nested type</param>
+   /// <param name="overrideIfExists">Whether to override existing mappings with the same key</param>
+   /// <returns>returns IQueryBuilder</returns>
+   /// <example>
+   /// <code>
+   /// var addressMapper = new GridifyMapper&lt;Address&gt;()
+   ///     .AddMap("city", x => x.City)
+   ///     .AddMap("country", x => x.Country);
+   ///
+   /// var builder = new QueryBuilder&lt;Company&gt;()
+   ///     .AddMap("name", x => x.Name)
+   ///     .AddNestedMapper("location", x => x.Address, addressMapper);
+   /// // Now supports: "location.city=London", "location.country=UK"
+   /// </code>
+   /// </example>
+   IQueryBuilder<T> AddNestedMapper<TProperty>(
+      string prefix,
+      Expression<Func<T, TProperty>> propertyExpression,
+      IGridifyMapper<TProperty> nestedMapper,
+      bool overrideIfExists = true);
+
+   /// <summary>
+   /// Reuses mappings from a custom mapper class for a nested object by composing expressions.
+   /// Merges mappings directly without a prefix.
+   /// </summary>
+   /// <typeparam name="TMapper">The mapper class type that implements IGridifyMapper&lt;TProperty&gt;</typeparam>
+   /// <param name="propertyExpression">Expression pointing to the nested property (e.g., x => x.Address)</param>
+   /// <param name="overrideIfExists">Whether to override existing mappings with the same key</param>
+   /// <returns>returns IQueryBuilder</returns>
+   /// <example>
+   /// <code>
+   /// public class AddressMapper : GridifyMapper&lt;Address&gt;
+   /// {
+   ///     public AddressMapper()
+   ///     {
+   ///         AddMap("city", q => q.City);
+   ///         AddMap("country", q => q.Country);
+   ///     }
+   /// }
+   ///
+   /// var builder = new QueryBuilder&lt;User&gt;()
+   ///     .AddMap("email", x => x.Email)
+   ///     .AddNestedMapper&lt;AddressMapper&gt;(x => x.Address);
+   /// // Uses AddressMapper and merges mappings: "city=London", "country=UK"
+   /// </code>
+   /// </example>
+   IQueryBuilder<T> AddNestedMapper<TMapper>(
+      Expression<Func<T, object>> propertyExpression,
+      bool overrideIfExists = true)
+      where TMapper : new();
+
+   /// <summary>
+   /// Reuses mappings from a custom mapper class for a nested object by composing expressions with a prefix.
+   /// </summary>
+   /// <typeparam name="TMapper">The mapper class type that implements IGridifyMapper&lt;TProperty&gt;</typeparam>
+   /// <param name="prefix">Prefix to prepend to nested mapping keys (e.g., "location" creates "location.city")</param>
+   /// <param name="propertyExpression">Expression pointing to the nested property (e.g., x => x.Address)</param>
+   /// <param name="overrideIfExists">Whether to override existing mappings with the same key</param>
+   /// <returns>returns IQueryBuilder</returns>
+   /// <example>
+   /// <code>
+   /// public class AddressMapper : GridifyMapper&lt;Address&gt;
+   /// {
+   ///     public AddressMapper()
+   ///     {
+   ///         AddMap("city", q => q.City);
+   ///         AddMap("country", q => q.Country);
+   ///     }
+   /// }
+   ///
+   /// var builder = new QueryBuilder&lt;Company&gt;()
+   ///     .AddMap("name", x => x.Name)
+   ///     .AddNestedMapper&lt;AddressMapper&gt;("location", x => x.Address);
+   /// // Uses AddressMapper with prefix: "location.city=London", "location.country=UK"
+   /// </code>
+   /// </example>
+   IQueryBuilder<T> AddNestedMapper<TMapper>(
+      string prefix,
+      Expression<Func<T, object>> propertyExpression,
+      bool overrideIfExists = true)
+      where TMapper : new();
 
    IQueryBuilder<T> RemoveMap(IGMap<T> map);
 
