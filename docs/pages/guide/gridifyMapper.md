@@ -237,25 +237,36 @@ var companyMapper = new GridifyMapper<Company>()
 // Supports: "location.city=London", "location.country=UK"
 ```
 
-### Auto-Generated Mappings
+### Custom Mapper Classes
 
-You can use the generic overloads to automatically generate mappings for the nested type:
+You can define custom mapper classes and use them with the generic overloads:
 
 ```csharp
-// Without prefix - auto-generates all Address mappings
+// Define a custom mapper class
+public class AddressGridifyMapper : GridifyMapper<Address>
+{
+    public AddressGridifyMapper()
+    {
+        AddMap("city", q => q.City);
+        AddMap("country", q => q.Country);
+        // Secret field is not mapped - not exposed for filtering
+    }
+}
+
+// Without prefix - uses custom mapper class
 var userMapper = new GridifyMapper<User>()
     .AddMap("email", x => x.Email)
-    .AddNestedMapper<Address>(x => x.Address);
-// Supports: "city=London", "country=UK", "secret=value" (all properties)
+    .AddNestedMapper<Address, AddressGridifyMapper>(x => x.Address);
+// Supports: "city=London", "country=UK" (Secret is hidden)
 
-// With prefix - auto-generates with prefix
+// With prefix - uses custom mapper class
 var companyMapper = new GridifyMapper<Company>()
     .AddMap("name", x => x.Name)
-    .AddNestedMapper<Address>("location", x => x.Address);
-// Supports: "location.city=London", "location.country=UK", etc.
+    .AddNestedMapper<Address, AddressGridifyMapper>("location", x => x.Address);
+// Supports: "location.city=London", "location.country=UK" (Secret is hidden)
 ```
 
-**Note:** Auto-generated mappings expose all properties. For security, use explicit mappers to control which fields are exposed.
+**Benefits:** Custom mapper classes allow you to define mappings once, control field exposure, and reuse them across multiple entities with compile-time safety.
 
 ### Features
 

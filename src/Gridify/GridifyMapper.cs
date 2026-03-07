@@ -211,33 +211,35 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       return AddNestedMapperInternal(propertyExpression, nestedMapper, prefix, overrideIfExists);
    }
 
-   // Overload 3: Generic without prefix - auto-generates mapper for TProperty and merges directly
-   public IGridifyMapper<T> AddNestedMapper<TProperty>(
+   // Overload 3: Generic without prefix - accepts custom mapper class and merges directly
+   public IGridifyMapper<T> AddNestedMapper<TProperty, TMapper>(
       Expression<Func<T, TProperty>> propertyExpression,
       bool overrideIfExists = true)
+      where TMapper : IGridifyMapper<TProperty>, new()
    {
       if (propertyExpression == null)
          throw new ArgumentNullException(nameof(propertyExpression));
 
-      // Auto-generate mappings for the nested type
-      var nestedMapper = new GridifyMapper<TProperty>().GenerateMappings();
+      // Instantiate the custom mapper class
+      var nestedMapper = new TMapper();
 
       return AddNestedMapperInternal(propertyExpression, nestedMapper, null, overrideIfExists);
    }
 
-   // Overload 4: Generic with prefix - auto-generates mapper for TProperty
-   public IGridifyMapper<T> AddNestedMapper<TProperty>(
+   // Overload 4: Generic with prefix - accepts custom mapper class
+   public IGridifyMapper<T> AddNestedMapper<TProperty, TMapper>(
       string prefix,
       Expression<Func<T, TProperty>> propertyExpression,
       bool overrideIfExists = true)
+      where TMapper : IGridifyMapper<TProperty>, new()
    {
       if (string.IsNullOrEmpty(prefix))
          throw new ArgumentException("Prefix cannot be null or empty when using this overload. Use the overload without prefix parameter to merge mappings directly.", nameof(prefix));
       if (propertyExpression == null)
          throw new ArgumentNullException(nameof(propertyExpression));
 
-      // Auto-generate mappings for the nested type
-      var nestedMapper = new GridifyMapper<TProperty>().GenerateMappings();
+      // Instantiate the custom mapper class
+      var nestedMapper = new TMapper();
 
       return AddNestedMapperInternal(propertyExpression, nestedMapper, prefix, overrideIfExists);
    }

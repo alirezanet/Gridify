@@ -317,22 +317,26 @@ public class Issue251Tests
    }
 
    [Fact]
-   public void AddNestedMapper_GenericOverload_WithoutPrefix_ShouldAutoGenerateMappings()
+   public void AddNestedMapper_GenericOverload_WithoutPrefix_ShouldUseCustomMapperClass()
    {
-      // Arrange & Act - use generic overload without prefix
+      // Define a custom mapper class inline for testing
+      // This would normally be defined outside the test
+
+      // Arrange & Act - use generic overload without prefix with custom mapper
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper<Address>(x => x.Address);
+          .AddNestedMapper<Address, AddressCustomMapper>(x => x.Address);
 
       var users = new List<User>
       {
-          new() { Email = "test@example.com", Address = new Address { City = "Tokyo", Country = "Japan" } },
-          new() { Email = "test2@example.com", Address = new Address { City = "Seoul", Country = "Korea" } }
+          new() { Email = "test@example.com", Address = new Address { City = "Tokyo", Country = "Japan", Secret = "secret1" } },
+          new() { Email = "test2@example.com", Address = new Address { City = "Seoul", Country = "Korea", Secret = "secret2" } }
       };
 
-      // Assert - verify auto-generated maps are accessible without prefix
+      // Assert - verify custom mapper's maps are accessible without prefix
       Assert.True(userMapper.HasMap("city"));
       Assert.True(userMapper.HasMap("country"));
+      Assert.False(userMapper.HasMap("secret")); // Secret not mapped in custom mapper
       Assert.False(userMapper.HasMap("address.city")); // Should not have any prefix
 
       // Test filtering without prefix
@@ -345,22 +349,23 @@ public class Issue251Tests
    }
 
    [Fact]
-   public void AddNestedMapper_GenericOverload_WithPrefix_ShouldAutoGenerateMappings()
+   public void AddNestedMapper_GenericOverload_WithPrefix_ShouldUseCustomMapperClass()
    {
-      // Arrange & Act - use generic overload with prefix
+      // Arrange & Act - use generic overload with prefix with custom mapper
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper<Address>("location", x => x.Address);
+          .AddNestedMapper<Address, AddressCustomMapper>("location", x => x.Address);
 
       var users = new List<User>
       {
-          new() { Email = "test@example.com", Address = new Address { City = "Paris", Country = "France" } },
-          new() { Email = "test2@example.com", Address = new Address { City = "Berlin", Country = "Germany" } }
+          new() { Email = "test@example.com", Address = new Address { City = "Paris", Country = "France", Secret = "secret1" } },
+          new() { Email = "test2@example.com", Address = new Address { City = "Berlin", Country = "Germany", Secret = "secret2" } }
       };
 
-      // Assert - verify auto-generated maps are accessible with prefix
+      // Assert - verify custom mapper's maps are accessible with prefix
       Assert.True(userMapper.HasMap("location.city"));
       Assert.True(userMapper.HasMap("location.country"));
+      Assert.False(userMapper.HasMap("location.secret")); // Secret not mapped in custom mapper
       Assert.False(userMapper.HasMap("city")); // Should have prefix
 
       // Test filtering with prefix
@@ -370,5 +375,16 @@ public class Issue251Tests
 
       Assert.Single(result);
       Assert.Equal("Paris", result[0].Address.City);
+   }
+
+   // Custom mapper class for testing generic overloads
+   public class AddressCustomMapper : GridifyMapper<Address>
+   {
+      public AddressCustomMapper()
+      {
+         AddMap("city", q => q.City);
+         AddMap("country", q => q.Country);
+         // Secret is intentionally not mapped
+      }
    }
 }

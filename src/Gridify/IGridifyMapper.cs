@@ -89,46 +89,67 @@ public interface IGridifyMapper<T>
       bool overrideIfExists = true);
 
    /// <summary>
-   /// Auto-generates and reuses mappings for a nested object by composing expressions.
-   /// Creates a mapper with auto-generated mappings for TProperty and merges them directly without a prefix.
+   /// Reuses mappings from a custom mapper class for a nested object by composing expressions.
+   /// Merges mappings directly without a prefix.
    /// </summary>
    /// <typeparam name="TProperty">The type of the nested property</typeparam>
+   /// <typeparam name="TMapper">The mapper class type that implements IGridifyMapper&lt;TProperty&gt;</typeparam>
    /// <param name="propertyExpression">Expression pointing to the nested property (e.g., x => x.Address)</param>
    /// <param name="overrideIfExists">Whether to override existing mappings with the same key</param>
    /// <returns>An instance of <see cref="IGridifyMapper{T}"/> for method chaining</returns>
    /// <example>
    /// <code>
+   /// public class AddressGridifyMapper : GridifyMapper&lt;Address&gt;
+   /// {
+   ///     public AddressGridifyMapper()
+   ///     {
+   ///         AddMap("city", q => q.City);
+   ///         AddMap("country", q => q.Country);
+   ///     }
+   /// }
+   /// 
    /// var userMapper = new GridifyMapper&lt;User&gt;()
    ///     .AddMap("email", x => x.Email)
-   ///     .AddNestedMapper&lt;Address&gt;(x => x.Address);
-   /// // Auto-generates mappings for Address properties and merges them: "city=London", "country=UK"
+   ///     .AddNestedMapper&lt;Address, AddressGridifyMapper&gt;(x => x.Address);
+   /// // Uses AddressGridifyMapper and merges mappings: "city=London", "country=UK"
    /// </code>
    /// </example>
-   IGridifyMapper<T> AddNestedMapper<TProperty>(
+   IGridifyMapper<T> AddNestedMapper<TProperty, TMapper>(
       Expression<Func<T, TProperty>> propertyExpression,
-      bool overrideIfExists = true);
+      bool overrideIfExists = true)
+      where TMapper : IGridifyMapper<TProperty>, new();
 
    /// <summary>
-   /// Auto-generates and reuses mappings for a nested object by composing expressions with a prefix.
-   /// Creates a mapper with auto-generated mappings for TProperty.
+   /// Reuses mappings from a custom mapper class for a nested object by composing expressions with a prefix.
    /// </summary>
    /// <typeparam name="TProperty">The type of the nested property</typeparam>
+   /// <typeparam name="TMapper">The mapper class type that implements IGridifyMapper&lt;TProperty&gt;</typeparam>
    /// <param name="prefix">Prefix to prepend to nested mapping keys (e.g., "location" creates "location.city")</param>
    /// <param name="propertyExpression">Expression pointing to the nested property (e.g., x => x.Address)</param>
    /// <param name="overrideIfExists">Whether to override existing mappings with the same key</param>
    /// <returns>An instance of <see cref="IGridifyMapper{T}"/> for method chaining</returns>
    /// <example>
    /// <code>
+   /// public class AddressGridifyMapper : GridifyMapper&lt;Address&gt;
+   /// {
+   ///     public AddressGridifyMapper()
+   ///     {
+   ///         AddMap("city", q => q.City);
+   ///         AddMap("country", q => q.Country);
+   ///     }
+   /// }
+   /// 
    /// var companyMapper = new GridifyMapper&lt;Company&gt;()
    ///     .AddMap("name", x => x.Name)
-   ///     .AddNestedMapper&lt;Address&gt;("location", x => x.Address);
-   /// // Auto-generates mappings for Address: "location.city=London", "location.country=UK"
+   ///     .AddNestedMapper&lt;Address, AddressGridifyMapper&gt;("location", x => x.Address);
+   /// // Uses AddressGridifyMapper with prefix: "location.city=London", "location.country=UK"
    /// </code>
    /// </example>
-   IGridifyMapper<T> AddNestedMapper<TProperty>(
+   IGridifyMapper<T> AddNestedMapper<TProperty, TMapper>(
       string prefix,
       Expression<Func<T, TProperty>> propertyExpression,
-      bool overrideIfExists = true);
+      bool overrideIfExists = true)
+      where TMapper : IGridifyMapper<TProperty>, new();
 
    /// <summary>
    /// Generates property mappings for the specified class type <typeparamref name="T"/>.
