@@ -50,7 +50,6 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       try
       {
          to = CreateExpression(from);
-         ;
       }
       catch (Exception)
       {
@@ -85,10 +84,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
 
          if (item.PropertyType.IsComplexTypeCollection(out var genericType))
          {
-            if (currentDepth >= maxNestingDepth)
-            {
-               continue;
-            }
+            if (currentDepth >= maxNestingDepth) continue;
 
             GenerateMappingsRecursive(genericType!, fullName, maxNestingDepth, (ushort)(currentDepth + 1));
             continue;
@@ -97,10 +93,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          // Skip classes if nestingLevel is exceeded
          if (item.PropertyType.IsClass && item.PropertyType != typeof(string) && !item.PropertyType.IsSimpleTypeCollection(out _))
          {
-            if (currentDepth >= maxNestingDepth)
-            {
-               continue;
-            }
+            if (currentDepth >= maxNestingDepth) continue;
 
             // If nestingLevel is not exceeded and the property is a class, recursively generate mappings
             GenerateMappingsRecursive(item.PropertyType, fullName, maxNestingDepth, (ushort)(currentDepth + 1));
@@ -202,7 +195,9 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       bool overrideIfExists = true)
    {
       if (string.IsNullOrEmpty(prefix))
-         throw new ArgumentException("Prefix cannot be null or empty when using this overload. Use the overload without prefix parameter to merge mappings directly.", nameof(prefix));
+         throw new ArgumentException(
+            "Prefix cannot be null or empty when using this overload. Use the overload without prefix parameter to merge mappings directly.",
+            nameof(prefix));
       if (propertyExpression == null)
          throw new ArgumentNullException(nameof(propertyExpression));
       if (nestedMapper == null)
@@ -231,7 +226,9 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       where TMapper : new()
    {
       if (string.IsNullOrEmpty(prefix))
-         throw new ArgumentException("Prefix cannot be null or empty when using this overload. Use the overload without prefix parameter to merge mappings directly.", nameof(prefix));
+         throw new ArgumentException(
+            "Prefix cannot be null or empty when using this overload. Use the overload without prefix parameter to merge mappings directly.",
+            nameof(prefix));
       if (propertyExpression == null)
          throw new ArgumentNullException(nameof(propertyExpression));
 
@@ -257,9 +254,9 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       var propertyType = mapperInterface.GetGenericArguments()[0];
 
       // Extract the actual property type from the expression
-      // The expression might have a Convert node if it's boxed to object
+      // might have a Convert node if it's boxed to object
       var body = propertyExpression.Body;
-      if (body is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
+      if (body is UnaryExpression { NodeType: ExpressionType.Convert } unary)
          body = unary.Operand;
 
       var expressionReturnType = body.Type;
@@ -283,7 +280,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
 
       method = method.MakeGenericMethod(propertyType);
 
-      return (IGridifyMapper<T>)method.Invoke(this, new object?[] { typedLambda, nestedMapper, prefix, overrideIfExists })!;
+      return (IGridifyMapper<T>)method.Invoke(this, [typedLambda, nestedMapper, prefix, overrideIfExists])!;
    }
 
    private IGridifyMapper<T> AddNestedMapperInternal<TProperty>(
@@ -292,7 +289,6 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       string? prefix,
       bool overrideIfExists)
    {
-
       // Get the parameter from the parent expression
       var parentParameter = propertyExpression.Parameters[0];
 
@@ -316,13 +312,10 @@ public class GridifyMapper<T> : IGridifyMapper<T>
             var propertyAccess = propertyExpression.Body;
 
             // If the body is a conversion (UnaryExpression), unwrap it
-            if (propertyAccess is UnaryExpression unaryExpr && unaryExpr.NodeType == ExpressionType.Convert)
-            {
-               propertyAccess = unaryExpr.Operand;
-            }
+            if (propertyAccess is UnaryExpression { NodeType: ExpressionType.Convert } unaryExpr) propertyAccess = unaryExpr.Operand;
 
             composedBody = new ReplaceExpressionVisitor(typedNestedExpr.Parameters[0], propertyAccess)
-               .Visit(typedNestedExpr.Body)!;
+               .Visit(typedNestedExpr.Body);
          }
          else
          {
@@ -330,13 +323,10 @@ public class GridifyMapper<T> : IGridifyMapper<T>
             var propertyAccess = propertyExpression.Body;
 
             // If the body is a conversion (UnaryExpression), unwrap it
-            if (propertyAccess is UnaryExpression unaryExpr && unaryExpr.NodeType == ExpressionType.Convert)
-            {
-               propertyAccess = unaryExpr.Operand;
-            }
+            if (propertyAccess is UnaryExpression { NodeType: ExpressionType.Convert } unaryExpr) propertyAccess = unaryExpr.Operand;
 
             composedBody = new ReplaceExpressionVisitor(nestedExpression.Parameters[0], propertyAccess)
-               .Visit(nestedExpression.Body)!;
+               .Visit(nestedExpression.Body);
          }
 
          // Create the composed expression
@@ -351,13 +341,10 @@ public class GridifyMapper<T> : IGridifyMapper<T>
             foreach (var expr in compositeMap.Expressions)
             {
                var propertyAccess = propertyExpression.Body;
-               if (propertyAccess is UnaryExpression unaryExpr && unaryExpr.NodeType == ExpressionType.Convert)
-               {
-                  propertyAccess = unaryExpr.Operand;
-               }
+               if (propertyAccess is UnaryExpression { NodeType: ExpressionType.Convert } unaryExpr) propertyAccess = unaryExpr.Operand;
 
                var composedExpr = new ReplaceExpressionVisitor(expr.Parameters[0], propertyAccess)
-                  .Visit(expr.Body)!;
+                  .Visit(expr.Body);
 
                composedExpressions.Add(Expression.Lambda<Func<T, object?>>(composedExpr, parentParameter));
             }
@@ -367,10 +354,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          else
          {
             // Skip if the map already exists and overrideIfExists is false
-            if (!overrideIfExists && HasMap(compositeKey))
-            {
-               continue;
-            }
+            if (!overrideIfExists && HasMap(compositeKey)) continue;
 
             // Add the composed mapping
             AddMap(compositeKey, composedExpression, nestedMap.Convertor, overrideIfExists);
@@ -420,7 +404,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          : _mappings.FirstOrDefault(q => key.Equals(q.From, StringComparison.InvariantCultureIgnoreCase))?.To;
       if (expression == null)
          throw new GridifyMapperException($"Mapping Key `{key}` not found.");
-      return expression!;
+      return expression;
    }
 
    public Expression<Func<T, object>> GetExpression(string key)
@@ -432,7 +416,6 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          throw new GridifyMapperException($"Mapping Key `{key}` not found.");
 
       var exception = new GridifyMapperException($"Expression for the `{key}` not found.");
-      ;
 
       // handle 2-parameter mapping: (target, keyParam) => ...
       if (expression.Parameters.Count == 2)
@@ -459,38 +442,27 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    public IEnumerable<IGMap<T>> GetCurrentMapsByType(HashSet<Type> targetTypes)
    {
       foreach (var map in _mappings)
-      {
          switch (map.To.Body)
          {
             case UnaryExpression unaryExpression:
             {
-               if (targetTypes.Contains(unaryExpression.Operand.Type))
-               {
-                  yield return map;
-               }
+               if (targetTypes.Contains(unaryExpression.Operand.Type)) yield return map;
 
                break;
             }
             case MethodCallExpression methodCallExpression:
             {
-               if (targetTypes.Contains(methodCallExpression.Type))
-               {
-                  yield return map;
-               }
+               if (targetTypes.Contains(methodCallExpression.Type)) yield return map;
 
                break;
             }
             case MemberExpression memberExpression:
             {
-               if (targetTypes.Contains(memberExpression.Type))
-               {
-                  yield return map;
-               }
+               if (targetTypes.Contains(memberExpression.Type)) yield return map;
 
                break;
             }
          }
-      }
    }
 
    public IEnumerable<IGMap<T>> GetCurrentMapsByType<TTarget>()
@@ -499,25 +471,26 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    }
 
    /// <summary>
-   /// Converts current mappings to a comma seperated list of map names.
+   /// Converts current mappings to a comma separated list of map names.
    /// eg, field1,field2,field3
    /// </summary>
-   /// <returns>a comma seperated string</returns>
-   public override string ToString() => string.Join(",", _mappings.Select(q => q.From));
+   /// <returns>a comma separated string</returns>
+   public override string ToString()
+   {
+      return string.Join(",", _mappings.Select(q => q.From));
+   }
 
    internal static Expression<Func<T, object>> CreateExpression(string from)
    {
       // Param_x =>
       var parameter = Expression.Parameter(typeof(T), "__" + typeof(T).Name);
       // Param_x.Name, Param_x.yyy.zz.xx
-      var mapProperty = from.Split('.').Aggregate<string, Expression>(parameter, CreatePropertyAccessExrpression);
+      var mapProperty = from.Split('.').Aggregate<string, Expression>(parameter, CreatePropertyAccessExpression);
 
       if (mapProperty is MethodCallExpression methodCallExpression
           && methodCallExpression.Method.Name.Equals("Select", StringComparison.InvariantCultureIgnoreCase)
           && methodCallExpression.Arguments.Last() is LambdaExpression)
-      {
          return Expression.Lambda<Func<T, object>>(methodCallExpression, parameter);
-      }
 
       if (!mapProperty.Type.IsSimpleTypeCollection(out var genericType))
       {
@@ -535,14 +508,12 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       return Expression.Lambda<Func<T, object>>(body, parameter);
    }
 
-   internal static Expression CreatePropertyAccessExrpression(Expression expression, string propertyName)
+   private static Expression CreatePropertyAccessExpression(Expression expression, string propertyName)
    {
-      Type? itemType;
-
       if (
-         ((expression is MemberExpression memberExpression && memberExpression.Member is PropertyInfo propertyInfo &&
-           propertyInfo.PropertyType.IsComplexTypeCollection(out itemType)) ||
-          (expression is MethodCallExpression methodCallExpression && methodCallExpression.Type.IsComplexTypeCollection(out itemType)))
+         (expression is MemberExpression { Member: PropertyInfo propertyInfo } &&
+          propertyInfo.PropertyType.IsComplexTypeCollection(out var itemType) ||
+          expression is MethodCallExpression methodCallExpression && methodCallExpression.Type.IsComplexTypeCollection(out itemType))
          && itemType is not null
       )
       {
@@ -568,29 +539,5 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       }
 
       return Expression.Property(expression, propertyName);
-   }
-
-   /// <summary>
-   /// Helper method to extract property name from expression and convert to camelCase
-   /// </summary>
-   private static string ExtractPropertyNameInCamelCase<TProperty>(Expression<Func<T, TProperty>> propertyExpression)
-   {
-      string propertyName;
-
-      if (propertyExpression.Body is MemberExpression memberExpr)
-      {
-         propertyName = memberExpr.Member.Name;
-      }
-      else if (propertyExpression.Body is UnaryExpression { Operand: MemberExpression unaryMemberExpr })
-      {
-         propertyName = unaryMemberExpr.Member.Name;
-      }
-      else
-      {
-         throw new GridifyMapperException("Unable to extract property name from expression. Please provide a prefix.");
-      }
-
-      // Convert to camelCase
-      return $"{char.ToLowerInvariant(propertyName[0])}{propertyName.Substring(1)}";
    }
 }
