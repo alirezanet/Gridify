@@ -159,6 +159,51 @@ public class QueryBuilder<T> : IQueryBuilder<T>
       return this;
    }
 
+   /// <inheritdoc />
+   public IQueryBuilder<T> AddNestedMapper<TProperty>(
+      Expression<Func<T, TProperty>> propertyExpression,
+      IGridifyMapper<TProperty> nestedMapper,
+      bool overrideIfExists = true)
+   {
+      _mapper ??= new GridifyMapper<T>(true);
+      _mapper.AddNestedMapper(propertyExpression, nestedMapper, overrideIfExists);
+      return this;
+   }
+
+   /// <inheritdoc />
+   public IQueryBuilder<T> AddNestedMapper<TProperty>(
+      string prefix,
+      Expression<Func<T, TProperty>> propertyExpression,
+      IGridifyMapper<TProperty> nestedMapper,
+      bool overrideIfExists = true)
+   {
+      _mapper ??= new GridifyMapper<T>(true);
+      _mapper.AddNestedMapper(prefix, propertyExpression, nestedMapper, overrideIfExists);
+      return this;
+   }
+
+   /// <inheritdoc />
+   public IQueryBuilder<T> AddNestedMapper<TMapper>(
+      Expression<Func<T, object>> propertyExpression,
+      bool overrideIfExists = true)
+      where TMapper : new()
+   {
+      _mapper ??= new GridifyMapper<T>(true);
+      _mapper.AddNestedMapper<TMapper>(propertyExpression, overrideIfExists);
+      return this;
+   }
+
+   /// <inheritdoc />
+   public IQueryBuilder<T> AddNestedMapper<TMapper>(
+      string prefix,
+      Expression<Func<T, object>> propertyExpression,
+      bool overrideIfExists = true)
+      where TMapper : new()
+   {
+      _mapper ??= new GridifyMapper<T>(true);
+      _mapper.AddNestedMapper<TMapper>(prefix, propertyExpression, overrideIfExists);
+      return this;
+   }
 
    /// <inheritdoc />
    public IQueryBuilder<T> RemoveMap(IGMap<T> map)
