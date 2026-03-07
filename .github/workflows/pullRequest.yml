@@ -19,19 +19,34 @@ jobs:
     - name: Detect file changes
       id: changes
       run: |
-        git fetch origin master
-        CHANGED_FILES=$(git diff origin/master...HEAD --name-only)
+        # Fetch the base branch
+        git fetch origin ${{ github.base_ref }}
         
+        # Get changed files
+        CHANGED_FILES=$(git diff origin/${{ github.base_ref }}...HEAD --name-only)
+        
+        # Initialize flags
         HAS_BACKEND=false
         HAS_CLIENT=false
         
-        while IFS= read -r file; do
-          [[ $file == src/* ]] && HAS_BACKEND=true
-          [[ $file == client/* ]] && HAS_CLIENT=true
-        done <<< "$CHANGED_FILES"
+        # Check for changes in each directory
+        if echo "$CHANGED_FILES" | grep -q '^src/'; then
+          HAS_BACKEND=true
+        fi
         
+        if echo "$CHANGED_FILES" | grep -q '^client/'; then
+          HAS_CLIENT=true
+        fi
+        
+        # Set outputs
         echo "backend=$HAS_BACKEND" >> $GITHUB_OUTPUT
         echo "client=$HAS_CLIENT" >> $GITHUB_OUTPUT
+        
+        # Debug output
+        echo "Changed files:"
+        echo "$CHANGED_FILES"
+        echo "Backend changes: $HAS_BACKEND"
+        echo "Client changes: $HAS_CLIENT"
 
   build-backend:
     permissions:

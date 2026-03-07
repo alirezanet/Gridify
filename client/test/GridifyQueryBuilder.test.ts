@@ -63,6 +63,21 @@ describe("GridifyQueryBuilder", () => {
       expect(cloned.build()).toEqual(query.build());
    });
 
+   it("build() should be idempotent - calling it multiple times should yield the same result", () => {
+      const builder = new GridifyQueryBuilder()
+         .setPage(1)
+         .setPageSize(20)
+         .addCondition("name", op.Contains, "abc");
+
+      const firstResult = builder.build();
+      const secondResult = builder.build();
+      const thirdResult = builder.build();
+
+      expect(secondResult).toEqual(firstResult);
+      expect(thirdResult).toEqual(firstResult);
+      expect(firstResult.filter).toBe("name=*abc");
+   });
+
    it("should remove all empty groups", () => {
       const query = new GridifyQueryBuilder({
          allowEmptyGroups: true

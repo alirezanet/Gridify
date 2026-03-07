@@ -101,6 +101,7 @@ export class GridifyQueryBuilder {
       let previousType: "filter" | "op" | "startGroup" | "endGroup" | null =
          null;
       let groupCounter = 0;
+      let filter = "";
       this.filteringExpressions.forEach((exp) => {
          if (exp.type === "startGroup") {
             groupCounter++;
@@ -162,7 +163,7 @@ export class GridifyQueryBuilder {
          }
 
          previousType = exp.type;
-         this.query.filter += exp.value;
+         filter += exp.value;
       });
 
       if (groupCounter != 0) {
@@ -170,7 +171,7 @@ export class GridifyQueryBuilder {
       }
 
       // postprocess
-      this.query.filter = this.query.filter?.replace(/[,|]?\(\)/gi, "");
+      this.query.filter = filter.replace(/[,|]?\(\)/gi, "");
 
       return this.query;
    }
