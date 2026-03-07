@@ -212,36 +212,74 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    }
 
    // Overload 3: Generic without prefix - accepts custom mapper class and merges directly
-   public IGridifyMapper<T> AddNestedMapper<TProperty, TMapper>(
-      Expression<Func<T, TProperty>> propertyExpression,
+   public IGridifyMapper<T> AddNestedMapper<TMapper>(
+      Expression<Func<T, object>> propertyExpression,
       bool overrideIfExists = true)
-      where TMapper : IGridifyMapper<TProperty>, new()
+      where TMapper : new()
    {
       if (propertyExpression == null)
          throw new ArgumentNullException(nameof(propertyExpression));
 
-      // Instantiate the custom mapper class
-      var nestedMapper = new TMapper();
-
-      return AddNestedMapperInternal(propertyExpression, nestedMapper, null, overrideIfExists);
+      return AddNestedMapperWithMapperType<TMapper>(propertyExpression, null, overrideIfExists);
    }
 
    // Overload 4: Generic with prefix - accepts custom mapper class
-   public IGridifyMapper<T> AddNestedMapper<TProperty, TMapper>(
+   public IGridifyMapper<T> AddNestedMapper<TMapper>(
       string prefix,
-      Expression<Func<T, TProperty>> propertyExpression,
+      Expression<Func<T, object>> propertyExpression,
       bool overrideIfExists = true)
-      where TMapper : IGridifyMapper<TProperty>, new()
+      where TMapper : new()
    {
       if (string.IsNullOrEmpty(prefix))
          throw new ArgumentException("Prefix cannot be null or empty when using this overload. Use the overload without prefix parameter to merge mappings directly.", nameof(prefix));
       if (propertyExpression == null)
          throw new ArgumentNullException(nameof(propertyExpression));
 
+      return AddNestedMapperWithMapperType<TMapper>(propertyExpression, prefix, overrideIfExists);
+   }
+
+   private IGridifyMapper<T> AddNestedMapperWithMapperType<TMapper>(
+      Expression<Func<T, object>> propertyExpression,
+      string? prefix,
+      bool overrideIfExists)
+      where TMapper : new()
+   {
       // Instantiate the custom mapper class
       var nestedMapper = new TMapper();
 
-      return AddNestedMapperInternal(propertyExpression, nestedMapper, prefix, overrideIfExists);
+      // Find which IGridifyMapper<TProperty> interface TMapper implements
+      var mapperInterface = typeof(TMapper).GetInterfaces()
+         .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IGridifyMapper<>));
+
+      if (mapperInterface == null)
+         throw new ArgumentException($"Type {typeof(TMapper).Name} must implement IGridifyMapper<T>", nameof(TMapper));
+
+      var propertyType = mapperInterface.GetGenericArguments()[0];
+
+      // Extract the actual property type from the expression
+      // The expression might have a Convert node if it's boxed to object
+      var body = propertyExpression.Body;
+      if (body is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
+         body = unary.Operand;
+
+      var expressionReturnType = body.Type;
+
+      if (expressionReturnType != propertyType)
+         throw new ArgumentException(
+            $"Property expression returns {expressionReturnType.Name} but mapper is for type {propertyType.Name}",
+            nameof(propertyExpression));
+
+      // Reconstruct the expression with the correct type (Expression<Func<T, TProperty>>)
+      var parameter = propertyExpression.Parameters[0];
+      var funcType = typeof(Func<,>).MakeGenericType(typeof(T), propertyType);
+      var typedLambda = Expression.Lambda(funcType, body, parameter);
+
+      // Call the internal method using reflection
+      var method = typeof(GridifyMapper<T>)
+         .GetMethod(nameof(AddNestedMapperInternal), BindingFlags.NonPublic | BindingFlags.Instance)!
+         .MakeGenericMethod(propertyType);
+
+      return (IGridifyMapper<T>)method.Invoke(this, new object?[] { typedLambda, nestedMapper, prefix, overrideIfExists })!;
    }
 
    private IGridifyMapper<T> AddNestedMapperInternal<TProperty>(

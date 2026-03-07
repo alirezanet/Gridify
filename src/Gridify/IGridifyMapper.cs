@@ -92,16 +92,15 @@ public interface IGridifyMapper<T>
    /// Reuses mappings from a custom mapper class for a nested object by composing expressions.
    /// Merges mappings directly without a prefix.
    /// </summary>
-   /// <typeparam name="TProperty">The type of the nested property</typeparam>
    /// <typeparam name="TMapper">The mapper class type that implements IGridifyMapper&lt;TProperty&gt;</typeparam>
    /// <param name="propertyExpression">Expression pointing to the nested property (e.g., x => x.Address)</param>
    /// <param name="overrideIfExists">Whether to override existing mappings with the same key</param>
    /// <returns>An instance of <see cref="IGridifyMapper{T}"/> for method chaining</returns>
    /// <example>
    /// <code>
-   /// public class AddressGridifyMapper : GridifyMapper&lt;Address&gt;
+   /// public class AddressMapper : GridifyMapper&lt;Address&gt;
    /// {
-   ///     public AddressGridifyMapper()
+   ///     public AddressMapper()
    ///     {
    ///         AddMap("city", q => q.City);
    ///         AddMap("country", q => q.Country);
@@ -110,19 +109,18 @@ public interface IGridifyMapper<T>
    /// 
    /// var userMapper = new GridifyMapper&lt;User&gt;()
    ///     .AddMap("email", x => x.Email)
-   ///     .AddNestedMapper&lt;Address, AddressGridifyMapper&gt;(x => x.Address);
-   /// // Uses AddressGridifyMapper and merges mappings: "city=London", "country=UK"
+   ///     .AddNestedMapper&lt;AddressMapper&gt;(x => x.Address);
+   /// // Uses AddressMapper and merges mappings: "city=London", "country=UK"
    /// </code>
    /// </example>
-   IGridifyMapper<T> AddNestedMapper<TProperty, TMapper>(
-      Expression<Func<T, TProperty>> propertyExpression,
+   IGridifyMapper<T> AddNestedMapper<TMapper>(
+      Expression<Func<T, object>> propertyExpression,
       bool overrideIfExists = true)
-      where TMapper : IGridifyMapper<TProperty>, new();
+      where TMapper : new();
 
    /// <summary>
    /// Reuses mappings from a custom mapper class for a nested object by composing expressions with a prefix.
    /// </summary>
-   /// <typeparam name="TProperty">The type of the nested property</typeparam>
    /// <typeparam name="TMapper">The mapper class type that implements IGridifyMapper&lt;TProperty&gt;</typeparam>
    /// <param name="prefix">Prefix to prepend to nested mapping keys (e.g., "location" creates "location.city")</param>
    /// <param name="propertyExpression">Expression pointing to the nested property (e.g., x => x.Address)</param>
@@ -130,9 +128,9 @@ public interface IGridifyMapper<T>
    /// <returns>An instance of <see cref="IGridifyMapper{T}"/> for method chaining</returns>
    /// <example>
    /// <code>
-   /// public class AddressGridifyMapper : GridifyMapper&lt;Address&gt;
+   /// public class AddressMapper : GridifyMapper&lt;Address&gt;
    /// {
-   ///     public AddressGridifyMapper()
+   ///     public AddressMapper()
    ///     {
    ///         AddMap("city", q => q.City);
    ///         AddMap("country", q => q.Country);
@@ -141,15 +139,15 @@ public interface IGridifyMapper<T>
    /// 
    /// var companyMapper = new GridifyMapper&lt;Company&gt;()
    ///     .AddMap("name", x => x.Name)
-   ///     .AddNestedMapper&lt;Address, AddressGridifyMapper&gt;("location", x => x.Address);
-   /// // Uses AddressGridifyMapper with prefix: "location.city=London", "location.country=UK"
+   ///     .AddNestedMapper&lt;AddressMapper&gt;("location", x => x.Address);
+   /// // Uses AddressMapper with prefix: "location.city=London", "location.country=UK"
    /// </code>
    /// </example>
-   IGridifyMapper<T> AddNestedMapper<TProperty, TMapper>(
+   IGridifyMapper<T> AddNestedMapper<TMapper>(
       string prefix,
-      Expression<Func<T, TProperty>> propertyExpression,
+      Expression<Func<T, object>> propertyExpression,
       bool overrideIfExists = true)
-      where TMapper : IGridifyMapper<TProperty>, new();
+      where TMapper : new();
 
    /// <summary>
    /// Generates property mappings for the specified class type <typeparamref name="T"/>.

@@ -256,13 +256,13 @@ public class AddressMapper : GridifyMapper<Address>
 // Without prefix - uses custom mapper class
 var userMapper = new GridifyMapper<User>()
     .AddMap("email", x => x.Email)
-    .AddNestedMapper<Address, AddressMapper>(x => x.Address);
+    .AddNestedMapper<AddressMapper>(x => x.Address);
 // Supports: "city=London", "country=UK" (Secret is hidden)
 
 // With prefix - uses custom mapper class
 var companyMapper = new GridifyMapper<Company>()
     .AddMap("name", x => x.Name)
-    .AddNestedMapper<Address, AddressMapper>("location", x => x.Address);
+    .AddNestedMapper<AddressMapper>("location", x => x.Address);
 // Supports: "location.city=London", "location.country=UK" (Secret is hidden)
 ```
 

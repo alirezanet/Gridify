@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Xunit;
 
 namespace Gridify.Tests.IssueTests;
@@ -333,7 +335,7 @@ public class Issue251Tests
       // Arrange & Act - use generic overload without prefix with custom mapper class
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper<Address, AddressMapper>(x => x.Address);
+          .AddNestedMapper<AddressMapper>(x => x.Address);
 
       var users = new List<User>
       {
@@ -362,7 +364,7 @@ public class Issue251Tests
       // Arrange & Act - use generic overload with prefix with custom mapper class
       var userMapper = new GridifyMapper<User>()
           .AddMap("email", x => x.Email)
-          .AddNestedMapper<Address, AddressMapper>("location", x => x.Address);
+          .AddNestedMapper<AddressMapper>("location", x => x.Address);
 
       var users = new List<User>
       {
