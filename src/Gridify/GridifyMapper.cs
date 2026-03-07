@@ -276,8 +276,12 @@ public class GridifyMapper<T> : IGridifyMapper<T>
 
       // Call the internal method using reflection
       var method = typeof(GridifyMapper<T>)
-         .GetMethod(nameof(AddNestedMapperInternal), BindingFlags.NonPublic | BindingFlags.Instance)!
-         .MakeGenericMethod(propertyType);
+         .GetMethod(nameof(AddNestedMapperInternal), BindingFlags.NonPublic | BindingFlags.Instance);
+
+      if (method == null)
+         throw new InvalidOperationException($"Internal method {nameof(AddNestedMapperInternal)} not found");
+
+      method = method.MakeGenericMethod(propertyType);
 
       return (IGridifyMapper<T>)method.Invoke(this, new object?[] { typedLambda, nestedMapper, prefix, overrideIfExists })!;
    }
