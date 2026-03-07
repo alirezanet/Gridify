@@ -4,17 +4,6 @@ using Xunit;
 
 namespace Gridify.Tests.IssueTests;
 
-// Custom mapper class for Address - demonstrates reusable mapper pattern
-public class AddressMapper : GridifyMapper<Issue251Tests.Address>
-{
-   public AddressMapper()
-   {
-      AddMap("city", q => q.City);
-      AddMap("country", q => q.Country);
-      // Secret is intentionally not mapped for security
-   }
-}
-
 // Related to Issue #251 - Reuse GridifyMapper
 public class Issue251Tests
 {
@@ -36,6 +25,17 @@ public class Issue251Tests
    {
       public string Name { get; set; } = string.Empty;
       public Address Address { get; set; } = new();
+   }
+
+   // Custom mapper class for Address - demonstrates reusable mapper pattern
+   public class AddressMapper : GridifyMapper<Address>
+   {
+      public AddressMapper()
+      {
+         AddMap("city", q => q.City);
+         AddMap("country", q => q.Country);
+         // Secret is intentionally not mapped for security
+      }
    }
 
    [Fact]
