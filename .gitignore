@@ -11,7 +11,5 @@ node_modules
 docs/.vuepress/dist
 /*.user
 client/dist
-client/package-lock.json
-client/yarn.lock
 global.json
 .nuget/
