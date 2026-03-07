@@ -21,8 +21,39 @@ on:
     - cron: '38 21 * * 5'
 
 jobs:
+  detect-changes:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+    - name: Detect file changes
+      id: changes
+      run: |
+        # For pull requests, detect specific changes
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff origin/${{ github.base_ref }}...HEAD --name-only)
+          
+          # Check for backend changes
+          if echo "$CHANGED_FILES" | grep -q '^src/'; then
+            echo "backend=true" >> $GITHUB_OUTPUT
+          else
+            echo "backend=false" >> $GITHUB_OUTPUT
+          fi
+        else
+          # For push and scheduled runs, always analyze
+          echo "backend=true" >> $GITHUB_OUTPUT
+        fi
+
   analyze:
     name: Analyze
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend == 'true'
     # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql
     #   - https://gh.io/supported-runners-and-hardware-resources
