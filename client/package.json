@@ -14,7 +14,10 @@
          "types": "./dist/index.d.ts"
       }
    },
-   "repository": "https://github.com/alirezanet/Gridify/",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/alirezanet/Gridify.git"
+   },
    "homepage": "https://alirezanet.github.io/Gridify/guide/gridify-client/",
    "author": "AliReza Sabouri",
    "license": "MIT",
