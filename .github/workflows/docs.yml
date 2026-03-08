@@ -35,22 +35,22 @@ jobs:
       # cache node_modules
       - name: Cache dependencies
         uses: actions/cache@v4
-        id: yarn-cache
+        id: npm-cache
         with:
           path: |
             **/node_modules
-          key: ${{ runner.os }}-yarn-v2-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-npm-v2-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-v2-
+            ${{ runner.os }}-npm-v2-
 
       # install dependencies if the cache did not hit
       - name: Install dependencies
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: yarn --frozen-lockfile
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
 
       # run build script
       - name: Build documentation site
-        run: yarn build
+        run: npm run build
 
       # please check out the docs of the workflow for more details
       # @see https://github.com/crazy-max/ghaction-github-pages
