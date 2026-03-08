@@ -26,13 +26,13 @@ jobs:
         registry-url: 'https://registry.npmjs.org/'
 
     - name: Install dependencies
-      run: yarn install
+      run: npm ci
 
     - name: Test
-      run: yarn test
+      run: npm test
 
     - name: Build
-      run: yarn build
+      run: npm run build
 
     - name: Copy README to client directory
       run: cp ../README.md .
@@ -43,7 +43,7 @@ jobs:
       run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
     - name: Publish to npm
-      run: yarn publish --new-version ${{ env.VERSION }} --access public
+      run: npm publish --access public
       env:
         NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
