@@ -264,6 +264,86 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
       return left.Or(right);
    }
 
+   protected override Expression<Func<T, bool>>? BuildFieldToFieldQuery(LambdaExpression leftMap, LambdaExpression rightMap, ISyntaxNode op)
+   {
+      var leftBody = leftMap.Body;
+      var rightBody = rightMap.Body;
+
+      // Remove boxing (Convert) wrappers produced by Expression<Func<T, object?>>
+      if (leftBody.NodeType == ExpressionType.Convert) leftBody = ((UnaryExpression)leftBody).Operand;
+      if (rightBody.NodeType == ExpressionType.Convert) rightBody = ((UnaryExpression)rightBody).Operand;
+
+      // Nested collection-to-collection comparison (e.g. end < (start) where both map to a Select)
+      if (leftBody is MethodCallExpression { Method.Name: "Select" } leftSelect &&
+          rightBody is MethodCallExpression { Method.Name: "Select" } rightSelect)
+      {
+         // Unify the outer parameter so both Select calls reference the same root object
+         var rightSelectNormalized =
+            new ReplaceExpressionVisitor(rightMap.Parameters[0], leftMap.Parameters[0]).Visit(rightSelect)
+               as MethodCallExpression ?? rightSelect;
+
+         return BuildNestedFieldToFieldQuery(leftSelect, rightSelectNormalized, op);
+      }
+
+      // Reject mixing nested and non-nested fields
+      if (leftBody is MethodCallExpression { Method.Name: "Select" } ||
+          rightBody is MethodCallExpression { Method.Name: "Select" })
+         throw new GridifyFilteringException(
+            "Field-to-field comparison between a nested collection field and a non-nested field is not supported.");
+
+      // Simple property-to-property comparison
+      var rightBodyNormalized =
+         new ReplaceExpressionVisitor(rightMap.Parameters[0], leftMap.Parameters[0]).Visit(rightBody);
+
+      var comparison = BuildFieldComparison(leftBody, rightBodyNormalized, op);
+      return Expression.Lambda<Func<T, bool>>(comparison, leftMap.Parameters[0]);
+   }
+
+   private Expression<Func<T, bool>>? BuildNestedFieldToFieldQuery(
+      MethodCallExpression leftSelect, MethodCallExpression rightSelect, ISyntaxNode op)
+   {
+      // Extract the inner lambda (e.g. x => x.End) from each Select call
+      var leftLambda = leftSelect.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
+      var rightLambda = rightSelect.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
+
+      if (leftLambda == null || rightLambda == null) return null;
+
+      // Get inner bodies, stripping any boxing Convert
+      var leftInnerBody = leftLambda.Body.NodeType == ExpressionType.Convert
+         ? ((UnaryExpression)leftLambda.Body).Operand
+         : leftLambda.Body;
+
+      // Unify inner parameter: replace right's inner param with left's inner param
+      var rightInnerBodyRaw = rightLambda.Body.NodeType == ExpressionType.Convert
+         ? ((UnaryExpression)rightLambda.Body).Operand
+         : rightLambda.Body;
+      var rightInnerBodyNormalized =
+         new ReplaceExpressionVisitor(rightLambda.Parameters[0], leftLambda.Parameters[0]).Visit(rightInnerBodyRaw);
+
+      var comparison = BuildFieldComparison(leftInnerBody, rightInnerBodyNormalized, op);
+      var predicate = Expression.Lambda(comparison, leftLambda.Parameters[0]);
+
+      // The collection source is the first argument of the left Select call
+      if (leftSelect.Arguments.First() is MemberExpression collectionMember)
+         return GetAnyExpression(collectionMember, predicate) as Expression<Func<T, bool>>;
+
+      return null;
+   }
+
+   private static Expression BuildFieldComparison(Expression left, Expression right, ISyntaxNode op)
+   {
+      return op.Kind switch
+      {
+         SyntaxKind.Equal => Expression.Equal(left, right),
+         SyntaxKind.NotEqual => Expression.NotEqual(left, right),
+         SyntaxKind.GreaterThan => Expression.GreaterThan(left, right),
+         SyntaxKind.LessThan => Expression.LessThan(left, right),
+         SyntaxKind.GreaterOrEqualThan => Expression.GreaterThanOrEqual(left, right),
+         SyntaxKind.LessOrEqualThan => Expression.LessThanOrEqual(left, right),
+         _ => throw new GridifyFilteringException($"Operator '{op.Kind}' is not supported for field-to-field comparison.")
+      };
+   }
+
    private Expression<Func<T, bool>>? GenerateNestedExpression(Expression body, IGMap<T> gMap, ValueExpressionSyntax value, ISyntaxNode op)
    {
       while (true)

@@ -106,8 +106,19 @@ public struct Parser
       return left;
    }
 
-   private ValueExpressionSyntax ParseValueExpression()
+   private ExpressionSyntax ParseValueExpression()
    {
+      // Detect field reference syntax: op (fieldName) or op (fieldName[idx])
+      // The lexer directly emits OpenParenthesisToken after an operator when the value starts with '('.
+      if (Current.Kind == SyntaxKind.OpenParenthesisToken &&
+          Peek(1).Kind == SyntaxKind.FieldToken)
+      {
+         NextToken(); // consume '('
+         var fieldExpr = ParseFieldExpression();
+         Match(SyntaxKind.CloseParenthesis); // consume ')'
+         return new FieldReferenceExpressionSyntax(fieldExpr);
+      }
+
       // field=
       if (Current.Kind != SyntaxKind.ValueToken)
       {
