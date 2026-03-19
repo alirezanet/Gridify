@@ -99,14 +99,14 @@ public struct Parser
       while (IsOperator(Current.Kind))
       {
          var operatorToken = NextToken();
-         var right = ParseValueExpression();
+         var right = ParseRightHandExpression();
          left = new BinaryExpressionSyntax(left, operatorToken, right);
       }
 
       return left;
    }
 
-   private ExpressionSyntax ParseValueExpression()
+   private ExpressionSyntax ParseRightHandExpression()
    {
       // Detect field reference syntax: op (fieldName) or op (fieldName[idx])
       // The lexer directly emits OpenParenthesisToken after an operator when the value starts with '('.
