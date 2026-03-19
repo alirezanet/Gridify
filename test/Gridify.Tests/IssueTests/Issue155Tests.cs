@@ -333,10 +333,319 @@ public class Issue155Tests
    }
 
    // -------------------------------------------------------------------------------
+   // String operators for field-to-field comparison
+   // -------------------------------------------------------------------------------
+
+   [Fact]
+   public void FieldToField_Like_ShouldFilterCorrectly()
+   {
+      var items = new List<StringItem>
+      {
+         new("Hello World", "World"),
+         new("Hello World", "Missing"),
+         new("Gridify", "Grid"),
+      }.AsQueryable();
+
+      var expected = items.Where(x => x.Name.Contains(x.Tag));
+
+      var mapper = new GridifyMapper<StringItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("name", p => p.Name)
+         .AddMap("tag", p => p.Tag);
+
+      var actual = items.ApplyFiltering("name=*(tag)", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   [Fact]
+   public void FieldToField_NotLike_ShouldFilterCorrectly()
+   {
+      var items = new List<StringItem>
+      {
+         new("Hello World", "World"),
+         new("Hello World", "Missing"),
+         new("Gridify", "Grid"),
+      }.AsQueryable();
+
+      var expected = items.Where(x => !x.Name.Contains(x.Tag));
+
+      var mapper = new GridifyMapper<StringItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("name", p => p.Name)
+         .AddMap("tag", p => p.Tag);
+
+      var actual = items.ApplyFiltering("name!*(tag)", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   [Fact]
+   public void FieldToField_StartsWith_ShouldFilterCorrectly()
+   {
+      var items = new List<StringItem>
+      {
+         new("Hello World", "Hello"),
+         new("Hello World", "World"),
+         new("Gridify", "Grid"),
+      }.AsQueryable();
+
+      var expected = items.Where(x => x.Name.StartsWith(x.Tag));
+
+      var mapper = new GridifyMapper<StringItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("name", p => p.Name)
+         .AddMap("tag", p => p.Tag);
+
+      var actual = items.ApplyFiltering("name^(tag)", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   [Fact]
+   public void FieldToField_NotStartsWith_ShouldFilterCorrectly()
+   {
+      var items = new List<StringItem>
+      {
+         new("Hello World", "Hello"),
+         new("Hello World", "World"),
+         new("Gridify", "Grid"),
+      }.AsQueryable();
+
+      var expected = items.Where(x => !x.Name.StartsWith(x.Tag));
+
+      var mapper = new GridifyMapper<StringItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("name", p => p.Name)
+         .AddMap("tag", p => p.Tag);
+
+      var actual = items.ApplyFiltering("name!^(tag)", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   [Fact]
+   public void FieldToField_EndsWith_ShouldFilterCorrectly()
+   {
+      var items = new List<StringItem>
+      {
+         new("Hello World", "World"),
+         new("Hello World", "Hello"),
+         new("Gridify", "ify"),
+      }.AsQueryable();
+
+      var expected = items.Where(x => x.Name.EndsWith(x.Tag));
+
+      var mapper = new GridifyMapper<StringItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("name", p => p.Name)
+         .AddMap("tag", p => p.Tag);
+
+      var actual = items.ApplyFiltering("name$(tag)", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   [Fact]
+   public void FieldToField_NotEndsWith_ShouldFilterCorrectly()
+   {
+      var items = new List<StringItem>
+      {
+         new("Hello World", "World"),
+         new("Hello World", "Hello"),
+         new("Gridify", "ify"),
+      }.AsQueryable();
+
+      var expected = items.Where(x => !x.Name.EndsWith(x.Tag));
+
+      var mapper = new GridifyMapper<StringItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("name", p => p.Name)
+         .AddMap("tag", p => p.Tag);
+
+      var actual = items.ApplyFiltering("name!$(tag)", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   // -------------------------------------------------------------------------------
+   // Grouping/parentheses conflict tests - ensure field reference (fieldName) on RHS
+   // does NOT conflict with Gridify's existing grouping syntax  ( expr | expr )
+   // -------------------------------------------------------------------------------
+
+   [Fact]
+   public void FieldToField_WithGroupingOnLeft_ShouldWork()
+   {
+      // "(name=*J|name=*S)" is a group expression - should remain a group
+      // "id=(score)" is a field-to-field comparison - should be a field reference
+      var items = new List<SimpleItem>
+      {
+         new(1, "John", 1),
+         new(2, "Sara", 3),
+         new(3, "Bob", 3),
+         new(4, "Dave", 4),
+      }.AsQueryable();
+
+      // (name contains J OR name contains S) AND id == score
+      var expected = items.Where(x => (x.Name.Contains("J") || x.Name.Contains("S")) && x.Id == x.Score);
+
+      var mapper = new GridifyMapper<SimpleItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("id", p => p.Id)
+         .AddMap("score", p => p.Score)
+         .AddMap("name", p => p.Name);
+
+      var actual = items.ApplyFiltering("(name=*J|name=*S),id=(score)", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   [Fact]
+   public void FieldToField_InsideGrouping_ShouldWork()
+   {
+      // field-to-field comparison inside a group: (id=(score)|id>2)
+      var items = new List<SimpleItem>
+      {
+         new(1, "Alice", 1),
+         new(2, "Bob", 3),
+         new(3, "Charlie", 3),
+         new(5, "Dave", 4),
+      }.AsQueryable();
+
+      // id == score OR id > 2
+      var expected = items.Where(x => x.Id == x.Score || x.Id > 2);
+
+      var mapper = new GridifyMapper<SimpleItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("id", p => p.Id)
+         .AddMap("score", p => p.Score);
+
+      var actual = items.ApplyFiltering("(id=(score)|id>2)", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   [Fact]
+   public void GroupingWithoutFieldReference_ShouldNotBeAffectedByFeature()
+   {
+      // Ensure regular grouping still works when feature is DISABLED
+      var items = new List<SimpleItem>
+      {
+         new(1, "John", 1),
+         new(3, "Sara", 3),
+         new(4, "Bob", 4),
+      }.AsQueryable();
+
+      var expected = items.Where(x => (x.Name.Contains("J") || x.Name.Contains("S")) && x.Id < 5);
+
+      // Feature disabled, but grouping should still work normally
+      var mapper = new GridifyMapper<SimpleItem>()
+         .AddMap("id", p => p.Id)
+         .AddMap("name", p => p.Name);
+
+      var actual = items.ApplyFiltering("(name=*J|name=*S),id<5", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   [Fact]
+   public void ParenthesisInValue_ShouldStillBeEscapedAsValue()
+   {
+      // Escaped parentheses in value should still be treated as a literal value, not a field reference
+      var items = new List<SimpleItem>
+      {
+         new(1, "test(value)", 1),
+         new(2, "normal", 2),
+      }.AsQueryable();
+
+      var expected = items.Where(x => x.Name == "test(value)");
+
+      // feature enabled, but escaped '(' should still be a value
+      var mapper = new GridifyMapper<SimpleItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("name", p => p.Name);
+
+      // The value contains escaped parentheses \( and \) which should be treated as literal characters
+      var actual = items.ApplyFiltering(@"name=test\(value\)", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   [Fact]
+   public void FieldToField_ORWithValueFilter_ShouldWork()
+   {
+      var items = new List<SimpleItem>
+      {
+         new(1, "Alice", 1),
+         new(2, "Bob", 3),
+         new(3, "Charlie", 5),
+         new(5, "Dave", 5),
+      }.AsQueryable();
+
+      // id == score OR id == 2
+      var expected = items.Where(x => x.Id == x.Score || x.Id == 2);
+
+      var mapper = new GridifyMapper<SimpleItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("id", p => p.Id)
+         .AddMap("score", p => p.Score);
+
+      var actual = items.ApplyFiltering("id=(score)|id=2", mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   // -------------------------------------------------------------------------------
+   // QueryBuilder integration - advanced scenarios
+   // -------------------------------------------------------------------------------
+
+   [Fact]
+   public void QueryBuilder_FieldToField_WithBuildFilteringExpression_ShouldWork()
+   {
+      var items = new List<SimpleItem>
+      {
+         new(1, "Alice", 1),
+         new(2, "Bob", 3),
+         new(3, "Charlie", 3),
+      }.AsQueryable();
+
+      var expected = items.Where(x => x.Id == x.Score);
+
+      var mapper = new GridifyMapper<SimpleItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("id", p => p.Id)
+         .AddMap("score", p => p.Score);
+
+      var filter = new GridifyQuery { Filter = "id=(score)" };
+      var expr = filter.GetFilteringExpression(mapper);
+      var actual = items.Where(expr);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   [Fact]
+   public void QueryBuilder_FieldToField_ComplexConditions_ShouldWork()
+   {
+      var items = new List<SimpleItem>
+      {
+         new(1, "Alice", 1),
+         new(2, "Bob", 3),
+         new(3, "Charlie", 3),
+         new(4, "Dave", 4),
+         new(5, "Eve", 3),
+      }.AsQueryable();
+
+      // (id == score OR id > 4) AND id >= 1
+      var expected = items.Where(x => (x.Id == x.Score || x.Id > 4) && x.Id >= 1);
+
+      var mapper = new GridifyMapper<SimpleItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("id", p => p.Id)
+         .AddMap("score", p => p.Score);
+
+      var actual = new QueryBuilder<SimpleItem>()
+         .UseCustomMapper(mapper)
+         .AddCondition("(id=(score)|id>4),id>=1")
+         .Build(items);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
+   // -------------------------------------------------------------------------------
    // Model types used in tests
    // -------------------------------------------------------------------------------
 
    private record SimpleItem(int Id, string Name, int Score);
+
+   private record StringItem(string Name, string Tag);
 
    private record Item(string Name, List<TimeSchedule> Schedules);
 

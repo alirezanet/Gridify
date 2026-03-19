@@ -63,6 +63,16 @@ If true, string comparison operations are case insensitive by default.
 - type: `bool`
 - default: `false`
 
+### AllowFieldToFieldComparison
+
+Enables field-to-field comparison in filtering expressions. When enabled, the right-hand side of a filter condition can reference another mapped field using the `(fieldName)` syntax. For example: `age>(minAge)`.
+
+This option is disabled by default to avoid any breaking changes for existing users. You must opt in explicitly.
+
+- type: `bool`
+- default: `false`
+- related to: [Filtering - Field-to-Field Comparison](./filtering.md#field-to-field-comparison)
+
 ### DefaultDateTimeKind
 
 By default, Gridify uses the `DateTimeKind.Unspecified` when parsing dates. You can change this behavior by setting this property to `DateTimeKind.Utc` or `DateTimeKind.Local`. This option is useful when you want to use Gridify with a database that requires a specific `DateTimeKind`, for example when using npgsql and postgresql. 

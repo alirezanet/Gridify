@@ -340,6 +340,12 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
          SyntaxKind.LessThan => Expression.LessThan(left, right),
          SyntaxKind.GreaterOrEqualThan => Expression.GreaterThanOrEqual(left, right),
          SyntaxKind.LessOrEqualThan => Expression.LessThanOrEqual(left, right),
+         SyntaxKind.Like => Expression.Call(left, MethodInfoHelper.GetStringContainsMethod(), right),
+         SyntaxKind.NotLike => Expression.Not(Expression.Call(left, MethodInfoHelper.GetStringContainsMethod(), right)),
+         SyntaxKind.StartsWith => Expression.Call(left, MethodInfoHelper.GetStartWithMethod(), right),
+         SyntaxKind.NotStartsWith => Expression.Not(Expression.Call(left, MethodInfoHelper.GetStartWithMethod(), right)),
+         SyntaxKind.EndsWith => Expression.Call(left, MethodInfoHelper.GetEndsWithMethod(), right),
+         SyntaxKind.NotEndsWith => Expression.Not(Expression.Call(left, MethodInfoHelper.GetEndsWithMethod(), right)),
          _ => throw new GridifyFilteringException($"Operator '{op.Kind}' is not supported for field-to-field comparison.")
       };
    }

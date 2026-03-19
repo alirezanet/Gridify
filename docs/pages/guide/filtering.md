@@ -173,3 +173,97 @@ Registration Example:
  GridifyGlobalConfiguration.CustomOperators.Register<RegexMatchOperator>();
  GridifyGlobalConfiguration.CustomOperators.Register<InOperator>();
 ```
+
+## Field-to-Field Comparison
+
+Starting from version `v2.20.0`, Gridify supports comparing a field against another field (instead of a fixed value). To reference a field on the right-hand side, wrap it in parentheses: `(fieldName)`.
+
+::: info
+Field-to-field comparison is **opt-in** and disabled by default to avoid breaking changes.
+You must enable it explicitly through configuration before using this syntax.
+:::
+
+### Enabling the Feature
+
+```csharp
+// Global configuration (applies to all mappers)
+GridifyGlobalConfiguration.AllowFieldToFieldComparison = true;
+
+// Or per-mapper configuration
+var mapper = new GridifyMapper<MyEntity>(
+    new GridifyMapperConfiguration { AllowFieldToFieldComparison = true });
+```
+
+### Syntax
+
+```
+fieldName operator (otherFieldName)
+```
+
+The parentheses around the right-hand field name signal that it is a **field reference**, not a literal value.
+
+### Examples
+
+```csharp
+var mapper = new GridifyMapper<Order>(
+       new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+   .AddMap("price", o => o.Price)
+   .AddMap("discount", o => o.Discount);
+
+// Find orders where price is greater than discount
+orders.ApplyFiltering("price>(discount)", mapper);
+// equivalent to: orders.Where(o => o.Price > o.Discount)
+
+// Find orders where price equals discount
+orders.ApplyFiltering("price=(discount)", mapper);
+// equivalent to: orders.Where(o => o.Price == o.Discount)
+```
+
+### Supported Operators
+
+All filtering operators are supported for field-to-field comparison:
+
+| Operator | Example                    | Description                       |
+|----------|----------------------------|-----------------------------------|
+| `=`      | `field1=(field2)`          | Equal                             |
+| `!=`     | `field1!=(field2)`         | Not equal                         |
+| `>`      | `field1>(field2)`          | Greater than                      |
+| `<`      | `field1<(field2)`          | Less than                         |
+| `>=`     | `field1>=(field2)`         | Greater than or equal             |
+| `<=`     | `field1<=(field2)`         | Less than or equal                |
+| `=*`     | `field1=*(field2)`         | Contains (string fields)          |
+| `!*`     | `field1!*(field2)`         | Not contains (string fields)      |
+| `^`      | `field1^(field2)`          | Starts with (string fields)       |
+| `!^`     | `field1!^(field2)`         | Not starts with (string fields)   |
+| `$`      | `field1$(field2)`          | Ends with (string fields)         |
+| `!$`     | `field1!$(field2)`         | Not ends with (string fields)     |
+
+### Nested Collections
+
+Field-to-field comparison also works when both fields are mapped to elements of the same nested collection:
+
+```csharp
+var mapper = new GridifyMapper<Order>(
+       new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+   .AddMap("start", o => o.Schedules.Select(s => s.Start))
+   .AddMap("end",   o => o.Schedules.Select(s => s.End));
+
+// Find orders that have at least one schedule where End < Start
+orders.ApplyFiltering("end<(start)", mapper);
+// equivalent to: orders.Where(o => o.Schedules.Any(s => s.End < s.Start))
+```
+
+### Combining with Other Conditions
+
+Field-to-field comparisons can be freely combined with regular value comparisons using logical operators:
+
+```csharp
+// price > discount AND price > 100
+orders.ApplyFiltering("price>(discount),price>100", mapper);
+
+// price == discount OR price < 50
+orders.ApplyFiltering("price=(discount)|price<50", mapper);
+
+// Grouping: (price == discount OR price > 200) AND discount > 0
+orders.ApplyFiltering("(price=(discount)|price>200),discount>0", mapper);
+```
