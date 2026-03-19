@@ -401,6 +401,24 @@ This setting is the same as [`EntityFrameworkCompatibilityLayer`](./extensions/e
 var mapper = new GridifyMapper<Person>(q => q.EntityFrameworkCompatibilityLayer = true);
 ```
 
+### AllowFieldToFieldComparison
+
+This setting is the same as [`AllowFieldToFieldComparison`](./gridifyGlobalConfiguration.md#allowfieldtofieldcomparison) in the global configuration, but it allows you to enable this setting on a per-mapper basis. When set to true, filter expressions can reference another mapped field on the right-hand side using the `(fieldName)` syntax.
+
+- **Type:** `bool`
+- **Default:** `false`
+
+```csharp
+var mapper = new GridifyMapper<Order>(q => q.AllowFieldToFieldComparison = true)
+   .AddMap("price", o => o.Price)
+   .AddMap("discount", o => o.Discount);
+
+// Find orders where price is greater than discount
+orders.ApplyFiltering("price>(discount)", mapper);
+```
+
+For more information, see [Field-to-Field Comparison](./filtering.md#field-to-field-comparison).
+
 ## Filtering on Nested Collections
 
 You can use LINQ `Select` and `SelectMany` methods to filter your data using its nested collections.

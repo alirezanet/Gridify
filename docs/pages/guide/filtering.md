@@ -217,53 +217,12 @@ orders.ApplyFiltering("price>(discount)", mapper);
 // Find orders where price equals discount
 orders.ApplyFiltering("price=(discount)", mapper);
 // equivalent to: orders.Where(o => o.Price == o.Discount)
-```
 
-### Supported Operators
-
-All filtering operators are supported for field-to-field comparison:
-
-| Operator | Example                    | Description                       |
-|----------|----------------------------|-----------------------------------|
-| `=`      | `field1=(field2)`          | Equal                             |
-| `!=`     | `field1!=(field2)`         | Not equal                         |
-| `>`      | `field1>(field2)`          | Greater than                      |
-| `<`      | `field1<(field2)`          | Less than                         |
-| `>=`     | `field1>=(field2)`         | Greater than or equal             |
-| `<=`     | `field1<=(field2)`         | Less than or equal                |
-| `=*`     | `field1=*(field2)`         | Contains (string fields)          |
-| `!*`     | `field1!*(field2)`         | Not contains (string fields)      |
-| `^`      | `field1^(field2)`          | Starts with (string fields)       |
-| `!^`     | `field1!^(field2)`         | Not starts with (string fields)   |
-| `$`      | `field1$(field2)`          | Ends with (string fields)         |
-| `!$`     | `field1!$(field2)`         | Not ends with (string fields)     |
-
-### Nested Collections
-
-Field-to-field comparison also works when both fields are mapped to elements of the same nested collection:
-
-```csharp
-var mapper = new GridifyMapper<Order>(
-       new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
-   .AddMap("start", o => o.Schedules.Select(s => s.Start))
-   .AddMap("end",   o => o.Schedules.Select(s => s.End));
-
-// Find orders that have at least one schedule where End < Start
-orders.ApplyFiltering("end<(start)", mapper);
-// equivalent to: orders.Where(o => o.Schedules.Any(s => s.End < s.Start))
-```
-
-### Combining with Other Conditions
-
-Field-to-field comparisons can be freely combined with regular value comparisons using logical operators:
-
-```csharp
-// price > discount AND price > 100
+// Can be combined with regular filters using logical operators
 orders.ApplyFiltering("price>(discount),price>100", mapper);
+// equivalent to: orders.Where(o => o.Price > o.Discount && o.Price > 100)
 
-// price == discount OR price < 50
-orders.ApplyFiltering("price=(discount)|price<50", mapper);
-
-// Grouping: (price == discount OR price > 200) AND discount > 0
+// Can be grouped with parentheses alongside regular conditions
 orders.ApplyFiltering("(price=(discount)|price>200),discount>0", mapper);
+// equivalent to: orders.Where(o => (o.Price == o.Discount || o.Price > 200) && o.Discount > 0)
 ```

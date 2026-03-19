@@ -562,6 +562,32 @@ public class Issue155Tests
       Assert.Equal(expected.ToList(), actual.ToList());
    }
 
+   [Theory]
+   [InlineData(@"name=\(somevalue\)", "(somevalue)")]     // value wrapped in parentheses
+   [InlineData(@"name=\(somevalue", "(somevalue")]        // only opening parenthesis escaped
+   [InlineData(@"name=somevalue\)", "somevalue)")]        // only closing parenthesis escaped
+   [InlineData(@"name=some\(value", "some(value")]        // opening parenthesis in the middle
+   [InlineData(@"name=some\)value", "some)value")]        // closing parenthesis in the middle
+   public void EscapedParenthesesInValue_ShouldBeSearchedAsLiteralValue(string filter, string expectedValue)
+   {
+      // When AllowFieldToFieldComparison is enabled, escaped parentheses in values must still be
+      // treated as literal characters, not as field reference syntax
+      var items = new List<SimpleItem>
+      {
+         new(1, expectedValue, 1),
+         new(2, "normal", 2),
+      }.AsQueryable();
+
+      var expected = items.Where(x => x.Name == expectedValue);
+
+      var mapper = new GridifyMapper<SimpleItem>(new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+         .AddMap("name", p => p.Name);
+
+      var actual = items.ApplyFiltering(filter, mapper);
+
+      Assert.Equal(expected.ToList(), actual.ToList());
+   }
+
    [Fact]
    public void FieldToField_ORWithValueFilter_ShouldWork()
    {
