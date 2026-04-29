@@ -52,10 +52,8 @@ public class CaseInsensitiveNonStringFilterTest
       var mapper = new GridifyMapper<TestClass>(q => q.CaseInsensitiveFiltering = true)
           .GenerateMappings();
 
-      var actual = DataSource.AsQueryable()
-          .ApplyFiltering($"MyGuid={TestGuid}", mapper)
-          .ToList();
-
-      Assert.Single(actual);
+      Assert.Single(DataSource.AsQueryable().ApplyFiltering($"MyGuid={TestGuid}", mapper).ToList());
+      Assert.Single(DataSource.AsQueryable().ApplyFiltering("Id=1", mapper).ToList());
+      Assert.Single(DataSource.AsQueryable().ApplyFiltering("IsActive=true", mapper).ToList());
    }
 }
