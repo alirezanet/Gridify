@@ -320,8 +320,8 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       }
 
       // handle case-Insensitive search
-      if (value is not null && (valueExpression.IsCaseInsensitive
-                            || (mapper.Configuration.CaseInsensitiveFiltering && body.Type == typeof(string)))
+      if (value is not null && body.Type == typeof(string) && (valueExpression.IsCaseInsensitive
+                            || mapper.Configuration.CaseInsensitiveFiltering)
                             && op.Kind is not SyntaxKind.GreaterThan
                             && op.Kind is not SyntaxKind.LessThan
                             && op.Kind is not SyntaxKind.GreaterOrEqualThan
