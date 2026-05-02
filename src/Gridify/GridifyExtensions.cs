@@ -255,18 +255,20 @@ public static partial class GridifyExtensions
          : new LinqSortingQueryBuilder<T>(mapper).ProcessOrdering(query, orderBy, startWithThenBy);
    }
 
-   public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, string props, IGridifyMapper<T>? mapper = null)
+   public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, string? select, IGridifyMapper<T>? mapper = null)
    {
-      if (string.IsNullOrWhiteSpace(props))
-         return (IQueryable<object>)query;
+      if (string.IsNullOrWhiteSpace(select))
+         return query.Cast<object>();
 
-      mapper ??= new GridifyMapper<T>(true);
+      mapper ??= new GridifyMapper<T>(autoGenerateMappings: true, maxNestingDepth: 1);
+      var lambda = Builder.SelectExpressionBuilder<T>.Build(select!, mapper);
+      return query.Select(lambda);
+   }
 
-      var exp = mapper.GetExpression(props);
-      var result = query.Select(exp);
-
-
-      return result;
+   public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, IGridifySelecting? selecting, IGridifyMapper<T>? mapper = null)
+   {
+      if (selecting == null) return query.Cast<object>();
+      return query.ApplySelect(selecting.Select, mapper);
    }
 
    /// <summary>

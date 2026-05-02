@@ -349,3 +349,51 @@ public class GridifyQuerySelectTests
       Assert.Null(q.Select);
    }
 }
+
+public class ApplySelectTests
+{
+   private static List<TestClass> SampleData() =>
+   [
+      new(1, "Alice", null),
+      new(2, "Bob", null),
+      new(3, "Carol", null)
+   ];
+
+   [Fact]
+   public void ApplySelect_FlatProjection_ReturnsRequestedFields()
+   {
+      var data = SampleData().AsQueryable();
+      var result = data.ApplySelect("name,id").ToList();
+
+      Assert.Equal(3, result.Count);
+      var first = result[0];
+      Assert.NotNull(first.GetType().GetProperty("name"));
+      Assert.NotNull(first.GetType().GetProperty("id"));
+      Assert.Equal("Alice", first.GetType().GetProperty("name")!.GetValue(first));
+   }
+
+   [Fact]
+   public void ApplySelect_NullOrWhitespace_ReturnsCastedQuery()
+   {
+      var data = SampleData().AsQueryable();
+      Assert.Equal(3, data.ApplySelect((string?)null).Count());
+      Assert.Equal(3, data.ApplySelect("").Count());
+      Assert.Equal(3, data.ApplySelect("   ").Count());
+   }
+
+   [Fact]
+   public void ApplySelect_IGridifySelectingOverload_Works()
+   {
+      var data = SampleData().AsQueryable();
+      IGridifySelecting selecting = new GridifyQuery { Select = "name" };
+      var result = data.ApplySelect(selecting).ToList();
+      Assert.Equal(3, result.Count);
+   }
+
+   [Fact]
+   public void ApplySelect_NullSelecting_ReturnsCastedQuery()
+   {
+      var data = SampleData().AsQueryable();
+      Assert.Equal(3, data.ApplySelect((IGridifySelecting?)null).Count());
+   }
+}
