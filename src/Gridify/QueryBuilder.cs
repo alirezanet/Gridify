@@ -13,6 +13,7 @@ public class QueryBuilder<T> : IQueryBuilder<T>
    private IGridifyMapper<T>? _mapper;
    private string _orderBy = string.Empty;
    private (int page, int pageSize)? _paging;
+   private string? _select;
 
    /// <inheritdoc />
    public IQueryBuilder<T> UseCustomMapper(IGridifyMapper<T> mapper)
@@ -62,6 +63,9 @@ public class QueryBuilder<T> : IQueryBuilder<T>
 
       if (gridifyQuery.PageSize == 0) gridifyQuery.PageSize = GridifyGlobalConfiguration.DefaultPageSize;
       ConfigurePaging(gridifyQuery.Page, gridifyQuery.PageSize);
+
+      if (gridifyQuery is IGridifySelecting selecting && !string.IsNullOrWhiteSpace(selecting.Select))
+         AddSelect(selecting.Select!);
 
       return this;
    }
@@ -420,4 +424,42 @@ public class QueryBuilder<T> : IQueryBuilder<T>
 
       return syntaxTree.CreateQuery(_mapper);
    }
+
+   /// <inheritdoc />
+   public IQueryBuilder<T> AddSelect(string select)
+   {
+      _select = select;
+      return this;
+   }
+
+   /// <inheritdoc />
+   public IQueryable<object> BuildSelect(IQueryable<T> context)
+   {
+      var query = Build(context);
+      return query.ApplySelect(_select, _mapper);
+   }
+
+   /// <inheritdoc />
+   public Func<IQueryable<T>, IQueryable<object>> BuildSelect() => BuildSelect;
+
+   /// <inheritdoc />
+   public Paging<object> BuildSelectWithPaging(IQueryable<T> context)
+   {
+      var query = context;
+      if (_conditionList.Count > 0)
+         query = query.Where(BuildFilteringExpression());
+      if (!string.IsNullOrEmpty(_orderBy))
+         query = query.ApplyOrdering(_orderBy, _mapper);
+
+      var count = query.Count();
+
+      if (_paging.HasValue)
+         query = query.Skip(_paging.Value.page * _paging.Value.pageSize).Take(_paging.Value.pageSize);
+
+      var projected = query.ApplySelect(_select, _mapper).ToList();
+      return new Paging<object>(count, projected);
+   }
+
+   /// <inheritdoc />
+   public Func<IQueryable<T>, Paging<object>> BuildSelectWithPaging() => BuildSelectWithPaging;
 }

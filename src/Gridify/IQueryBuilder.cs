@@ -363,4 +363,22 @@ public interface IQueryBuilder<T>
    /// </example>
    /// <returns><![CDATA[ Func<IQueryable<T>,Paging<T>> ]]></returns>
    Func<IEnumerable<T>, Paging<T>> BuildWithPagingCompiled();
+
+   /// <summary>
+   /// Configures a select (field projection) string. Has no effect on the typed Build* family;
+   /// only applies when calling BuildSelect / BuildSelectWithPaging.
+   /// </summary>
+   IQueryBuilder<T> AddSelect(string select);
+
+   /// <summary>Builds the projection delegate.</summary>
+   Func<IQueryable<T>, IQueryable<object>> BuildSelect();
+
+   /// <summary>Applies filtering, ordering, paging, and projection to the given queryable.</summary>
+   IQueryable<object> BuildSelect(IQueryable<T> context);
+
+   /// <summary>Builds a delegate that returns Paging&lt;object&gt; with the projection applied.</summary>
+   Func<IQueryable<T>, Paging<object>> BuildSelectWithPaging();
+
+   /// <summary>Applies filtering, ordering, paging, and projection, returning Paging&lt;object&gt;.</summary>
+   Paging<object> BuildSelectWithPaging(IQueryable<T> context);
 }
