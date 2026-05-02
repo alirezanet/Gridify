@@ -451,3 +451,47 @@ public class GridifySelectPipelineTests
       Assert.Equal(5, qp.Query.Count());
    }
 }
+
+public class IsValidSelectTests
+{
+   [Fact]
+   public void IsValidSelect_ValidSelect_ReturnsTrue()
+   {
+      var s = new GridifyQuery { Select = "name,id" };
+      Assert.True(((IGridifySelecting)s).IsValidSelect<TestClass>());
+   }
+
+   [Fact]
+   public void IsValidSelect_NullOrEmpty_ReturnsTrue()
+   {
+      Assert.True(((IGridifySelecting)new GridifyQuery { Select = null }).IsValidSelect<TestClass>());
+      Assert.True(((IGridifySelecting)new GridifyQuery { Select = "" }).IsValidSelect<TestClass>());
+   }
+
+   [Fact]
+   public void IsValidSelect_BadSyntax_ReturnsFalseWithError()
+   {
+      IGridifySelecting s = new GridifyQuery { Select = "name,," };
+      var ok = s.IsValidSelect<TestClass>(out var errors);
+      Assert.False(ok);
+      Assert.NotEmpty(errors);
+   }
+
+   [Fact]
+   public void IsValidSelect_UnmappedField_ReturnsFalseWithError()
+   {
+      IGridifySelecting s = new GridifyQuery { Select = "doesNotExist" };
+      var mapper = new GridifyMapper<TestClass>().AddMap("name", x => x.Name!);
+      var ok = s.IsValidSelect(out var errors, mapper);
+      Assert.False(ok);
+      Assert.Contains(errors, e => e.Contains("doesNotExist"));
+   }
+
+   [Fact]
+   public void GridifyQuery_IsValid_Composite_AlsoChecksSelect()
+   {
+      var gq = new GridifyQuery { Filter = "id=1", OrderBy = "name", Select = "doesNotExist" };
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true);
+      Assert.False(gq.IsValid(mapper));
+   }
+}

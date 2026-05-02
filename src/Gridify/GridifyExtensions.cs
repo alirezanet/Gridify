@@ -280,8 +280,64 @@ public static partial class GridifyExtensions
    /// <returns></returns>
    public static bool IsValid<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T>? mapper = null)
    {
-      return ((IGridifyFiltering)gridifyQuery).IsValid(mapper) &&
-             ((IGridifyOrdering)gridifyQuery).IsValid(mapper);
+      var ok = ((IGridifyFiltering)gridifyQuery).IsValid(mapper) &&
+               ((IGridifyOrdering)gridifyQuery).IsValid(mapper);
+      if (gridifyQuery is IGridifySelecting s)
+         ok = ok && s.IsValidSelect(mapper);
+      return ok;
+   }
+
+   /// <summary>
+   /// Validates a Select string against the mapper. Returns true if the Select string is
+   /// null/empty or every requested path is resolvable (and, by default, mapped).
+   /// </summary>
+   /// <remarks>
+   /// Named <c>IsValidSelect</c> rather than <c>IsValid</c> because <see cref="GridifyQuery"/>
+   /// implements both <see cref="IGridifyQuery"/> and <see cref="IGridifySelecting"/>; an
+   /// <c>IsValid</c> extension on each interface would make calls on a <c>GridifyQuery</c>
+   /// instance ambiguous.
+   /// </remarks>
+   public static bool IsValidSelect<T>(this IGridifySelecting selecting, IGridifyMapper<T>? mapper = null)
+   {
+      return selecting.IsValidSelect(out _, mapper);
+   }
+
+   /// <summary>
+   /// Validates a Select string against the mapper and reports per-path errors via
+   /// <paramref name="validationErrors"/>.
+   /// </summary>
+   /// <remarks>See remarks on the single-arg overload for why this is named <c>IsValidSelect</c>.</remarks>
+   public static bool IsValidSelect<T>(this IGridifySelecting selecting, out List<string> validationErrors, IGridifyMapper<T>? mapper = null)
+   {
+      validationErrors = new List<string>();
+      if (string.IsNullOrWhiteSpace(selecting.Select)) return true;
+
+      IReadOnlyList<string> paths;
+      try
+      {
+         paths = SelectTokenizer.Parse(selecting.Select);
+      }
+      catch (GridifySelectException ex)
+      {
+         validationErrors.Add(ex.Message);
+         return false;
+      }
+
+      mapper ??= new GridifyMapper<T>(autoGenerateMappings: true, maxNestingDepth: 1);
+
+      foreach (var path in paths)
+      {
+         try
+         {
+            _ = Builder.SelectExpressionBuilder<T>.Build(path, mapper);
+         }
+         catch (GridifySelectException ex)
+         {
+            validationErrors.Add(ex.Message);
+         }
+      }
+
+      return validationErrors.Count == 0;
    }
 
    public static bool IsValid<T>(this IGridifyFiltering filtering, IGridifyMapper<T>? mapper = null)
