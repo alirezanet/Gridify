@@ -332,3 +332,20 @@ public class SelectExpressionBuilderTests
       Assert.Contains("collection", ex.Message, System.StringComparison.OrdinalIgnoreCase);
    }
 }
+
+public class GridifyQuerySelectTests
+{
+   [Fact]
+   public void GridifyQuery_ImplementsIGridifySelecting()
+   {
+      IGridifySelecting q = new GridifyQuery { Select = "name,age" };
+      Assert.Equal("name,age", q.Select);
+   }
+
+   [Fact]
+   public void GridifyQuery_DefaultSelect_IsNull()
+   {
+      var q = new GridifyQuery();
+      Assert.Null(q.Select);
+   }
+}
