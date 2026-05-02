@@ -396,6 +396,22 @@ public class ApplySelectTests
       var data = SampleData().AsQueryable();
       Assert.Equal(3, data.ApplySelect((IGridifySelecting?)null).Count());
    }
+
+   [Fact]
+   public void ApplySelect_PartialMapperWithIgnoreNotMapped_DropsUnmappedFields()
+   {
+      var mapper = new GridifyMapper<TestClass>(c => c.IgnoreNotMappedFields = true)
+         .AddMap("name", x => x.Name!);
+      var data = SampleData().AsQueryable();
+
+      var result = data.ApplySelect("name,id,doesNotExist", mapper).ToList();
+
+      Assert.Equal(3, result.Count);
+      var first = result[0];
+      Assert.NotNull(first.GetType().GetProperty("name"));
+      Assert.Null(first.GetType().GetProperty("id"));
+      Assert.Null(first.GetType().GetProperty("doesNotExist"));
+   }
 }
 
 public class GridifySelectPipelineTests

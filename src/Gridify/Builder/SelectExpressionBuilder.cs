@@ -16,6 +16,7 @@ internal static class SelectExpressionBuilder<T>
          throw new GridifySelectException("Select string is empty.");
 
       var ignoreUnmapped = mapper.Configuration.IgnoreNotMappedFields;
+      var caseInsensitive = !mapper.Configuration.CaseSensitive;
       var rootParam = Expression.Parameter(typeof(T), "x");
 
       var resolved = new List<ResolvedPath>(paths.Count);
@@ -23,7 +24,7 @@ internal static class SelectExpressionBuilder<T>
       {
          try
          {
-            var rp = ResolvePath(path, rootParam, mapper);
+            var rp = ResolvePath(path, rootParam, mapper, caseInsensitive);
             if (rp != null) resolved.Add(rp);
          }
          catch (GridifySelectException) when (ignoreUnmapped)
@@ -35,10 +36,8 @@ internal static class SelectExpressionBuilder<T>
       if (resolved.Count == 0)
          throw new GridifySelectException("Select produced no fields.");
 
-      var nameComparer = mapper.Configuration.CaseSensitive
-         ? StringComparer.Ordinal
-         : StringComparer.OrdinalIgnoreCase;
-      var rootShape = BuildShape(typeof(T), resolved, rootParam, nameComparer);
+      var nameComparer = caseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+      var rootShape = BuildShape(typeof(T), resolved, rootParam, nameComparer, caseInsensitive);
       var rootType = SelectTypeFactory.GetOrCreate(rootShape);
 
       var memberInit = BuildMemberInitFromExpression(rootType, rootShape, rootParam);
@@ -53,7 +52,7 @@ internal static class SelectExpressionBuilder<T>
       public Type LeafType { get; set; } = null!;
    }
 
-   private static ResolvedPath? ResolvePath(string path, ParameterExpression rootParam, IGridifyMapper<T> mapper)
+   private static ResolvedPath? ResolvePath(string path, ParameterExpression rootParam, IGridifyMapper<T> mapper, bool caseInsensitive)
    {
       // (a) Try full-path mapper key.
       if (mapper.HasMap(path))
@@ -82,7 +81,7 @@ internal static class SelectExpressionBuilder<T>
          var current = rebound;
 
          for (var i = prefixLen; i < segments.Length; i++)
-            current = WalkSegment(current, segments[i]);
+            current = WalkSegment(current, segments[i], caseInsensitive);
 
          return new ResolvedPath
          {
@@ -92,31 +91,11 @@ internal static class SelectExpressionBuilder<T>
          };
       }
 
-      // (d) No mapper key matched any prefix — try resolving directly off T as a last resort.
-      try
-      {
-         Expression current = rootParam;
-         foreach (var seg in segments)
-            current = WalkSegment(current, seg);
-         return new ResolvedPath
-         {
-            Segments = segments,
-            Body = current,
-            LeafType = current.Type
-         };
-      }
-      catch (GridifySelectException)
-      {
-         // Preserve actionable messages from WalkSegment (e.g. multi-level collection).
-         throw;
-      }
-      catch
-      {
-         throw new GridifySelectException($"Field '{path}' is not mapped");
-      }
+      // No mapper key matched the full path or any prefix.
+      throw new GridifySelectException($"Field '{path}' is not mapped");
    }
 
-   private static Expression WalkSegment(Expression current, string segment)
+   private static Expression WalkSegment(Expression current, string segment, bool caseInsensitive)
    {
       // If current is already a collection, deeper nesting is not supported.
       if (TryGetEnumerableElementType(current.Type, out _) && current.Type != typeof(string))
@@ -125,14 +104,16 @@ internal static class SelectExpressionBuilder<T>
             $"Path projects through more than one collection level (segment '{segment}')");
       }
 
-      var prop = current.Type.GetProperty(segment, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+      var bindingFlags = BindingFlags.Public | BindingFlags.Instance;
+      if (caseInsensitive) bindingFlags |= BindingFlags.IgnoreCase;
+      var prop = current.Type.GetProperty(segment, bindingFlags);
       if (prop == null)
          throw new GridifySelectException($"Path is not a property of type '{current.Type.Name}': '{segment}'");
 
       return Expression.Property(current, prop);
    }
 
-   private static SelectShape BuildShape(Type sourceType, List<ResolvedPath> paths, ParameterExpression rootParam, StringComparer nameComparer)
+   private static SelectShape BuildShape(Type sourceType, List<ResolvedPath> paths, ParameterExpression rootParam, StringComparer nameComparer, bool caseInsensitive)
    {
       var shape = new SelectShape { SourceType = sourceType };
       var groups = paths
@@ -166,10 +147,10 @@ internal static class SelectExpressionBuilder<T>
          // Build child paths re-anchored at childParam.
          var childPaths = group
             .Where(p => p.Segments.Count > 1)
-            .Select(p => RebaseToChild(p, childParam))
+            .Select(p => RebaseToChild(p, childParam, caseInsensitive))
             .ToList();
 
-         var childShape = BuildShape(childSourceType, childPaths, childParam, nameComparer);
+         var childShape = BuildShape(childSourceType, childPaths, childParam, nameComparer, caseInsensitive);
          var emittedChildType = SelectTypeFactory.GetOrCreate(childShape);
 
          shape.Children.Add(new SelectNode
@@ -214,12 +195,12 @@ internal static class SelectExpressionBuilder<T>
       return body; // fallback for unusual expressions
    }
 
-   private static ResolvedPath RebaseToChild(ResolvedPath original, ParameterExpression childParam)
+   private static ResolvedPath RebaseToChild(ResolvedPath original, ParameterExpression childParam, bool caseInsensitive)
    {
       // Reconstruct the body by walking childParam.<segments[1..]>.
       Expression current = childParam;
       for (var i = 1; i < original.Segments.Count; i++)
-         current = WalkSegment(current, original.Segments[i]);
+         current = WalkSegment(current, original.Segments[i], caseInsensitive);
 
       return new ResolvedPath
       {

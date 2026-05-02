@@ -51,4 +51,20 @@ public class SelectSqlTests
       Assert.DoesNotContain("[CreateDate]", sql);
       Assert.DoesNotContain("[FkGuid]", sql);
    }
+
+   [Fact]
+   public void ApplySelect_CollectionProjection_IsTranslatedToSql()
+   {
+      // Project a navigation collection (User.Groups[].Name). This must translate to SQL
+      // (a JOIN or correlated subquery). If Enumerable.Select is used in a way EF Core
+      // cannot translate, the query falls back to client-side evaluation or throws —
+      // ToQueryString() in particular throws InvalidOperationException on untranslatable
+      // expressions, which is what this test guards against.
+      var sql = _dbContext.Users.ApplySelect("name,groups.name").ToQueryString();
+
+      // The User.Name column must appear; columns not requested must not.
+      Assert.Contains("[Name]", sql);
+      Assert.DoesNotContain("[CreateDate]", sql);
+      Assert.DoesNotContain("[FkGuid]", sql);
+   }
 }

@@ -255,6 +255,24 @@ public static partial class GridifyExtensions
          : new LinqSortingQueryBuilder<T>(mapper).ProcessOrdering(query, orderBy, startWithThenBy);
    }
 
+   /// <summary>
+   /// Projects the queryable to a sequence of runtime-emitted types containing only the
+   /// fields named in <paramref name="select"/> (e.g. <c>"name,address.city,orders.amount"</c>).
+   /// Under EF Core this translates to a column-pruned SQL <c>SELECT</c>.
+   /// </summary>
+   /// <param name="query">The source queryable.</param>
+   /// <param name="select">
+   /// A comma-separated list of field paths. Dotted paths produce nested objects; one level
+   /// of collection projection is supported. If null or whitespace, this method is a no-op
+   /// cast (<c>IQueryable&lt;T&gt;</c> → <c>IQueryable&lt;object&gt;</c>) and no projection is applied.
+   /// </param>
+   /// <param name="mapper">
+   /// Optional mapper. If omitted, an auto-generated mapper is used.
+   /// </param>
+   /// <exception cref="GridifySelectException">
+   /// Thrown for invalid syntax, unmapped fields (unless <c>IgnoreNotMappedFields</c> is set),
+   /// two-level collection nesting, or under NativeAOT (where dynamic code is unsupported).
+   /// </exception>
    public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, string? select, IGridifyMapper<T>? mapper = null)
    {
       if (string.IsNullOrWhiteSpace(select))
@@ -265,6 +283,11 @@ public static partial class GridifyExtensions
       return query.Select(lambda);
    }
 
+   /// <summary>
+   /// Overload that reads the select string from <see cref="IGridifySelecting.Select"/>.
+   /// If <paramref name="selecting"/> is null or its <c>Select</c> string is null/whitespace,
+   /// this method is a no-op cast.
+   /// </summary>
    public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, IGridifySelecting? selecting, IGridifyMapper<T>? mapper = null)
    {
       if (selecting == null) return query.Cast<object>();
