@@ -204,3 +204,131 @@ public class SelectTypeFactoryTests
       Assert.Single(results.Distinct());
    }
 }
+
+public class SelectExpressionBuilderTests
+{
+   [Fact]
+   public void Build_FlatProjection_ReturnsLambdaThatProjectsCorrectly()
+   {
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true);
+      var lambda = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("name,id", mapper);
+
+      var compiled = lambda.Compile();
+      var input = new TestClass(7, "Alice", null);
+      var projected = compiled(input);
+
+      var nameProp = projected.GetType().GetProperty("name");
+      var idProp = projected.GetType().GetProperty("id");
+      Assert.NotNull(nameProp);
+      Assert.NotNull(idProp);
+      Assert.Equal("Alice", nameProp!.GetValue(projected));
+      Assert.Equal(7, idProp!.GetValue(projected));
+   }
+
+   [Fact]
+   public void Build_NestedPath_ProducesNestedProjection()
+   {
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true, maxNestingDepth: 2);
+      var lambda = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("childClass.name", mapper);
+
+      var compiled = lambda.Compile();
+      var input = new TestClass(1, "Outer", new TestClass(2, "Inner", null));
+      var projected = compiled(input);
+
+      var childProp = projected.GetType().GetProperty("childClass");
+      Assert.NotNull(childProp);
+
+      var inner = childProp!.GetValue(projected);
+      Assert.NotNull(inner);
+      var innerNameProp = inner!.GetType().GetProperty("name");
+      Assert.Equal("Inner", innerNameProp!.GetValue(inner));
+   }
+
+   [Fact]
+   public void Build_CollectionPath_ProducesEnumerableProjection()
+   {
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true, maxNestingDepth: 2);
+      var lambda = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("children.name", mapper);
+
+      var compiled = lambda.Compile();
+      var input = new TestClass(1, "Parent", null);
+      input.Children.Add(new TestClass(2, "ChildA", null));
+      input.Children.Add(new TestClass(3, "ChildB", null));
+
+      var projected = compiled(input);
+      var childrenProp = projected.GetType().GetProperty("children");
+      Assert.NotNull(childrenProp);
+
+      var children = childrenProp!.GetValue(projected) as System.Collections.IEnumerable;
+      Assert.NotNull(children);
+
+      var names = new List<string?>();
+      foreach (var c in children!)
+      {
+         var nameProp = c.GetType().GetProperty("name");
+         names.Add((string?)nameProp!.GetValue(c));
+      }
+      Assert.Equal(new[] { "ChildA", "ChildB" }, names);
+   }
+
+   [Fact]
+   public void Build_UnmappedField_ThrowsByDefault()
+   {
+      var mapper = new GridifyMapper<TestClass>().AddMap("name", x => x.Name!);
+      Assert.Throws<GridifySelectException>(() =>
+         Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("name,missingField", mapper));
+   }
+
+   [Fact]
+   public void Build_UnmappedField_WhenIgnoreNotMappedFields_DropsSilently()
+   {
+      var mapper = new GridifyMapper<TestClass>(c => c.IgnoreNotMappedFields = true)
+         .AddMap("name", x => x.Name!);
+
+      var lambda = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("name,missingField", mapper);
+      var compiled = lambda.Compile();
+      var projected = compiled(new TestClass(1, "Bob", null));
+
+      Assert.NotNull(projected.GetType().GetProperty("name"));
+      Assert.Null(projected.GetType().GetProperty("missingField"));
+   }
+
+   [Fact]
+   public void Build_TwoLevelCollection_Throws()
+   {
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true, maxNestingDepth: 3);
+      Assert.Throws<GridifySelectException>(() =>
+         Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("children.children.name", mapper));
+   }
+
+   [Fact]
+   public void Build_EmptySelect_Throws()
+   {
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true);
+      Assert.Throws<GridifySelectException>(() =>
+         Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("", mapper));
+   }
+
+   [Fact]
+   public void Build_MixedCaseFirstSegment_GroupsByMapperCaseSensitivity()
+   {
+      // Default mapper is case-insensitive. "Name" and "name" should be one property,
+      // not two, otherwise the emitted type has duplicate columns.
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true);
+      var lambda = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("Name,name", mapper);
+      var compiled = lambda.Compile();
+      var projected = compiled(new TestClass(1, "Alice", null));
+
+      var props = projected.GetType().GetProperties();
+      Assert.Single(props);
+   }
+
+   [Fact]
+   public void Build_TwoLevelCollection_ErrorMentionsMultipleLevels()
+   {
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true, maxNestingDepth: 3);
+      var ex = Assert.Throws<GridifySelectException>(() =>
+         Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("children.children.name", mapper));
+      Assert.Contains("collection", ex.Message, System.StringComparison.OrdinalIgnoreCase);
+   }
+}
