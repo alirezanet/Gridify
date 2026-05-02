@@ -1,6 +1,6 @@
 # GridifyQuery
 
-`GridifyQuery` is a simple class for configuring Filtering, Ordering and Paging.
+`GridifyQuery` is a simple class for configuring Filtering, Ordering, and Paging.
 
 ``` csharp
 var gq = new GridifyQuery()
@@ -15,8 +15,7 @@ var gq = new GridifyQuery()
 Paging<Person> result = personsRepo.Gridify(gq);
 ```
 
-Here’s an updated version of the `IsValid` section you can drop into the docs.
-
+`GridifyQuery` also has an optional `Select` property for field projection — see [Selecting](#selecting) below.
 
 ## IsValid
 
@@ -102,6 +101,54 @@ Notes:
 
 * Empty or null `Filter` values are considered valid and return `true`.
 * The “old” overloads (`IsValid<T>()` and `IsValid(mapper)`) remain and now also benefit from the improved value-type validation; they just don’t expose the error details.
+* If `Select` is set, `IsValid` also validates each requested path against the mapper.
+
+## Selecting
+
+The `Select` property picks a subset of fields to project. Each projected item is a runtime-emitted type containing only the requested properties. Under Entity Framework Core this translates to column-pruned SQL.
+
+``` csharp
+var gq = new GridifyQuery()
+{
+    Filter = "age>18",
+    OrderBy = "name",
+    Page = 1,
+    PageSize = 20,
+    Select = "name,age,address.city"
+};
+
+Paging<object> result = dbContext.People.GridifySelect(gq);
+```
+
+`GridifySelect` is the projecting counterpart of `Gridify`: filter, order, page, and project in one call. If `Select` is null or empty, items remain boxed instances of the source type.
+
+Dotted paths produce nested objects, and one level of collection projection is supported:
+
+``` csharp
+// nested object — result: { name, address: { city } }
+"name,address.city"
+
+// collection element — result: { name, orders: [ { amount } ] }
+"name,orders.amount"
+```
+
+Two-level collection nesting (e.g. `orders.items.price`) throws `GridifySelectException`.
+
+To validate a `Select` string in isolation, cast to `IGridifySelecting` and call `IsValidSelect`:
+
+``` csharp
+IGridifySelecting s = new GridifyQuery { Select = "name,doesNotExist" };
+bool ok = s.IsValidSelect<Person>(out var errors);
+
+// ok == false
+// errors contains "Field 'doesNotExist' is not mapped"
+```
+
+By default, unmapped fields cause validation to fail and projection to throw. Set `IgnoreNotMappedFields = true` on the mapper to silently drop them.
+
+::: warning
+Field projection is not supported under **NativeAOT** (tracked at [#140](https://github.com/alirezanet/Gridify/issues/140)), and `Gridify.Elasticsearch` does not yet implement `Select`.
+:::
 
 ## GetFilteringExpression
 

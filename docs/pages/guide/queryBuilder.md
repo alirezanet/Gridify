@@ -25,6 +25,9 @@ The `QueryBuilder` class is useful when you want to manually build your query or
 | BuildWithPagingCompiled  | Compiles the expressions and returns a delegate for applying filtering, ordering, and paging to an enumerable collection that returns paging result |
 | BuildWithQueryablePaging | Applies filtering, ordering, and paging to a context and returns a queryable paging result                                                        |
 | Evaluate                 | Directly evaluates a context to check if all conditions are valid                                                                                 |
+| AddSelect                | Configures a field projection (Select) string. Has no effect on the typed Build* family                                                           |
+| BuildSelect              | Applies filtering, ordering, paging, and projection to a context; returns IQueryable&lt;object&gt;                                                |
+| BuildSelectWithPaging    | Applies filtering, ordering, paging, and projection to a context; returns a paging result of object                                               |
 
 ``` csharp
 var builder = new QueryBuilder<Person>()
@@ -126,4 +129,22 @@ var builder = new QueryBuilder<User>()
 
 var result = builder.Build(users.AsQueryable());
 ```
+
+## AddSelect
+
+The `AddSelect` method configures a [field projection](./gridifyQuery.md#selecting) string. It has no effect on the typed `Build*` family — only the `BuildSelect*` family applies it, returning `IQueryable<object>` or `Paging<object>` whose items contain only the requested fields.
+
+``` csharp
+var builder = new QueryBuilder<Person>()
+    .AddCondition("age>18")
+    .AddOrderBy("name")
+    .ConfigurePaging(0, 20)
+    .AddSelect("name,age,address.city");
+
+Paging<object> result = builder.BuildSelectWithPaging(persons);
+```
+
+If `AddSelect` is not called (or the configured string is null or empty), `BuildSelect` is a no-op cast — items are boxed instances of the source type.
+
+Check out the [Selecting](./gridifyQuery.md#selecting) section for more information.
 
