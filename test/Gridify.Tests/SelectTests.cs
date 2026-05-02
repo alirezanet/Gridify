@@ -397,3 +397,57 @@ public class ApplySelectTests
       Assert.Equal(3, data.ApplySelect((IGridifySelecting?)null).Count());
    }
 }
+
+public class GridifySelectPipelineTests
+{
+   private static List<TestClass> SampleData() =>
+   [
+      new(1, "Alice", null),
+      new(2, "Bob", null),
+      new(3, "Carol", null),
+      new(4, "Dave", null),
+      new(5, "Eve", null)
+   ];
+
+   [Fact]
+   public void GridifySelect_AppliesFilterOrderingPagingAndProjection()
+   {
+      var data = SampleData().AsQueryable();
+      var gq = new GridifyQuery
+      {
+         Filter = "id>1",
+         OrderBy = "name",
+         Page = 1,
+         PageSize = 2,
+         Select = "name,id"
+      };
+      Paging<object> result = data.GridifySelect(gq);
+
+      Assert.Equal(4, result.Count); // filtered count (id > 1) = 4
+      Assert.Equal(2, result.Data.Count()); // page size
+      var first = result.Data.First();
+      Assert.NotNull(first.GetType().GetProperty("name"));
+   }
+
+   [Fact]
+   public void GridifySelect_NoSelect_ReturnsBoxedT()
+   {
+      var data = SampleData().AsQueryable();
+      var gq = new GridifyQuery { Page = 1, PageSize = 10 };
+      var result = data.GridifySelect(gq);
+
+      Assert.Equal(5, result.Count);
+      Assert.All(result.Data, item => Assert.IsType<TestClass>(item));
+   }
+
+   [Fact]
+   public void GridifyQueryableSelect_ReturnsQueryablePagingOfObject()
+   {
+      var data = SampleData().AsQueryable();
+      var gq = new GridifyQuery { Select = "name", Page = 1, PageSize = 10 };
+      QueryablePaging<object> qp = data.GridifyQueryableSelect(gq);
+
+      Assert.Equal(5, qp.Count);
+      Assert.Equal(5, qp.Query.Count());
+   }
+}

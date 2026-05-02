@@ -467,6 +467,34 @@ public static partial class GridifyExtensions
       return new Paging<T>(count, queryable.ToList());
    }
 
+   /// <summary>
+   /// Applies filtering, ordering, paging, and field projection (Select) to the query.
+   /// Returns a <see cref="QueryablePaging{T}"/> of <see cref="object"/> where each item
+   /// is a runtime-emitted type with only the requested Select fields. If the query has
+   /// no Select string, items remain boxed instances of <typeparamref name="T"/>.
+   /// </summary>
+   public static QueryablePaging<object> GridifyQueryableSelect<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
+   {
+      query = query.ApplyFiltering(gridifyQuery, mapper);
+      var count = query.Count();
+      query = query.ApplyOrdering(gridifyQuery, mapper);
+      query = query.ApplyPaging(gridifyQuery);
+
+      var selecting = gridifyQuery as IGridifySelecting;
+      var projected = query.ApplySelect(selecting, mapper);
+      return new QueryablePaging<object>(count, projected);
+   }
+
+   /// <summary>
+   /// Applies filtering, ordering, paging, and field projection (Select), then materializes
+   /// the result. Returns a <see cref="Paging{T}"/> of <see cref="object"/>.
+   /// </summary>
+   public static Paging<object> GridifySelect<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
+   {
+      var (count, projected) = query.GridifyQueryableSelect(gridifyQuery, mapper);
+      return new Paging<object>(count, projected.ToList());
+   }
+
    #endregion
 
    /// <summary>
