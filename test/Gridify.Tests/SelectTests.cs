@@ -275,8 +275,11 @@ public class SelectExpressionBuilderTests
    public void Build_UnmappedField_ThrowsByDefault()
    {
       var mapper = new GridifyMapper<TestClass>().AddMap("name", x => x.Name!);
-      Assert.Throws<GridifySelectException>(() =>
+      // Asserting on the base GridifySelectException type — the concrete throw
+      // is the GridifySelectFieldNotMappedException subtype.
+      var ex = Assert.ThrowsAny<GridifySelectException>(() =>
          Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("name,missingField", mapper));
+      Assert.IsType<GridifySelectFieldNotMappedException>(ex);
    }
 
    [Fact]
@@ -330,6 +333,46 @@ public class SelectExpressionBuilderTests
       var ex = Assert.Throws<GridifySelectException>(() =>
          Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("children.children.name", mapper));
       Assert.Contains("collection", ex.Message, System.StringComparison.OrdinalIgnoreCase);
+   }
+
+   [Fact]
+   public void Build_StructuralCollectionError_PropagatesUnderIgnoreNotMappedFields()
+   {
+      // Mapper maps the collection prefix "children" but NOT "children.name".
+      // ResolvePath's prefix walk lands on the IEnumerable<TestClass>, then
+      // WalkSegment("name") fires the multi-level-collection guard. Even with
+      // IgnoreNotMappedFields=true the structural error must propagate — the
+      // path isn't unmapped, it's structurally unprojectable.
+      var mapper = new GridifyMapper<TestClass>(c => c.IgnoreNotMappedFields = true);
+      mapper.AddMap("children", x => x.Children);
+
+      var ex = Assert.Throws<GridifySelectException>(() =>
+         Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("children.name", mapper));
+      Assert.False(ex is GridifySelectFieldNotMappedException);
+      Assert.Contains("collection", ex.Message, System.StringComparison.OrdinalIgnoreCase);
+   }
+
+   [Fact]
+   public void Build_NotAPropertyError_PropagatesUnderIgnoreNotMappedFields()
+   {
+      // Mapper maps "name" (a string). User asks for "name.bogus" — prefix walk
+      // hits "name", then tries Expression.Property(string, "bogus") which fails.
+      // Structural error, must propagate even with IgnoreNotMappedFields=true.
+      var mapper = new GridifyMapper<TestClass>(c => c.IgnoreNotMappedFields = true)
+         .AddMap("name", x => x.Name!);
+
+      var ex = Assert.Throws<GridifySelectException>(() =>
+         Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("name.bogus", mapper));
+      Assert.False(ex is GridifySelectFieldNotMappedException);
+   }
+
+   [Fact]
+   public void Build_UnmappedField_ThrowsTypedSubException()
+   {
+      var mapper = new GridifyMapper<TestClass>().AddMap("name", x => x.Name!);
+      var ex = Assert.Throws<GridifySelectFieldNotMappedException>(() =>
+         Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("missingField", mapper));
+      Assert.Equal("missingField", ex.Field);
    }
 }
 
@@ -509,5 +552,51 @@ public class IsValidSelectTests
       var gq = new GridifyQuery { Filter = "id=1", OrderBy = "name", Select = "doesNotExist" };
       var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true);
       Assert.False(gq.IsValid(mapper));
+   }
+
+   [Fact]
+   public void IsValidSelect_UnmappedField_UnderIgnoreNotMappedFields_ReturnsTrue()
+   {
+      // When IgnoreNotMappedFields=true, unmapped paths are silently dropped at
+      // runtime. The validator must mirror that and report no error.
+      var mapper = new GridifyMapper<TestClass>(c => c.IgnoreNotMappedFields = true)
+         .AddMap("name", x => x.Name!);
+      IGridifySelecting s = new GridifyQuery { Select = "name,doesNotExist" };
+
+      var ok = s.IsValidSelect(out var errors, mapper);
+
+      Assert.True(ok);
+      Assert.Empty(errors);
+   }
+
+   [Fact]
+   public void IsValidSelect_UnmappedField_ErrorMentionsField()
+   {
+      // Regression: under the old per-path Build() validator the error message
+      // was "Select produced no fields." for every unmapped path; now it should
+      // surface the actual "Field 'X' is not mapped" diagnostic.
+      var mapper = new GridifyMapper<TestClass>().AddMap("name", x => x.Name!);
+      IGridifySelecting s = new GridifyQuery { Select = "doesNotExist" };
+
+      var ok = s.IsValidSelect(out var errors, mapper);
+
+      Assert.False(ok);
+      Assert.Contains(errors, e => e.Contains("doesNotExist") && e.Contains("not mapped"));
+      Assert.DoesNotContain(errors, e => e.Contains("Select produced no fields"));
+   }
+
+   [Fact]
+   public void IsValidSelect_StructuralError_UnderIgnoreNotMappedFields_ReturnsFalse()
+   {
+      // Structural errors are not unmapped-field errors and must surface in the
+      // validator regardless of IgnoreNotMappedFields.
+      var mapper = new GridifyMapper<TestClass>(c => c.IgnoreNotMappedFields = true);
+      mapper.AddMap("children", x => x.Children);
+      IGridifySelecting s = new GridifyQuery { Select = "children.name" };
+
+      var ok = s.IsValidSelect(out var errors, mapper);
+
+      Assert.False(ok);
+      Assert.NotEmpty(errors);
    }
 }

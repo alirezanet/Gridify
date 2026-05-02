@@ -27,9 +27,11 @@ internal static class SelectExpressionBuilder<T>
             var rp = ResolvePath(path, rootParam, mapper, caseInsensitive);
             if (rp != null) resolved.Add(rp);
          }
-         catch (GridifySelectException) when (ignoreUnmapped)
+         catch (GridifySelectFieldNotMappedException) when (ignoreUnmapped)
          {
-            // skip silently
+            // Only "field not mapped" is silenced under IgnoreNotMappedFields.
+            // Structural errors (two-level collection, "not a property of type")
+            // still propagate so the caller learns the path is unprojectable.
          }
       }
 
@@ -92,7 +94,37 @@ internal static class SelectExpressionBuilder<T>
       }
 
       // No mapper key matched the full path or any prefix.
-      throw new GridifySelectException($"Field '{path}' is not mapped");
+      throw new GridifySelectFieldNotMappedException(path);
+   }
+
+   /// <summary>
+   /// Validator-only path resolution. Tokenized paths are resolved through the mapper
+   /// and per-path errors collected into <paramref name="errors"/>. Does not emit any
+   /// runtime types and does not build the projection lambda — the cache and IL
+   /// emission are deliberately skipped so that validating user input doesn't pollute
+   /// the <see cref="SelectTypeFactory"/> cache with single-field shapes.
+   /// </summary>
+   internal static void ValidatePaths(IReadOnlyList<string> paths, IGridifyMapper<T> mapper, List<string> errors)
+   {
+      var caseInsensitive = !mapper.Configuration.CaseSensitive;
+      var ignoreUnmapped = mapper.Configuration.IgnoreNotMappedFields;
+      var rootParam = Expression.Parameter(typeof(T), "x");
+
+      foreach (var path in paths)
+      {
+         try
+         {
+            _ = ResolvePath(path, rootParam, mapper, caseInsensitive);
+         }
+         catch (GridifySelectFieldNotMappedException) when (ignoreUnmapped)
+         {
+            // mapper will silently drop this at runtime; validator treats it as OK.
+         }
+         catch (GridifySelectException ex)
+         {
+            errors.Add(ex.Message);
+         }
+      }
    }
 
    private static Expression WalkSegment(Expression current, string segment, bool caseInsensitive)

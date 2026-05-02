@@ -348,16 +348,13 @@ public static partial class GridifyExtensions
 
       mapper ??= new GridifyMapper<T>(autoGenerateMappings: true, maxNestingDepth: 1);
 
-      foreach (var path in paths)
+      try
       {
-         try
-         {
-            _ = Builder.SelectExpressionBuilder<T>.Build(path, mapper);
-         }
-         catch (GridifySelectException ex)
-         {
-            validationErrors.Add(ex.Message);
-         }
+         Builder.SelectExpressionBuilder<T>.ValidatePaths(paths, mapper, validationErrors);
+      }
+      catch (Exception ex)
+      {
+         validationErrors.Add($"Validation error: {ex.Message}");
       }
 
       return validationErrors.Count == 0;
