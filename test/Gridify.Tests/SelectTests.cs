@@ -374,6 +374,45 @@ public class SelectExpressionBuilderTests
          Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("missingField", mapper));
       Assert.Equal("missingField", ex.Field);
    }
+
+   [Fact]
+   public void Build_CaseSensitiveMapper_CamelCasePrefix_ResolvesPascalCaseSuffix()
+   {
+      var mapper = new GridifyMapper<TestClass>(c => c.CaseSensitive = true)
+         .AddMap("childClass", x => x.ChildClass!);
+
+      var lambda = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("childClass.name", mapper);
+      var projected = lambda.Compile()(new TestClass(1, "Outer", new TestClass(2, "Inner", null)));
+
+      var inner = projected.GetType().GetProperty("childClass")!.GetValue(projected);
+      Assert.Equal("Inner", inner!.GetType().GetProperty("Name")!.GetValue(inner));
+   }
+
+   [Fact]
+   public void Build_CaseInsensitiveMapper_DifferentCasings_ProduceSameEmittedType()
+   {
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true);
+
+      var a = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("id,name", mapper);
+      var b = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("Id,Name", mapper);
+
+      Assert.Same(a.ReturnType, b.ReturnType);
+   }
+
+   [Fact]
+   public void Build_CaseInsensitiveMapper_EmittedPropertyNames_FollowMapperCanonicalCasing()
+   {
+      var mapper = new GridifyMapper<TestClass>()
+         .AddMap("id", x => x.Id)
+         .AddMap("name", x => x.Name!);
+
+      var lambda = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("Id,Name", mapper);
+      var projected = lambda.Compile()(new TestClass(7, "Alice", null));
+
+      Assert.NotNull(projected.GetType().GetProperty("id"));
+      Assert.NotNull(projected.GetType().GetProperty("name"));
+      Assert.Equal(2, projected.GetType().GetProperties().Length);
+   }
 }
 
 public class GridifyQuerySelectTests
