@@ -198,9 +198,15 @@ public interface IQueryBuilder<T>
    IQueryBuilder<T> RemoveMap(IGMap<T> map);
 
    /// <summary>
-   /// Validate conditions, orderings, mappings
-   /// make sure to use ir after your configurations and before the Build methods
+   /// Validate filter conditions and orderings against the configured mappings.
+   /// Use this after configuring the builder and before the Build methods.
    /// </summary>
+   /// <remarks>
+   /// This method does <b>not</b> validate the select string supplied via
+   /// <see cref="AddSelect"/>. To validate the select string, call
+   /// <c>IsValidSelect()</c> on an <see cref="IGridifySelecting"/> instance
+   /// (for example <c>new GridifyQuery { Select = "..." }.IsValidSelect(mapper)</c>).
+   /// </remarks>
    /// <returns>boolean true/false</returns>
    bool IsValid();
 
@@ -368,6 +374,11 @@ public interface IQueryBuilder<T>
    /// Configures a select (field projection) string. Has no effect on the typed Build* family;
    /// only applies when calling BuildSelect / BuildSelectWithPaging.
    /// </summary>
+   /// <remarks>
+   /// <see cref="IsValid"/> does not validate the select string. To validate it before building,
+   /// call <c>new GridifyQuery { Select = select }.IsValidSelect(mapper)</c>
+   /// — see <see cref="GridifyExtensions.IsValidSelect{T}(IGridifySelecting, IGridifyMapper{T})"/>.
+   /// </remarks>
    IQueryBuilder<T> AddSelect(string select);
 
    /// <summary>Builds the projection delegate.</summary>

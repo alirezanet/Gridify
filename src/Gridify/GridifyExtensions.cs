@@ -295,9 +295,10 @@ public static partial class GridifyExtensions
    }
 
    /// <summary>
-   /// Validates Filter and/or OrderBy with Mappings
+   /// Validates Filter, OrderBy, and (when the query implements <see cref="IGridifySelecting"/>)
+   /// the Select string against the configured mappings.
    /// </summary>
-   /// <param name="gridifyQuery">gridify query with (Filter or OrderBy) </param>
+   /// <param name="gridifyQuery">gridify query with Filter, OrderBy, and optionally Select</param>
    /// <param name="mapper">the gridify mapper that you want to use with, this is optional</param>
    /// <typeparam name="T"></typeparam>
    /// <returns></returns>

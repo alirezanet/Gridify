@@ -413,6 +413,85 @@ public class SelectExpressionBuilderTests
       Assert.NotNull(projected.GetType().GetProperty("name"));
       Assert.Equal(2, projected.GetType().GetProperties().Length);
    }
+
+   [Fact]
+   public void Build_SingleSegmentAlias_MappedToNestedValue_ProjectsLeafValue()
+   {
+      // An alias that resolves to a nested value must project the leaf,
+      // not the first root segment of the resolved body.
+      var mapper = new GridifyMapper<TestClass>()
+         .AddMap("childName", x => x.ChildClass!.Name!);
+
+      var lambda = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("childName", mapper);
+      var projected = lambda.Compile()(new TestClass(1, "Outer", new TestClass(2, "Inner", null)));
+
+      var prop = projected.GetType().GetProperty("childName");
+      Assert.NotNull(prop);
+      Assert.Equal(typeof(string), prop!.PropertyType);
+      Assert.Equal("Inner", prop.GetValue(projected));
+   }
+
+   [Fact]
+   public void Build_SingleSegmentAlias_MappedToCollectionProjection_ProjectsProjectedCollection()
+   {
+      // An alias that resolves to a collection projection must project the
+      // projected sequence, not the source collection it was projected from.
+      var mapper = new GridifyMapper<TestClass>()
+         .AddMap("childNames", x => x.Children.Select(c => c.Name!));
+
+      var lambda = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("childNames", mapper);
+      var source = new TestClass(1, "Outer", null)
+      {
+         Children =
+         {
+            new TestClass(2, "A", null),
+            new TestClass(3, "B", null)
+         }
+      };
+      var projected = lambda.Compile()(source);
+
+      var prop = projected.GetType().GetProperty("childNames");
+      Assert.NotNull(prop);
+      var value = prop!.GetValue(projected);
+      var names = Assert.IsAssignableFrom<IEnumerable<string>>(value);
+      Assert.Equal(new[] { "A", "B" }, names);
+   }
+
+   [Fact]
+   public void Build_DottedIntoAliasWithNonMemberChainBody_ThrowsClearError()
+   {
+      // Dotting into an alias whose body is not a plain member chain currently throws.
+      // Lock this in so any future widening of supported alias-body shapes is intentional.
+      var mapper = new GridifyMapper<TestClass>()
+         .AddMap("display", x => x.Name ?? x.Tag ?? string.Empty);
+
+      var ex = Assert.Throws<GridifySelectException>(() =>
+         Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("display.Length", mapper));
+      Assert.False(ex is GridifySelectFieldNotMappedException);
+   }
+
+   [Fact]
+   public void Build_MixedSingleSegmentAliasAndNestedWalk_BothProjectCorrectly()
+   {
+      // Stresses grouping: childName is a single-segment alias resolving to x.ChildClass.Name
+      // while childClass.id is a real nested walk. They live in different groups
+      // (different first segments), so both should project their resolved leaves.
+      var mapper = new GridifyMapper<TestClass>()
+         .AddMap("childName", x => x.ChildClass!.Name!)
+         .AddMap("childClass", x => x.ChildClass!);
+
+      var lambda = Gridify.Builder.SelectExpressionBuilder<TestClass>.Build("childName,childClass.id", mapper);
+      var projected = lambda.Compile()(new TestClass(1, "Outer", new TestClass(42, "Inner", null)));
+
+      var childName = projected.GetType().GetProperty("childName")!.GetValue(projected);
+      Assert.Equal("Inner", childName);
+
+      var childClass = projected.GetType().GetProperty("childClass")!.GetValue(projected);
+      Assert.NotNull(childClass);
+      // Walked suffix segments canonicalize to CLR prop.Name (PascalCase), so the
+      // emitted nested property is "Id" even though the user wrote "childClass.id".
+      Assert.Equal(42, childClass!.GetType().GetProperty("Id")!.GetValue(childClass));
+   }
 }
 
 public class GridifyQuerySelectTests

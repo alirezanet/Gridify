@@ -164,23 +164,27 @@ internal static class SelectExpressionBuilder<T>
       foreach (var group in groups)
       {
          var first = group.First();
-         var firstSegmentExpr = ExtractFirstSegmentExpr(first.Body, rootParam);
-         var firstSegmentType = firstSegmentExpr.Type;
 
-         // Leaf: only this single segment.
+         // Leaf: only this single segment. Use the mapper's resolved body directly so
+         // single-field aliases that resolve to nested values (e.g. childName → x.ChildClass.Name)
+         // or to collection projections (e.g. tags → x.Children.Select(c => c.Name)) project the
+         // resolved leaf, not the extracted first root segment.
          var allSingleSegment = group.All(p => p.Segments.Count == 1);
          if (allSingleSegment)
          {
             shape.Children.Add(new SelectNode
             {
                Name = group.Key,
-               Accessor = Expression.Lambda(firstSegmentExpr, rootParam),
-               ResultType = firstSegmentType
+               Accessor = Expression.Lambda(first.Body, rootParam),
+               ResultType = first.LeafType
             });
             continue;
          }
 
-         // Nested or collection.
+         // Nested or collection: group by the first root segment so multiple child paths
+         // (e.g. childClass.name, childClass.age) hang off one parent node.
+         var firstSegmentExpr = ExtractFirstSegmentExpr(first.Body, rootParam);
+         var firstSegmentType = firstSegmentExpr.Type;
          var isCollection = TryGetEnumerableElementType(firstSegmentType, out var elementType) && firstSegmentType != typeof(string);
          var childSourceType = isCollection ? elementType! : firstSegmentType;
          var childParam = Expression.Parameter(childSourceType, "y");

@@ -67,4 +67,22 @@ public class SelectSqlTests
       Assert.DoesNotContain("[CreateDate]", sql);
       Assert.DoesNotContain("[FkGuid]", sql);
    }
+
+   [Fact]
+   public void ApplySelect_SingleSegmentAliasToCollectionProjection_IsTranslatedToSql()
+   {
+      // A mapper alias (groupNames) resolves to a collection projection
+      // (x.Groups.Select(g => g.Name)). The select string has only one segment but
+      // the resolved body is a Select(...) call — EF Core must still translate it.
+      var mapper = new GridifyMapper<User>(autoGenerateMappings: true)
+         .AddMap("groupNames", x => x.Groups.Select(g => g.Name));
+
+      var sql = _dbContext.Users.ApplySelect("groupNames", mapper).ToQueryString();
+
+      // The Group.Name column must appear (LEFT JOIN against Groups), and unrelated
+      // User columns must not.
+      Assert.Contains("[Name]", sql);
+      Assert.DoesNotContain("[CreateDate]", sql);
+      Assert.DoesNotContain("[FkGuid]", sql);
+   }
 }

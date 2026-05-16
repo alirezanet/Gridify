@@ -10,6 +10,19 @@ using System.Threading;
 
 namespace Gridify.Builder;
 
+/// <summary>
+/// Emits and caches runtime CLR types matching a <see cref="SelectShape"/> so each unique
+/// projection shape is materialized as exactly one type per process.
+/// </summary>
+/// <remarks>
+/// The cache is process-wide and unbounded — emitted types live for the lifetime of the
+/// dynamic assembly. For typical use (a finite set of select strings per endpoint) the cache
+/// is naturally bounded. If select strings can come from untrusted input and produce
+/// arbitrarily many distinct shapes, validate / restrict the input before calling
+/// <see cref="GridifyExtensions.ApplySelect{T}(System.Linq.IQueryable{T}, string?, IGridifyMapper{T}?)"/>
+/// (e.g. via <see cref="GridifyExtensions.IsValidSelect{T}(IGridifySelecting, IGridifyMapper{T})"/>)
+/// to keep cache growth predictable.
+/// </remarks>
 internal static class SelectTypeFactory
 {
    private static readonly ConcurrentDictionary<string, Type> Cache = new();
