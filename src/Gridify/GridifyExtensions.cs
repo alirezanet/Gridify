@@ -3,6 +3,7 @@ using Gridify.Syntax;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -677,7 +678,7 @@ public static partial class GridifyExtensions
          if (converter.CanConvertFrom(typeof(string)))
          {
             // Attempt the actual conversion to validate
-            converter.ConvertFromString(value);
+            converter.ConvertFromString(null, CultureInfo.InvariantCulture, value);
             return true;
          }
 

@@ -1,0 +1,22 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/benchmark/">
+    <Project Path="benchmark/Benchmark.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Gridify.Elasticsearch/Gridify.Elasticsearch.csproj" />
+    <Project Path="src/Gridify.EntityFramework/Gridify.EntityFramework.csproj" />
+    <Project Path="src/Gridify/Gridify.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/EntityFrameworkIntegrationTests/EntityFrameworkIntegrationTests.cs.csproj" />
+    <Project Path="test/EntityFrameworkPostgreSqlIntegrationTests/EntityFrameworkPostgreSqlIntegrationTests.csproj" />
+    <Project Path="test/EntityFrameworkSqlProviderIntegrationTests/EntityFrameworkSqlProviderIntegrationTests.csproj" />
+    <Project Path="test/Gridify.Elasticsearch.Tests/Gridify.Elasticsearch.Tests.csproj" />
+    <Project Path="test/Gridify.Tests/Gridify.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -13,7 +13,7 @@
       <IncludeSymbols>true</IncludeSymbols>
       <SymbolPackageFormat>snupkg</SymbolPackageFormat>
       <PackageReadmeFile>README.md</PackageReadmeFile>
-      <TargetFrameworks>net10.0;netstandard2.0;netstandard2.1;net8.0;net9.0</TargetFrameworks>
+      <TargetFrameworks>net11.0;net10.0;netstandard2.0;netstandard2.1;net8.0;net9.0</TargetFrameworks>
       <LangVersion>default</LangVersion>
       <Nullable>enable</Nullable>
    </PropertyGroup>
@@ -29,7 +29,7 @@
 
    <ItemGroup>
       <PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.18.*" />
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.301" PrivateAssets="All" />
    </ItemGroup>
 
 </Project>
