@@ -14,6 +14,7 @@ public class CompositeGMap<T> : IGMap<T>
    public string From { get; set; }
    public LambdaExpression To { get; set; }
    public Func<string, object>? Convertor { get; set; }
+   public bool? CaseInsensitive { get; set; }
 
    /// <summary>
    /// Collection of expressions that will be combined with OR logic

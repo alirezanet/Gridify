@@ -41,7 +41,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
          GenerateMappings();
    }
 
-   public IGridifyMapper<T> AddMap(string from, Func<string, object>? convertor = null!, bool overrideIfExists = true)
+   public IGridifyMapper<T> AddMap(string from, Func<string, object>? convertor = null!, bool overrideIfExists = true, bool? caseInsensitive = null)
    {
       if (!overrideIfExists && HasMap(from))
          throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
@@ -57,7 +57,7 @@ public class GridifyMapper<T> : IGridifyMapper<T>
       }
 
       RemoveMap(from);
-      _mappings.Add(new GMap<T>(from, to!, convertor));
+      _mappings.Add(new GMap<T>(from, to!, convertor) { CaseInsensitive = caseInsensitive });
       return this;
    }
 
@@ -105,13 +105,13 @@ public class GridifyMapper<T> : IGridifyMapper<T>
    }
 
    public IGridifyMapper<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null!,
-      bool overrideIfExists = true)
+      bool overrideIfExists = true, bool? caseInsensitive = null)
    {
       if (!overrideIfExists && HasMap(from))
          throw new GridifyMapperException($"Duplicate Key. the '{from}' key already exists");
 
       RemoveMap(from);
-      _mappings.Add(new GMap<T>(from, to, convertor));
+      _mappings.Add(new GMap<T>(from, to, convertor) { CaseInsensitive = caseInsensitive });
       return this;
    }
 

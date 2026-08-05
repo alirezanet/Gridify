@@ -6,7 +6,7 @@ namespace Gridify;
 
 public interface IGridifyMapper<T>
 {
-   IGridifyMapper<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null, bool overrideIfExists = true);
+   IGridifyMapper<T> AddMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null, bool overrideIfExists = true, bool? caseInsensitive = null);
 
    IGridifyMapper<T> AddMap(string from, Expression<Func<T, int, object?>> to, Func<string, object>? convertor = null!,
       bool overrideIfExists = true);
@@ -16,7 +16,7 @@ public interface IGridifyMapper<T>
       bool overrideIfExists = true);
 
    IGridifyMapper<T> AddMap(IGMap<T> gMap, bool overrideIfExists = true);
-   IGridifyMapper<T> AddMap(string from, Func<string, object>? convertor = null!, bool overrideIfExists = true);
+   IGridifyMapper<T> AddMap(string from, Func<string, object>? convertor = null!, bool overrideIfExists = true, bool? caseInsensitive = null);
 
    /// <summary>
    /// Adds a composite mapping that combines multiple property expressions with OR logic.

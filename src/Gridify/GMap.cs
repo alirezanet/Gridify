@@ -9,6 +9,7 @@ public partial class GMap<T> : IGMap<T>
    public string From { get; set; }
    public LambdaExpression To { get; set; }
    public Func<string, object>? Convertor { get; set; }
+   public bool? CaseInsensitive { get; set; }
 
    public GMap(string from, Expression<Func<T, object?>> to, Func<string, object>? convertor = null)
    {

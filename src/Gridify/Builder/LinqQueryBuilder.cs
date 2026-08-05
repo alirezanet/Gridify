@@ -30,7 +30,8 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
                   value,
                   op,
                   gMap.Convertor,
-                  true);
+                  true,
+                  gMap.CaseInsensitive);
 
                if (conditionExp is not LambdaExpression lambdaExp) return null;
 
@@ -272,7 +273,7 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
             case MethodCallExpression { Method.Name: "Select" } selectExp:
             {
                var targetExp = selectExp.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
-               var conditionExp = BuildQuery(targetExp!.Body, targetExp.Parameters[0], value, op, gMap.Convertor, true);
+               var conditionExp = BuildQuery(targetExp!.Body, targetExp.Parameters[0], value, op, gMap.Convertor, true, gMap.CaseInsensitive);
 
                if (conditionExp is not LambdaExpression lambdaExp) return null;
 
