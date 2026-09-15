@@ -80,6 +80,7 @@ This method adds a mapping to the mapper.
 - the first parameter is the name of the field you want to use in the string query
 - the second parameter is a property selector expression
 - the third parameter is an optional [value convertor](#value-convertor) expression that you can use to convert user inputs to anything you want
+- the optional `caseInsensitive` parameter lets you override `CaseInsensitiveFiltering` for a specific map (`true` = force case-insensitive, `false` = force case-sensitive)
 
 ### Value Convertor
 
@@ -349,6 +350,14 @@ If true, string comparison operations are case insensitive by default.
 
 ``` csharp
 var mapper = new GridifyMapper<Person>(q => q.CaseInsensitiveFiltering = true);
+```
+
+You can also override this behavior per map:
+
+```csharp
+var mapper = new GridifyMapper<Person>(q => q.CaseInsensitiveFiltering = true)
+   .AddMap("userName", p => p.UserName, caseInsensitive: false)
+   .AddMap("email", p => p.Email, caseInsensitive: true);
 ```
 
 ### DefaultDateTimeKind

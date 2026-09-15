@@ -148,7 +148,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
             }
             else
             {
-               var exprQuery = BuildQuery(exprMapTarget.Body, exprMapTarget.Parameters[0], right, op, gMap.Convertor, false);
+               var exprQuery = BuildQuery(exprMapTarget.Body, exprMapTarget.Parameters[0], right, op, gMap.Convertor, false, gMap.CaseInsensitive);
                if (exprQuery == null) continue;
 
                if (exprHasIndexer)
@@ -193,7 +193,7 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
          return (result, isNested);
       }
 
-      var query = BuildQuery(mapTarget.Body, mapTarget.Parameters[0], right, op, gMap.Convertor, false);
+      var query = BuildQuery(mapTarget.Body, mapTarget.Parameters[0], right, op, gMap.Convertor, false, gMap.CaseInsensitive);
       if (query == null) return null;
 
       if (hasIndexer)
@@ -264,7 +264,8 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       ValueExpressionSyntax valueExpression,
       ISyntaxNode op,
       Func<string, object>? convertor,
-      bool isNested)
+      bool isNested,
+      bool? mapCaseInsensitive)
    {
       // Remove the boxing for value types
       if (body.NodeType == ExpressionType.Convert) body = ((UnaryExpression)body).Operand;
@@ -320,8 +321,11 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
       }
 
       // handle case-Insensitive search
-      if (value is not null && body.Type == typeof(string) && (valueExpression.IsCaseInsensitive
-                            || mapper.Configuration.CaseInsensitiveFiltering)
+      // mapCaseInsensitive overrides the global mapper config per-map: true=force insensitive, false=force sensitive, null=use config
+      var isCaseInsensitive = valueExpression.IsCaseInsensitive
+                              || mapCaseInsensitive == true
+                              || (mapCaseInsensitive == null && mapper.Configuration.CaseInsensitiveFiltering);
+      if (value is not null && body.Type == typeof(string) && isCaseInsensitive
                             && op.Kind is not SyntaxKind.GreaterThan
                             && op.Kind is not SyntaxKind.LessThan
                             && op.Kind is not SyntaxKind.GreaterOrEqualThan
