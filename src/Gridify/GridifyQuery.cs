@@ -1,6 +1,6 @@
 namespace Gridify;
 
-public class GridifyQuery : IGridifyQuery
+public class GridifyQuery : IGridifyQuery, IGridifySelecting
 {
    public GridifyQuery()
    {
@@ -17,4 +17,5 @@ public class GridifyQuery : IGridifyQuery
    public int PageSize { get; set; }
    public string? OrderBy { get; set; }
    public string? Filter { get; set; }
+   public string? Select { get; set; }
 }

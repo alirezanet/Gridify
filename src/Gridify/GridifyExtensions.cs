@@ -256,31 +256,110 @@ public static partial class GridifyExtensions
          : new LinqSortingQueryBuilder<T>(mapper).ProcessOrdering(query, orderBy, startWithThenBy);
    }
 
-   public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, string props, IGridifyMapper<T>? mapper = null)
+   /// <summary>
+   /// Projects the queryable to a sequence of runtime-emitted types containing only the
+   /// fields named in <paramref name="select"/> (e.g. <c>"name,address.city,orders.amount"</c>).
+   /// Under EF Core this translates to a column-pruned SQL <c>SELECT</c>.
+   /// </summary>
+   /// <param name="query">The source queryable.</param>
+   /// <param name="select">
+   /// A comma-separated list of field paths. Dotted paths produce nested objects; one level
+   /// of collection projection is supported. If null or whitespace, this method is a no-op
+   /// cast (<c>IQueryable&lt;T&gt;</c> → <c>IQueryable&lt;object&gt;</c>) and no projection is applied.
+   /// </param>
+   /// <param name="mapper">
+   /// Optional mapper. If omitted, an auto-generated mapper is used.
+   /// </param>
+   /// <exception cref="GridifySelectException">
+   /// Thrown for invalid syntax, unmapped fields (unless <c>IgnoreNotMappedFields</c> is set),
+   /// two-level collection nesting, or under NativeAOT (where dynamic code is unsupported).
+   /// </exception>
+   public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, string? select, IGridifyMapper<T>? mapper = null)
    {
-      if (string.IsNullOrWhiteSpace(props))
-         return (IQueryable<object>)query;
+      if (string.IsNullOrWhiteSpace(select))
+         return query.Cast<object>();
 
-      mapper ??= new GridifyMapper<T>(true);
-
-      var exp = mapper.GetExpression(props);
-      var result = query.Select(exp);
-
-
-      return result;
+      mapper ??= new GridifyMapper<T>(autoGenerateMappings: true, maxNestingDepth: 1);
+      var lambda = Builder.SelectExpressionBuilder<T>.Build(select!, mapper);
+      return query.Select(lambda);
    }
 
    /// <summary>
-   /// Validates Filter and/or OrderBy with Mappings
+   /// Overload that reads the select string from <see cref="IGridifySelecting.Select"/>.
+   /// If <paramref name="selecting"/> is null or its <c>Select</c> string is null/whitespace,
+   /// this method is a no-op cast.
    /// </summary>
-   /// <param name="gridifyQuery">gridify query with (Filter or OrderBy) </param>
+   public static IQueryable<object> ApplySelect<T>(this IQueryable<T> query, IGridifySelecting? selecting, IGridifyMapper<T>? mapper = null)
+   {
+      if (selecting == null) return query.Cast<object>();
+      return query.ApplySelect(selecting.Select, mapper);
+   }
+
+   /// <summary>
+   /// Validates Filter, OrderBy, and (when the query implements <see cref="IGridifySelecting"/>)
+   /// the Select string against the configured mappings.
+   /// </summary>
+   /// <param name="gridifyQuery">gridify query with Filter, OrderBy, and optionally Select</param>
    /// <param name="mapper">the gridify mapper that you want to use with, this is optional</param>
    /// <typeparam name="T"></typeparam>
    /// <returns></returns>
    public static bool IsValid<T>(this IGridifyQuery gridifyQuery, IGridifyMapper<T>? mapper = null)
    {
-      return ((IGridifyFiltering)gridifyQuery).IsValid(mapper) &&
-             ((IGridifyOrdering)gridifyQuery).IsValid(mapper);
+      var ok = ((IGridifyFiltering)gridifyQuery).IsValid(mapper) &&
+               ((IGridifyOrdering)gridifyQuery).IsValid(mapper);
+      if (gridifyQuery is IGridifySelecting s)
+         ok = ok && s.IsValidSelect(mapper);
+      return ok;
+   }
+
+   /// <summary>
+   /// Validates a Select string against the mapper. Returns true if the Select string is
+   /// null/empty or every requested path is resolvable (and, by default, mapped).
+   /// </summary>
+   /// <remarks>
+   /// Named <c>IsValidSelect</c> rather than <c>IsValid</c> because <see cref="GridifyQuery"/>
+   /// implements both <see cref="IGridifyQuery"/> and <see cref="IGridifySelecting"/>; an
+   /// <c>IsValid</c> extension on each interface would make calls on a <c>GridifyQuery</c>
+   /// instance ambiguous.
+   /// </remarks>
+   public static bool IsValidSelect<T>(this IGridifySelecting selecting, IGridifyMapper<T>? mapper = null)
+   {
+      return selecting.IsValidSelect(out _, mapper);
+   }
+
+   /// <summary>
+   /// Validates a Select string against the mapper and reports per-path errors via
+   /// <paramref name="validationErrors"/>.
+   /// </summary>
+   /// <remarks>See remarks on the single-arg overload for why this is named <c>IsValidSelect</c>.</remarks>
+   public static bool IsValidSelect<T>(this IGridifySelecting selecting, out List<string> validationErrors, IGridifyMapper<T>? mapper = null)
+   {
+      validationErrors = new List<string>();
+      if (string.IsNullOrWhiteSpace(selecting.Select)) return true;
+
+      IReadOnlyList<string> paths;
+      try
+      {
+         paths = SelectTokenizer.Parse(selecting.Select);
+      }
+      catch (GridifySelectException ex)
+      {
+         validationErrors.Add(ex.Message);
+         return false;
+      }
+
+      mapper ??= new GridifyMapper<T>(autoGenerateMappings: true, maxNestingDepth: 1);
+
+      try
+      {
+         Builder.SelectExpressionBuilder<T>.ValidatePaths(paths, mapper, validationErrors);
+      }
+      catch (Exception ex)
+      {
+         validationErrors.Add($"Validation error: {ex.Message}");
+      }
+
+      return validationErrors.Count == 0;
    }
 
    public static bool IsValid<T>(this IGridifyFiltering filtering, IGridifyMapper<T>? mapper = null)
@@ -464,6 +543,34 @@ public static partial class GridifyExtensions
       queryOption.Invoke(gridifyQuery);
       var (count, queryable) = query.GridifyQueryable(gridifyQuery, mapper);
       return new Paging<T>(count, queryable.ToList());
+   }
+
+   /// <summary>
+   /// Applies filtering, ordering, paging, and field projection (Select) to the query.
+   /// Returns a <see cref="QueryablePaging{T}"/> of <see cref="object"/> where each item
+   /// is a runtime-emitted type with only the requested Select fields. If the query has
+   /// no Select string, items remain boxed instances of <typeparamref name="T"/>.
+   /// </summary>
+   public static QueryablePaging<object> GridifyQueryableSelect<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
+   {
+      query = query.ApplyFiltering(gridifyQuery, mapper);
+      var count = query.Count();
+      query = query.ApplyOrdering(gridifyQuery, mapper);
+      query = query.ApplyPaging(gridifyQuery);
+
+      var selecting = gridifyQuery as IGridifySelecting;
+      var projected = query.ApplySelect(selecting, mapper);
+      return new QueryablePaging<object>(count, projected);
+   }
+
+   /// <summary>
+   /// Applies filtering, ordering, paging, and field projection (Select), then materializes
+   /// the result. Returns a <see cref="Paging{T}"/> of <see cref="object"/>.
+   /// </summary>
+   public static Paging<object> GridifySelect<T>(this IQueryable<T> query, IGridifyQuery? gridifyQuery, IGridifyMapper<T>? mapper = null)
+   {
+      var (count, projected) = query.GridifyQueryableSelect(gridifyQuery, mapper);
+      return new Paging<object>(count, projected.ToList());
    }
 
    #endregion

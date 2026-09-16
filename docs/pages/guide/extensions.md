@@ -77,3 +77,41 @@ Like [ApplyFilteringOrderingPaging](#applyfilteringorderingpaging), but it retur
 
 This is an all-in-one method. It accepts `IGridifyQuery`, applies filtering, ordering, and paging, and returns a `Paging<T>` object.
 This method is optimized for use with any grid component.
+
+## ApplySelect
+
+Use this method to apply **field projection** to an `IQueryable` collection or `DbSet`. Each item in the result contains only the requested fields.
+
+``` csharp
+var query = personsRepo.ApplySelect("name,age,address.city");
+```
+
+This is roughly equivalent to the following LINQ query:
+
+``` csharp
+var query = personsRepo.Select(p => new { p.Name, p.Age, Address = new { p.Address.City } });
+```
+
+Each item is a runtime-emitted type with the requested properties. Under EF Core this translates to a column-pruned `SELECT` that reads only the requested columns. If the select string is null or empty, the method is a no-op cast (`IQueryable<T>` → `IQueryable<object>`).
+
+There is also an overload that accepts `IGridifySelecting` (which `GridifyQuery` implements):
+
+``` csharp
+var gq = new GridifyQuery { Select = "name,age" };
+var query = personsRepo.ApplySelect(gq);
+```
+
+Check out the [Selecting](./gridifyQuery.md#selecting) section for more information.
+
+## GridifySelect
+
+Like [Gridify](#gridify) but applies the `Select` projection at the end. Returns `Paging<object>` whose data items contain only the requested fields. If `Select` is null or empty, items are boxed instances of the source type.
+
+``` csharp
+var gq = new GridifyQuery { Filter = "age>18", OrderBy = "name", Select = "name,age" };
+Paging<object> result = personsRepo.GridifySelect(gq);
+```
+
+## GridifyQueryableSelect
+
+Like [GridifyQueryable](#gridifyqueryable) but with projection applied. Returns `QueryablePaging<object>`.
