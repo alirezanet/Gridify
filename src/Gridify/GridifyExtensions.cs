@@ -302,7 +302,11 @@ public static partial class GridifyExtensions
       var filteringIsValid = ((IGridifyFiltering)gridifyQuery).IsValid(out validationErrors, mapper);
       var orderingIsValid = ((IGridifyOrdering)gridifyQuery).IsValid(out var orderingErrors, mapper);
 
-      validationErrors.AddRange(orderingErrors);
+      // a field that is unmapped and used in both Filter and OrderBy is one problem,
+      // so it is reported once
+      foreach (var orderingError in orderingErrors)
+         if (!validationErrors.Contains(orderingError))
+            validationErrors.Add(orderingError);
 
       return filteringIsValid && orderingIsValid;
    }
@@ -345,8 +349,15 @@ public static partial class GridifyExtensions
          // ParseOrderings is a lazy iterator that throws on a malformed ordering, so the
          // enumeration itself has to stay inside the try
          foreach (var order in SyntaxTree.ParseOrderings(ordering.OrderBy!))
-            if (!mapper.HasMap(order.MemberName))
-               validationErrors.Add($"Field '{order.MemberName}' is not mapped");
+         {
+            if (mapper.HasMap(order.MemberName))
+               continue;
+
+            // the same field can be ordered on more than once, it is still one problem
+            var error = $"Field '{order.MemberName}' is not mapped";
+            if (!validationErrors.Contains(error))
+               validationErrors.Add(error);
+         }
       }
       catch (Exception ex)
       {

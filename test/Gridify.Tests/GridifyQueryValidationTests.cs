@@ -624,6 +624,40 @@ public class GridifyQueryValidationTests
       Assert.Contains("Field 'AnotherMissing' is not mapped", errors);
    }
 
+   // One unmapped field is one problem, however many places it is used.
+   [Fact]
+   public void IsValid_WithErrors_WhenAFieldIsUnmappedInBothFilterAndOrderBy_ReportsItOnce()
+   {
+      var query = new GridifyQuery { Filter = "NonExistentField=1", OrderBy = "NonExistentField" };
+
+      Assert.False(query.IsValid<TestEntity>(out var errors));
+      Assert.Equal("Field 'NonExistentField' is not mapped", Assert.Single(errors));
+   }
+
+   [Theory]
+   [InlineData("NonExistentField, NonExistentField")]
+   [InlineData("NonExistentField, NonExistentField desc")]
+   [InlineData("NonExistentField desc, NonExistentField")]
+   public void IsValid_WithErrors_OnOrdering_WithTheSameUnmappedFieldTwice_ReportsItOnce(string orderBy)
+   {
+      var ordering = new GridifyQuery { OrderBy = orderBy };
+
+      Assert.False(((IGridifyOrdering)ordering).IsValid<TestEntity>(out var errors));
+      Assert.Equal("Field 'NonExistentField' is not mapped", Assert.Single(errors));
+   }
+
+   // ... but distinct fields are still reported separately.
+   [Fact]
+   public void IsValid_WithErrors_WithDifferentUnmappedFields_ReportsEachOne()
+   {
+      var query = new GridifyQuery { Filter = "MissingA=1", OrderBy = "MissingB" };
+
+      Assert.False(query.IsValid<TestEntity>(out var errors));
+      Assert.Equal(2, errors.Count);
+      Assert.Contains("Field 'MissingA' is not mapped", errors);
+      Assert.Contains("Field 'MissingB' is not mapped", errors);
+   }
+
    [Fact]
    public void IsValid_WithErrors_OnGridifyQuery_WithBothValid_ReturnsTrue()
    {
