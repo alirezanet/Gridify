@@ -67,6 +67,41 @@ var gq = new GridifyQuery { Filter = "name=John", OrderBy = "Age" };
 bool isValid = gq.IsValid(mapper);
 ```
 
+### Maps with a custom convertor
+
+When a map has a convertor, `IsValid` runs it before checking the value type, the same way the
+query builder does. Validating the raw text instead would reject values that only the convertor
+understands:
+
+```csharp
+var mapper = new GridifyMapper<Person>()
+    .AddMap("createdOn", q => q.CreatedOn, value => ParseRelativeDate(value)); // understands "d-2"
+
+var gq = new GridifyQuery { Filter = "createdOn>d-2" };
+
+// true, because the convertor turns "d-2" into a DateTime
+bool isValid = gq.IsValid(mapper);
+```
+
+The convertor's result is then judged the way the query builder uses it:
+
+| convertor result | validation |
+| --- | --- |
+| throws | invalid, the message includes the convertor's own error |
+| a `string` | checked against the mapped property type, as usual |
+| any other type | must be usable as the mapped property type |
+| `null` | valid when the mapped property can hold null |
+
+Two things to keep in mind:
+
+* **`IsValid` invokes the convertor.** If yours is expensive or has side effects, it now runs
+  during validation as well as during filtering.
+* "Usable as the mapped property type" is decided by asking the query builder's own value
+  machinery, so it follows whichever path is in effect. Plain LINQ needs the exact type;
+  with the **Entity Framework compatibility layer** the value is assigned through reflection,
+  which widens some types (`int` into a `long` property, for instance) and accepts `null` for
+  a non-nullable property by storing its default.
+
 ### Getting validation error messages
 
 If you need detailed feedback (for example, to return validation errors to a client), use the overload with `out List<string> validationErrors`:

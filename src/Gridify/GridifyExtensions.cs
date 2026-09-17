@@ -1,4 +1,5 @@
 using Gridify.Builder;
+using Gridify.Reflection;
 using Gridify.Syntax;
 using System;
 using System.Collections.Generic;
@@ -544,8 +545,39 @@ public static partial class GridifyExtensions
                    operatorKind is SyntaxKind.Equal or SyntaxKind.NotEqual)
                   continue;
 
+               // Run the map's custom convertor first, the query builder does the same
+               // before it converts the type, github issue #337
+               var valueToConvert = valueText;
+               if (gMap.Convertor != null)
+               {
+                  object? converted;
+                  try
+                  {
+                     converted = gMap.Convertor.Invoke(valueText);
+                  }
+                  catch (Exception ex)
+                  {
+                     validationErrors.Add($"Cannot convert value '{valueText}' to type '{propertyType.Name}' for field '{fieldName}': {ex.Message}");
+                     continue;
+                  }
+
+                  // The query builder converts a string result, and uses anything else as the
+                  // value of the condition, see BaseQueryBuilder.BuildQuery
+                  if (converted is string convertedText)
+                  {
+                     valueToConvert = convertedText;
+                  }
+                  else
+                  {
+                     if (!CanBeUsedAsValue(gMap, converted, mapper.Configuration.EntityFrameworkCompatibilityLayer, out var valueError))
+                        validationErrors.Add($"Cannot convert value '{valueText}' for field '{fieldName}': {valueError}");
+
+                     continue;
+                  }
+               }
+
                // Attempt to convert the value to the target type
-               if (!TryConvertValue(valueText, propertyType, out var errorMessage))
+               if (!TryConvertValue(valueToConvert, propertyType, out var errorMessage))
                {
                   validationErrors.Add($"Cannot convert value '{valueText}' to type '{propertyType.Name}' for field '{fieldName}': {errorMessage}");
                }
@@ -560,6 +592,74 @@ public static partial class GridifyExtensions
          return false;
       }
    }
+
+   /// <summary>
+   /// Whether the query builder can use <paramref name="value"/> as the value of a condition on
+   /// the mapped property. A composite map is ORed over every one of its expressions, so the
+   /// value has to work for all of them. github issue #337
+   /// </summary>
+   private static bool CanBeUsedAsValue<T>(
+      IGMap<T> gMap,
+      object? value,
+      bool entityFrameworkCompatibilityLayer,
+      out string errorMessage)
+   {
+      errorMessage = string.Empty;
+
+      if (gMap is not CompositeGMap<T> composite)
+         return CanBeUsedAsValue(gMap.To, value, entityFrameworkCompatibilityLayer, out errorMessage);
+
+      foreach (var expression in composite.Expressions)
+         if (!CanBeUsedAsValue(expression, value, entityFrameworkCompatibilityLayer, out errorMessage))
+            return false;
+
+      return true;
+   }
+
+   /// <summary>
+   /// Asks the query builder's own value machinery whether the value is usable, rather than
+   /// reproducing its rules. It has two paths and they accept different things: a constant of
+   /// the property type for plain LINQ, which needs an exact type and rejects null for a
+   /// non-nullable property, and a generated parameter object for the Entity Framework
+   /// compatibility layer, which is assigned through reflection and so widens some types.
+   /// See <c>LinqQueryBuilder.GetValueExpression</c>. github issue #337
+   /// </summary>
+   private static bool CanBeUsedAsValue(
+      LambdaExpression to,
+      object? value,
+      bool entityFrameworkCompatibilityLayer,
+      out string errorMessage)
+   {
+      errorMessage = string.Empty;
+
+      var body = to.Body;
+
+      // Remove the boxing for value types, the same way the query builder does
+      if (body is UnaryExpression { NodeType: ExpressionType.Convert } unary)
+         body = unary.Operand;
+
+      try
+      {
+         if (entityFrameworkCompatibilityLayer)
+            // this also warms the type cache that the query builder is about to use
+            GridifyTypeBuilder.CreateNewObject(body.Type, EntityFrameworkValueFieldName, value);
+         else
+            Expression.Constant(value, body.Type);
+
+         return true;
+      }
+      catch (Exception ex)
+      {
+         errorMessage = ex.Message;
+         return false;
+      }
+   }
+
+   /// <summary>
+   /// The field name <c>LinqQueryBuilder.GetValueExpression</c> gives the parameter object it
+   /// generates for the Entity Framework compatibility layer.
+   /// </summary>
+   private const string EntityFrameworkValueFieldName = "Value";
 
    /// <summary>
    /// Extracts the actual property type from an expression tree.
