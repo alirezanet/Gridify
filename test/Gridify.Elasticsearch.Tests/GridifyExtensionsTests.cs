@@ -806,6 +806,26 @@ public class GridifyExtensionsTests
       AssertDescriptor(descriptor, expected);
    }
 
+   // issue #332, https://github.com/alirezanet/Gridify/issues/332
+   // The text operators work on a non-string field here by matching the field's text. The LINQ
+   // builder used to throw for the contains operator while this one did not; it now behaves the
+   // same way, so these pin the agreement between the two.
+   [Theory]
+   // contains
+   [InlineData("MyInt=*5", """{"wildcard":{"MyInt":{"value":"*5*"}}}""")]
+   // does not contain
+   [InlineData("MyInt!*5", """{"bool":{"must_not":{"wildcard":{"MyInt":{"value":"*5*"}}}}}""")]
+   // starts with
+   [InlineData("MyInt^3", """{"wildcard":{"MyInt":{"value":"3*"}}}""")]
+   // ends with
+   [InlineData("MyInt$5", """{"wildcard":{"MyInt":{"value":"*5"}}}""")]
+   // and on a bool field
+   [InlineData("IsActive=*true", """{"wildcard":{"IsActive":{"value":"*true*"}}}""")]
+   public void ApplyFiltering_WhenTextOperatorIsUsedOnNonStringField_ShouldMatchItsText(string filter, string expected)
+   {
+      AssertFilter(filter, expected);
+   }
+
    private void AssertFilter(string filter, string expected, IGridifyMapper<TestClass>? mapper = null)
    {
       var gridifyQuery = new GridifyQuery { Filter = filter };

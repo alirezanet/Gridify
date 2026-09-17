@@ -133,10 +133,45 @@ var isValid = gq.IsValid(out var errors, mapper);
 // - "Cannot convert value 'abc' to type 'Int32' for field 'Age': Invalid format"
 ```
 
+`OrderBy` is validated too, and its errors come back in the same list:
+
+```csharp
+var mapper = new GridifyMapper<Person>()
+    .AddMap("Name", q => q.Name)
+    .AddMap("Age", q => q.Age);
+
+var gq = new GridifyQuery(1, 100, "Name=Ivan", "ageee");
+
+var isValid = gq.IsValid(out var errors, mapper);
+
+// isValid == false
+// errors == ["Field 'ageee' is not mapped"]
+```
+
+There are overloads for each part on its own, should you only have one of them:
+
+```csharp
+// filtering only
+((IGridifyFiltering)gq).IsValid(out var filterErrors, mapper);
+
+// ordering only
+((IGridifyOrdering)gq).IsValid(out var orderErrors, mapper);
+```
+
+The validation also catches a few things that only fail once the query is built:
+
+```csharp
+// '?' and '!' order by the member's null state, so the member has to be nullable
+new GridifyQuery { OrderBy = "Age?" }.IsValid<Person>(out var errors);
+// false, ["Field 'Age' is not a nullable type, so it cannot be ordered by its null state"]
+```
+
 Notes:
 
-* Empty or null `Filter` values are considered valid and return `true`.
+* Empty or null `Filter` and `OrderBy` values are considered valid and return `true`.
 * The “old” overloads (`IsValid<T>()` and `IsValid(mapper)`) remain and now also benefit from the improved value-type validation; they just don’t expose the error details.
+* Whether the `null` keyword is accepted follows the **mapper's** `AllowNullSearch`, which is what the query builder uses, rather than the global configuration.
+* Calling the error collecting overload on a `GridifyQuery`, or on anything typed as `IGridifyQuery`, validates **both** `Filter` and `OrderBy` and reports every error from both, rather than stopping at the first part that fails.
 
 ## GetFilteringExpression
 

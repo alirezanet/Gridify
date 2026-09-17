@@ -284,6 +284,33 @@ public static partial class GridifyExtensions
              ((IGridifyOrdering)gridifyQuery).IsValid(mapper);
    }
 
+   /// <summary>
+   /// Validates Filter and OrderBy with Mappings, and reports why they are invalid.
+   /// </summary>
+   /// <param name="gridifyQuery">gridify query with (Filter or OrderBy)</param>
+   /// <param name="validationErrors">List of validation error messages if validation fails</param>
+   /// <param name="mapper">the gridify mapper that you want to use with, this is optional</param>
+   /// <typeparam name="T">type of target entity</typeparam>
+   /// <returns>True if the query is valid; otherwise, false.</returns>
+   public static bool IsValid<T>(
+      this IGridifyQuery gridifyQuery,
+      out List<string> validationErrors,
+      IGridifyMapper<T>? mapper = null)
+   {
+      // Both parts are validated even when the first one already failed, so that the
+      // caller gets every error rather than only the ones from Filter. github issue #332
+      var filteringIsValid = ((IGridifyFiltering)gridifyQuery).IsValid(out validationErrors, mapper);
+      var orderingIsValid = ((IGridifyOrdering)gridifyQuery).IsValid(out var orderingErrors, mapper);
+
+      // a field that is unmapped and used in both Filter and OrderBy is one problem,
+      // so it is reported once
+      foreach (var orderingError in orderingErrors)
+         if (!validationErrors.Contains(orderingError))
+            validationErrors.Add(orderingError);
+
+      return filteringIsValid && orderingIsValid;
+   }
+
    public static bool IsValid<T>(this IGridifyFiltering filtering, IGridifyMapper<T>? mapper = null)
    {
       // Call the new overload with detailed validation and discard the error messages
@@ -292,20 +319,81 @@ public static partial class GridifyExtensions
 
    public static bool IsValid<T>(this IGridifyOrdering ordering, IGridifyMapper<T>? mapper = null)
    {
-      if (string.IsNullOrWhiteSpace(ordering.OrderBy)) return true;
+      // Call the new overload with detailed validation and discard the error messages
+      return ordering.IsValid(out _, mapper);
+   }
+
+   /// <summary>
+   /// Validates OrderBy with Mappings, and reports why it is invalid.
+   /// </summary>
+   /// <param name="ordering">the ordering query to validate</param>
+   /// <param name="validationErrors">List of validation error messages if validation fails</param>
+   /// <param name="mapper">the gridify mapper that you want to use with, this is optional</param>
+   /// <typeparam name="T">type of target entity</typeparam>
+   /// <returns>True if the ordering is valid; otherwise, false.</returns>
+   public static bool IsValid<T>(
+      this IGridifyOrdering ordering,
+      out List<string> validationErrors,
+      IGridifyMapper<T>? mapper = null)
+   {
+      validationErrors = new List<string>();
+
+      // Empty or null orderings are always valid
+      if (string.IsNullOrWhiteSpace(ordering.OrderBy))
+         return true;
+
       try
       {
-         var orders = SyntaxTree.ParseOrderings(ordering.OrderBy!);
          mapper ??= new GridifyMapper<T>(true);
-         if (orders.Any(order => !mapper.HasMap(order.MemberName)))
-            return false;
+
+         // ParseOrderings is a lazy iterator that throws on a malformed ordering, so the
+         // enumeration itself has to stay inside the try
+         foreach (var order in SyntaxTree.ParseOrderings(ordering.OrderBy!))
+         {
+            var gMap = mapper.GetGMap(order.MemberName);
+
+            if (gMap == null)
+            {
+               // the same field can be ordered on more than once, it is still one problem
+               AddOnce(validationErrors, $"Field '{order.MemberName}' is not mapped");
+               continue;
+            }
+
+            if (order.OrderingType is OrderingType.NullCheck or OrderingType.NotNullCheck &&
+                !CanBeOrderedByNullState(gMap.To))
+               AddOnce(validationErrors, $"Field '{order.MemberName}' is not a nullable type, so it cannot be ordered by its null state");
+         }
       }
-      catch (Exception)
+      catch (Exception ex)
       {
+         validationErrors.Add($"Ordering validation error: {ex.Message}");
          return false;
       }
 
-      return true;
+      return validationErrors.Count == 0;
+   }
+
+   /// <summary>
+   /// Whether the '?' and '!' ordering suffixes can be used on this member. They order by the
+   /// member's <c>HasValue</c>, which the query builder can only build for a <c>Nullable</c>
+   /// member, so a reference type does not qualify either. Mirrors the check in
+   /// <c>LinqSortingQueryBuilder.GetOrderExpression</c>. github issue #332
+   /// </summary>
+   /// <param name="to">The map's target expression</param>
+   /// <returns>True if the member can be ordered by its null state; otherwise false</returns>
+   private static bool CanBeOrderedByNullState(LambdaExpression to)
+   {
+      return to.Body is UnaryExpression unary && Nullable.GetUnderlyingType(unary.Operand.Type) != null;
+   }
+
+   /// <summary>
+   /// Adds a validation error unless it has already been reported. One unmapped or unusable
+   /// field is one problem, however many times a query mentions it.
+   /// </summary>
+   private static void AddOnce(List<string> validationErrors, string error)
+   {
+      if (!validationErrors.Contains(error))
+         validationErrors.Add(error);
    }
 
    internal static string ReplaceAll(this string seed, IEnumerable<char> chars, char replacementCharacter)
@@ -539,8 +627,10 @@ public static partial class GridifyExtensions
 
                var valueText = valueExp.ValueToken.Text;
 
-               // Allow "null" keyword for null searches if configured
-               if (GridifyGlobalConfiguration.AllowNullSearch &&
+               // Allow "null" keyword for null searches if configured. This reads the mapper's
+               // configuration because that is what BaseQueryBuilder.BuildQuery reads, and a
+               // mapper can be built with a value that differs from the global one
+               if (mapper.Configuration.AllowNullSearch &&
                    valueText == "null" &&
                    operatorKind is SyntaxKind.Equal or SyntaxKind.NotEqual)
                   continue;

@@ -567,6 +567,287 @@ public class GridifyQueryValidationTests
 
    #endregion
 
+   #region Tests for issue #332 - IsValid(out errors) on IGridifyOrdering and IGridifyQuery
+
+   private static IGridifyMapper<TestEntity> OrderingMapper() =>
+      new GridifyMapper<TestEntity>()
+         .AddMap("Name", x => x.StringProperty)
+         .AddMap("Age", x => x.IntProperty);
+
+   // Reproduces issue #332: on the same object, the error collecting overload used to bind to
+   // the IGridifyFiltering extension and validate only Filter, so it returned true where the
+   // boolean overload returned false.
+   [Fact]
+   public void IsValid_WithErrors_OnGridifyQuery_ValidatesOrderByToo()
+   {
+      var mapper = OrderingMapper();
+      var query = new GridifyQuery(1, 100, "Name=Ivan", "ageee");
+
+      Assert.False(query.IsValid(mapper));
+      Assert.False(query.IsValid(out var errors, mapper));
+      Assert.Contains("Field 'ageee' is not mapped", errors);
+   }
+
+   // The two overloads must never disagree about the verdict, whatever combination of a
+   // good or bad Filter and OrderBy they are given.
+   [Theory]
+   [InlineData("Name=Ivan", "Age", true)]
+   [InlineData("Name=Ivan", "ageee", false)]
+   [InlineData("nope=Ivan", "Age", false)]
+   [InlineData("nope=Ivan", "ageee", false)]
+   [InlineData("Age=abc", "Age", false)]
+   [InlineData(null, "Age", true)]
+   [InlineData("Name=Ivan", null, true)]
+   [InlineData(null, null, true)]
+   [InlineData("Name=Ivan", "Age desc", true)]
+   [InlineData("Name=Ivan", "Age bogus", false)]
+   public void IsValid_WithErrors_OnGridifyQuery_AgreesWithTheBooleanOverload(
+      string? filter, string? orderBy, bool expected)
+   {
+      var mapper = OrderingMapper();
+      var query = new GridifyQuery { Filter = filter, OrderBy = orderBy };
+
+      Assert.Equal(expected, query.IsValid(mapper));
+      Assert.Equal(expected, query.IsValid(out var errors, mapper));
+      Assert.Equal(expected, errors.Count == 0);
+   }
+
+   // Errors from both parts are reported, not just the ones from whichever fails first.
+   [Fact]
+   public void IsValid_WithErrors_OnGridifyQuery_CollectsFilterAndOrderingErrors()
+   {
+      var query = new GridifyQuery { Filter = "NonExistentField=1", OrderBy = "AnotherMissing" };
+
+      Assert.False(query.IsValid<TestEntity>(out var errors));
+      Assert.Equal(2, errors.Count);
+      Assert.Contains("Field 'NonExistentField' is not mapped", errors);
+      Assert.Contains("Field 'AnotherMissing' is not mapped", errors);
+   }
+
+   // One unmapped field is one problem, however many places it is used.
+   [Fact]
+   public void IsValid_WithErrors_WhenAFieldIsUnmappedInBothFilterAndOrderBy_ReportsItOnce()
+   {
+      var query = new GridifyQuery { Filter = "NonExistentField=1", OrderBy = "NonExistentField" };
+
+      Assert.False(query.IsValid<TestEntity>(out var errors));
+      Assert.Equal("Field 'NonExistentField' is not mapped", Assert.Single(errors));
+   }
+
+   [Theory]
+   [InlineData("NonExistentField, NonExistentField")]
+   [InlineData("NonExistentField, NonExistentField desc")]
+   [InlineData("NonExistentField desc, NonExistentField")]
+   public void IsValid_WithErrors_OnOrdering_WithTheSameUnmappedFieldTwice_ReportsItOnce(string orderBy)
+   {
+      var ordering = new GridifyQuery { OrderBy = orderBy };
+
+      Assert.False(((IGridifyOrdering)ordering).IsValid<TestEntity>(out var errors));
+      Assert.Equal("Field 'NonExistentField' is not mapped", Assert.Single(errors));
+   }
+
+   // ... but distinct fields are still reported separately.
+   [Fact]
+   public void IsValid_WithErrors_WithDifferentUnmappedFields_ReportsEachOne()
+   {
+      var query = new GridifyQuery { Filter = "MissingA=1", OrderBy = "MissingB" };
+
+      Assert.False(query.IsValid<TestEntity>(out var errors));
+      Assert.Equal(2, errors.Count);
+      Assert.Contains("Field 'MissingA' is not mapped", errors);
+      Assert.Contains("Field 'MissingB' is not mapped", errors);
+   }
+
+   [Fact]
+   public void IsValid_WithErrors_OnGridifyQuery_WithBothValid_ReturnsTrue()
+   {
+      var query = new GridifyQuery { Filter = "IntProperty=5", OrderBy = "IntProperty" };
+
+      Assert.True(query.IsValid<TestEntity>(out var errors));
+      Assert.Empty(errors);
+   }
+
+   [Theory]
+   [InlineData("IntProperty", true)]
+   [InlineData("IntProperty desc", true)]
+   [InlineData("IntProperty, StringProperty", true)]
+   [InlineData("NullableIntProperty?, NullableDateProperty!", true)]
+   [InlineData("IntProperty?", false)]
+   [InlineData("", true)]
+   [InlineData("   ", true)]
+   [InlineData(null, true)]
+   [InlineData("NonExistentField", false)]
+   [InlineData("IntProperty, NonExistentField", false)]
+   public void IsValid_WithErrors_OnOrdering_MatchesTheBooleanOverload(string? orderBy, bool expected)
+   {
+      var ordering = new GridifyQuery { OrderBy = orderBy };
+
+      Assert.Equal(expected, ((IGridifyOrdering)ordering).IsValid<TestEntity>());
+      Assert.Equal(expected, ((IGridifyOrdering)ordering).IsValid<TestEntity>(out var errors));
+      Assert.Equal(expected, errors.Count == 0);
+   }
+
+   [Fact]
+   public void IsValid_WithErrors_OnOrdering_WithUnmappedField_NamesTheField()
+   {
+      var ordering = new GridifyQuery { OrderBy = "NonExistentField" };
+
+      Assert.False(((IGridifyOrdering)ordering).IsValid<TestEntity>(out var errors));
+      Assert.Equal("Field 'NonExistentField' is not mapped", Assert.Single(errors));
+   }
+
+   // ParseOrderings is a lazy iterator that throws GridifyOrderingException part way through
+   // the enumeration, so the message has to be captured rather than the exception escaping.
+   [Fact]
+   public void IsValid_WithErrors_OnOrdering_WithMalformedOrdering_ReportsTheReason()
+   {
+      var ordering = new GridifyQuery { OrderBy = "IntProperty bogus" };
+
+      Assert.False(((IGridifyOrdering)ordering).IsValid<TestEntity>(out var errors));
+      Assert.StartsWith("Ordering validation error:", Assert.Single(errors));
+      Assert.Contains("expected 'desc' or 'asc'", errors[0]);
+   }
+
+   // A malformed ordering after a valid one still reports the failure, and keeps the errors
+   // already collected from the fields before it.
+   [Fact]
+   public void IsValid_WithErrors_OnOrdering_WithErrorsBeforeAMalformedOrdering_KeepsBoth()
+   {
+      var ordering = new GridifyQuery { OrderBy = "NonExistentField, IntProperty bogus" };
+
+      Assert.False(((IGridifyOrdering)ordering).IsValid<TestEntity>(out var errors));
+      Assert.Equal(2, errors.Count);
+      Assert.Contains("Field 'NonExistentField' is not mapped", errors);
+      Assert.StartsWith("Ordering validation error:", errors[1]);
+   }
+
+   [Fact]
+   public void IsValid_WithErrors_OnOrdering_WithoutAMapper_UsesTheAutoGeneratedOne()
+   {
+      var mapped = new GridifyQuery { OrderBy = "IntProperty" };
+      var unmapped = new GridifyQuery { OrderBy = "NotAProperty" };
+
+      Assert.True(((IGridifyOrdering)mapped).IsValid<TestEntity>(out var noErrors));
+      Assert.Empty(noErrors);
+
+      Assert.False(((IGridifyOrdering)unmapped).IsValid<TestEntity>(out var errors));
+      Assert.NotEmpty(errors);
+   }
+
+   // The '?' and '!' suffixes order by the member's HasValue, which the query builder can
+   // only do for a Nullable<> member. A non-nullable value type, and a reference type, both
+   // throw at execution, so validation has to reject them.
+   [Theory]
+   [InlineData("NullableIntProperty?", true)]
+   [InlineData("NullableIntProperty!", true)]
+   [InlineData("NullableDateProperty?", true)]
+   [InlineData("IntProperty?", false)]
+   [InlineData("IntProperty!", false)]
+   [InlineData("StringProperty?", false)]
+   [InlineData("NullableIntProperty?, IntProperty desc", true)]
+   [InlineData("IntProperty?, NullableIntProperty", false)]
+   // without a suffix the member's nullability does not matter
+   [InlineData("IntProperty", true)]
+   [InlineData("StringProperty desc", true)]
+   public void IsValid_OnOrdering_ChecksTheNullStateSuffixAgainstTheMember(string orderBy, bool expected)
+   {
+      var ordering = new GridifyQuery { OrderBy = orderBy };
+
+      Assert.Equal(expected, ((IGridifyOrdering)ordering).IsValid<TestEntity>(out var errors));
+      Assert.Equal(expected, errors.Count == 0);
+
+      // and the verdict has to match whether the ordering can actually be applied
+      var applies = true;
+      try { Source.ApplyOrdering(ordering, new GridifyMapper<TestEntity>(true)).ToList(); }
+      catch (Exception) { applies = false; }
+
+      Assert.Equal(applies, ((IGridifyOrdering)ordering).IsValid<TestEntity>());
+   }
+
+   [Fact]
+   public void IsValid_OnOrdering_WithNullStateSuffixOnNonNullable_ExplainsWhy()
+   {
+      var ordering = new GridifyQuery { OrderBy = "IntProperty?" };
+
+      Assert.False(((IGridifyOrdering)ordering).IsValid<TestEntity>(out var errors));
+      Assert.Equal(
+         "Field 'IntProperty' is not a nullable type, so it cannot be ordered by its null state",
+         Assert.Single(errors));
+   }
+
+   // Like and NotLike fall back to ToString for a non-string member, the same way StartsWith
+   // and EndsWith already did, so validation must not reject them.
+   [Theory]
+   [InlineData("StringProperty=*ab")]
+   [InlineData("StringProperty!*ab")]
+   [InlineData("IntProperty=*5")]
+   [InlineData("IntProperty!*5")]
+   [InlineData("NullableIntProperty=*5")]
+   [InlineData("IntProperty^5")]
+   [InlineData("IntProperty$5")]
+   [InlineData("IntProperty=5")]
+   public void IsValid_AllowsTheContainsOperatorOnANonStringField(string filter)
+   {
+      var query = new GridifyQuery { Filter = filter };
+
+      Assert.True(query.IsValid<TestEntity>(out var errors));
+      Assert.Empty(errors);
+
+      // and the query it just approved can actually be built and run
+      Source.ApplyFiltering(query, new GridifyMapper<TestEntity>(true)).ToList();
+   }
+
+   // The builder side of the same behaviour: the contains operator on a non-string member
+   // compares the member's text, which is what StartsWith and EndsWith already did.
+   [Fact]
+   public void ApplyFiltering_WithContainsOperatorOnANonStringField_ComparesItsText()
+   {
+      var source = new List<TestEntity>
+      {
+         new() { IntProperty = 315 },
+         new() { IntProperty = 25 }
+      }.AsQueryable();
+
+      Assert.Equal(315, Assert.Single(source.ApplyFiltering("IntProperty=*31")).IntProperty);
+      Assert.Equal(2, source.ApplyFiltering("IntProperty=*5").Count());
+      Assert.Equal(25, Assert.Single(source.ApplyFiltering("IntProperty!*31")).IntProperty);
+   }
+
+   // A nullable member with no value has an empty text, so it simply does not match.
+   [Fact]
+   public void ApplyFiltering_WithContainsOperatorOnANullableField_DoesNotThrow()
+   {
+      var source = new List<TestEntity>
+      {
+         new() { NullableIntProperty = 15 },
+         new() { NullableIntProperty = null }
+      }.AsQueryable();
+
+      Assert.Equal(15, Assert.Single(source.ApplyFiltering("NullableIntProperty=*1")).NullableIntProperty);
+   }
+
+   // AllowNullSearch is read from the mapper, because that is what the query builder reads.
+   // A mapper built with it turned off makes the "null" keyword invalid even though the
+   // global configuration still allows it.
+   [Fact]
+   public void IsValid_ReadsAllowNullSearchFromTheMapper()
+   {
+      var allowed = new GridifyMapper<TestEntity>(c => c.AllowNullSearch = true)
+         .AddMap("rank", q => q.NullableIntProperty);
+      var denied = new GridifyMapper<TestEntity>(c => c.AllowNullSearch = false)
+         .AddMap("rank", q => q.NullableIntProperty);
+
+      var query = new GridifyQuery { Filter = "rank=null" };
+
+      Assert.True(query.IsValid(out var noErrors, allowed));
+      Assert.Empty(noErrors);
+
+      Assert.False(query.IsValid(out var errors, denied));
+      Assert.NotEmpty(errors);
+   }
+
+   #endregion
+
    #region Tests for backward compatible IsValid() method
 
    [Fact]
