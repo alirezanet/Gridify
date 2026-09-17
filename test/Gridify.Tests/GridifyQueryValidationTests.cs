@@ -671,7 +671,8 @@ public class GridifyQueryValidationTests
    [InlineData("IntProperty", true)]
    [InlineData("IntProperty desc", true)]
    [InlineData("IntProperty, StringProperty", true)]
-   [InlineData("IntProperty?, StringProperty!", true)]
+   [InlineData("NullableIntProperty?, NullableDateProperty!", true)]
+   [InlineData("IntProperty?", false)]
    [InlineData("", true)]
    [InlineData("   ", true)]
    [InlineData(null, true)]
@@ -730,6 +731,98 @@ public class GridifyQueryValidationTests
       Assert.Empty(noErrors);
 
       Assert.False(((IGridifyOrdering)unmapped).IsValid<TestEntity>(out var errors));
+      Assert.NotEmpty(errors);
+   }
+
+   // The '?' and '!' suffixes order by the member's HasValue, which the query builder can
+   // only do for a Nullable<> member. A non-nullable value type, and a reference type, both
+   // throw at execution, so validation has to reject them.
+   [Theory]
+   [InlineData("NullableIntProperty?", true)]
+   [InlineData("NullableIntProperty!", true)]
+   [InlineData("NullableDateProperty?", true)]
+   [InlineData("IntProperty?", false)]
+   [InlineData("IntProperty!", false)]
+   [InlineData("StringProperty?", false)]
+   [InlineData("NullableIntProperty?, IntProperty desc", true)]
+   [InlineData("IntProperty?, NullableIntProperty", false)]
+   // without a suffix the member's nullability does not matter
+   [InlineData("IntProperty", true)]
+   [InlineData("StringProperty desc", true)]
+   public void IsValid_OnOrdering_ChecksTheNullStateSuffixAgainstTheMember(string orderBy, bool expected)
+   {
+      var ordering = new GridifyQuery { OrderBy = orderBy };
+
+      Assert.Equal(expected, ((IGridifyOrdering)ordering).IsValid<TestEntity>(out var errors));
+      Assert.Equal(expected, errors.Count == 0);
+
+      // and the verdict has to match whether the ordering can actually be applied
+      var applies = true;
+      try { Source.ApplyOrdering(ordering, new GridifyMapper<TestEntity>(true)).ToList(); }
+      catch (Exception) { applies = false; }
+
+      Assert.Equal(applies, ((IGridifyOrdering)ordering).IsValid<TestEntity>());
+   }
+
+   [Fact]
+   public void IsValid_OnOrdering_WithNullStateSuffixOnNonNullable_ExplainsWhy()
+   {
+      var ordering = new GridifyQuery { OrderBy = "IntProperty?" };
+
+      Assert.False(((IGridifyOrdering)ordering).IsValid<TestEntity>(out var errors));
+      Assert.Equal(
+         "Field 'IntProperty' is not a nullable type, so it cannot be ordered by its null state",
+         Assert.Single(errors));
+   }
+
+   // Like and NotLike call string.Contains on the member, so a non-string member throws.
+   // StartsWith and EndsWith fall back to ToString, so they stay valid.
+   [Theory]
+   [InlineData("StringProperty=*ab", true)]
+   [InlineData("StringProperty!*ab", true)]
+   [InlineData("IntProperty=*5", false)]
+   [InlineData("IntProperty!*5", false)]
+   [InlineData("NullableIntProperty=*5", false)]
+   [InlineData("DateProperty=*2024", false)]
+   [InlineData("IntProperty^5", true)]
+   [InlineData("IntProperty$5", true)]
+   [InlineData("IntProperty=5", true)]
+   public void IsValid_ChecksTheContainsOperatorAgainstTheFieldType(string filter, bool expected)
+   {
+      var query = new GridifyQuery { Filter = filter };
+
+      Assert.Equal(expected, query.IsValid<TestEntity>(out var errors));
+      Assert.Equal(expected, errors.Count == 0);
+   }
+
+   [Fact]
+   public void IsValid_WithContainsOperatorOnANonStringField_ExplainsWhy()
+   {
+      var query = new GridifyQuery { Filter = "IntProperty=*5" };
+
+      Assert.False(query.IsValid<TestEntity>(out var errors));
+      Assert.Equal(
+         "Field 'IntProperty' is of type 'Int32', the contains operator can only be used with string fields",
+         Assert.Single(errors));
+   }
+
+   // AllowNullSearch is read from the mapper, because that is what the query builder reads.
+   // A mapper built with it turned off makes the "null" keyword invalid even though the
+   // global configuration still allows it.
+   [Fact]
+   public void IsValid_ReadsAllowNullSearchFromTheMapper()
+   {
+      var allowed = new GridifyMapper<TestEntity>(c => c.AllowNullSearch = true)
+         .AddMap("rank", q => q.NullableIntProperty);
+      var denied = new GridifyMapper<TestEntity>(c => c.AllowNullSearch = false)
+         .AddMap("rank", q => q.NullableIntProperty);
+
+      var query = new GridifyQuery { Filter = "rank=null" };
+
+      Assert.True(query.IsValid(out var noErrors, allowed));
+      Assert.Empty(noErrors);
+
+      Assert.False(query.IsValid(out var errors, denied));
       Assert.NotEmpty(errors);
    }
 

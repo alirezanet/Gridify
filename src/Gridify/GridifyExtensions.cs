@@ -350,13 +350,18 @@ public static partial class GridifyExtensions
          // enumeration itself has to stay inside the try
          foreach (var order in SyntaxTree.ParseOrderings(ordering.OrderBy!))
          {
-            if (mapper.HasMap(order.MemberName))
-               continue;
+            var gMap = mapper.GetGMap(order.MemberName);
 
-            // the same field can be ordered on more than once, it is still one problem
-            var error = $"Field '{order.MemberName}' is not mapped";
-            if (!validationErrors.Contains(error))
-               validationErrors.Add(error);
+            if (gMap == null)
+            {
+               // the same field can be ordered on more than once, it is still one problem
+               AddOnce(validationErrors, $"Field '{order.MemberName}' is not mapped");
+               continue;
+            }
+
+            if (order.OrderingType is OrderingType.NullCheck or OrderingType.NotNullCheck &&
+                !CanBeOrderedByNullState(gMap.To))
+               AddOnce(validationErrors, $"Field '{order.MemberName}' is not a nullable type, so it cannot be ordered by its null state");
          }
       }
       catch (Exception ex)
@@ -366,6 +371,29 @@ public static partial class GridifyExtensions
       }
 
       return validationErrors.Count == 0;
+   }
+
+   /// <summary>
+   /// Whether the '?' and '!' ordering suffixes can be used on this member. They order by the
+   /// member's <c>HasValue</c>, which the query builder can only build for a <c>Nullable</c>
+   /// member, so a reference type does not qualify either. Mirrors the check in
+   /// <c>LinqSortingQueryBuilder.GetOrderExpression</c>. github issue #332
+   /// </summary>
+   /// <param name="to">The map's target expression</param>
+   /// <returns>True if the member can be ordered by its null state; otherwise false</returns>
+   private static bool CanBeOrderedByNullState(LambdaExpression to)
+   {
+      return to.Body is UnaryExpression unary && Nullable.GetUnderlyingType(unary.Operand.Type) != null;
+   }
+
+   /// <summary>
+   /// Adds a validation error unless it has already been reported. One unmapped or unusable
+   /// field is one problem, however many times a query mentions it.
+   /// </summary>
+   private static void AddOnce(List<string> validationErrors, string error)
+   {
+      if (!validationErrors.Contains(error))
+         validationErrors.Add(error);
    }
 
    internal static string ReplaceAll(this string seed, IEnumerable<char> chars, char replacementCharacter)
@@ -599,11 +627,23 @@ public static partial class GridifyExtensions
 
                var valueText = valueExp.ValueToken.Text;
 
-               // Allow "null" keyword for null searches if configured
-               if (GridifyGlobalConfiguration.AllowNullSearch &&
+               // Allow "null" keyword for null searches if configured. This reads the mapper's
+               // configuration because that is what BaseQueryBuilder.BuildQuery reads, and a
+               // mapper can be built with a value that differs from the global one
+               if (mapper.Configuration.AllowNullSearch &&
                    valueText == "null" &&
                    operatorKind is SyntaxKind.Equal or SyntaxKind.NotEqual)
                   continue;
+
+               // Like and NotLike call string.Contains on the member itself. StartsWith and
+               // EndsWith fall back to ToString for a non-string member, but these two do not,
+               // see LinqQueryBuilder.BuildQuery
+               if (operatorKind is SyntaxKind.Like or SyntaxKind.NotLike && propertyType != typeof(string))
+               {
+                  validationErrors.Add(
+                     $"Field '{fieldName}' is of type '{propertyType.Name}', the contains operator can only be used with string fields");
+                  continue;
+               }
 
                // Run the map's custom convertor first, the query builder does the same
                // before it converts the type, github issue #337
