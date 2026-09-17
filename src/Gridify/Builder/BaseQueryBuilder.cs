@@ -61,6 +61,21 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
             throw;
          }
 
+      // Handle field-to-field comparison: field1 op (field2)
+      if (bExp.Left is FieldExpressionSyntax && bExp.Right is FieldReferenceExpressionSyntax)
+         try
+         {
+            return ConvertFieldToFieldQuery(bExp)
+                   ?? throw new GridifyFilteringException("Invalid expression");
+         }
+         catch (GridifyMapperException)
+         {
+            if (mapper.Configuration.IgnoreNotMappedFields)
+               return (BuildAlwaysTrueQuery(), false);
+
+            throw;
+         }
+
       (TQuery query, bool isNested) leftQuery;
       (TQuery query, bool isNested) rightQuery;
 
@@ -202,6 +217,41 @@ public abstract class BaseQueryBuilder<TQuery, T>(IGridifyMapper<T> mapper)
          query = AddNullPropagator(mapTarget, query);
 
       return ((TQuery)query, false);
+   }
+
+   private (TQuery, bool)? ConvertFieldToFieldQuery(BinaryExpressionSyntax binarySyntax)
+   {
+      if (!mapper.Configuration.AllowFieldToFieldComparison)
+         throw new GridifyFilteringException(
+            "Field-to-field comparison is disabled. " +
+            "Enable it by setting AllowFieldToFieldComparison to true in GridifyMapperConfiguration or GridifyGlobalConfiguration.");
+
+      var leftFieldExpr = binarySyntax.Left as FieldExpressionSyntax;
+      var rightFieldRef = binarySyntax.Right as FieldReferenceExpressionSyntax;
+      var op = binarySyntax.OperatorToken;
+
+      var leftField = leftFieldExpr!.FieldToken.Text.Trim();
+      var rightField = rightFieldRef!.FieldExpression.FieldToken.Text.Trim();
+
+      var leftGMap = mapper.GetGMap(leftField);
+      if (leftGMap == null) throw new GridifyMapperException($"Mapping '{leftField}' not found");
+
+      var rightGMap = mapper.GetGMap(rightField);
+      if (rightGMap == null) throw new GridifyMapperException($"Mapping '{rightField}' not found");
+
+      var result = BuildFieldToFieldQuery(leftGMap.To, rightGMap.To, op);
+      if (result == null) return null;
+
+      return (result, false);
+   }
+
+   /// <summary>
+   /// Builds a query that compares two fields against each other.
+   /// Subclasses can override this to support field-to-field comparison.
+   /// </summary>
+   protected virtual TQuery? BuildFieldToFieldQuery(LambdaExpression leftMap, LambdaExpression rightMap, ISyntaxNode op)
+   {
+      throw new GridifyFilteringException("Field-to-field comparison is not supported by the current query builder.");
    }
 
 

@@ -173,3 +173,56 @@ Registration Example:
  GridifyGlobalConfiguration.CustomOperators.Register<RegexMatchOperator>();
  GridifyGlobalConfiguration.CustomOperators.Register<InOperator>();
 ```
+
+## Field-to-Field Comparison
+
+Starting from version `v2.20.0`, Gridify supports comparing a field against another field (instead of a fixed value). To reference a field on the right-hand side, wrap it in parentheses: `(fieldName)`.
+
+::: info
+Field-to-field comparison is **opt-in** and disabled by default to avoid breaking changes.
+You must enable it explicitly through configuration before using this syntax.
+:::
+
+### Enabling the Feature
+
+```csharp
+// Global configuration (applies to all mappers)
+GridifyGlobalConfiguration.AllowFieldToFieldComparison = true;
+
+// Or per-mapper configuration
+var mapper = new GridifyMapper<MyEntity>(
+    new GridifyMapperConfiguration { AllowFieldToFieldComparison = true });
+```
+
+### Syntax
+
+```
+fieldName operator (otherFieldName)
+```
+
+The parentheses around the right-hand field name signal that it is a **field reference**, not a literal value.
+
+### Examples
+
+```csharp
+var mapper = new GridifyMapper<Order>(
+       new GridifyMapperConfiguration { AllowFieldToFieldComparison = true })
+   .AddMap("price", o => o.Price)
+   .AddMap("discount", o => o.Discount);
+
+// Find orders where price is greater than discount
+orders.ApplyFiltering("price>(discount)", mapper);
+// equivalent to: orders.Where(o => o.Price > o.Discount)
+
+// Find orders where price equals discount
+orders.ApplyFiltering("price=(discount)", mapper);
+// equivalent to: orders.Where(o => o.Price == o.Discount)
+
+// Can be combined with regular filters using logical operators
+orders.ApplyFiltering("price>(discount),price>100", mapper);
+// equivalent to: orders.Where(o => o.Price > o.Discount && o.Price > 100)
+
+// Can be grouped with parentheses alongside regular conditions
+orders.ApplyFiltering("(price=(discount)|price>200),discount>0", mapper);
+// equivalent to: orders.Where(o => (o.Price == o.Discount || o.Price > 200) && o.Discount > 0)
+```

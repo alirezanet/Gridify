@@ -55,6 +55,14 @@ public record GridifyMapperConfiguration
    public bool DisableCollectionNullChecks { get; set; } = GridifyGlobalConfiguration.DisableNullChecks;
 
    /// <summary>
+   /// Enables field-to-field comparison in filtering expressions.
+   /// When enabled, the right-hand side of a filter condition can reference another field
+   /// using the <c>(fieldName)</c> syntax. For example: <c>age &gt; (minAge)</c>.
+   /// Default is false to avoid breaking changes.
+   /// </summary>
+   public bool AllowFieldToFieldComparison { get; set; } = GridifyGlobalConfiguration.AllowFieldToFieldComparison;
+
+   /// <summary>
    /// It makes the generated expressions compatible
    /// with the entity framework.
    /// Default is false.
