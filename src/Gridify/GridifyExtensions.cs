@@ -635,16 +635,6 @@ public static partial class GridifyExtensions
                    operatorKind is SyntaxKind.Equal or SyntaxKind.NotEqual)
                   continue;
 
-               // Like and NotLike call string.Contains on the member itself. StartsWith and
-               // EndsWith fall back to ToString for a non-string member, but these two do not,
-               // see LinqQueryBuilder.BuildQuery
-               if (operatorKind is SyntaxKind.Like or SyntaxKind.NotLike && propertyType != typeof(string))
-               {
-                  validationErrors.Add(
-                     $"Field '{fieldName}' is of type '{propertyType.Name}', the contains operator can only be used with string fields");
-                  continue;
-               }
-
                // Run the map's custom convertor first, the query builder does the same
                // before it converts the type, github issue #337
                var valueToConvert = valueText;

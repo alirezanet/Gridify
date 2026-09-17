@@ -775,35 +775,55 @@ public class GridifyQueryValidationTests
          Assert.Single(errors));
    }
 
-   // Like and NotLike call string.Contains on the member, so a non-string member throws.
-   // StartsWith and EndsWith fall back to ToString, so they stay valid.
+   // Like and NotLike fall back to ToString for a non-string member, the same way StartsWith
+   // and EndsWith already did, so validation must not reject them.
    [Theory]
-   [InlineData("StringProperty=*ab", true)]
-   [InlineData("StringProperty!*ab", true)]
-   [InlineData("IntProperty=*5", false)]
-   [InlineData("IntProperty!*5", false)]
-   [InlineData("NullableIntProperty=*5", false)]
-   [InlineData("DateProperty=*2024", false)]
-   [InlineData("IntProperty^5", true)]
-   [InlineData("IntProperty$5", true)]
-   [InlineData("IntProperty=5", true)]
-   public void IsValid_ChecksTheContainsOperatorAgainstTheFieldType(string filter, bool expected)
+   [InlineData("StringProperty=*ab")]
+   [InlineData("StringProperty!*ab")]
+   [InlineData("IntProperty=*5")]
+   [InlineData("IntProperty!*5")]
+   [InlineData("NullableIntProperty=*5")]
+   [InlineData("IntProperty^5")]
+   [InlineData("IntProperty$5")]
+   [InlineData("IntProperty=5")]
+   public void IsValid_AllowsTheContainsOperatorOnANonStringField(string filter)
    {
       var query = new GridifyQuery { Filter = filter };
 
-      Assert.Equal(expected, query.IsValid<TestEntity>(out var errors));
-      Assert.Equal(expected, errors.Count == 0);
+      Assert.True(query.IsValid<TestEntity>(out var errors));
+      Assert.Empty(errors);
+
+      // and the query it just approved can actually be built and run
+      Source.ApplyFiltering(query, new GridifyMapper<TestEntity>(true)).ToList();
    }
 
+   // The builder side of the same behaviour: the contains operator on a non-string member
+   // compares the member's text, which is what StartsWith and EndsWith already did.
    [Fact]
-   public void IsValid_WithContainsOperatorOnANonStringField_ExplainsWhy()
+   public void ApplyFiltering_WithContainsOperatorOnANonStringField_ComparesItsText()
    {
-      var query = new GridifyQuery { Filter = "IntProperty=*5" };
+      var source = new List<TestEntity>
+      {
+         new() { IntProperty = 315 },
+         new() { IntProperty = 25 }
+      }.AsQueryable();
 
-      Assert.False(query.IsValid<TestEntity>(out var errors));
-      Assert.Equal(
-         "Field 'IntProperty' is of type 'Int32', the contains operator can only be used with string fields",
-         Assert.Single(errors));
+      Assert.Equal(315, Assert.Single(source.ApplyFiltering("IntProperty=*31")).IntProperty);
+      Assert.Equal(2, source.ApplyFiltering("IntProperty=*5").Count());
+      Assert.Equal(25, Assert.Single(source.ApplyFiltering("IntProperty!*31")).IntProperty);
+   }
+
+   // A nullable member with no value has an empty text, so it simply does not match.
+   [Fact]
+   public void ApplyFiltering_WithContainsOperatorOnANullableField_DoesNotThrow()
+   {
+      var source = new List<TestEntity>
+      {
+         new() { NullableIntProperty = 15 },
+         new() { NullableIntProperty = null }
+      }.AsQueryable();
+
+      Assert.Equal(15, Assert.Single(source.ApplyFiltering("NullableIntProperty=*1")).NullableIntProperty);
    }
 
    // AllowNullSearch is read from the mapper, because that is what the query builder reads.

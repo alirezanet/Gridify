@@ -162,15 +162,9 @@ The validation also catches a few things that only fail once the query is built:
 
 ```csharp
 // '?' and '!' order by the member's null state, so the member has to be nullable
-new GridifyQuery { OrderBy = "Age?" }.IsValid<Person>(out var e1);
+new GridifyQuery { OrderBy = "Age?" }.IsValid<Person>(out var errors);
 // false, ["Field 'Age' is not a nullable type, so it cannot be ordered by its null state"]
-
-// the contains operator calls string.Contains on the field
-new GridifyQuery { Filter = "Age=*5" }.IsValid<Person>(out var e2);
-// false, ["Field 'Age' is of type 'Int32', the contains operator can only be used with string fields"]
 ```
-
-`^` (starts with) and `$` (ends with) do fall back to `ToString()`, so they stay valid on a non-string field.
 
 Notes:
 
