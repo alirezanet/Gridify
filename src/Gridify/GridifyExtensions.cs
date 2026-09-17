@@ -284,6 +284,29 @@ public static partial class GridifyExtensions
              ((IGridifyOrdering)gridifyQuery).IsValid(mapper);
    }
 
+   /// <summary>
+   /// Validates Filter and OrderBy with Mappings, and reports why they are invalid.
+   /// </summary>
+   /// <param name="gridifyQuery">gridify query with (Filter or OrderBy)</param>
+   /// <param name="validationErrors">List of validation error messages if validation fails</param>
+   /// <param name="mapper">the gridify mapper that you want to use with, this is optional</param>
+   /// <typeparam name="T">type of target entity</typeparam>
+   /// <returns>True if the query is valid; otherwise, false.</returns>
+   public static bool IsValid<T>(
+      this IGridifyQuery gridifyQuery,
+      out List<string> validationErrors,
+      IGridifyMapper<T>? mapper = null)
+   {
+      // Both parts are validated even when the first one already failed, so that the
+      // caller gets every error rather than only the ones from Filter. github issue #332
+      var filteringIsValid = ((IGridifyFiltering)gridifyQuery).IsValid(out validationErrors, mapper);
+      var orderingIsValid = ((IGridifyOrdering)gridifyQuery).IsValid(out var orderingErrors, mapper);
+
+      validationErrors.AddRange(orderingErrors);
+
+      return filteringIsValid && orderingIsValid;
+   }
+
    public static bool IsValid<T>(this IGridifyFiltering filtering, IGridifyMapper<T>? mapper = null)
    {
       // Call the new overload with detailed validation and discard the error messages
@@ -292,20 +315,46 @@ public static partial class GridifyExtensions
 
    public static bool IsValid<T>(this IGridifyOrdering ordering, IGridifyMapper<T>? mapper = null)
    {
-      if (string.IsNullOrWhiteSpace(ordering.OrderBy)) return true;
+      // Call the new overload with detailed validation and discard the error messages
+      return ordering.IsValid(out _, mapper);
+   }
+
+   /// <summary>
+   /// Validates OrderBy with Mappings, and reports why it is invalid.
+   /// </summary>
+   /// <param name="ordering">the ordering query to validate</param>
+   /// <param name="validationErrors">List of validation error messages if validation fails</param>
+   /// <param name="mapper">the gridify mapper that you want to use with, this is optional</param>
+   /// <typeparam name="T">type of target entity</typeparam>
+   /// <returns>True if the ordering is valid; otherwise, false.</returns>
+   public static bool IsValid<T>(
+      this IGridifyOrdering ordering,
+      out List<string> validationErrors,
+      IGridifyMapper<T>? mapper = null)
+   {
+      validationErrors = new List<string>();
+
+      // Empty or null orderings are always valid
+      if (string.IsNullOrWhiteSpace(ordering.OrderBy))
+         return true;
+
       try
       {
-         var orders = SyntaxTree.ParseOrderings(ordering.OrderBy!);
          mapper ??= new GridifyMapper<T>(true);
-         if (orders.Any(order => !mapper.HasMap(order.MemberName)))
-            return false;
+
+         // ParseOrderings is a lazy iterator that throws on a malformed ordering, so the
+         // enumeration itself has to stay inside the try
+         foreach (var order in SyntaxTree.ParseOrderings(ordering.OrderBy!))
+            if (!mapper.HasMap(order.MemberName))
+               validationErrors.Add($"Field '{order.MemberName}' is not mapped");
       }
-      catch (Exception)
+      catch (Exception ex)
       {
+         validationErrors.Add($"Ordering validation error: {ex.Message}");
          return false;
       }
 
-      return true;
+      return validationErrors.Count == 0;
    }
 
    internal static string ReplaceAll(this string seed, IEnumerable<char> chars, char replacementCharacter)
