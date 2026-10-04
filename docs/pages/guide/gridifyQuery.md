@@ -15,9 +15,6 @@ var gq = new GridifyQuery()
 Paging<Person> result = personsRepo.Gridify(gq);
 ```
 
-Here’s an updated version of the `IsValid` section you can drop into the docs.
-
-
 ## IsValid
 
 This extension method checks if a `GridifyQuery` (`Filter`, `OrderBy`) is valid for use with a custom mapper or the auto-generated mapper. It returns `true` if valid, `false` otherwise.
