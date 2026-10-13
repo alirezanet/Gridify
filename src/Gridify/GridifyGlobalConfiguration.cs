@@ -78,6 +78,14 @@ namespace Gridify
       public static Func<string, string>? CustomElasticsearchNamingAction { get; set; }
 
       /// <summary>
+      /// Enables field-to-field comparison in filtering expressions.
+      /// When enabled, the right-hand side of a filter condition can reference another field
+      /// using the <c>(fieldName)</c> syntax. For example: <c>age &gt; (minAge)</c>.
+      /// Default is false to avoid breaking changes.
+      /// </summary>
+      public static bool AllowFieldToFieldComparison { get; set; } = false;
+
+      /// <summary>
       /// You can extend the gridify supported operators by adding
       /// your own operators to OperatorManager.
       /// Custom operators must implement the IGridifyOperator interface
