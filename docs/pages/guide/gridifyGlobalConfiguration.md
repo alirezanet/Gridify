@@ -45,6 +45,24 @@ Some ORMs like NHibernate don't support this. You can disable this behavior by s
 - type: `bool`
 - default: `false`
 
+### CollectionNegationAsNotAny
+
+By default, a condition on a nested collection matches when **any** element matches it, including negated conditions. For example, `tags!=red` becomes `() => field.Any(x => x != "red")`, so a record with the tags `red` and `blue` matches, and an empty value (`tags=`) never matches a record without tags.
+
+By setting this option to `true`, negated conditions (`!=`, `!*`, `!^`, `!$`) match when **no** element matches the condition, and an empty value matches when no element has a value. Empty and null collections match both.
+
+| Filter | Default | `CollectionNegationAsNotAny = true` |
+|--------|---------|-------------------------------------|
+| `tags!=red` | `field.Any(x => x != "red")` | `!field.Any(x => x == "red")` |
+| `tags!*re` | `field.Any(x => !x.Contains("re"))` | `!field.Any(x => x.Contains("re"))` |
+| `tags=` | `field.Any(x => string.IsNullOrEmpty(x))` | `!field.Any(x => !string.IsNullOrEmpty(x))` |
+
+Other conditions, like `tags=red` and `tags!=` (has a value), are the same with both settings. This option applies to LINQ queries only.
+
+- type: `bool`
+- default: `false`
+- related to: [GridifyMapper - CollectionNegationAsNotAny](./gridifyMapper.md#collectionnegationasnotany)
+
 ### AvoidNullReference
 
 This option allows intermediate objects to be null.
