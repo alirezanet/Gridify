@@ -386,6 +386,21 @@ This setting is similar to [`DisableNullChecks`](./gridifyGlobalConfiguration.md
 var mapper = new GridifyMapper<Person>(q => q.DisableCollectionNullChecks = true);
 ```
 
+### CollectionNegationAsNotAny
+
+This setting is similar to [`CollectionNegationAsNotAny`](./gridifyGlobalConfiguration.md#collectionnegationasnotany) in the global configuration, but it allows you to enable this setting on a per-query basis instead of globally. When set to true, negated conditions (`!=`, `!*`, `!^`, `!$`) on a nested collection match when no element matches the condition, and an empty value (`field=`) matches when no element has a value.
+
+- **Type:** `bool`
+- **Default:** `false`
+
+```csharp
+var mapper = new GridifyMapper<Person>(q => q.CollectionNegationAsNotAny = true)
+   .AddMap("tags", p => p.Tags.Select(t => t.Name));
+
+// people without a 'red' tag, including those without tags
+var query = personList.ApplyFiltering("tags!=red", mapper);
+```
+
 ### AvoidNullReference
 
 
@@ -426,6 +441,8 @@ var query = level1List.ApplyFiltering("prop1 = 123", mapper);
 ```
 
 if you have only two-level nesting, you don't need to use `SelectMany`.
+
+A condition on a nested collection matches when any element matches it, e.g. `prop1 = 123` becomes `l1.Level2List.Any(l2 => l2.Level3List.Any(l3 => l3.Property1 == 123))`. To make negated conditions and empty values mean "no element matches", see [`CollectionNegationAsNotAny`](#collectionnegationasnotany).
 
 ## Defining Mappings for Indexable Properties
 
