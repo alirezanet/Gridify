@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Gridify.Elasticsearch.Tests;
 
@@ -23,4 +24,5 @@ public class TestClass
    public float MyFloat { get; set; }
    public double MyDouble { get; set; }
    public decimal MyDecimal { get; set; }
+   public Dictionary<string, string> Attributes { get; set; } = new();
 }
