@@ -44,6 +44,6 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.*" />
    </ItemGroup>
    <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="11.*-*" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="11.*" />
    </ItemGroup>
 </Project>
