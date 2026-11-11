@@ -23,19 +23,7 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
          {
             case MethodCallExpression { Method.Name: "Select" } selectExp:
             {
-               var targetExp = selectExp.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
-               var conditionExp = BuildQuery(
-                  targetExp!.Body,
-                  targetExp.Parameters[0],
-                  value,
-                  op,
-                  gMap.Convertor,
-                  true,
-                  gMap.CaseInsensitive);
-
-               if (conditionExp is not LambdaExpression lambdaExp) return null;
-
-               return ParseMethodCallExpression(selectExp, lambdaExp, op) as Expression<Func<T, bool>>;
+               return BuildSelectQuery(selectExp, gMap, value, op);
             }
             case ConditionalExpression cExp:
             {
@@ -62,6 +50,49 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
          }
    }
 
+   private Expression<Func<T, bool>>? BuildSelectQuery(MethodCallExpression selectExp, IGMap<T> gMap, ValueExpressionSyntax value, ISyntaxNode op)
+   {
+      // with CollectionNegationAsNotAny, a negated condition means no element matches: !Any(x => <positive condition>)
+      var elementOp = op;
+      var isNegated = _mapper.Configuration.CollectionNegationAsNotAny && TryGetPositiveOperator(op, value, out elementOp);
+
+      var targetExp = selectExp.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
+      var conditionExp = BuildQuery(
+         targetExp!.Body,
+         targetExp.Parameters[0],
+         value,
+         elementOp,
+         gMap.Convertor,
+         true,
+         gMap.CaseInsensitive);
+
+      if (conditionExp is not LambdaExpression lambdaExp) return null;
+
+      // an empty value ("has no value") can't use Contains: Contains(default) would test for one element with the default value
+      var allowContains = !(isNegated && value.IsNullOrDefault);
+      var anyExp = ParseMethodCallExpression(selectExp, lambdaExp, elementOp, allowContains);
+      if (!isNegated) return anyExp as Expression<Func<T, bool>>;
+
+      return Expression.Lambda<Func<T, bool>>(Expression.Not(anyExp.Body), anyExp.Parameters);
+   }
+
+   // the condition op negates on a collection: field!=x is "not any equals x", field= is "not any has a value"
+   private static bool TryGetPositiveOperator(ISyntaxNode op, ValueExpressionSyntax value, out ISyntaxNode positiveOp)
+   {
+      SyntaxKind? positiveKind = op.Kind switch
+      {
+         SyntaxKind.NotEqual when !value.IsNullOrDefault => SyntaxKind.Equal,
+         SyntaxKind.Equal when value.IsNullOrDefault => SyntaxKind.NotEqual,
+         SyntaxKind.NotLike => SyntaxKind.Like,
+         SyntaxKind.NotStartsWith => SyntaxKind.StartsWith,
+         SyntaxKind.NotEndsWith => SyntaxKind.EndsWith,
+         _ => null
+      };
+
+      positiveOp = positiveKind is { } kind ? new SyntaxToken(kind, 0, string.Empty) : op;
+      return positiveKind != null;
+   }
+
    protected override Expression<Func<T, bool>> BuildAlwaysTrueQuery()
    {
       return _ => true;
@@ -78,7 +109,9 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
       (Expression<Func<T, bool>> query, bool isNested) rightQuery,
       SyntaxKind op)
    {
-      if (leftQuery.isNested && rightQuery.isNested)
+      // a negated collection condition (CollectionNegationAsNotAny) is !Any(..): it can't share one Any with another condition
+      if (leftQuery.isNested && rightQuery.isNested &&
+          leftQuery.query.Body.NodeType != ExpressionType.Not && rightQuery.query.Body.NodeType != ExpressionType.Not)
       {
          var leftExp = ParseNestedExpression(leftQuery.query.Body);
          var rightExp = ParseNestedExpression(rightQuery.query.Body);
@@ -291,12 +324,7 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
          {
             case MethodCallExpression { Method.Name: "Select" } selectExp:
             {
-               var targetExp = selectExp.Arguments.Single(a => a.NodeType == ExpressionType.Lambda) as LambdaExpression;
-               var conditionExp = BuildQuery(targetExp!.Body, targetExp.Parameters[0], value, op, gMap.Convertor, true, gMap.CaseInsensitive);
-
-               if (conditionExp is not LambdaExpression lambdaExp) return null;
-
-               return ParseMethodCallExpression(selectExp, lambdaExp, op) as Expression<Func<T, bool>>;
+               return BuildSelectQuery(selectExp, gMap, value, op);
             }
             case ConditionalExpression cExp:
             {
@@ -323,13 +351,14 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
          }
    }
 
-   private LambdaExpression ParseMethodCallExpression(MethodCallExpression exp, LambdaExpression predicate, ISyntaxNode op)
+   private LambdaExpression ParseMethodCallExpression(MethodCallExpression exp, LambdaExpression predicate, ISyntaxNode op, bool allowContains = true)
    {
       switch (exp.Arguments.First())
       {
          case MemberExpression member:
          {
-            if (op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual &&
+            if (allowContains &&
+                op.Kind is SyntaxKind.Equal or SyntaxKind.NotEqual &&
                 member.Type.IsSimpleTypeCollection(out _) &&
                 predicate.Body is BinaryExpression binaryExpression)
             {
@@ -343,7 +372,7 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
                is LambdaExpression { Body: MemberExpression lambdaMember }:
          {
             var newPredicate = GetAnyExpression(lambdaMember, predicate);
-            return ParseMethodCallExpression(subExp, newPredicate, op);
+            return ParseMethodCallExpression(subExp, newPredicate, op, allowContains);
          }
          case MethodCallExpression { Method.Name: "Select" } subExp
             when subExp.Arguments.Last() is LambdaExpression
@@ -353,7 +382,7 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
          {
             var newExp = new ReplaceExpressionVisitor(predicate.Parameters[0], lambdaMember).Visit(predicate.Body);
             var newPredicate = GetExpressionWithNullCheck(lambdaMember, lambda.Parameters[0], newExp);
-            return ParseMethodCallExpression(subExp, newPredicate, op);
+            return ParseMethodCallExpression(subExp, newPredicate, op, allowContains);
          }
          case MethodCallExpression { Method.Name: "Where" } subExp
             when subExp.Arguments.Last() is LambdaExpression wherePredicate &&
@@ -368,7 +397,7 @@ public class LinqQueryBuilder<T> : BaseQueryBuilder<Expression<Func<T, bool>>, T
 
             var newExp = (MethodCallExpression)new ReplaceExpressionVisitor(subExp.Arguments[1], newPredicate).Visit(subExp);
 
-            return ParseMethodCallExpression(newExp, newPredicate, op);
+            return ParseMethodCallExpression(newExp, newPredicate, op, allowContains);
          }
          default:
             throw new InvalidOperationException();

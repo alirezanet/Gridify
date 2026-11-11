@@ -55,6 +55,17 @@ public record GridifyMapperConfiguration
    public bool DisableCollectionNullChecks { get; set; } = GridifyGlobalConfiguration.DisableNullChecks;
 
    /// <summary>
+   /// On nested collections by default a negated condition matches when any element doesn't match,
+   /// e.g field!=value becomes () => field.Any(x => x != value), and an empty value (field=)
+   /// matches when any element is empty.
+   /// By setting this option to true, negated conditions (!=, !*, !^, !$) match when no element matches,
+   /// e.g field!=value becomes () => !field.Any(x => x == value), and an empty value matches when no element
+   /// has a value, including empty and null collections.
+   /// Default is false
+   /// </summary>
+   public bool CollectionNegationAsNotAny { get; set; } = GridifyGlobalConfiguration.CollectionNegationAsNotAny;
+
+   /// <summary>
    /// It makes the generated expressions compatible
    /// with the entity framework.
    /// Default is false.

@@ -54,6 +54,17 @@ namespace Gridify
       public static bool DisableNullChecks { get; set; } = false;
 
       /// <summary>
+      /// On nested collections by default a negated condition matches when any element doesn't match,
+      /// e.g field!=value becomes () => field.Any(x => x != value), and an empty value (field=)
+      /// matches when any element is empty.
+      /// By setting this option to true, negated conditions (!=, !*, !^, !$) match when no element matches,
+      /// e.g field!=value becomes () => !field.Any(x => x == value), and an empty value matches when no element
+      /// has a value, including empty and null collections.
+      /// Default is false
+      /// </summary>
+      public static bool CollectionNegationAsNotAny { get; set; } = false;
+
+      /// <summary>
       /// By default, string comparison is case-sensitive.
       /// You can change this behavior by setting this property to true.
       /// Default is false
