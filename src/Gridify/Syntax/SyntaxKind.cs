@@ -34,5 +34,6 @@ public enum SyntaxKind
    NotStartsWith,
    NotEndsWith,
    CaseInsensitive,
-   FieldIndexer
+   FieldIndexer,
+   FieldReferenceExpression
 }

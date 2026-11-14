@@ -99,15 +99,26 @@ public struct Parser
       while (IsOperator(Current.Kind))
       {
          var operatorToken = NextToken();
-         var right = ParseValueExpression();
+         var right = ParseRightHandExpression();
          left = new BinaryExpressionSyntax(left, operatorToken, right);
       }
 
       return left;
    }
 
-   private ValueExpressionSyntax ParseValueExpression()
+   private ExpressionSyntax ParseRightHandExpression()
    {
+      // Detect field reference syntax: op (fieldName) or op (fieldName[idx])
+      // The lexer directly emits OpenParenthesisToken after an operator when the value starts with '('.
+      if (Current.Kind == SyntaxKind.OpenParenthesisToken &&
+          Peek(1).Kind == SyntaxKind.FieldToken)
+      {
+         NextToken(); // consume '('
+         var fieldExpr = ParseFieldExpression();
+         Match(SyntaxKind.CloseParenthesis); // consume ')'
+         return new FieldReferenceExpressionSyntax(fieldExpr);
+      }
+
       // field=
       if (Current.Kind != SyntaxKind.ValueToken)
       {
