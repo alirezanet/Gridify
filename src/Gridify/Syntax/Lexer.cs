@@ -53,63 +53,63 @@ public ref struct Lexer(string text, IEnumerable<IGridifyOperator> customOperato
             _waitingForValue = false;
             return new SyntaxToken(SyntaxKind.Or, _position++, "|");
          }
-         case '^':
+         case '^' when !_waitingForValue:
          {
             _waitingForValue = true;
             return new SyntaxToken(SyntaxKind.StartsWith, _position++, "^");
          }
-         case '$':
+         case '$' when !_waitingForValue:
          {
             _waitingForValue = true;
             return new SyntaxToken(SyntaxKind.EndsWith, _position++, "$");
          }
-         case '!' when peek == '^':
+         case '!' when !_waitingForValue && peek == '^':
          {
             _waitingForValue = true;
             return new SyntaxToken(SyntaxKind.NotStartsWith, _position += 2, "!^");
          }
-         case '!' when peek == '$':
+         case '!' when !_waitingForValue && peek == '$':
          {
             _waitingForValue = true;
             return new SyntaxToken(SyntaxKind.NotEndsWith, _position += 2, "!$");
          }
-         case '=' when peek == '*':
+         case '=' when !_waitingForValue && peek == '*':
          {
             _waitingForValue = true;
             return new SyntaxToken(SyntaxKind.Like, _position += 2, "=*");
          }
-         case '=':
+         case '=' when !_waitingForValue:
          {
             _waitingForValue = true;
             return new SyntaxToken(SyntaxKind.Equal, _position++, "=");
          }
-         case '!' when peek == '=':
+         case '!' when !_waitingForValue && peek == '=':
          {
             _waitingForValue = true;
             return new SyntaxToken(SyntaxKind.NotEqual, _position += 2, "!=");
          }
-         case '!' when peek == '*':
+         case '!' when !_waitingForValue && peek == '*':
          {
             _waitingForValue = true;
             return new SyntaxToken(SyntaxKind.NotLike, _position += 2, "!*");
          }
          case '/' when peek == 'i':
             return new SyntaxToken(SyntaxKind.CaseInsensitive, _position += 2, "/i");
-         case '<':
+         case '<' when !_waitingForValue:
          {
             _waitingForValue = true;
             return peek == '='
                ? new SyntaxToken(SyntaxKind.LessOrEqualThan, _position += 2, "<=")
                : new SyntaxToken(SyntaxKind.LessThan, _position++, "<");
          }
-         case '>':
+         case '>' when !_waitingForValue:
          {
             _waitingForValue = true;
             return peek == '='
                ? new SyntaxToken(SyntaxKind.GreaterOrEqualThan, _position += 2, ">=")
                : new SyntaxToken(SyntaxKind.GreaterThan, _position++, ">");
          }
-         case '#' when customOperators.Any(): // Custom Operators
+         case '#' when !_waitingForValue && customOperators.Any(): // Custom Operators
          {
             foreach (var cOp in customOperators)
             {
