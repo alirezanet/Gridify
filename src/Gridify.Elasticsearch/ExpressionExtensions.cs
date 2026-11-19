@@ -57,8 +57,24 @@ internal static class ExpressionExtensions
       }
       else if (expression is MethodCallExpression { Object: not null } methodCallExpression)
       {
-         // Handle cases when the expression is a method call on a member (e.g. ToLower() for case-insensitive filtering)
-         VisitMemberAccessChain(methodCallExpression.Object, result);
+         // Handle dictionary/indexer access: e.g. dict.get_Item("key") → dict.key
+         if (methodCallExpression.Method.Name == "get_Item"
+             && methodCallExpression.Arguments.Count == 1
+             && methodCallExpression.Arguments[0] is ConstantExpression indexerKey)
+         {
+            if (result.Length > 0)
+            {
+               result.Insert(0, ".");
+            }
+
+            result.Insert(0, indexerKey.Value?.ToString() ?? string.Empty);
+            VisitMemberAccessChain(methodCallExpression.Object, result);
+         }
+         else
+         {
+            // Handle cases when the expression is a method call on a member (e.g. ToLower() for case-insensitive filtering)
+            VisitMemberAccessChain(methodCallExpression.Object, result);
+         }
       }
    }
 }

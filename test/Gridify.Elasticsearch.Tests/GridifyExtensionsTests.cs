@@ -826,6 +826,28 @@ public class GridifyExtensionsTests
       AssertFilter(filter, expected);
    }
 
+   [Theory]
+   // dictionary indexer equals
+   [InlineData("Attributes[size]=XL", """{"term":{"Attributes.size.keyword":{"value":"XL"}}}""")]
+   // dictionary indexer not equals
+   [InlineData("Attributes[size]!=XL", """{"bool":{"must_not":{"term":{"Attributes.size.keyword":{"value":"XL"}}}}}""")]
+   // dictionary indexer contains
+   [InlineData("Attributes[color]=*blu", """{"wildcard":{"Attributes.color.keyword":{"value":"*blu*"}}}""")]
+   // dictionary indexer starts with
+   [InlineData("Attributes[color]^blu", """{"wildcard":{"Attributes.color.keyword":{"value":"blu*"}}}""")]
+   // dictionary indexer combined with regular field
+   [InlineData("Attributes[size]=XL,Name=Test", """{"bool":{"must":[{"term":{"Attributes.size.keyword":{"value":"XL"}}},{"term":{"Name.keyword":{"value":"Test"}}}]}}""")]
+   public void ToElasticsearchQuery_WhenCalledWithDictionaryIndexer_ReturnsElasticsearchQuery(string filter, string expected)
+   {
+      var mapper = new GridifyMapper<TestClass>(autoGenerateMappings: true)
+      {
+         Configuration = { DisableCollectionNullChecks = true }
+      };
+      mapper.AddMap("Attributes", (TestClass t, string key) => t.Attributes[key]);
+
+      AssertFilter(filter, expected, mapper);
+   }
+
    private void AssertFilter(string filter, string expected, IGridifyMapper<TestClass>? mapper = null)
    {
       var gridifyQuery = new GridifyQuery { Filter = filter };
